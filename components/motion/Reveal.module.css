@@ -1,0 +1,37 @@
+/* ─── Base hidden state ─────────────────────────────── */
+
+.reveal {
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out),
+    filter var(--duration-slow) var(--ease-out);
+  will-change: opacity, transform;
+}
+
+/* Variants — hidden */
+.reveal--fade-up[data-visible="false"]    { opacity: 0; transform: translateY(32px); }
+.reveal--fade[data-visible="false"]       { opacity: 0; }
+.reveal--blur[data-visible="false"]       { opacity: 0; filter: blur(12px); }
+.reveal--scale[data-visible="false"]      { opacity: 0; transform: scale(0.95); }
+.reveal--slide-left[data-visible="false"] { opacity: 0; transform: translateX(-32px); }
+.reveal--slide-right[data-visible="false"]{ opacity: 0; transform: translateX(32px); }
+
+/* Visible */
+.reveal[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* ─── Reduced motion override ────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .reveal[data-visible="false"] {
+    opacity: 0;
+  }
+  .reveal[data-visible="true"] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: opacity var(--duration-fast) linear;
+  }
+}
