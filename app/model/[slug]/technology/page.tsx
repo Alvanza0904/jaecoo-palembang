@@ -12,7 +12,6 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { GoldLine } from "@/components/ui/GoldLine";
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/motion/Reveal";
-import { Reveal } from "@/components/motion/Reveal";
 import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
