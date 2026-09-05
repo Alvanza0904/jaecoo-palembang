@@ -8,10 +8,13 @@ import type { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { GoldLine } from "@/components/ui/GoldLine";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/motion/Reveal";
 import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
+import { FinanceCalculator } from "@/components/finance/FinanceCalculator";
 import { buildWhatsAppUrl, SALES_NAME, WHATSAPP_NUMBER } from "@/lib/utils/whatsapp";
+import { getModels } from "@/lib/data/models";
 import styles from "./sales.module.css";
 
 export const metadata: Metadata = {
@@ -49,6 +52,8 @@ export default function SalesPage() {
     source: "sales_page",
     source_cta: "sales_page_cta",
   });
+
+  const models = getModels();
 
   return (
     <>
@@ -122,6 +127,30 @@ export default function SalesPage() {
                     <p className={styles.serviceDesc}>{item.description}</p>
                   </div>
                 </div>
+              </Reveal>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* Finance Calculator */}
+      <section className={styles.calcSection}>
+        <Container size="narrow">
+          <Reveal variant="fade-up" threshold={0}>
+            <SectionHeading
+              eyebrow="Simulasi Kredit"
+              heading="Hitung Cicilan Anda"
+              subheading="Estimasi angsuran dengan bunga flat 10%/tahun. Hubungi Alvan untuk simulasi resmi."
+            />
+          </Reveal>
+
+          <div className={styles.calcGrid}>
+            {models.map((model, i) => (
+              <Reveal key={model.slug} variant="fade-up" delay={i * 80} threshold={0}>
+                <FinanceCalculator
+                  price={model.default_variant.price_idr}
+                  modelName={model.name}
+                />
               </Reveal>
             ))}
           </div>

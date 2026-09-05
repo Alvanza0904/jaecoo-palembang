@@ -103,7 +103,7 @@ export default async function SpecificationsPage({ params }: Props) {
         </Reveal>
 
         {/* Finance Calculator — price from model data */}
-        <Reveal variant="fade-up" delay={100}>
+        <Reveal variant="fade-up" delay={100} threshold={0}>
           <div className={styles.calcWrapper}>
             <FinanceCalculator
               price={model.default_variant.price_idr}

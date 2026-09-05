@@ -43,6 +43,14 @@ export function Reveal({
     const el = ref.current;
     if (!el) return;
 
+    // If threshold is 0, element is immediately observable — show right away.
+    if (threshold === 0) {
+      el.style.transitionDelay = `${delay}ms`;
+      el.style.animationDelay = `${delay}ms`;
+      el.setAttribute("data-visible", "true");
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -55,8 +63,17 @@ export function Reveal({
       { threshold }
     );
 
+    // Fallback: if observer never fires within 3s, show element anyway.
+    const fallback = setTimeout(() => {
+      el.setAttribute("data-visible", "true");
+      observer.disconnect();
+    }, 3000);
+
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      clearTimeout(fallback);
+    };
   }, [delay, threshold]);
 
   const cls = [

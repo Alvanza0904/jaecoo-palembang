@@ -222,14 +222,14 @@ export default async function ModelPage({ params }: ModelPageProps) {
       {/* ── Finance Calculator ── */}
       <section className={styles.calcSection}>
         <Container size="narrow">
-          <Reveal variant="fade-up">
+          <Reveal variant="fade-up" threshold={0}>
             <SectionHeading
               eyebrow="Simulasi Kredit"
               heading="Hitung Cicilan Anda"
               subheading="Estimasi angsuran dengan bunga flat 10%/tahun. Hubungi kami untuk simulasi resmi."
             />
           </Reveal>
-          <Reveal variant="fade-up" delay={100}>
+          <Reveal variant="fade-up" delay={100} threshold={0}>
             {/* Price dari model data — TIDAK hardcode */}
             <FinanceCalculator
               price={model.default_variant.price_idr}
