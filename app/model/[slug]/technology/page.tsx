@@ -1,7 +1,8 @@
 /**
  * JAECOO Palembang — Model Technology Page
  * Route: /model/[slug]/technology
- * Phase 2: Hero + editorial feature layout.
+ *
+ * STEP 4A: Uses model.technology.headline from data — not hardcoded.
  */
 
 import type { Metadata } from "next";
@@ -50,10 +51,11 @@ export default async function TechnologyPage({ params }: Props) {
   return (
     <>
       <TransparentHeader />
-      {/* Hero */}
+
+      {/* Hero — headline dari technology data */}
       <HeroPlaceholder
         tagline="Technology"
-        heading="INTELLIGENCE IN MOTION."
+        heading={technology.headline}
         subheading={technology.subheadline}
         size="medium"
         accent="cool"

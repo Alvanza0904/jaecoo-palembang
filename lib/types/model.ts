@@ -3,11 +3,13 @@
  *
  * One reusable template drives J5, J7, J8.
  * Variants (e.g. J7 SIVP) belong to a model, not a separate page.
+ *
+ * STEP 4A: Updated slugs to jaecoo-* format.
  */
 
 import type { MediaWithArtDirection, ResponsiveImage } from "./media";
 
-export type ModelSlug = "j5-ev" | "j7-shs" | "j8-ardis-shs";
+export type ModelSlug = "jaecoo-j5-ev" | "jaecoo-j7-shs" | "jaecoo-j8-shs";
 
 export interface ModelColor {
   id: string;
@@ -58,7 +60,7 @@ export interface ModelData {
   slug: ModelSlug;
   /** Full display name e.g. "JAECOO J5 EV" */
   name: string;
-  /** Short model identifier e.g. "J5" */
+  /** Short model identifier e.g. "J5 EV" */
   short_name: string;
   /** Tagline for hero */
   tagline: string;

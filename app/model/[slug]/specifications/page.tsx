@@ -1,7 +1,8 @@
 /**
  * JAECOO Palembang — Model Specifications Page
  * Route: /model/[slug]/specifications
- * Phase 2: Clean editorial spec layout.
+ *
+ * STEP 4A: Real spec data from model. Calculator integrated with correct price.
  */
 
 import type { Metadata } from "next";
@@ -12,6 +13,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { GoldLine } from "@/components/ui/GoldLine";
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/motion/Reveal";
+import { FinanceCalculator } from "@/components/finance/FinanceCalculator";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import styles from "./specifications.module.css";
@@ -98,6 +100,16 @@ export default async function SpecificationsPage({ params }: Props) {
             Spesifikasi dapat berubah sewaktu-waktu. Untuk informasi terkini,
             hubungi Sales JAECOO Palembang.
           </p>
+        </Reveal>
+
+        {/* Finance Calculator — price from model data */}
+        <Reveal variant="fade-up" delay={100}>
+          <div className={styles.calcWrapper}>
+            <FinanceCalculator
+              price={model.default_variant.price_idr}
+              modelName={model.name}
+            />
+          </div>
         </Reveal>
 
         {/* CTA */}

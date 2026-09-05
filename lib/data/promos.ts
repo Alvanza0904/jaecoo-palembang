@@ -20,7 +20,7 @@ export const PROMOS: PromoData[] = [
     },
     cta_label: "Tanya Sekarang",
     cta_whatsapp_context: "Promo Spesial J5 EV",
-    model_slug: "j5-ev",
+    model_slug: "jaecoo-j5-ev",
     published: true,
     updated_at: "2025-01-01T00:00:00Z",
   },

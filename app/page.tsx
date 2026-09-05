@@ -60,7 +60,7 @@ export default function HomePage() {
         subheading="Electric. Intelligent. Ready."
         cta={
           <div className={styles.heroCtas}>
-            <Button as="link" href="/model/j5-ev" variant="primary" size="lg">
+            <Button as="link" href="/model/jaecoo-j5-ev" variant="primary" size="lg">
               Jelajahi J5 EV
             </Button>
             <Button
@@ -154,7 +154,7 @@ export default function HomePage() {
 
           <Reveal variant="fade" delay={200}>
             <div className={styles.techCta}>
-              <Button as="link" href="/model/j5-ev/technology" variant="secondary" size="md">
+              <Button as="link" href="/model/jaecoo-j5-ev/technology" variant="secondary" size="md">
                 Explore Technology
               </Button>
             </div>

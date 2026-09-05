@@ -269,3 +269,10 @@
 @media (min-width: 1024px) {
   .ctaHeading { font-size: var(--text-4xl); }
 }
+
+/* ─── Finance Calculator ──────────────────────────────── */
+
+.calcSection {
+  padding-block: var(--section-gap-md);
+  background-color: var(--color-off-white);
+}

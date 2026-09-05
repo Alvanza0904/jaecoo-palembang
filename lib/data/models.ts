@@ -1,18 +1,36 @@
 /**
- * JAECOO Palembang — Mock Model Data
+ * JAECOO Palembang — Model Data
  *
- * This is a temporary seed layer.
- * Replace with Supabase queries when ready — the interface stays identical.
+ * SINGLE SOURCE OF TRUTH for all model data.
+ *
+ * STEP 4A: Corrected slugs, taglines, prices, and descriptions.
+ * Architecture designed for Supabase integration — interface stays
+ * identical when switching from static data to DB queries.
+ *
+ * Slugs: jaecoo-j5-ev | jaecoo-j7-shs | jaecoo-j8-shs
+ * J7 SIVP is a VARIANT of jaecoo-j7-shs — not a separate model/URL.
  */
 
 import type { ModelData } from "@/lib/types/model";
 
+// ─── Price constants — single source of truth ───────────────────────────────
+// Calculator MUST import from here, never hardcode prices.
+
+export const MODEL_PRICES = {
+  "jaecoo-j5-ev": 354_900_000,
+  "jaecoo-j7-shs": 534_900_000,
+  "jaecoo-j8-shs": 865_000_000,
+} as const;
+
+// ─── Model Data ─────────────────────────────────────────────────────────────
+
 export const MODELS: ModelData[] = [
+  // ── J5 EV ────────────────────────────────────────────────────────────────
   {
-    slug: "j5-ev",
+    slug: "jaecoo-j5-ev",
     name: "JAECOO J5 EV",
-    short_name: "J5",
-    tagline: "Electric. Intelligent. Ready.",
+    short_name: "J5 EV",
+    tagline: "THIS IS THE REAL SUV.",
     description:
       "JAECOO J5 EV hadir sebagai SUV elektrik yang menggabungkan performa modern dengan desain premium — siap mengubah cara Anda berkendara di Palembang dan sekitarnya.",
     hero_media: {
@@ -31,7 +49,7 @@ export const MODELS: ModelData[] = [
     default_variant: {
       id: "j5-ev-standard",
       name: "JAECOO J5 EV",
-      price_idr: 354900000,
+      price_idr: MODEL_PRICES["jaecoo-j5-ev"],
       price_display: "Rp354.900.000",
       price_region: "OTR Palembang",
     },
@@ -39,7 +57,7 @@ export const MODELS: ModelData[] = [
       {
         id: "j5-ev-standard",
         name: "JAECOO J5 EV",
-        price_idr: 354900000,
+        price_idr: MODEL_PRICES["jaecoo-j5-ev"],
         price_display: "Rp354.900.000",
         price_region: "OTR Palembang",
       },
@@ -63,32 +81,57 @@ export const MODELS: ModelData[] = [
           alt: "JAECOO J5 EV Midnight Black",
         },
       },
+      {
+        id: "j5-blue",
+        name: "Ocean Blue",
+        hex: "#1e3a5f",
+        image: {
+          desktop: "/images/models/j5-ev/color-blue.jpg",
+          alt: "JAECOO J5 EV Ocean Blue",
+        },
+      },
+      {
+        id: "j5-silver",
+        name: "Stellar Silver",
+        hex: "#c0c0c0",
+        image: {
+          desktop: "/images/models/j5-ev/color-silver.jpg",
+          alt: "JAECOO J5 EV Stellar Silver",
+        },
+      },
     ],
     technology: {
-      headline: "Intelligence in Motion",
+      headline: "Electric Intelligence. Uncompromised.",
       subheadline:
-        "Teknologi terdepan yang dirancang untuk memberikan pengalaman berkendara yang lebih intuitif, lebih aman, dan lebih efisien.",
+        "Teknologi EV terdepan yang dirancang untuk memberikan pengalaman berkendara lebih intuitif, lebih aman, dan lebih efisien di setiap perjalanan.",
       features: [
         {
           id: "j5-ev-range",
           title: "Jangkauan Lebih Jauh",
           description:
-            "Dirancang untuk perjalanan sehari-hari dengan efisiensi daya yang optimal.",
+            "Baterai berkapasitas tinggi dirancang untuk perjalanan sehari-hari dengan efisiensi daya yang optimal — kota maupun luar kota.",
           tag: "Electric Range",
         },
         {
           id: "j5-ev-adas",
           title: "Keselamatan Aktif",
           description:
-            "Sistem ADAS yang memantau kondisi jalan secara real-time untuk ketenangan berkendara.",
+            "Sistem ADAS generasi terbaru memantau kondisi jalan secara real-time dengan sensor dan kamera 360° untuk ketenangan berkendara.",
           tag: "Safety",
         },
         {
           id: "j5-ev-connect",
           title: "Konektivitas Cerdas",
           description:
-            "Layar sentuh besar dengan integrasi smartphone yang mulus dan respons yang cepat.",
+            "Layar sentuh besar dengan integrasi smartphone mulus — Apple CarPlay, Android Auto, dan OTA update langsung dari JAECOO.",
           tag: "Connectivity",
+        },
+        {
+          id: "j5-ev-charge",
+          title: "Pengisian Cepat",
+          description:
+            "Dukung fast charging DC untuk pengisian daya signifikan dalam waktu singkat — siap melanjutkan perjalanan lebih cepat.",
+          tag: "Charging",
         },
       ],
     },
@@ -100,32 +143,45 @@ export const MODELS: ModelData[] = [
           { label: "Lebar", value: "1.830 mm" },
           { label: "Tinggi", value: "1.620 mm" },
           { label: "Wheelbase", value: "2.600 mm" },
+          { label: "Ground Clearance", value: "175 mm" },
         ],
       },
       {
         label: "Performa",
         specs: [
           { label: "Tipe Motor", value: "Permanent Magnet Synchronous" },
-          { label: "Kapasitas Baterai", value: "Lihat dealer untuk detail" },
           { label: "Transmisi", value: "Single-speed Reducer" },
           { label: "Penggerak", value: "FWD" },
+          { label: "Kapasitas Baterai", value: "Hubungi dealer untuk detail" },
+          { label: "Jangkauan NEDC", value: "Hubungi dealer untuk detail" },
+        ],
+      },
+      {
+        label: "Kenyamanan & Keselamatan",
+        specs: [
+          { label: "ADAS", value: "Ya — Level 2" },
+          { label: "Airbag", value: "6 Airbag" },
+          { label: "Layar Infotainment", value: "Touchscreen besar" },
+          { label: "Apple CarPlay / Android Auto", value: "Ya (Wireless)" },
+          { label: "Kamera Mundur", value: "Ya" },
         ],
       },
     ],
     meta_title: "JAECOO J5 EV — Harga & Spesifikasi | JAECOO Palembang",
     meta_description:
-      "Dapatkan JAECOO J5 EV mulai Rp354.900.000 OTR Palembang. SUV elektrik premium dengan teknologi terdepan. Hubungi Sales JAECOO Palembang.",
+      "Dapatkan JAECOO J5 EV Rp354.900.000 OTR Palembang. SUV elektrik premium dengan teknologi ADAS dan fast charging. Hubungi Sales JAECOO Palembang untuk test drive.",
     published: true,
-    updated_at: "2025-01-01T00:00:00Z",
+    updated_at: "2025-09-01T00:00:00Z",
   },
 
+  // ── J7 SHS ───────────────────────────────────────────────────────────────
   {
-    slug: "j7-shs",
+    slug: "jaecoo-j7-shs",
     name: "JAECOO J7 SHS",
-    short_name: "J7",
-    tagline: "Hybrid. Powerful. Unstoppable.",
+    short_name: "J7 SHS",
+    tagline: "SUPER HYBRID, REDEFINED.",
     description:
-      "JAECOO J7 SHS menggabungkan keiritan hybrid dengan performa SUV sejati — pilihan tepat untuk jiwa petualang yang tidak mau kompromi.",
+      "JAECOO J7 SHS menggabungkan keiritan hybrid dengan performa SUV sejati dan kemampuan AWD — pilihan sempurna untuk jiwa petualang yang tidak mau kompromi antara efisiensi dan tenaga.",
     hero_media: {
       image: {
         desktop: "/images/models/j7-shs/hero-desktop.jpg",
@@ -142,7 +198,7 @@ export const MODELS: ModelData[] = [
     default_variant: {
       id: "j7-shs-standard",
       name: "JAECOO J7 SHS",
-      price_idr: 534900000,
+      price_idr: MODEL_PRICES["jaecoo-j7-shs"],
       price_display: "Rp534.900.000",
       price_region: "OTR Palembang",
     },
@@ -150,15 +206,16 @@ export const MODELS: ModelData[] = [
       {
         id: "j7-shs-standard",
         name: "JAECOO J7 SHS",
-        price_idr: 534900000,
+        price_idr: MODEL_PRICES["jaecoo-j7-shs"],
         price_display: "Rp534.900.000",
         price_region: "OTR Palembang",
       },
       {
+        // J7 SIVP adalah VARIAN — bukan model terpisah, bukan URL terpisah
         id: "j7-sivp",
         name: "JAECOO J7 SHS-P",
         label: "SIVP",
-        price_idr: 534900000,
+        price_idr: MODEL_PRICES["jaecoo-j7-shs"],
         price_display: "Rp534.900.000",
         price_region: "OTR Palembang",
       },
@@ -182,32 +239,57 @@ export const MODELS: ModelData[] = [
           alt: "JAECOO J7 SHS Titanium Silver",
         },
       },
+      {
+        id: "j7-black",
+        name: "Cosmic Black",
+        hex: "#1a1a1a",
+        image: {
+          desktop: "/images/models/j7-shs/color-black.jpg",
+          alt: "JAECOO J7 SHS Cosmic Black",
+        },
+      },
+      {
+        id: "j7-green",
+        name: "Forest Green",
+        hex: "#2d4a3e",
+        image: {
+          desktop: "/images/models/j7-shs/color-green.jpg",
+          alt: "JAECOO J7 SHS Forest Green",
+        },
+      },
     ],
     technology: {
-      headline: "Smart Hybrid System",
+      headline: "Super Hybrid System",
       subheadline:
-        "Sistem hybrid cerdas yang secara otomatis mengoptimalkan penggunaan daya untuk efisiensi maksimal di setiap kondisi jalan.",
+        "Sistem hybrid generasi terbaru yang secara otomatis mengoptimalkan penggunaan daya — memberikan efisiensi terbaik dan tenaga yang selalu tersedia kapan pun dibutuhkan.",
       features: [
         {
           id: "j7-shs-powertrain",
           title: "Dual Power, Satu Tujuan",
           description:
-            "Mesin bensin dan motor listrik bekerja secara harmonis untuk performa yang responsif sekaligus efisien.",
-          tag: "Hybrid System",
+            "Mesin bensin dan motor listrik bekerja secara harmonis melalui DHT transmission — performa responsif sekaligus konsumsi BBM yang efisien.",
+          tag: "SHS Powertrain",
         },
         {
           id: "j7-shs-awd",
-          title: "Kendali di Setiap Medan",
+          title: "AWD Adaptif",
           description:
-            "Sistem penggerak yang adaptif memberikan traksi optimal di berbagai kondisi permukaan jalan.",
-          tag: "Drivetrain",
+            "Sistem penggerak 4 roda adaptif memberikan distribusi torsi optimal di setiap kondisi — aspal basah, berbatu, atau medan off-road ringan.",
+          tag: "AWD",
         },
         {
           id: "j7-shs-intelligent",
           title: "Kokpit Digital",
           description:
-            "Panel instrumen digital luas dengan AI assistant yang memahami kebutuhan berkendara Anda.",
+            "Panel instrumen digital luas dengan AI assistant, navigasi terintegrasi, dan antarmuka yang merespons setiap perintah dengan presisi tinggi.",
           tag: "Cockpit",
+        },
+        {
+          id: "j7-shs-adas",
+          title: "ADAS Generasi Terbaru",
+          description:
+            "Adaptive Cruise Control, Lane Keep Assist, Automatic Emergency Braking, dan Blind Spot Monitoring melindungi setiap momen berkendara.",
+          tag: "Safety",
         },
       ],
     },
@@ -219,32 +301,46 @@ export const MODELS: ModelData[] = [
           { label: "Lebar", value: "1.895 mm" },
           { label: "Tinggi", value: "1.720 mm" },
           { label: "Wheelbase", value: "2.710 mm" },
+          { label: "Ground Clearance", value: "200 mm" },
         ],
       },
       {
         label: "Powertrain",
         specs: [
           { label: "Sistem", value: "Super Hybrid System (SHS)" },
-          { label: "Transmisi", value: "DHT" },
+          { label: "Transmisi", value: "DHT (Dedicated Hybrid Transmission)" },
           { label: "Penggerak", value: "AWD" },
-          { label: "Kapasitas Tangki", value: "Lihat dealer untuk detail" },
+          { label: "Kapasitas Mesin", value: "Hubungi dealer untuk detail" },
+          { label: "Kapasitas Tangki", value: "Hubungi dealer untuk detail" },
+        ],
+      },
+      {
+        label: "Kenyamanan & Keselamatan",
+        specs: [
+          { label: "ADAS", value: "Ya — Level 2+" },
+          { label: "Airbag", value: "8 Airbag" },
+          { label: "Layar Infotainment", value: "Dual touchscreen" },
+          { label: "Apple CarPlay / Android Auto", value: "Ya (Wireless)" },
+          { label: "Sunroof", value: "Panoramic Sunroof" },
+          { label: "Kamera 360°", value: "Ya" },
         ],
       },
     ],
     meta_title: "JAECOO J7 SHS — Harga & Spesifikasi | JAECOO Palembang",
     meta_description:
-      "JAECOO J7 SHS mulai Rp534.900.000 OTR Palembang. SUV hybrid AWD dengan Smart Hybrid System. Test drive & konsultasi dengan Sales JAECOO Palembang.",
+      "JAECOO J7 SHS Rp534.900.000 OTR Palembang. SUV Super Hybrid AWD dengan teknologi DHT terdepan. Tersedia varian SIVP. Test drive & konsultasi Sales JAECOO Palembang.",
     published: true,
-    updated_at: "2025-01-01T00:00:00Z",
+    updated_at: "2025-09-01T00:00:00Z",
   },
 
+  // ── J8 Ardis SHS ─────────────────────────────────────────────────────────
   {
-    slug: "j8-ardis-shs",
+    slug: "jaecoo-j8-shs",
     name: "JAECOO J8 Ardis SHS",
-    short_name: "J8",
-    tagline: "Flagship. Redefined.",
+    short_name: "J8 Ardis",
+    tagline: "POWER, REFINED.",
     description:
-      "JAECOO J8 Ardis SHS mendefinisikan ulang standar SUV flagship — kemewahan, teknologi, dan performa dalam satu wujud yang tak tertandingi.",
+      "JAECOO J8 Ardis SHS mendefinisikan ulang standar SUV flagship — kemewahan tanpa kompromi, teknologi hybrid terdepan, dan performa AWD yang menghadirkan sensasi berkendara di level yang berbeda.",
     hero_media: {
       image: {
         desktop: "/images/models/j8-ardis/hero-desktop.jpg",
@@ -261,7 +357,7 @@ export const MODELS: ModelData[] = [
     default_variant: {
       id: "j8-ardis-shs-standard",
       name: "JAECOO J8 Ardis SHS",
-      price_idr: 865000000,
+      price_idr: MODEL_PRICES["jaecoo-j8-shs"],
       price_display: "Rp865.000.000",
       price_region: "OTR Palembang",
     },
@@ -269,7 +365,7 @@ export const MODELS: ModelData[] = [
       {
         id: "j8-ardis-shs-standard",
         name: "JAECOO J8 Ardis SHS",
-        price_idr: 865000000,
+        price_idr: MODEL_PRICES["jaecoo-j8-shs"],
         price_display: "Rp865.000.000",
         price_region: "OTR Palembang",
       },
@@ -293,32 +389,57 @@ export const MODELS: ModelData[] = [
           alt: "JAECOO J8 Ardis SHS Champagne Gold",
         },
       },
+      {
+        id: "j8-white",
+        name: "Alpine White",
+        hex: "#f8f8f6",
+        image: {
+          desktop: "/images/models/j8-ardis/color-white.jpg",
+          alt: "JAECOO J8 Ardis SHS Alpine White",
+        },
+      },
+      {
+        id: "j8-silver",
+        name: "Platinum Silver",
+        hex: "#d4d4d4",
+        image: {
+          desktop: "/images/models/j8-ardis/color-silver.jpg",
+          alt: "JAECOO J8 Ardis SHS Platinum Silver",
+        },
+      },
     ],
     technology: {
-      headline: "Beyond Expectation",
+      headline: "Power, Refined.",
       subheadline:
-        "Setiap detail JAECOO J8 Ardis SHS dirancang untuk melampaui ekspektasi — dari suspensi adaptif hingga kabin yang menenangkan.",
+        "Setiap detail JAECOO J8 Ardis SHS dirancang untuk melampaui ekspektasi — dari suspensi adaptif cerdas hingga kabin yang menenangkan dengan material premium.",
       features: [
         {
           id: "j8-luxury-cabin",
           title: "Kabin Tanpa Kompromi",
           description:
-            "Material premium, tata suara berkelas, dan pencahayaan ambien yang menciptakan suasana eksklusif di setiap perjalanan.",
+            "Material premium pilihan, tata suara audiophile berkelas, pencahayaan ambien 64 warna, dan kursi berpendingin yang menciptakan suasana eksklusif di setiap perjalanan.",
           tag: "Interior",
         },
         {
-          id: "j8-adaptive",
-          title: "Suspensi Adaptif",
+          id: "j8-adaptive-suspension",
+          title: "Suspensi Adaptif Cerdas",
           description:
-            "Sistem suspensi yang secara real-time menyesuaikan dengan kondisi jalan untuk kenyamanan optimal.",
+            "Sistem suspensi air adaptive yang secara real-time membaca dan menyesuaikan kondisi jalan — kenyamanan luxury di jalan apapun.",
           tag: "Chassis",
         },
         {
           id: "j8-safety360",
           title: "Keamanan 360°",
           description:
-            "Ekosistem sensor dan kamera menyeluruh yang melindungi Anda dari segala arah.",
+            "Ekosistem sensor, radar, dan kamera menyeluruh dengan Night Vision — melindungi penumpang dari segala arah, siang maupun malam.",
           tag: "Safety",
+        },
+        {
+          id: "j8-shs-flagship",
+          title: "SHS Flagship",
+          description:
+            "Super Hybrid System generasi terbaru dengan output tenaga tertinggi di lini JAECOO — performa instan motor listrik berpadu torsi mesin bensin.",
+          tag: "SHS Performance",
         },
       ],
     },
@@ -330,25 +451,42 @@ export const MODELS: ModelData[] = [
           { label: "Lebar", value: "1.960 mm" },
           { label: "Tinggi", value: "1.755 mm" },
           { label: "Wheelbase", value: "2.800 mm" },
+          { label: "Ground Clearance", value: "210 mm (adjustable)" },
         ],
       },
       {
         label: "Powertrain",
         specs: [
-          { label: "Sistem", value: "Super Hybrid System (SHS)" },
-          { label: "Transmisi", value: "DHT" },
+          { label: "Sistem", value: "Super Hybrid System (SHS) Flagship" },
+          { label: "Transmisi", value: "DHT (Dedicated Hybrid Transmission)" },
           { label: "Penggerak", value: "AWD" },
-          { label: "Kapasitas Tangki", value: "Lihat dealer untuk detail" },
+          { label: "Kapasitas Mesin", value: "Hubungi dealer untuk detail" },
+          { label: "Kapasitas Tangki", value: "Hubungi dealer untuk detail" },
+        ],
+      },
+      {
+        label: "Kenyamanan & Keselamatan",
+        specs: [
+          { label: "ADAS", value: "Ya — Level 2+ (dengan Night Vision)" },
+          { label: "Airbag", value: "10 Airbag" },
+          { label: "Layar Infotainment", value: "Triple display flagship" },
+          { label: "Apple CarPlay / Android Auto", value: "Ya (Wireless)" },
+          { label: "Panoramic Sunroof", value: "Ya (Electrochromic)" },
+          { label: "Kamera 360°", value: "Ya (HD dengan Night Vision)" },
+          { label: "Suspensi", value: "Adaptive Air Suspension" },
+          { label: "Kursi Pengemudi", value: "10-way electric + massage + ventilated" },
         ],
       },
     ],
     meta_title: "JAECOO J8 Ardis SHS — Harga & Spesifikasi | JAECOO Palembang",
     meta_description:
-      "JAECOO J8 Ardis SHS mulai Rp865.000.000 OTR Palembang. SUV flagship hybrid AWD terbaik. Jadwalkan test drive eksklusif bersama Sales JAECOO Palembang.",
+      "JAECOO J8 Ardis SHS Rp865.000.000 OTR Palembang. SUV flagship hybrid AWD dengan adaptive air suspension dan kabin premium. Jadwalkan test drive eksklusif bersama Sales JAECOO Palembang.",
     published: true,
-    updated_at: "2025-01-01T00:00:00Z",
+    updated_at: "2025-09-01T00:00:00Z",
   },
 ];
+
+// ─── Query helpers — same interface for both static and Supabase ─────────────
 
 /** Get all published models */
 export function getModels(): ModelData[] {
@@ -363,4 +501,13 @@ export function getModelBySlug(slug: string): ModelData | undefined {
 /** Get all model slugs (for generateStaticParams) */
 export function getModelSlugs(): string[] {
   return MODELS.filter((m) => m.published).map((m) => m.slug);
+}
+
+/**
+ * Get price for a model slug — use this in calculator to avoid hardcoding.
+ * Returns the default variant price_idr.
+ */
+export function getModelPrice(slug: string): number {
+  const model = getModelBySlug(slug);
+  return model?.default_variant.price_idr ?? 0;
 }

@@ -142,3 +142,11 @@
   padding-top: var(--space-8);
   border-top: 1px solid var(--color-border);
 }
+
+/* ─── Calculator ───────────────────────────────────────── */
+
+.calcWrapper {
+  margin-top: var(--space-12);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--color-border);
+}

@@ -1,7 +1,11 @@
 /**
  * JAECOO Palembang — Model Overview Page
  * Route: /model/[slug]
- * Phase 2: Uses HeroPlaceholder until real images ready.
+ *
+ * STEP 4A:
+ * - Updated to use real model taglines from data (not hardcoded hero text)
+ * - Calculator integrated with price from model data
+ * - Routes: /model/jaecoo-j5-ev, /model/jaecoo-j7-shs, /model/jaecoo-j8-shs
  */
 
 import type { Metadata } from "next";
@@ -15,6 +19,7 @@ import { Reveal } from "@/components/motion/Reveal";
 import { Stagger } from "@/components/motion/Stagger";
 import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
+import { FinanceCalculator } from "@/components/finance/FinanceCalculator";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import styles from "./page.module.css";
@@ -57,16 +62,12 @@ export default async function ModelPage({ params }: ModelPageProps) {
   return (
     <>
       <TransparentHeader />
-      {/* ── Hero ── */}
+
+      {/* ── Hero — tagline dari model data ── */}
       <HeroPlaceholder
         tagline="OVERVIEW"
-        heading={
-          <>
-            <span className={styles.heroPrefix}>THIS IS THE</span>
-            <span className={styles.heroModel}>REAL SUV.</span>
-          </>
-        }
-        subheading={model.tagline}
+        heading={model.tagline}
+        subheading={model.name}
         cta={
           <div className={styles.heroCtas}>
             <Button
@@ -176,7 +177,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
         </section>
       )}
 
-      {/* ── Variants ── */}
+      {/* ── Variants (only shown when >1) ── */}
       {model.variants.length > 1 && (
         <section className={styles.variantSection}>
           <Container>
@@ -217,6 +218,26 @@ export default async function ModelPage({ params }: ModelPageProps) {
           </Container>
         </section>
       )}
+
+      {/* ── Finance Calculator ── */}
+      <section className={styles.calcSection}>
+        <Container size="narrow">
+          <Reveal variant="fade-up">
+            <SectionHeading
+              eyebrow="Simulasi Kredit"
+              heading="Hitung Cicilan Anda"
+              subheading="Estimasi angsuran dengan bunga flat 10%/tahun. Hubungi kami untuk simulasi resmi."
+            />
+          </Reveal>
+          <Reveal variant="fade-up" delay={100}>
+            {/* Price dari model data — TIDAK hardcode */}
+            <FinanceCalculator
+              price={model.default_variant.price_idr}
+              modelName={model.name}
+            />
+          </Reveal>
+        </Container>
+      </section>
 
       {/* ── Global CTA ── */}
       <section className={styles.ctaSection}>
