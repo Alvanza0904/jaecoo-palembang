@@ -53,6 +53,10 @@ interface FinanceCalculatorProps {
 export function FinanceCalculator({ price, modelName }: FinanceCalculatorProps) {
   const [dpPercent, setDpPercent] = useState<typeof DP_OPTIONS[number]>(30);
   const [tenor, setTenor] = useState<typeof TENOR_OPTIONS[number]>(3);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  void setDpPercent;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  void setTenor;
 
   const result = calculate({ price, dp_percent: dpPercent, tenor_years: tenor });
 

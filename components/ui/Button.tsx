@@ -47,6 +47,7 @@ export function Button({ variant = "primary", size = "md", fullWidth = false, ch
     .join(" ");
 
   if (rest.as === "link") {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { as: _as, href, ...linkRest } = rest as ButtonAsLink;
     return (
       <Link href={href} className={className} {...(linkRest as object)}>
@@ -56,6 +57,7 @@ export function Button({ variant = "primary", size = "md", fullWidth = false, ch
   }
 
   if (rest.as === "a") {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { as: _as, href, ...anchorRest } = rest as ButtonAsAnchor;
     return (
       <a href={href} className={className} {...anchorRest}>
@@ -64,6 +66,7 @@ export function Button({ variant = "primary", size = "md", fullWidth = false, ch
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { as: _as, ...btnRest } = rest as ButtonAsButton;
   return (
     <button className={className} {...btnRest}>

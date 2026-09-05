@@ -2,7 +2,6 @@
  * JAECOO Palembang — 404 Not Found
  */
 
-import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import styles from "./not-found.module.css";

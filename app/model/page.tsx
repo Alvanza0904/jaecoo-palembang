@@ -5,7 +5,6 @@
  */
 
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getModels } from "@/lib/data/models";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
