@@ -1,19 +1,23 @@
 /**
  * JAECOO Palembang — Homepage
  *
- * Phase 1: Section architecture placeholder.
- * Each section will be built out individually in later phases.
+ * Phase 2: Visual Foundation.
+ * Cinematic full-width storytelling architecture.
+ * Hero + Range + Technology + Promo + Journal + Global CTA.
  */
 
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getModels } from "@/lib/data/models";
 import { getActivePromos } from "@/lib/data/promos";
 import { getPublishedNews } from "@/lib/data/news";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Button } from "@/components/ui/Button";
+import { GoldLine } from "@/components/ui/GoldLine";
 import { Reveal } from "@/components/motion/Reveal";
-import { Stagger } from "@/components/motion/Stagger";
+import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
+import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import styles from "./page.module.css";
 
@@ -36,133 +40,194 @@ export default function HomePage() {
 
   return (
     <>
+      {/* Transparent header over hero */}
+      <TransparentHeader />
+
       {/* ─── 1. HERO ──────────────────────────────────────────── */}
-      <section className={styles.hero} aria-label="Hero JAECOO J5 EV">
-        <div className={styles.heroBg} aria-hidden="true">
-          {/* Placeholder — akan diganti dengan layered hero component */}
-          <div className={styles.heroBgFill} />
-        </div>
-        <Container>
-          <div className={styles.heroContent}>
-            <Reveal variant="fade" delay={100}>
-              <p className={styles.heroEyebrow}>Dealer Resmi Palembang</p>
-            </Reveal>
-            <Reveal variant="fade-up" delay={200}>
-              <h1 className={styles.heroHeading}>
-                <span className={styles.heroModel}>JAECOO</span>
-                <span className={styles.heroModelName}>J5 EV</span>
-              </h1>
-            </Reveal>
-            <Reveal variant="fade-up" delay={350}>
-              <p className={styles.heroTagline}>Electric. Intelligent. Ready.</p>
-            </Reveal>
-            <Reveal variant="fade-up" delay={500}>
-              <div className={styles.heroCtas}>
-                <Button as="link" href="/model/j5-ev" variant="primary" size="lg">
-                  Jelajahi J5 EV
-                </Button>
-                <Button as="a" href={heroWhatsApp} variant="secondary" size="lg" target="_blank" rel="noopener noreferrer">
-                  Hubungi Sales
-                </Button>
-              </div>
-            </Reveal>
+      {/*
+        Phase 2: Using HeroPlaceholder.
+        Phase 3+: Replace with <LayeredHero> when real images are ready.
+        The LayeredHero component is fully built and ready to use.
+      */}
+      <HeroPlaceholder
+        tagline="Dealer Resmi Palembang"
+        heading={
+          <>
+            <span className={styles.heroModelLine}>JAECOO</span>
+            <span className={styles.heroNameLine}>J5 EV</span>
+          </>
+        }
+        subheading="Electric. Intelligent. Ready."
+        cta={
+          <div className={styles.heroCtas}>
+            <Button as="link" href="/model/j5-ev" variant="primary" size="lg">
+              Jelajahi J5 EV
+            </Button>
+            <Button
+              as="a"
+              href={heroWhatsApp}
+              variant="secondary"
+              size="lg"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Talk to Alvan →
+            </Button>
           </div>
-        </Container>
-      </section>
+        }
+        accent="warm"
+      />
 
       {/* ─── 2. JAECOO RANGE ──────────────────────────────────── */}
-      <section className={styles.section} aria-label="Lineup JAECOO">
+      <section className={styles.rangeSection} aria-label="Lineup JAECOO">
         <Container>
-          <Reveal>
-            <SectionHeading
-              eyebrow="Lineup"
-              heading="The JAECOO Range"
-              subheading="Tiga model. Satu filosofi — performa, teknologi, dan desain yang tidak berkompromi."
-            />
-          </Reveal>
-          <div className={styles.modelGrid}>
-            <Stagger delay={150} staggerMs={120}>
-              {models.map((model) => (
-                <article key={model.slug} className={styles.modelCard}>
-                  {/* Placeholder — akan diganti ModelCard component */}
-                  <div className={styles.modelCardImg} aria-hidden="true" />
-                  <div className={styles.modelCardBody}>
-                    <p className={styles.modelCardName}>{model.name}</p>
-                    <p className={styles.modelCardPrice}>
-                      {model.default_variant.price_display}
-                      <span className={styles.modelCardRegion}> {model.default_variant.price_region}</span>
-                    </p>
-                    <Button as="link" href={`/model/${model.slug}`} variant="secondary" size="sm">
-                      Lihat Detail
+          <div className={styles.rangeMeta}>
+            <Reveal variant="fade">
+              <SectionHeading
+                eyebrow="The Range"
+                heading="Three models. One philosophy."
+                subheading="Performance, technology, and design — without compromise."
+              />
+            </Reveal>
+          </div>
+
+          <div className={styles.modelList}>
+            {models.map((model, i) => (
+              <Reveal key={model.slug} variant="fade-up" delay={i * 80}>
+                <article className={styles.modelRow}>
+                  {/* Index */}
+                  <span className={styles.modelIndex} aria-hidden="true">
+                    0{i + 1}
+                  </span>
+
+                  {/* Info */}
+                  <div className={styles.modelInfo}>
+                    <p className={styles.modelShortName}>{model.short_name}</p>
+                    <h3 className={styles.modelName}>{model.name}</h3>
+                    <p className={styles.modelTagline}>{model.tagline}</p>
+                  </div>
+
+                  {/* Price + CTA */}
+                  <div className={styles.modelPricing}>
+                    <div>
+                      <p className={styles.modelPrice}>
+                        {model.default_variant.price_display}
+                      </p>
+                      <p className={styles.modelRegion}>
+                        {model.default_variant.price_region}
+                      </p>
+                    </div>
+                    <Button
+                      as="link"
+                      href={`/model/${model.slug}`}
+                      variant="ghost"
+                      size="sm"
+                    >
+                      Detail →
                     </Button>
                   </div>
+
+                  {/* Gold separator */}
+                  <div className={styles.modelSep} aria-hidden="true" />
                 </article>
-              ))}
-            </Stagger>
+              </Reveal>
+            ))}
           </div>
         </Container>
       </section>
 
-      {/* ─── 3. TECHNOLOGY TEASER ─────────────────────────────── */}
-      <section className={[styles.section, styles.sectionDark].join(" ")} aria-label="Teknologi JAECOO">
-        <Container>
-          <Reveal>
+      {/* ─── 3. TECHNOLOGY ────────────────────────────────────── */}
+      <section className={styles.techSection} aria-label="Teknologi JAECOO">
+        <Container size="content">
+          <Reveal variant="fade-up">
+            <GoldLine width="short" className={styles.techGold} />
+          </Reveal>
+          <Reveal variant="fade-up" delay={100}>
             <SectionHeading
               eyebrow="Technology"
-              heading="Intelligence in Motion"
-              subheading="Setiap JAECOO dirancang dengan teknologi yang beradaptasi terhadap Anda — bukan sebaliknya."
+              heading={<>Intelligence<br />in Motion.</>}
+              subheading="Every JAECOO is built with technology that adapts to you — not the other way around."
+              size="display"
               align="center"
-              size="large"
             />
+          </Reveal>
+
+          <Reveal variant="fade" delay={200}>
+            <div className={styles.techCta}>
+              <Button as="link" href="/model/j5-ev/technology" variant="secondary" size="md">
+                Explore Technology
+              </Button>
+            </div>
           </Reveal>
         </Container>
       </section>
 
       {/* ─── 4. PROMO ─────────────────────────────────────────── */}
       {promos.length > 0 && (
-        <section className={styles.section} aria-label="Promo JAECOO Palembang">
+        <section className={styles.promoSection} aria-label="Promo JAECOO Palembang">
           <Container>
             <Reveal>
-              <SectionHeading eyebrow="Penawaran" heading="Promo Terkini" />
+              <SectionHeading
+                eyebrow="Penawaran"
+                heading="Promo Terkini"
+                subheading="Penawaran spesial dari JAECOO Palembang — terbatas untuk waktu tertentu."
+              />
             </Reveal>
-            {/* PromoCard components akan ditambahkan di fase berikutnya */}
-            <p className={styles.placeholder}>{promos.length} promo aktif tersedia.</p>
+            {/* PromoCard akan ditambahkan di Phase 3+ */}
+            <p className={styles.comingSoon}>
+              {promos.length} penawaran aktif — segera hadir.
+            </p>
           </Container>
         </section>
       )}
 
       {/* ─── 5. JAECOO JOURNAL ────────────────────────────────── */}
       {news.length > 0 && (
-        <section className={styles.section} aria-label="JAECOO Journal">
+        <section className={styles.journalSection} aria-label="JAECOO Journal">
           <Container>
             <Reveal>
-              <SectionHeading eyebrow="Journal" heading="Berita Terbaru" />
+              <div className={styles.journalHeader}>
+                <SectionHeading
+                  eyebrow="Journal"
+                  heading="The JAECOO Journal"
+                />
+                <Link href="/berita" className={styles.journalSeeAll}>
+                  Semua Artikel →
+                </Link>
+              </div>
             </Reveal>
-            {/* NewsCard components akan ditambahkan di fase berikutnya */}
-            <p className={styles.placeholder}>{news.length} artikel tersedia.</p>
+            {/* NewsCard akan ditambahkan di Phase 3+ */}
+            <p className={styles.comingSoon}>
+              {news.length} artikel tersedia.
+            </p>
           </Container>
         </section>
       )}
 
       {/* ─── 6. GLOBAL CTA ────────────────────────────────────── */}
-      <section className={[styles.section, styles.sectionCta].join(" ")} aria-label="Hubungi Sales">
+      <section className={styles.ctaSection} aria-label="Hubungi Sales Alvan">
         <Container size="narrow">
-          <Reveal variant="scale">
+          <Reveal variant="fade-up">
             <div className={styles.ctaBlock}>
-              <p className={styles.ctaEyebrow}>Siap Memulai?</p>
-              <h2 className={styles.ctaHeading}>Bicara langsung dengan Sales kami.</h2>
+              <GoldLine width="short" className={styles.ctaGold} />
+              <h2 className={styles.ctaHeading}>
+                Ready to drive<br />something extraordinary?
+              </h2>
               <p className={styles.ctaBody}>
-                Konsultasi gratis, test drive, simulasi kredit — semua bisa diatur via WhatsApp.
+                Konsultasi gratis, test drive, simulasi kredit — semua bisa diatur langsung bersama Alvan via WhatsApp.
               </p>
               <Button
                 as="a"
-                href={buildWhatsAppUrl({ source: "homepage_hero", source_cta: "global_cta" })}
-                variant="whatsapp"
+                href={buildWhatsAppUrl({
+                  source: "homepage_hero",
+                  source_cta: "global_cta",
+                })}
+                variant="primary"
                 size="lg"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Chat WhatsApp
+                Talk to Alvan →
               </Button>
             </div>
           </Reveal>

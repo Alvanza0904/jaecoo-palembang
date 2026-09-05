@@ -1,5 +1,6 @@
 /**
  * JAECOO Palembang — Design Tokens
+ * Phase 2: Visual Foundation additions.
  * Single source of truth for all visual design decisions.
  */
 
@@ -16,6 +17,13 @@
   --color-ink-muted:   #555555;
   --color-ink-subtle:  #888888;
 
+  /* Dark surfaces */
+  --color-charcoal:        #1a1a1a;
+  --color-charcoal-mid:    #232323;
+  --color-charcoal-light:  #2e2e2e;
+  --color-ink-on-dark:     rgba(255, 255, 255, 0.88);
+  --color-ink-muted-dark:  rgba(255, 255, 255, 0.52);
+
   /* Primary CTA */
   --color-cta-bg:      #111111;
   --color-cta-text:    #ffffff;
@@ -28,6 +36,7 @@
   /* Borders */
   --color-border:      rgba(0, 0, 0, 0.08);
   --color-border-mid:  rgba(0, 0, 0, 0.14);
+  --color-border-dark: rgba(255, 255, 255, 0.10);
 
   /* ─── TYPOGRAPHY ─────────────────────────────────────── */
 
@@ -81,6 +90,8 @@
   --space-24:  6rem;      /* 96px */
   --space-32:  8rem;      /* 128px */
   --space-40:  10rem;     /* 160px */
+  --space-48:  12rem;     /* 192px */
+  --space-64:  16rem;     /* 256px */
 
   /* ─── LAYOUT ─────────────────────────────────────────── */
 
@@ -88,6 +99,11 @@
   --container-content:  1200px;
   --container-narrow:   800px;
   --container-padding:  var(--space-5);
+
+  /* Section spacing */
+  --section-gap-sm:   var(--space-12);
+  --section-gap-md:   var(--space-20);
+  --section-gap-lg:   var(--space-32);
 
   /* ─── BORDER RADIUS ──────────────────────────────────── */
 
@@ -101,11 +117,16 @@
   --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out:    cubic-bezier(0.76, 0, 0.24, 1);
   --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-cinema:    cubic-bezier(0.22, 1, 0.36, 1);
 
-  --duration-fast:   150ms;
-  --duration-base:   300ms;
-  --duration-slow:   600ms;
-  --duration-slower: 900ms;
+  --duration-fast:    150ms;
+  --duration-base:    300ms;
+  --duration-slow:    600ms;
+  --duration-slower:  900ms;
+  --duration-cinematic: 1200ms;
+
+  /* Page transition */
+  --transition-page-duration: 400ms;
 
   /* ─── Z-INDEX ─────────────────────────────────────────── */
 
@@ -127,6 +148,9 @@
 @media (min-width: 1024px) {
   :root {
     --container-padding: var(--space-8);
+    --section-gap-sm:   var(--space-16);
+    --section-gap-md:   var(--space-32);
+    --section-gap-lg:   var(--space-48);
   }
 }
 

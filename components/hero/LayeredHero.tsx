@@ -1,0 +1,221 @@
+/**
+ * JAECOO Palembang — Layered Hero
+ *
+ * Architecture:
+ *   BACKGROUND MEDIA (image/video)
+ *     ↓
+ *   TYPOGRAPHY LAYER
+ *     ↓
+ *   VEHICLE CUTOUT (foreground — overlaps typography)
+ *
+ * Supports: desktop / tablet / mobile / small_mobile
+ * Art direction: focal_x, focal_y, mode (auto | custom)
+ * Video: muted autoplay loop with poster fallback
+ */
+
+import Image from "next/image";
+import type { MediaWithArtDirection, ResponsiveVideo } from "@/lib/types/media";
+import styles from "./LayeredHero.module.css";
+
+export interface LayeredHeroProps {
+  /** Background media — required */
+  media: MediaWithArtDirection;
+  /** Optional video source */
+  video?: ResponsiveVideo;
+  /** Hero heading — main model name */
+  heading: React.ReactNode;
+  /** Model identifier below heading */
+  subheading?: React.ReactNode;
+  /** Tagline / eyebrow text */
+  tagline?: string;
+  /** Call to action area */
+  cta?: React.ReactNode;
+  /** Overlay darkness (0–100) */
+  overlayOpacity?: number;
+  /** Minimum height variant */
+  size?: "full" | "large" | "medium";
+  /** Whether background is light (affects text color) */
+  lightBackground?: boolean;
+}
+
+export function LayeredHero({
+  media,
+  video,
+  heading,
+  subheading,
+  tagline,
+  cta,
+  overlayOpacity = 30,
+  size = "full",
+  lightBackground = false,
+}: LayeredHeroProps) {
+  const { image, art_direction } = media;
+
+  // Build object-position from art direction
+  const getObjectPosition = (breakpoint: "desktop" | "tablet" | "mobile") => {
+    const dir = art_direction?.[breakpoint];
+    if (!dir) return "center center";
+    if (dir.mode === "custom" && dir.x && dir.y) {
+      return `${dir.x} ${dir.y}`;
+    }
+    const fx = dir.focal_x ?? 50;
+    const fy = dir.focal_y ?? 50;
+    return `${fx}% ${fy}%`;
+  };
+
+  const hasCutout = !!image.cutout;
+
+  return (
+    <section
+      className={[
+        styles.hero,
+        styles[`hero--${size}`],
+        lightBackground ? styles.heroLight : styles.heroDark,
+      ].join(" ")}
+      aria-label="Hero section"
+    >
+      {/* ── Background layer ── */}
+      <div className={styles.bg} aria-hidden="true">
+        {video ? (
+          /* Video background with image fallback */
+          <VideoBackground video={video} />
+        ) : (
+          /* Responsive image background */
+          <div className={styles.bgImages}>
+            {/* Mobile */}
+            {(image.small_mobile || image.mobile) && (
+              <div className={styles.bgImageMobile}>
+                <Image
+                  src={image.small_mobile ?? image.mobile ?? image.desktop ?? ""}
+                  alt=""
+                  fill
+                  priority
+                  quality={90}
+                  style={{ objectPosition: getObjectPosition("mobile") }}
+                  className={styles.bgImg}
+                  sizes="100vw"
+                />
+              </div>
+            )}
+            {/* Tablet */}
+            {image.tablet && (
+              <div className={styles.bgImageTablet}>
+                <Image
+                  src={image.tablet}
+                  alt=""
+                  fill
+                  priority
+                  quality={90}
+                  style={{ objectPosition: getObjectPosition("tablet") }}
+                  className={styles.bgImg}
+                  sizes="100vw"
+                />
+              </div>
+            )}
+            {/* Desktop */}
+            {image.desktop && (
+              <div className={styles.bgImageDesktop}>
+                <Image
+                  src={image.desktop}
+                  alt=""
+                  fill
+                  priority
+                  quality={90}
+                  style={{ objectPosition: getObjectPosition("desktop") }}
+                  className={styles.bgImg}
+                  sizes="100vw"
+                />
+              </div>
+            )}
+            {/* Fallback placeholder when no images provided */}
+            {!image.desktop && !image.mobile && (
+              <div className={styles.bgPlaceholder} />
+            )}
+          </div>
+        )}
+
+        {/* Overlay */}
+        <div
+          className={styles.overlay}
+          style={{ "--overlay-opacity": overlayOpacity / 100 } as React.CSSProperties}
+          aria-hidden="true"
+        />
+      </div>
+
+      {/* ── Typography layer ── */}
+      <div className={styles.content}>
+        <div className={styles.contentInner}>
+          {tagline && (
+            <p className={styles.tagline}>{tagline}</p>
+          )}
+
+          <div className={styles.headingBlock}>
+            <h1 className={styles.heading}>{heading}</h1>
+            {subheading && (
+              <p className={styles.subheading}>{subheading}</p>
+            )}
+          </div>
+
+          {cta && (
+            <div className={styles.cta}>{cta}</div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Vehicle cutout layer (foreground) ── */}
+      {hasCutout && (
+        <div className={styles.cutout} aria-hidden="true">
+          <Image
+            src={image.cutout!}
+            alt={image.alt}
+            fill
+            priority
+            className={styles.cutoutImg}
+            sizes="(max-width: 768px) 100vw, 80vw"
+          />
+        </div>
+      )}
+
+      {/* Screen-reader alt for hero image */}
+      <span className="sr-only">{image.alt}</span>
+    </section>
+  );
+}
+
+/* ── Video Background sub-component ── */
+
+function VideoBackground({ video }: { video: ResponsiveVideo }) {
+  return (
+    <div className={styles.videoBg}>
+      <video
+        className={styles.video}
+        autoPlay
+        muted
+        loop
+        playsInline
+        poster={video.poster}
+        aria-hidden="true"
+      >
+        {video.mobile && (
+          <source
+            src={video.mobile}
+            media="(max-width: 767px)"
+            type="video/mp4"
+          />
+        )}
+        {video.desktop && (
+          <source src={video.desktop} type="video/mp4" />
+        )}
+      </video>
+      {/* Poster fallback image */}
+      <Image
+        src={video.poster}
+        alt={video.alt}
+        fill
+        priority
+        className={[styles.bgImg, styles.videoPoster].join(" ")}
+        sizes="100vw"
+      />
+    </div>
+  );
+}

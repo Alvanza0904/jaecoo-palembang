@@ -1,0 +1,256 @@
+/* ─── Hero Base ───────────────────────────────────────── */
+
+.hero {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  /* Push content below fixed header */
+  margin-top: 0;
+}
+
+/* Size variants */
+.hero--full {
+  min-height: 100svh;
+}
+
+.hero--large {
+  min-height: 80svh;
+}
+
+.hero--medium {
+  min-height: 60svh;
+}
+
+/* ─── Background layer ────────────────────────────────── */
+
+.bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.bgImages {
+  position: absolute;
+  inset: 0;
+}
+
+/* Responsive image containers */
+.bgImageMobile {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.bgImageTablet {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+
+.bgImageDesktop {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+
+.bgImg {
+  object-fit: cover;
+  object-position: center;
+  transition: transform var(--duration-cinematic) var(--ease-cinema);
+}
+
+/* Placeholder when no image */
+.bgPlaceholder {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    160deg,
+    var(--color-charcoal) 0%,
+    #0a0a0a 100%
+  );
+}
+
+/* Overlay */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, var(--overlay-opacity, 0.3));
+  z-index: 1;
+}
+
+/* ─── Video background ────────────────────────────────── */
+
+.videoBg {
+  position: absolute;
+  inset: 0;
+}
+
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.videoPoster {
+  z-index: 0;
+}
+
+/* ─── Typography layer ────────────────────────────────── */
+
+.content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  min-height: inherit;
+  padding-bottom: var(--space-12);
+  /* Account for fixed header */
+  padding-top: calc(var(--header-height-mobile) + var(--space-8));
+}
+
+.contentInner {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* ─── Hero typography ─────────────────────────────────── */
+
+.heroDark .tagline,
+.heroDark .heading,
+.heroDark .subheading {
+  color: var(--color-white);
+}
+
+.heroLight .tagline,
+.heroLight .heading,
+.heroLight .subheading {
+  color: var(--color-ink);
+}
+
+.tagline {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--color-gold-light);
+  opacity: 0.9;
+}
+
+.heroDark .tagline {
+  color: var(--color-gold-light);
+}
+
+.headingBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.heading {
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: inherit;
+}
+
+.subheading {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-normal);
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 480px;
+}
+
+.heroLight .subheading {
+  color: var(--color-ink-muted);
+}
+
+.cta {
+  margin-top: var(--space-2);
+}
+
+/* ─── Vehicle cutout ──────────────────────────────────── */
+
+.cutout {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  /* Position cutout at bottom-right by default */
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.cutoutImg {
+  object-fit: contain;
+  object-position: bottom right;
+  /* Cutout can overlap into content area */
+  width: 70% !important;
+  height: 75% !important;
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+}
+
+/* ─── Responsive breakpoints ──────────────────────────── */
+
+@media (min-width: 768px) {
+  .bgImageMobile { display: none; }
+  .bgImageTablet { display: block; }
+
+  .content {
+    align-items: center;
+    padding-top: calc(var(--header-height-desktop) + var(--space-12));
+  }
+
+  .heading {
+    font-size: var(--text-5xl);
+  }
+
+  .cutoutImg {
+    width: 60% !important;
+    height: 80% !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .content {
+    padding-top: calc(var(--header-height-desktop) + var(--space-16));
+    padding-bottom: var(--space-20);
+  }
+
+  .bgImageTablet { display: none; }
+  .bgImageDesktop { display: block; }
+
+  .heading {
+    font-size: var(--text-hero);
+  }
+
+  .subheading {
+    font-size: var(--text-xl);
+    max-width: 560px;
+  }
+
+  .cutoutImg {
+    width: 55% !important;
+    height: 85% !important;
+  }
+}
+
+/* ─── Reduced motion ──────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .bgImg {
+    transition: none;
+  }
+}

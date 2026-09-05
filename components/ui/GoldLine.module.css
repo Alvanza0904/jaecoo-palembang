@@ -1,0 +1,9 @@
+.line {
+  height: 1px;
+  background-color: var(--color-gold);
+  opacity: 0.6;
+}
+
+.line--short  { width: 32px; }
+.line--medium { width: 64px; }
+.line--full   { width: 100%; }

@@ -1,5 +1,6 @@
 /**
  * JAECOO Palembang — Root Layout
+ * Phase 2: Visual Foundation.
  */
 
 import type { Metadata } from "next";
@@ -70,6 +71,13 @@ export default function RootLayout({
   return (
     <html lang="id" className={manrope.variable}>
       <body>
+        {/*
+          Header is fixed/sticky via CSS.
+          transparent=true on pages with hero that needs overlay header.
+          Default (no prop): solid off-white header.
+          Hero pages (model pages, homepage) pass transparent={true}
+          directly to Header in their own layout file.
+        */}
         <Header />
         <main id="main-content">{children}</main>
         <Footer />

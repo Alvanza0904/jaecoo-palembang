@@ -1,78 +1,162 @@
-/* Toggle button — visible only on mobile */
+/* ─── Toggle Button ───────────────────────────────────── */
+
 .toggle {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: 5px;
   width: 44px;
   height: 44px;
-  padding: var(--space-2);
   background: transparent;
   border: none;
   cursor: pointer;
+  color: var(--color-ink);
+  transition: color var(--duration-slow) var(--ease-out);
+}
+
+.toggleInverted {
+  color: var(--color-white);
+}
+
+/* Icon container */
+.icon {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 22px;
+  transition: transform var(--duration-base) var(--ease-out);
 }
 
 .bar {
   display: block;
-  width: 24px;
-  height: 2px;
-  background-color: var(--color-ink);
-  border-radius: 2px;
+  width: 100%;
+  height: 1.5px;
+  background-color: currentColor;
+  border-radius: 1px;
   transition:
     transform var(--duration-base) var(--ease-out),
-    opacity var(--duration-base) var(--ease-out);
+    opacity var(--duration-base) var(--ease-out),
+    width var(--duration-base) var(--ease-out);
   transform-origin: center;
 }
 
-.barTop  { transform: rotate(45deg) translate(5px, 5px); }
-.barMid  { opacity: 0; }
-.barBot  { transform: rotate(-45deg) translate(5px, -5px); }
-
-/* Overlay */
-.overlay {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-overlay);
-  background-color: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(2px);
+/* X state */
+.iconOpen .bar:nth-child(1) {
+  transform: rotate(45deg) translate(4.5px, 4.5px);
+}
+.iconOpen .bar:nth-child(2) {
+  opacity: 0;
+  width: 0;
+}
+.iconOpen .bar:nth-child(3) {
+  transform: rotate(-45deg) translate(4.5px, -4.5px);
 }
 
-/* Drawer */
-.menu {
+/* ─── Backdrop ────────────────────────────────────────── */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-menu) + 1);
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-slow) var(--ease-out);
+}
+
+.backdropVisible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ─── Full Panel ──────────────────────────────────────── */
+
+.panel {
   position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
-  z-index: var(--z-modal);
-  width: min(320px, 90vw);
+  z-index: calc(var(--z-menu) + 2);
+  width: min(420px, 100vw);
   background-color: var(--color-off-white);
-  padding: var(--space-20) var(--space-6) var(--space-8);
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
+  padding: var(--space-6) var(--space-6) var(--space-8);
   transform: translateX(100%);
-  transition: transform var(--duration-base) var(--ease-out);
+  transition: transform var(--duration-slower) var(--ease-out);
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
-.menuOpen {
+.panelOpen {
   transform: translateX(0);
 }
 
+/* ─── Close Button ────────────────────────────────────── */
+
+.closeBtn {
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-ink-muted);
+  margin-bottom: var(--space-6);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.closeBtn:hover {
+  color: var(--color-ink);
+}
+
+/* ─── Gold Accent ─────────────────────────────────────── */
+
+.accentLine {
+  width: 32px;
+  height: 1px;
+  background-color: var(--color-gold);
+  margin-bottom: var(--space-8);
+  transform-origin: left;
+}
+
+/* ─── Links ───────────────────────────────────────────── */
+
 .links {
+  list-style: none;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-  list-style: none;
+}
+
+.linkItem {
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-border);
+
+  /* Stagger entrance */
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+  transition-delay: calc(var(--stagger-i, 0) * 60ms + 100ms);
+}
+
+.panelOpen .linkItem {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .link {
-  display: block;
-  padding: var(--space-4) 0;
-  font-size: var(--text-lg);
-  font-weight: var(--weight-medium);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-5) 0;
   color: var(--color-ink);
-  border-bottom: 1px solid var(--color-border);
   transition: color var(--duration-fast) var(--ease-out);
 }
 
@@ -80,13 +164,98 @@
   color: var(--color-gold);
 }
 
-.menuCta {
-  margin-top: auto;
+.linkLabel {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-snug);
+  line-height: var(--leading-tight);
 }
 
-/* Hide toggle on desktop */
+.linkArrow {
+  font-size: var(--text-base);
+  color: var(--color-ink-subtle);
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.link:hover .linkArrow {
+  transform: translateX(4px);
+  color: var(--color-gold);
+}
+
+/* ─── CTA ─────────────────────────────────────────────── */
+
+.cta {
+  margin-top: var(--space-8);
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+  transition-delay: 400ms;
+}
+
+.panelOpen .cta {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ctaLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-6);
+  background-color: var(--color-ink);
+  color: var(--color-white);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.ctaLink:hover {
+  opacity: 0.85;
+}
+
+/* ─── Desktop — hide toggle ───────────────────────────── */
+
 @media (min-width: 1024px) {
   .toggle {
     display: none;
+  }
+
+  .panel {
+    display: none;
+  }
+
+  .backdrop {
+    display: none;
+  }
+}
+
+/* ─── Reduced motion ──────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    transition: none;
+  }
+
+  .backdrop {
+    transition: none;
+  }
+
+  .linkItem {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .cta {
+    transition: none;
+    opacity: 1;
+    transform: none;
   }
 }

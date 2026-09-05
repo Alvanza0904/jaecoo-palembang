@@ -11,7 +11,7 @@ export default function TermsPage() {
     <section style={{ paddingBlock: "var(--space-20)" }}>
       <Container size="narrow">
         <h1 style={{ fontSize: "var(--text-2xl)", fontWeight: "var(--weight-semibold)", marginBottom: "var(--space-8)" }}>
-          Syarat & Ketentuan
+          Syarat &amp; Ketentuan
         </h1>
         <p style={{ color: "var(--color-ink-muted)" }}>Konten akan ditambahkan segera.</p>
       </Container>

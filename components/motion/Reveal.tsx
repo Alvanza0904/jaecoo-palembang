@@ -1,8 +1,9 @@
 /**
  * JAECOO Palembang — Reveal Motion Component
  *
- * Scroll-triggered entrance animation.
- * Respects prefers-reduced-motion automatically via CSS.
+ * Scroll-triggered entrance animations.
+ * Variants: fade-up, fade, blur, scale, slide-left, slide-right, mask
+ * Respects prefers-reduced-motion via CSS.
  *
  * "use client" — requires IntersectionObserver.
  */
@@ -12,7 +13,14 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import styles from "./Reveal.module.css";
 
-type RevealVariant = "fade-up" | "fade" | "blur" | "scale" | "slide-left" | "slide-right";
+export type RevealVariant =
+  | "fade-up"
+  | "fade"
+  | "blur"
+  | "scale"
+  | "slide-left"
+  | "slide-right"
+  | "mask";
 
 interface RevealProps {
   children: ReactNode;
@@ -26,7 +34,7 @@ export function Reveal({
   children,
   variant = "fade-up",
   delay = 0,
-  threshold = 0.15,
+  threshold = 0.12,
   className = "",
 }: RevealProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -39,6 +47,7 @@ export function Reveal({
       ([entry]) => {
         if (entry.isIntersecting) {
           el.style.transitionDelay = `${delay}ms`;
+          el.style.animationDelay = `${delay}ms`;
           el.setAttribute("data-visible", "true");
           observer.disconnect();
         }
@@ -50,10 +59,18 @@ export function Reveal({
     return () => observer.disconnect();
   }, [delay, threshold]);
 
+  const cls = [
+    styles.reveal,
+    styles[`reveal--${variant}`],
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <div
       ref={ref}
-      className={[styles.reveal, styles[`reveal--${variant}`], className].filter(Boolean).join(" ")}
+      className={cls}
       data-visible="false"
     >
       {children}

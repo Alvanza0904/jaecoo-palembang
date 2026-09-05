@@ -1,199 +1,248 @@
-/* ─── Hero ─────────────────────────────────────────────── */
+/* ─── Hero typography overrides ──────────────────────── */
 
-.hero {
-  position: relative;
-  min-height: calc(100svh - var(--header-height-mobile));
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-}
-
-.heroBg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-
-.heroBgFill {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-}
-
-.heroContent {
-  position: relative;
-  z-index: 1;
-  padding-block: var(--space-20);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-}
-
-.heroEyebrow {
-  font-size: var(--text-xs);
-  font-weight: var(--weight-medium);
-  letter-spacing: var(--tracking-wider);
-  text-transform: uppercase;
-  color: var(--color-gold);
-}
-
-.heroHeading {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  line-height: var(--leading-tight);
-}
-
-.heroModel {
-  font-size: var(--text-2xl);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-wide);
-  color: rgba(255,255,255,0.6);
-  text-transform: uppercase;
-}
-
-.heroModelName {
-  font-size: var(--text-5xl);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--tracking-tight);
-  color: var(--color-white);
-}
-
-.heroTagline {
-  font-size: var(--text-lg);
+.heroModelLine {
+  display: block;
+  font-size: inherit;
   font-weight: var(--weight-regular);
-  color: rgba(255,255,255,0.65);
-  letter-spacing: var(--tracking-normal);
+  letter-spacing: var(--tracking-wider);
+  opacity: 0.72;
+}
+
+.heroNameLine {
+  display: block;
+  font-size: inherit;
+  font-weight: var(--weight-bold);
 }
 
 .heroCtas {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-4);
-  margin-top: var(--space-4);
+  gap: var(--space-3);
+  align-items: center;
 }
 
-/* ─── Sections ──────────────────────────────────────────── */
+/* ─── Range Section ───────────────────────────────────── */
 
-.section {
-  padding-block: var(--space-20);
+.rangeSection {
+  padding-block: var(--section-gap-md);
+  background-color: var(--color-off-white);
 }
 
-.sectionDark {
-  background-color: var(--color-ink);
-  color: var(--color-off-white);
+.rangeMeta {
+  margin-bottom: var(--space-10);
 }
 
-.sectionDark :global(.sectionHeading) {
-  color: var(--color-off-white);
+/* Model list — editorial row layout */
+.modelList {
+  display: flex;
+  flex-direction: column;
 }
 
-/* ─── Model Grid ────────────────────────────────────────── */
-
-.modelGrid {
+.modelRow {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--space-6);
-  margin-top: var(--space-12);
+  gap: var(--space-4);
+  padding-block: var(--space-8);
 }
 
-.modelCard {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-.modelCardImg {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  background: linear-gradient(135deg, #e8e6e3, #d0cdc8);
-}
-
-.modelCardBody {
-  padding: var(--space-6);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.modelCardName {
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
-  color: var(--color-ink);
-}
-
-.modelCardPrice {
-  font-size: var(--text-base);
-  font-weight: var(--weight-medium);
-  color: var(--color-ink);
-}
-
-.modelCardRegion {
+.modelIndex {
   font-size: var(--text-xs);
-  font-weight: var(--weight-regular);
-  color: var(--color-ink-muted);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-gold);
+  align-self: start;
 }
 
-/* ─── Global CTA ────────────────────────────────────────── */
-
-.sectionCta {
-  background-color: var(--color-surface);
-}
-
-.ctaBlock {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-5);
-}
-
-.ctaEyebrow {
+.modelShortName {
   font-size: var(--text-xs);
   font-weight: var(--weight-medium);
   letter-spacing: var(--tracking-wider);
   text-transform: uppercase;
-  color: var(--color-gold);
+  color: var(--color-ink-subtle);
+  margin-bottom: var(--space-1);
 }
 
-.ctaHeading {
+.modelName {
   font-size: var(--text-2xl);
   font-weight: var(--weight-semibold);
-  color: var(--color-ink);
   letter-spacing: var(--tracking-snug);
-  max-width: 24ch;
+  color: var(--color-ink);
+  margin-bottom: var(--space-2);
 }
 
-.ctaBody {
-  font-size: var(--text-md);
-  color: var(--color-ink-muted);
-  max-width: 42ch;
-}
-
-/* ─── Placeholder ───────────────────────────────────────── */
-
-.placeholder {
-  margin-top: var(--space-8);
+.modelTagline {
   font-size: var(--text-sm);
-  color: var(--color-ink-subtle);
-  font-style: italic;
+  color: var(--color-ink-muted);
 }
 
-/* ─── Desktop ───────────────────────────────────────────── */
+.modelPricing {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
 
+.modelPrice {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-snug);
+  color: var(--color-ink);
+}
+
+.modelRegion {
+  font-size: var(--text-xs);
+  color: var(--color-ink-subtle);
+  margin-top: var(--space-1);
+}
+
+.modelSep {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--color-border);
+}
+
+/* Tablet+ — horizontal row */
 @media (min-width: 768px) {
-  .modelGrid {
-    grid-template-columns: repeat(3, 1fr);
+  .modelRow {
+    grid-template-columns: 2rem 1fr auto;
+    align-items: start;
+    gap: var(--space-6);
+    padding-block: var(--space-10);
+  }
+
+  .modelPricing {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-3);
   }
 }
 
 @media (min-width: 1024px) {
-  .hero {
-    min-height: calc(100svh - var(--header-height-desktop));
-  }
+  .modelName { font-size: var(--text-3xl); }
+}
 
-  .heroModelName {
-    font-size: var(--text-hero);
-  }
+/* ─── Technology Section ──────────────────────────────── */
+
+.techSection {
+  padding-block: var(--section-gap-lg);
+  background-color: var(--color-charcoal);
+  color: var(--color-white);
+  text-align: center;
+}
+
+/* Override SectionHeading color for dark bg */
+.techSection :global(.root--center) h2 {
+  color: var(--color-white);
+}
+
+.techSection :global(.eyebrow) {
+  color: var(--color-ink-muted-dark);
+  justify-content: center;
+}
+
+.techSection :global(.subheading) {
+  color: var(--color-ink-muted-dark);
+}
+
+.techGold {
+  margin: 0 auto var(--space-10);
+}
+
+.techCta {
+  margin-top: var(--space-10);
+}
+
+/* Secondary button on dark bg */
+.techSection :global(.btn--secondary) {
+  border-color: rgba(255, 255, 255, 0.24);
+  color: var(--color-white);
+}
+
+.techSection :global(.btn--secondary:hover) {
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* ─── Promo Section ───────────────────────────────────── */
+
+.promoSection {
+  padding-block: var(--section-gap-md);
+  background-color: var(--color-surface);
+}
+
+/* ─── Journal Section ─────────────────────────────────── */
+
+.journalSection {
+  padding-block: var(--section-gap-md);
+  background-color: var(--color-off-white);
+}
+
+.journalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-6);
+  margin-bottom: var(--space-10);
+  flex-wrap: wrap;
+}
+
+.journalSeeAll {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-ink-muted);
+  transition: color var(--duration-fast) var(--ease-out);
+  white-space: nowrap;
+  align-self: flex-end;
+}
+
+.journalSeeAll:hover {
+  color: var(--color-ink);
+}
+
+/* ─── Placeholder text ────────────────────────────────── */
+
+.comingSoon {
+  font-size: var(--text-sm);
+  color: var(--color-ink-subtle);
+  padding-top: var(--space-8);
+}
+
+/* ─── Global CTA Section ──────────────────────────────── */
+
+.ctaSection {
+  padding-block: var(--section-gap-lg);
+  background-color: var(--color-off-white);
+  border-top: 1px solid var(--color-border);
+}
+
+.ctaBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.ctaGold {
+  margin-bottom: var(--space-2);
+}
+
+.ctaHeading {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-snug);
+  line-height: var(--leading-tight);
+  color: var(--color-ink);
+}
+
+.ctaBody {
+  font-size: var(--text-base);
+  color: var(--color-ink-muted);
+  max-width: 480px;
+  line-height: var(--leading-normal);
+}
+
+@media (min-width: 1024px) {
+  .ctaHeading { font-size: var(--text-4xl); }
 }

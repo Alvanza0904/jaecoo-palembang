@@ -1,12 +1,14 @@
 /**
  * JAECOO Palembang — Global Styles
+ * Phase 2: Visual Foundation.
  */
 
 @import "./tokens.css";
 
 /* ─── FONT ────────────────────────────────────────────── */
 
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+/* Next.js handles Manrope via next/font — the import below
+   is a fallback for environments without Next.js font optimization */
 
 /* ─── RESET ───────────────────────────────────────────── */
 
@@ -86,6 +88,40 @@ select {
   background-color: var(--color-gold-subtle);
 }
 
+/* ─── PAGE TRANSITION ─────────────────────────────────── */
+
+/* Applied by PageTransition component */
+.page-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--transition-page-duration) var(--ease-cinema),
+    transform var(--transition-page-duration) var(--ease-cinema);
+}
+
+/* ─── DARK SECTION UTILITY ────────────────────────────── */
+
+.section--dark {
+  background-color: var(--color-charcoal);
+  color: var(--color-ink-on-dark);
+}
+
+.section--dark p,
+.section--dark span {
+  color: var(--color-ink-muted-dark);
+}
+
+.section--dark h1,
+.section--dark h2,
+.section--dark h3 {
+  color: var(--color-ink-on-dark);
+}
+
 /* ─── REDUCED MOTION ──────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
@@ -96,6 +132,13 @@ select {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .page-enter,
+  .page-enter-active {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
 
@@ -126,4 +169,27 @@ select {
 
 .container--narrow {
   max-width: var(--container-narrow);
+}
+
+/* ─── MASK REVEAL KEYFRAME ────────────────────────────── */
+
+/* Used by MaskReveal component */
+@keyframes maskReveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0% 0 0);
+  }
+}
+
+@keyframes maskRevealUp {
+  from {
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(12px);
+  }
+  to {
+    clip-path: inset(0 0 0% 0);
+    transform: translateY(0);
+  }
 }

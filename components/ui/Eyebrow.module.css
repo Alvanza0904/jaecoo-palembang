@@ -1,0 +1,22 @@
+.eyebrow {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--color-ink-subtle);
+}
+
+.eyebrowAccent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.eyebrowAccent::before {
+  content: "";
+  display: block;
+  width: 20px;
+  height: 1px;
+  background-color: var(--color-gold);
+  flex-shrink: 0;
+}

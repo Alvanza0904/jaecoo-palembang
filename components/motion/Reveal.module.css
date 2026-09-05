@@ -1,37 +1,70 @@
-/* ─── Base hidden state ─────────────────────────────── */
+/* ─── Base ──────────────────────────────────────────────── */
 
 .reveal {
+  will-change: opacity, transform;
+}
+
+/* Transform-based variants — use transition */
+.reveal--fade-up,
+.reveal--fade,
+.reveal--blur,
+.reveal--scale,
+.reveal--slide-left,
+.reveal--slide-right {
   transition:
     opacity var(--duration-slow) var(--ease-out),
     transform var(--duration-slow) var(--ease-out),
     filter var(--duration-slow) var(--ease-out);
-  will-change: opacity, transform;
 }
 
-/* Variants — hidden */
-.reveal--fade-up[data-visible="false"]    { opacity: 0; transform: translateY(32px); }
-.reveal--fade[data-visible="false"]       { opacity: 0; }
-.reveal--blur[data-visible="false"]       { opacity: 0; filter: blur(12px); }
-.reveal--scale[data-visible="false"]      { opacity: 0; transform: scale(0.95); }
-.reveal--slide-left[data-visible="false"] { opacity: 0; transform: translateX(-32px); }
-.reveal--slide-right[data-visible="false"]{ opacity: 0; transform: translateX(32px); }
+/* ─── Hidden states ─────────────────────────────────────── */
 
-/* Visible */
+.reveal--fade-up[data-visible="false"]    { opacity: 0; transform: translateY(28px); }
+.reveal--fade[data-visible="false"]       { opacity: 0; }
+.reveal--blur[data-visible="false"]       { opacity: 0; filter: blur(10px); }
+.reveal--scale[data-visible="false"]      { opacity: 0; transform: scale(0.96); }
+.reveal--slide-left[data-visible="false"] { opacity: 0; transform: translateX(-28px); }
+.reveal--slide-right[data-visible="false"]{ opacity: 0; transform: translateX(28px); }
+
+/* Mask reveal — clip-path animation */
+.reveal--mask[data-visible="false"] {
+  clip-path: inset(0 100% 0 0);
+  opacity: 0;
+}
+
+.reveal--mask {
+  transition:
+    clip-path var(--duration-cinematic) var(--ease-cinema),
+    opacity var(--duration-slow) var(--ease-out);
+}
+
+/* ─── Visible states ────────────────────────────────────── */
+
 .reveal[data-visible="true"] {
   opacity: 1;
   transform: none;
   filter: none;
+  clip-path: inset(0 0% 0 0);
 }
 
-/* ─── Reduced motion override ────────────────────────── */
+/* ─── Reduced motion ────────────────────────────────────── */
+
 @media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transition: opacity var(--duration-fast) linear !important;
+    clip-path: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
   .reveal[data-visible="false"] {
     opacity: 0;
-  }
-  .reveal[data-visible="true"] {
-    opacity: 1;
+    clip-path: none;
     transform: none;
     filter: none;
-    transition: opacity var(--duration-fast) linear;
+  }
+
+  .reveal[data-visible="true"] {
+    opacity: 1;
   }
 }

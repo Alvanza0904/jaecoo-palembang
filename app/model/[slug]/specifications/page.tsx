@@ -1,6 +1,7 @@
 /**
  * JAECOO Palembang — Model Specifications Page
  * Route: /model/[slug]/specifications
+ * Phase 2: Clean editorial spec layout.
  */
 
 import type { Metadata } from "next";
@@ -8,8 +9,10 @@ import { notFound } from "next/navigation";
 import { getModelBySlug, getModelSlugs } from "@/lib/data/models";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { GoldLine } from "@/components/ui/GoldLine";
+import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/motion/Reveal";
-import { Stagger } from "@/components/motion/Stagger";
+import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import styles from "./specifications.module.css";
 
@@ -34,41 +37,85 @@ export default async function SpecificationsPage({ params }: Props) {
   const model = getModelBySlug(slug);
   if (!model) notFound();
 
+  const whatsappUrl = buildWhatsAppUrl({
+    source: "model_specifications",
+    source_page: `/model/${slug}/specifications`,
+    model: model.short_name,
+    source_cta: "specs_cta",
+  });
+
   return (
     <section className={styles.section}>
       <Container size="content">
-        <Reveal>
-          <SectionHeading
-            eyebrow="Specifications"
-            heading={`${model.short_name} — Spesifikasi Lengkap`}
-          />
+
+        {/* Header */}
+        <Reveal variant="fade-up">
+          <div className={styles.header}>
+            <GoldLine width="short" className={styles.gold} />
+            <SectionHeading
+              eyebrow="Specifications"
+              heading={`${model.short_name} — Every Detail Matters.`}
+              size="large"
+            />
+            <div className={styles.priceTag}>
+              <span className={styles.priceFrom}>OTR Palembang</span>
+              <span className={styles.priceValue}>
+                {model.default_variant.price_display}
+              </span>
+            </div>
+          </div>
         </Reveal>
 
+        {/* Spec categories */}
         <div className={styles.categories}>
-          <Stagger delay={150} staggerMs={100}>
-            {model.specifications.map((cat) => (
-              <div key={cat.label} className={styles.category}>
+          {model.specifications.map((cat, i) => (
+            <Reveal key={cat.label} variant="fade-up" delay={i * 80}>
+              <div className={styles.category}>
                 <h3 className={styles.categoryLabel}>{cat.label}</h3>
-                <table className={styles.table} aria-label={`Spesifikasi ${cat.label}`}>
+                <table
+                  className={styles.table}
+                  aria-label={`Spesifikasi ${cat.label} ${model.name}`}
+                >
                   <tbody>
                     {cat.specs.map((spec) => (
                       <tr key={spec.label} className={styles.row}>
-                        <th className={styles.rowLabel} scope="row">{spec.label}</th>
+                        <th className={styles.rowLabel} scope="row">
+                          {spec.label}
+                        </th>
                         <td className={styles.rowValue}>{spec.value}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-            ))}
-          </Stagger>
+            </Reveal>
+          ))}
         </div>
 
-        <Reveal delay={300}>
+        {/* Disclaimer */}
+        <Reveal variant="fade" delay={200}>
           <p className={styles.disclaimer}>
-            * Spesifikasi dapat berubah sewaktu-waktu. Untuk informasi terkini, hubungi Sales JAECOO Palembang.
+            Spesifikasi dapat berubah sewaktu-waktu. Untuk informasi terkini,
+            hubungi Sales JAECOO Palembang.
           </p>
         </Reveal>
+
+        {/* CTA */}
+        <Reveal variant="fade-up" delay={100}>
+          <div className={styles.cta}>
+            <Button
+              as="a"
+              href={whatsappUrl}
+              variant="primary"
+              size="lg"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Talk to Alvan →
+            </Button>
+          </div>
+        </Reveal>
+
       </Container>
     </section>
   );
