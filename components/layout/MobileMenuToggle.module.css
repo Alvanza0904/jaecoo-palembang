@@ -11,8 +11,6 @@
   cursor: pointer;
   color: var(--color-ink);
   transition: color var(--duration-slow) var(--ease-out);
-  position: relative;
-  z-index: calc(var(--z-menu) + 3);
 }
 
 .toggleInverted {
@@ -60,6 +58,8 @@
   inset: 0;
   z-index: calc(var(--z-menu) + 1);
   background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--duration-slow) var(--ease-out);
@@ -68,8 +68,6 @@
 .backdropVisible {
   opacity: 1;
   pointer-events: auto;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
 }
 
 /* ─── Full Panel ──────────────────────────────────────── */
