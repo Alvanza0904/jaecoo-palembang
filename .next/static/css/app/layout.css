@@ -1,0 +1,1210 @@
+/*!***************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[3]!./components/ui/Button.module.css ***!
+  \***************************************************************************************************************************************************************************************************************************************************************************/
+/* ─── Base ────────────────────────────────────────────── */
+
+.Button_btn__kzInP {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    opacity var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.Button_btn__kzInP:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 3px;
+}
+
+.Button_btn__kzInP:active {
+  transform: scale(0.98);
+}
+
+/* ─── Variants ────────────────────────────────────────── */
+
+/* Primary — charcoal bg, white text. The only solid CTA. */
+.Button_btn--primary__sEZUR {
+  background-color: var(--color-cta-bg);
+  color: var(--color-cta-text);
+  border-color: var(--color-cta-bg);
+}
+.Button_btn--primary__sEZUR:hover {
+  opacity: 0.82;
+}
+
+/* Secondary — outlined, adapts to dark/light context */
+.Button_btn--secondary__x8YZ1 {
+  background-color: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-border-mid);
+}
+.Button_btn--secondary__x8YZ1:hover {
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+}
+
+/* Ghost — text only, no border */
+.Button_btn--ghost__DtHLG {
+  background-color: transparent;
+  color: var(--color-ink-muted);
+  border-color: transparent;
+  letter-spacing: var(--tracking-normal);
+  text-transform: none;
+}
+.Button_btn--ghost__DtHLG:hover {
+  color: var(--color-ink);
+}
+
+/* WhatsApp — for explicit WA CTAs if needed */
+.Button_btn--whatsapp__scI_d {
+  background-color: #25d366;
+  color: #ffffff;
+  border-color: #25d366;
+}
+.Button_btn--whatsapp__scI_d:hover {
+  opacity: 0.9;
+}
+
+/* ─── Sizes ───────────────────────────────────────────── */
+
+/* sm — compact, nav/inline use */
+.Button_btn--sm__yOlqa {
+  font-size: var(--text-xs);
+  padding: var(--space-2) var(--space-5);
+  min-height: 36px;
+}
+
+/* md — standard */
+.Button_btn--md__ohz5C {
+  font-size: var(--text-xs);
+  padding: var(--space-3) var(--space-6);
+  min-height: 48px;
+}
+
+/* lg — hero / section CTA */
+.Button_btn--lg__8fDGb {
+  font-size: var(--text-sm);
+  padding: var(--space-4) var(--space-8);
+  min-height: 56px;
+}
+
+/* ─── Full width ──────────────────────────────────────── */
+
+.Button_btn--full__BcQE8 {
+  width: 100%;
+}
+
+/*!*****************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[3]!./components/layout/MobileMenuToggle.module.css ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************************/
+/* ─── Toggle Button ───────────────────────────────────── */
+
+.MobileMenuToggle_toggle__AuFn2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-ink);
+  transition: color var(--duration-slow) var(--ease-out);
+}
+
+.MobileMenuToggle_toggleInverted__hU78o {
+  color: var(--color-white);
+}
+
+/* Icon container */
+.MobileMenuToggle_icon__XEZzv {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 22px;
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+.MobileMenuToggle_bar__PICr7 {
+  display: block;
+  width: 100%;
+  height: 1.5px;
+  background-color: currentColor;
+  border-radius: 1px;
+  transition:
+    transform var(--duration-base) var(--ease-out),
+    opacity var(--duration-base) var(--ease-out),
+    width var(--duration-base) var(--ease-out);
+  transform-origin: center;
+}
+
+/* X state */
+.MobileMenuToggle_iconOpen__7yZXd .MobileMenuToggle_bar__PICr7:nth-child(1) {
+  transform: rotate(45deg) translate(4.5px, 4.5px);
+}
+.MobileMenuToggle_iconOpen__7yZXd .MobileMenuToggle_bar__PICr7:nth-child(2) {
+  opacity: 0;
+  width: 0;
+}
+.MobileMenuToggle_iconOpen__7yZXd .MobileMenuToggle_bar__PICr7:nth-child(3) {
+  transform: rotate(-45deg) translate(4.5px, -4.5px);
+}
+
+/* ─── Backdrop ────────────────────────────────────────── */
+
+.MobileMenuToggle_backdrop__bbT0n {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-menu) + 1);
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-slow) var(--ease-out);
+}
+
+.MobileMenuToggle_backdropVisible__6XAFs {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ─── Full Panel ──────────────────────────────────────── */
+
+.MobileMenuToggle_panel__GEVa_ {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: calc(var(--z-menu) + 2);
+  width: min(420px, 100vw);
+  background-color: var(--color-off-white);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6) var(--space-6) var(--space-8);
+  transform: translateX(100%);
+  transition: transform var(--duration-slower) var(--ease-out);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.MobileMenuToggle_panelOpen__xYCHU {
+  transform: translateX(0);
+}
+
+/* ─── Close Button ────────────────────────────────────── */
+
+.MobileMenuToggle_closeBtn__H7_H_ {
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-ink-muted);
+  margin-bottom: var(--space-6);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.MobileMenuToggle_closeBtn__H7_H_:hover {
+  color: var(--color-ink);
+}
+
+/* ─── Gold Accent ─────────────────────────────────────── */
+
+.MobileMenuToggle_accentLine__qck0R {
+  width: 32px;
+  height: 1px;
+  background-color: var(--color-gold);
+  margin-bottom: var(--space-8);
+  transform-origin: left;
+}
+
+/* ─── Links ───────────────────────────────────────────── */
+
+.MobileMenuToggle_links__Sgtej {
+  list-style: none;
+  flex: 1 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.MobileMenuToggle_linkItem__wwKWM {
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-border);
+
+  /* Stagger entrance */
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+  transition-delay: calc(var(--stagger-i, 0) * 60ms + 100ms);
+}
+
+.MobileMenuToggle_panelOpen__xYCHU .MobileMenuToggle_linkItem__wwKWM {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.MobileMenuToggle_link__e7fwK {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-5) 0;
+  color: var(--color-ink);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.MobileMenuToggle_link__e7fwK:hover {
+  color: var(--color-gold);
+}
+
+.MobileMenuToggle_linkLabel__lh2Ge {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-snug);
+  line-height: var(--leading-tight);
+}
+
+.MobileMenuToggle_linkArrow__wWVlu {
+  font-size: var(--text-base);
+  color: var(--color-ink-subtle);
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.MobileMenuToggle_link__e7fwK:hover .MobileMenuToggle_linkArrow__wWVlu {
+  transform: translateX(4px);
+  color: var(--color-gold);
+}
+
+/* ─── CTA ─────────────────────────────────────────────── */
+
+.MobileMenuToggle_cta__t_hua {
+  margin-top: var(--space-8);
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+  transition-delay: 400ms;
+}
+
+.MobileMenuToggle_panelOpen__xYCHU .MobileMenuToggle_cta__t_hua {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.MobileMenuToggle_ctaLink__MyZ4D {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-6);
+  background-color: var(--color-ink);
+  color: var(--color-white);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.MobileMenuToggle_ctaLink__MyZ4D:hover {
+  opacity: 0.85;
+}
+
+/* ─── Desktop — hide toggle ───────────────────────────── */
+
+@media (min-width: 1024px) {
+  .MobileMenuToggle_toggle__AuFn2 {
+    display: none;
+  }
+
+  .MobileMenuToggle_panel__GEVa_ {
+    display: none;
+  }
+
+  .MobileMenuToggle_backdrop__bbT0n {
+    display: none;
+  }
+}
+
+/* ─── Reduced motion ──────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .MobileMenuToggle_panel__GEVa_ {
+    transition: none;
+  }
+
+  .MobileMenuToggle_backdrop__bbT0n {
+    transition: none;
+  }
+
+  .MobileMenuToggle_linkItem__wwKWM {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .MobileMenuToggle_cta__t_hua {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*!*************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[3]!./components/layout/ScrollHeader.module.css ***!
+  \*************************************************************************************************************************************************************************************************************************************************************************************/
+/* ─── Base Header ─────────────────────────────────────── */
+
+.ScrollHeader_header__hhNFe {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-menu);
+  height: var(--header-height-mobile);
+  transition:
+    background-color var(--duration-slow) var(--ease-out),
+    border-color var(--duration-slow) var(--ease-out),
+    -webkit-backdrop-filter var(--duration-slow) var(--ease-out);
+  transition:
+    background-color var(--duration-slow) var(--ease-out),
+    backdrop-filter var(--duration-slow) var(--ease-out),
+    border-color var(--duration-slow) var(--ease-out);
+  transition:
+    background-color var(--duration-slow) var(--ease-out),
+    backdrop-filter var(--duration-slow) var(--ease-out),
+    border-color var(--duration-slow) var(--ease-out),
+    -webkit-backdrop-filter var(--duration-slow) var(--ease-out);
+}
+
+/* Solid state — scrolled or non-transparent page */
+.ScrollHeader_headerSolid__CZ4FO {
+  background-color: rgba(245, 244, 242, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Transparent state — at top of hero pages */
+.ScrollHeader_headerTransparent__1qX7T {
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: 1px solid transparent;
+}
+
+/* ─── Inner ───────────────────────────────────────────── */
+
+.ScrollHeader_inner__dFtcL {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-padding);
+  gap: var(--space-6);
+}
+
+/* ─── Logo ────────────────────────────────────────────── */
+
+.ScrollHeader_logo__vDIKW {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.ScrollHeader_logoText__1KBQA {
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink);
+  transition: color var(--duration-slow) var(--ease-out);
+}
+
+.ScrollHeader_logoTextLight__r0x7j {
+  color: var(--color-white);
+}
+
+.ScrollHeader_logoSub__2Jv3P {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-gold);
+}
+
+/* ─── Desktop Nav ─────────────────────────────────────── */
+
+.ScrollHeader_nav__5KYYd {
+  display: none;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.ScrollHeader_navLink__Soc2M {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-normal);
+  color: var(--color-ink-muted);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.ScrollHeader_navLink__Soc2M:hover {
+  color: var(--color-ink);
+}
+
+.ScrollHeader_navLinkLight__mLhyq {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.ScrollHeader_navLinkLight__mLhyq:hover {
+  color: var(--color-white);
+}
+
+/* ─── Desktop CTA ─────────────────────────────────────── */
+
+.ScrollHeader_cta__5n90I {
+  display: none;
+}
+
+/* ─── Desktop breakpoint ─────────────────────────────── */
+
+@media (min-width: 1024px) {
+  .ScrollHeader_header__hhNFe {
+    height: var(--header-height-desktop);
+  }
+
+  .ScrollHeader_nav__5KYYd {
+    display: flex;
+  }
+
+  .ScrollHeader_cta__5n90I {
+    display: block;
+    flex-shrink: 0;
+  }
+}
+
+/*!****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[2].use[1]!./node_modules/next/dist/build/webpack/loaders/next-font-loader/index.js??ruleSet[1].rules[13].oneOf[2].use[2]!./node_modules/next/font/google/target.css?{"path":"app/layout.tsx","import":"Manrope","arguments":[{"subsets":["latin"],"weight":["400","500","600","700"],"variable":"--font-manrope","display":"swap"}],"variableName":"manrope"} ***!
+  \****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/_next/static/media/438aa629764e75f3-s.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/_next/static/media/875ae681bfde4580-s.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/_next/static/media/51251f8b9793cdb3-s.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/_next/static/media/e857b654a2caa584-s.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/_next/static/media/cc978ac5ee68c2b6-s.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/_next/static/media/4c9affa5bc8f420e-s.p.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/_next/static/media/438aa629764e75f3-s.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/_next/static/media/875ae681bfde4580-s.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/_next/static/media/51251f8b9793cdb3-s.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/_next/static/media/e857b654a2caa584-s.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/_next/static/media/cc978ac5ee68c2b6-s.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/_next/static/media/4c9affa5bc8f420e-s.p.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/_next/static/media/438aa629764e75f3-s.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/_next/static/media/875ae681bfde4580-s.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/_next/static/media/51251f8b9793cdb3-s.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/_next/static/media/e857b654a2caa584-s.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/_next/static/media/cc978ac5ee68c2b6-s.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/_next/static/media/4c9affa5bc8f420e-s.p.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/_next/static/media/438aa629764e75f3-s.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/_next/static/media/875ae681bfde4580-s.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/_next/static/media/51251f8b9793cdb3-s.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/_next/static/media/e857b654a2caa584-s.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/_next/static/media/cc978ac5ee68c2b6-s.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/_next/static/media/4c9affa5bc8f420e-s.p.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}@font-face {font-family: 'Manrope Fallback';src: local("Arial");ascent-override: 103.31%;descent-override: 29.07%;line-gap-override: 0.00%;size-adjust: 103.19%
+}.__className_d2dc74 {font-family: 'Manrope', 'Manrope Fallback';font-style: normal
+}.__variable_d2dc74 {--font-manrope: 'Manrope', 'Manrope Fallback'
+}
+
+/*!*******************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[3]!./components/layout/Footer.module.css ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************/
+.Footer_footer__LxLGV {
+  background-color: var(--color-charcoal);
+  color: var(--color-ink-on-dark);
+}
+
+.Footer_inner__4mERO {
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-padding);
+  padding-block: var(--space-12) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Brand */
+.Footer_brand__hrKsL {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.Footer_brandName__XOcol {
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-white);
+}
+
+.Footer_brandSub__2hq52 {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-gold);
+}
+
+/* Divider */
+.Footer_divider__m5Gmy {
+  width: 100%;
+  height: 1px;
+  background-color: var(--color-border-dark);
+}
+
+/* Social links */
+.Footer_social__Wi7j3 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-6);
+}
+
+.Footer_socialLink__h7068 {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-ink-muted-dark);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.Footer_socialLink__h7068:hover {
+  color: var(--color-gold-light);
+}
+
+/* Bottom bar */
+.Footer_bottom__GqBWJ {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-dark);
+}
+
+.Footer_copy__KAKJk {
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted-dark);
+}
+
+.Footer_legal__fuCOy {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.Footer_legalLink__8hTfW {
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted-dark);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.Footer_legalLink__8hTfW:hover {
+  color: var(--color-white);
+}
+
+/* Tablet+ */
+@media (min-width: 768px) {
+  .Footer_bottom__GqBWJ {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+@media (min-width: 1024px) {
+  .Footer_inner__4mERO {
+    padding-block: var(--space-16) var(--space-10);
+  }
+}
+
+/*!***************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[3]!./styles/tokens.css ***!
+  \***************************************************************************************************************************************************************************************************************************************************************/
+/**
+ * JAECOO Palembang — Design Tokens
+ * Phase 2: Visual Foundation additions.
+ * Single source of truth for all visual design decisions.
+ */
+
+:root {
+  /* ─── COLOR ─────────────────────────────────────────── */
+
+  /* Base */
+  --color-white:       #ffffff;
+  --color-off-white:   #f5f4f2;
+  --color-surface:     #f9f8f7;
+
+  /* Text */
+  --color-ink:         #111111;
+  --color-ink-muted:   #555555;
+  --color-ink-subtle:  #888888;
+
+  /* Dark surfaces */
+  --color-charcoal:        #1a1a1a;
+  --color-charcoal-mid:    #232323;
+  --color-charcoal-light:  #2e2e2e;
+  --color-ink-on-dark:     rgba(255, 255, 255, 0.88);
+  --color-ink-muted-dark:  rgba(255, 255, 255, 0.52);
+
+  /* Primary CTA */
+  --color-cta-bg:      #111111;
+  --color-cta-text:    #ffffff;
+
+  /* Gold — accent only, never CTA */
+  --color-gold:        #c8a96e;
+  --color-gold-light:  #e2ceaa;
+  --color-gold-subtle: rgba(200, 169, 110, 0.12);
+
+  /* Borders */
+  --color-border:      rgba(0, 0, 0, 0.08);
+  --color-border-mid:  rgba(0, 0, 0, 0.14);
+  --color-border-dark: rgba(255, 255, 255, 0.10);
+
+  /* ─── TYPOGRAPHY ─────────────────────────────────────── */
+
+  --font-sans: 'Manrope', system-ui, -apple-system, sans-serif;
+
+  /* Scale — mobile-first, desktop overrides in breakpoints */
+  --text-xs:   0.75rem;   /* 12px */
+  --text-sm:   0.875rem;  /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-md:   1.125rem;  /* 18px */
+  --text-lg:   1.375rem;  /* 22px */
+  --text-xl:   1.75rem;   /* 28px */
+  --text-2xl:  2.25rem;   /* 36px */
+  --text-3xl:  3rem;      /* 48px */
+  --text-4xl:  4rem;      /* 64px */
+  --text-5xl:  5.5rem;    /* 88px */
+  --text-hero: 7rem;      /* 112px */
+
+  /* Weight */
+  --weight-regular:    400;
+  --weight-medium:     500;
+  --weight-semibold:   600;
+  --weight-bold:       700;
+
+  /* Line height */
+  --leading-tight:  1.1;
+  --leading-snug:   1.25;
+  --leading-normal: 1.5;
+  --leading-loose:  1.75;
+
+  /* Letter spacing */
+  --tracking-tight:  -0.03em;
+  --tracking-snug:   -0.02em;
+  --tracking-normal:  0em;
+  --tracking-wide:    0.06em;
+  --tracking-wider:   0.1em;
+
+  /* ─── SPACING ─────────────────────────────────────────── */
+
+  --space-1:   0.25rem;   /* 4px */
+  --space-2:   0.5rem;    /* 8px */
+  --space-3:   0.75rem;   /* 12px */
+  --space-4:   1rem;      /* 16px */
+  --space-5:   1.25rem;   /* 20px */
+  --space-6:   1.5rem;    /* 24px */
+  --space-8:   2rem;      /* 32px */
+  --space-10:  2.5rem;    /* 40px */
+  --space-12:  3rem;      /* 48px */
+  --space-16:  4rem;      /* 64px */
+  --space-20:  5rem;      /* 80px */
+  --space-24:  6rem;      /* 96px */
+  --space-32:  8rem;      /* 128px */
+  --space-40:  10rem;     /* 160px */
+  --space-48:  12rem;     /* 192px */
+  --space-64:  16rem;     /* 256px */
+
+  /* ─── LAYOUT ─────────────────────────────────────────── */
+
+  --container-max:      1440px;
+  --container-content:  1200px;
+  --container-narrow:   800px;
+  --container-padding:  var(--space-5);
+
+  /* Section spacing */
+  --section-gap-sm:   var(--space-12);
+  --section-gap-md:   var(--space-20);
+  --section-gap-lg:   var(--space-32);
+
+  /* ─── BORDER RADIUS ──────────────────────────────────── */
+
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-full: 9999px;
+
+  /* ─── MOTION ─────────────────────────────────────────── */
+
+  --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out:    cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-cinema:    cubic-bezier(0.22, 1, 0.36, 1);
+
+  --duration-fast:    150ms;
+  --duration-base:    300ms;
+  --duration-slow:    600ms;
+  --duration-slower:  900ms;
+  --duration-cinematic: 1200ms;
+
+  /* Page transition */
+  --transition-page-duration: 400ms;
+
+  /* ─── Z-INDEX ─────────────────────────────────────────── */
+
+  --z-base:    0;
+  --z-above:   10;
+  --z-overlay: 100;
+  --z-menu:    200;
+  --z-modal:   300;
+  --z-toast:   400;
+
+  /* ─── HEADER ─────────────────────────────────────────── */
+
+  --header-height-mobile:  64px;
+  --header-height-desktop: 80px;
+}
+
+/* ─── DESKTOP OVERRIDES ───────────────────────────────── */
+
+@media (min-width: 1024px) {
+  :root {
+    --container-padding: var(--space-8);
+    --section-gap-sm:   var(--space-16);
+    --section-gap-md:   var(--space-32);
+    --section-gap-lg:   var(--space-48);
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --container-padding: var(--space-12);
+  }
+}
+
+/*!****************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[3]!./styles/globals.css ***!
+  \****************************************************************************************************************************************************************************************************************************************************************/
+/**
+ * JAECOO Palembang — Global Styles
+ * Phase 2: Visual Foundation.
+ */
+
+/* ─── FONT ────────────────────────────────────────────── */
+
+/* Next.js handles Manrope via next/font — the import below
+   is a fallback for environments without Next.js font optimization */
+
+/* ─── RESET ───────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--color-ink);
+  background-color: var(--color-off-white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ─── TYPOGRAPHY ─────────────────────────────────────── */
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-snug);
+}
+
+p {
+  line-height: var(--leading-normal);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+/* ─── FOCUS ───────────────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 3px;
+}
+
+/* ─── SELECTION ───────────────────────────────────────── */
+
+::selection {
+  background-color: var(--color-gold-subtle);
+}
+
+/* ─── PAGE TRANSITION ─────────────────────────────────── */
+
+/* Applied by PageTransition component */
+.page-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--transition-page-duration) var(--ease-cinema),
+    transform var(--transition-page-duration) var(--ease-cinema);
+}
+
+/* ─── DARK SECTION UTILITY ────────────────────────────── */
+
+.section--dark {
+  background-color: var(--color-charcoal);
+  color: var(--color-ink-on-dark);
+}
+
+.section--dark p,
+.section--dark span {
+  color: var(--color-ink-muted-dark);
+}
+
+.section--dark h1,
+.section--dark h2,
+.section--dark h3 {
+  color: var(--color-ink-on-dark);
+}
+
+/* ─── REDUCED MOTION ──────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .page-enter,
+  .page-enter-active {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ─── UTILITIES ───────────────────────────────────────── */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-padding);
+}
+
+.container--content {
+  max-width: var(--container-content);
+}
+
+.container--narrow {
+  max-width: var(--container-narrow);
+}
+
+/* ─── MASK REVEAL KEYFRAME ────────────────────────────── */
+
+/* Used by MaskReveal component */
+@keyframes maskReveal {
+  from {
+    -webkit-clip-path: inset(0 100% 0 0);
+            clip-path: inset(0 100% 0 0);
+  }
+  to {
+    -webkit-clip-path: inset(0 0% 0 0);
+            clip-path: inset(0 0% 0 0);
+  }
+}
+
+@keyframes maskRevealUp {
+  from {
+    -webkit-clip-path: inset(0 0 100% 0);
+            clip-path: inset(0 0 100% 0);
+    transform: translateY(12px);
+  }
+  to {
+    -webkit-clip-path: inset(0 0 0% 0);
+            clip-path: inset(0 0 0% 0);
+    transform: translateY(0);
+  }
+}
+

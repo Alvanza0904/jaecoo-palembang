@@ -1,0 +1,7 @@
+{
+  "/page": "app/page.js",
+  "/model/page": "app/model/page.js",
+  "/berita/page": "app/berita/page.js",
+  "/promo/page": "app/promo/page.js",
+  "/gallery/page": "app/gallery/page.js"
+}

@@ -1,0 +1,491 @@
+/*!*******************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[3]!./components/motion/Reveal.module.css ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************/
+/* ─── Base ──────────────────────────────────────────────── */
+
+.Reveal_reveal__hBVzb {
+  will-change: opacity, transform;
+}
+
+/* Transform-based variants — use transition */
+.Reveal_reveal--fade-up__1Pph_,
+.Reveal_reveal--fade__nm_UU,
+.Reveal_reveal--blur___aQfp,
+.Reveal_reveal--scale__DImLh,
+.Reveal_reveal--slide-left__H4mDf,
+.Reveal_reveal--slide-right__ICZv9 {
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out),
+    filter var(--duration-slow) var(--ease-out);
+}
+
+/* ─── Hidden states ─────────────────────────────────────── */
+
+.Reveal_reveal--fade-up__1Pph_[data-visible="false"]    { opacity: 0; transform: translateY(28px); }
+.Reveal_reveal--fade__nm_UU[data-visible="false"]       { opacity: 0; }
+.Reveal_reveal--blur___aQfp[data-visible="false"]       { opacity: 0; filter: blur(10px); }
+.Reveal_reveal--scale__DImLh[data-visible="false"]      { opacity: 0; transform: scale(0.96); }
+.Reveal_reveal--slide-left__H4mDf[data-visible="false"] { opacity: 0; transform: translateX(-28px); }
+.Reveal_reveal--slide-right__ICZv9[data-visible="false"]{ opacity: 0; transform: translateX(28px); }
+
+/* Mask reveal — clip-path animation */
+.Reveal_reveal--mask__uJySE[data-visible="false"] {
+  -webkit-clip-path: inset(0 100% 0 0);
+          clip-path: inset(0 100% 0 0);
+  opacity: 0;
+}
+
+.Reveal_reveal--mask__uJySE {
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    -webkit-clip-path var(--duration-cinematic) var(--ease-cinema);
+  transition:
+    clip-path var(--duration-cinematic) var(--ease-cinema),
+    opacity var(--duration-slow) var(--ease-out);
+  transition:
+    clip-path var(--duration-cinematic) var(--ease-cinema),
+    opacity var(--duration-slow) var(--ease-out),
+    -webkit-clip-path var(--duration-cinematic) var(--ease-cinema);
+}
+
+/* ─── Visible states ────────────────────────────────────── */
+
+.Reveal_reveal__hBVzb[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  -webkit-clip-path: inset(0 0% 0 0);
+          clip-path: inset(0 0% 0 0);
+}
+
+/* ─── Reduced motion ────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .Reveal_reveal__hBVzb {
+    transition: opacity var(--duration-fast) linear !important;
+    -webkit-clip-path: none !important;
+            clip-path: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .Reveal_reveal__hBVzb[data-visible="false"] {
+    opacity: 0;
+    -webkit-clip-path: none;
+            clip-path: none;
+    transform: none;
+    filter: none;
+  }
+
+  .Reveal_reveal__hBVzb[data-visible="true"] {
+    opacity: 1;
+  }
+}
+
+/*!******************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[3]!./components/ui/Container.module.css ***!
+  \******************************************************************************************************************************************************************************************************************************************************************************/
+.Container_container__MEmhX {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-padding);
+}
+
+.Container_container--content__tI0UV {
+  max-width: var(--container-content);
+}
+
+.Container_container--narrow__Djtok {
+  max-width: var(--container-narrow);
+}
+
+/*!***********************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[3]!./components/ui/SectionHeading.module.css ***!
+  \***********************************************************************************************************************************************************************************************************************************************************************************/
+.SectionHeading_root__7lzfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 680px;
+}
+
+.SectionHeading_root--center__xyMCr {
+  align-items: center;
+  text-align: center;
+  max-width: 800px;
+  margin-inline: auto;
+}
+
+/* ─── Eyebrow ─────────────────────────────────────────── */
+
+.SectionHeading_eyebrow__stQeg {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--color-ink-subtle);
+}
+
+.SectionHeading_root--center__xyMCr .SectionHeading_eyebrow__stQeg {
+  justify-content: center;
+}
+
+.SectionHeading_root--inverted__28UZf .SectionHeading_eyebrow__stQeg {
+  color: var(--color-ink-muted-dark);
+}
+
+.SectionHeading_eyebrowLine__ojh2p {
+  display: block;
+  width: 20px;
+  height: 1px;
+  background-color: var(--color-gold);
+  flex-shrink: 0;
+}
+
+.SectionHeading_root--center__xyMCr .SectionHeading_eyebrowLine__ojh2p {
+  display: none;
+}
+
+/* ─── Heading ─────────────────────────────────────────── */
+
+.SectionHeading_heading__VpwOy {
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-snug);
+  color: var(--color-ink);
+}
+
+.SectionHeading_root--inverted__28UZf .SectionHeading_heading__VpwOy {
+  color: var(--color-white);
+}
+
+/* Sizes */
+.SectionHeading_root--default__JAYdp .SectionHeading_heading__VpwOy { font-size: var(--text-2xl); }
+.SectionHeading_root--large__M4wfI .SectionHeading_heading__VpwOy   { font-size: var(--text-3xl); }
+.SectionHeading_root--display__3uYOb .SectionHeading_heading__VpwOy { font-size: var(--text-4xl); }
+
+/* ─── Subheading ──────────────────────────────────────── */
+
+.SectionHeading_subheading__ID3HV {
+  font-size: var(--text-base);
+  color: var(--color-ink-muted);
+  line-height: var(--leading-normal);
+  max-width: 560px;
+}
+
+.SectionHeading_root--center__xyMCr .SectionHeading_subheading__ID3HV {
+  max-width: 620px;
+}
+
+.SectionHeading_root--inverted__28UZf .SectionHeading_subheading__ID3HV {
+  color: var(--color-ink-muted-dark);
+}
+
+/* ─── Desktop sizes ───────────────────────────────────── */
+
+@media (min-width: 1024px) {
+  .SectionHeading_root--default__JAYdp .SectionHeading_heading__VpwOy { font-size: var(--text-3xl); }
+  .SectionHeading_root--large__M4wfI .SectionHeading_heading__VpwOy   { font-size: var(--text-4xl); }
+  .SectionHeading_root--display__3uYOb .SectionHeading_heading__VpwOy { font-size: var(--text-5xl); }
+  .SectionHeading_subheading__ID3HV             { font-size: var(--text-md); }
+}
+
+/*!*****************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[3]!./components/ui/GoldLine.module.css ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************/
+.GoldLine_line__nW6Db {
+  height: 1px;
+  background-color: var(--color-gold);
+  opacity: 0.6;
+}
+
+.GoldLine_line--short__ALfft  { width: 32px; }
+.GoldLine_line--medium__NsTGm { width: 64px; }
+.GoldLine_line--full__5HZrv   { width: 100%; }
+
+/*!***************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[3]!./components/ui/Button.module.css ***!
+  \***************************************************************************************************************************************************************************************************************************************************************************/
+/* ─── Base ────────────────────────────────────────────── */
+
+.Button_btn__kzInP {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    opacity var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.Button_btn__kzInP:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 3px;
+}
+
+.Button_btn__kzInP:active {
+  transform: scale(0.98);
+}
+
+/* ─── Variants ────────────────────────────────────────── */
+
+/* Primary — charcoal bg, white text. The only solid CTA. */
+.Button_btn--primary__sEZUR {
+  background-color: var(--color-cta-bg);
+  color: var(--color-cta-text);
+  border-color: var(--color-cta-bg);
+}
+.Button_btn--primary__sEZUR:hover {
+  opacity: 0.82;
+}
+
+/* Secondary — outlined, adapts to dark/light context */
+.Button_btn--secondary__x8YZ1 {
+  background-color: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-border-mid);
+}
+.Button_btn--secondary__x8YZ1:hover {
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+}
+
+/* Ghost — text only, no border */
+.Button_btn--ghost__DtHLG {
+  background-color: transparent;
+  color: var(--color-ink-muted);
+  border-color: transparent;
+  letter-spacing: var(--tracking-normal);
+  text-transform: none;
+}
+.Button_btn--ghost__DtHLG:hover {
+  color: var(--color-ink);
+}
+
+/* WhatsApp — for explicit WA CTAs if needed */
+.Button_btn--whatsapp__scI_d {
+  background-color: #25d366;
+  color: #ffffff;
+  border-color: #25d366;
+}
+.Button_btn--whatsapp__scI_d:hover {
+  opacity: 0.9;
+}
+
+/* ─── Sizes ───────────────────────────────────────────── */
+
+/* sm — compact, nav/inline use */
+.Button_btn--sm__yOlqa {
+  font-size: var(--text-xs);
+  padding: var(--space-2) var(--space-5);
+  min-height: 36px;
+}
+
+/* md — standard */
+.Button_btn--md__ohz5C {
+  font-size: var(--text-xs);
+  padding: var(--space-3) var(--space-6);
+  min-height: 48px;
+}
+
+/* lg — hero / section CTA */
+.Button_btn--lg__8fDGb {
+  font-size: var(--text-sm);
+  padding: var(--space-4) var(--space-8);
+  min-height: 56px;
+}
+
+/* ─── Full width ──────────────────────────────────────── */
+
+.Button_btn--full__BcQE8 {
+  width: 100%;
+}
+
+/*!**************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[3]!./components/hero/HeroPlaceholder.module.css ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************************/
+.HeroPlaceholder_hero__TKoO_ {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  color: var(--color-white);
+}
+
+.HeroPlaceholder_hero--full__xkiHZ  { min-height: 100svh; }
+.HeroPlaceholder_hero--large__2LD9p { min-height: 80svh; }
+.HeroPlaceholder_hero--medium__kIC8A { min-height: 60svh; }
+
+/* ─── Background ──────────────────────────────────────── */
+
+.HeroPlaceholder_bg__lRIF9 {
+  position: absolute;
+  inset: 0;
+}
+
+.HeroPlaceholder_gradient__TTTWQ {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 80% 70% at 60% 40%,
+    #232323 0%,
+    #111111 50%,
+    #0a0a0a 100%
+  );
+}
+
+/* Warm accent */
+.HeroPlaceholder_hero--warm___0sef .HeroPlaceholder_gradient__TTTWQ {
+  background: radial-gradient(
+    ellipse 80% 70% at 60% 40%,
+    #2a1f14 0%,
+    #181008 50%,
+    #0a0805 100%
+  );
+}
+
+/* Cool accent */
+.HeroPlaceholder_hero--cool__GRXvz .HeroPlaceholder_gradient__TTTWQ {
+  background: radial-gradient(
+    ellipse 80% 70% at 60% 40%,
+    #161e2a 0%,
+    #0c1218 50%,
+    #080c10 100%
+  );
+}
+
+/* Subtle grid overlay */
+.HeroPlaceholder_grid__n1rtQ {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 80px 80px;
+  opacity: 0.6;
+}
+
+/* ─── Content ─────────────────────────────────────────── */
+
+.HeroPlaceholder_content__vwuGi {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  min-height: inherit;
+  padding-bottom: var(--space-12);
+  padding-top: calc(var(--header-height-mobile) + var(--space-8));
+}
+
+.HeroPlaceholder_inner__gGyS4 {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* ─── Typography ──────────────────────────────────────── */
+
+.HeroPlaceholder_tagline__AsZZ6 {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--color-gold-light);
+  opacity: 0.85;
+}
+
+.HeroPlaceholder_headingWrap__AqNZy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.HeroPlaceholder_heading__etsqf {
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-white);
+}
+
+.HeroPlaceholder_subheading__Hs_tn {
+  font-size: var(--text-lg);
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 480px;
+  line-height: var(--leading-snug);
+}
+
+.HeroPlaceholder_cta__Dnsup {
+  margin-top: var(--space-2);
+}
+
+/* ─── Responsive ──────────────────────────────────────── */
+
+@media (min-width: 768px) {
+  .HeroPlaceholder_content__vwuGi {
+    align-items: center;
+    padding-top: calc(var(--header-height-desktop) + var(--space-12));
+  }
+
+  .HeroPlaceholder_heading__etsqf { font-size: var(--text-5xl); }
+}
+
+@media (min-width: 1024px) {
+  .HeroPlaceholder_heading__etsqf { font-size: var(--text-hero); }
+  .HeroPlaceholder_subheading__Hs_tn { font-size: var(--text-xl); max-width: 560px; }
+  .HeroPlaceholder_content__vwuGi {
+    padding-bottom: var(--space-20);
+  }
+}
+
+/*!**************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[5].use[3]!./app/gallery/gallery.module.css ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************/
+.gallery_section__kYGX1 {
+  padding-block: var(--section-gap-md);
+  background-color: var(--color-off-white);
+}
+
+.gallery_header__oifpj {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  margin-bottom: var(--space-12);
+}
+
+.gallery_placeholder__AJ0Sr {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding-block: var(--space-20);
+  border-top: 1px solid var(--color-border);
+  max-width: 480px;
+}
+
+.gallery_placeholderText__i5HpF {
+  font-size: var(--text-md);
+  color: var(--color-ink-muted);
+  line-height: var(--leading-normal);
+}
+
