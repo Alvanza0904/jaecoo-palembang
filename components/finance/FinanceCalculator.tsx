@@ -1,9 +1,9 @@
 /**
- * JAECOO Palembang -- Finance Calculator
+ * JAECOO Palembang — Finance Calculator
  *
  * Phase 1: Interface and formula scaffold.
  * UI will be built in a later phase.
- * "use client" -- interactive, requires state.
+ * "use client" — interactive, requires state.
  */
 
 "use client";
@@ -45,22 +45,24 @@ export function calculate(input: CalculatorInput): CalculatorResult {
 }
 
 interface FinanceCalculatorProps {
-  /** Price passed from model data -- never hardcoded */
+  /** Price passed from model data — never hardcoded */
   price: number;
   modelName: string;
 }
 
 export function FinanceCalculator({ price, modelName }: FinanceCalculatorProps) {
-  const [dpPercent, _setDpPercent] = useState<typeof DP_OPTIONS[number]>(30);
-  const [tenor, _setTenor] = useState<typeof TENOR_OPTIONS[number]>(3);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [dpPercent, setDpPercent] = useState<typeof DP_OPTIONS[number]>(30);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [tenor, setTenor] = useState<typeof TENOR_OPTIONS[number]>(3);
 
   const result = calculate({ price, dp_percent: dpPercent, tenor_years: tenor });
 
-  // Placeholder UI -- full component in Phase: Calculator
+  // Placeholder UI — full component in Phase: Calculator
   return (
     <div aria-label={`Simulasi kredit ${modelName}`}>
       <p style={{ fontSize: "var(--text-xs)", color: "var(--color-ink-subtle)", fontStyle: "italic" }}>
-        Calculator UI -- akan dibangun pada fase berikutnya.
+        Calculator UI — akan dibangun pada fase berikutnya.
         {" "}DP: {dpPercent}%, Tenor: {tenor}th, Angsuran: Rp{result.monthly_installment.toLocaleString("id-ID")}/bln
       </p>
       <p style={{ fontSize: "var(--text-xs)", color: "var(--color-ink-subtle)", marginTop: "0.5rem" }}>
