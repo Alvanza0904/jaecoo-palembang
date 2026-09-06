@@ -1,12 +1,12 @@
 /**
  * JAECOO Palembang — Root Layout
- * Phase 2: Visual Foundation.
+ * Provides html/body shell, fonts, and global CSS only.
+ * Header/Footer live in app/(public)/layout.tsx (public pages only).
+ * Admin routes use AdminShell via app/admin/layout.tsx.
  */
 
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import "@/styles/globals.css";
 
 const manrope = Manrope({
@@ -70,18 +70,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" className={manrope.variable}>
-      <body>
-        {/*
-          Header is fixed/sticky via CSS.
-          transparent=true on pages with hero that needs overlay header.
-          Default (no prop): solid off-white header.
-          Hero pages (model pages, homepage) pass transparent={true}
-          directly to Header in their own layout file.
-        */}
-        <Header />
-        <main id="main-content">{children}</main>
-        <Footer />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
