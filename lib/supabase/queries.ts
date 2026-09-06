@@ -93,13 +93,15 @@ function mapModel(row: SupabaseModel, staticFallback?: ModelData): ModelData {
   )
 
   const techContent = (row.model_content ?? []).find((c) => c.section === 'technology')
-  const technology: ModelTechnologySection =
-    (techContent?.content as ModelTechnologySection) ??
+    const technology: ModelTechnologySection =
+    (techContent?.content as unknown as ModelTechnologySection) ??
+
     staticFallback?.technology ?? { headline: '', features: [] }
 
   const heroContent = (row.model_content ?? []).find((c) => c.section === 'hero')
   const hero_media =
-    (heroContent?.content as ModelData['hero_media']) ??
+        (heroContent?.content as unknown as ModelData['hero_media']) ??
+
     staticFallback?.hero_media ?? {
       image: {
         desktop: `/images/models/${row.slug}/hero-desktop.jpg`,
