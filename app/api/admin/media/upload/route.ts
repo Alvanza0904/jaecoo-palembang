@@ -25,7 +25,6 @@ import {
   ALLOWED_TYPES,
   MAX_FILE_SIZE_BYTES,
 } from '@/lib/types/media-asset'
-import type { MediaCategory } from '@/lib/types/media-asset'
 
 const BUCKET = 'jaecoo-media'
 
