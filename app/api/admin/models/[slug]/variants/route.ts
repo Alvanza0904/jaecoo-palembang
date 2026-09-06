@@ -1,12 +1,24 @@
 /**
  * JAECOO Palembang — API Admin: Model Variants
  * STEP 5B: POST create new variant
+ * STEP 5B.1: price_status support, nullable price_idr / price_display
  *
  * Auth: Supabase session wajib.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+
+const VALID_PRICE_STATUSES = [
+  'official',
+  'prebook',
+  'coming_soon',
+  'contact_sales',
+  'starting_from',
+  'hidden',
+] as const
+
+const PRICE_REQUIRES_AMOUNT = ['official', 'starting_from'] as const
 
 interface RouteParams {
   params: Promise<{ slug: string }>
@@ -34,12 +46,49 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     const body = await req.json()
-    const { variant_key, name, label, price_idr, price_display, price_region, is_default } = body
+    const {
+      variant_key, name, label,
+      price_status = 'official',
+      price_idr, price_display, price_display_override,
+      price_region, is_default,
+    } = body
 
-    // Validate
+    // Validate required fields
     if (!name?.trim()) return NextResponse.json({ error: 'Nama variant wajib diisi' }, { status: 422 })
     if (!variant_key?.trim()) return NextResponse.json({ error: 'Variant key wajib diisi' }, { status: 422 })
-    if (!price_idr || isNaN(Number(price_idr))) return NextResponse.json({ error: 'Harga harus berupa angka' }, { status: 422 })
+
+    // Validate price_status
+    if (!VALID_PRICE_STATUSES.includes(price_status as typeof VALID_PRICE_STATUSES[number])) {
+      return NextResponse.json(
+        { error: `price_status tidak valid. Pilih: ${VALID_PRICE_STATUSES.join(', ')}` },
+        { status: 422 }
+      )
+    }
+
+    // Validate price_idr for statuses that require it
+    const requiresAmount = PRICE_REQUIRES_AMOUNT.includes(
+      price_status as typeof PRICE_REQUIRES_AMOUNT[number]
+    )
+    let priceIdrValue: number | null = null
+    if (price_idr !== null && price_idr !== undefined && price_idr !== '') {
+      const n = Number(price_idr)
+      if (isNaN(n)) {
+        return NextResponse.json({ error: 'Harga harus berupa angka' }, { status: 422 })
+      }
+      priceIdrValue = n
+    }
+    if (requiresAmount && (!priceIdrValue || priceIdrValue <= 0)) {
+      return NextResponse.json(
+        { error: `Harga (price_idr) wajib diisi untuk status "${price_status}"` },
+        { status: 422 }
+      )
+    }
+
+    // Auto-format price_display if not provided and price_idr exists
+    let priceDisplayValue: string | null = price_display?.trim() || null
+    if (!priceDisplayValue && priceIdrValue) {
+      priceDisplayValue = `Rp${priceIdrValue.toLocaleString('id-ID')}`
+    }
 
     const { data, error } = await supabase
       .from('model_variants')
@@ -48,8 +97,10 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         variant_key: variant_key.trim(),
         name: name.trim(),
         label: label?.trim() || null,
-        price_idr: Number(price_idr),
-        price_display: price_display?.trim() || `Rp${Number(price_idr).toLocaleString('id-ID')}`,
+        price_status,
+        price_idr: priceIdrValue,
+        price_display: priceDisplayValue,
+        price_display_override: price_display_override?.trim() || null,
         price_region: price_region?.trim() || 'OTR Palembang',
         is_default: Boolean(is_default),
       })

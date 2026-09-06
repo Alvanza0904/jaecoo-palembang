@@ -20,6 +20,8 @@ import { Stagger } from "@/components/motion/Stagger";
 import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { FinanceCalculator } from "@/components/finance/FinanceCalculator";
+import { PriceDisplay } from "@/components/price/PriceDisplay";
+import { priceStatusAllowsCalculator } from "@/lib/types/model";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import styles from "./page.module.css";
@@ -99,13 +101,14 @@ export default async function ModelPage({ params }: ModelPageProps) {
               <p className={styles.descText}>{model.description}</p>
 
               <div className={styles.descPrice}>
-                <p className={styles.priceLabel}>Mulai dari</p>
-                <p className={styles.priceValue}>
-                  {model.default_variant.price_display}
-                </p>
-                <p className={styles.priceRegion}>
-                  {model.default_variant.price_region}
-                </p>
+                <PriceDisplay
+                  price_status={model.default_variant.price_status}
+                  price_idr={model.default_variant.price_idr}
+                  price_display={model.default_variant.price_display}
+                  price_display_override={model.default_variant.price_display_override}
+                  price_region={model.default_variant.price_region}
+                  className={styles.descPriceDisplay}
+                />
               </div>
             </div>
           </Reveal>
@@ -194,8 +197,14 @@ export default async function ModelPage({ params }: ModelPageProps) {
                         <span className={styles.variantBadge}>{variant.label}</span>
                       )}
                     </div>
-                    <p className={styles.variantPrice}>{variant.price_display}</p>
-                    <p className={styles.variantRegion}>{variant.price_region}</p>
+                    <PriceDisplay
+                      price_status={variant.price_status}
+                      price_idr={variant.price_idr}
+                      price_display={variant.price_display}
+                      price_display_override={variant.price_display_override}
+                      price_region={variant.price_region}
+                      className={styles.variantPriceDisplay}
+                    />
                     <Button
                       as="a"
                       href={buildWhatsAppUrl({
@@ -219,25 +228,48 @@ export default async function ModelPage({ params }: ModelPageProps) {
         </section>
       )}
 
-      {/* ── Finance Calculator ── */}
-      <section className={styles.calcSection}>
-        <Container size="narrow">
-          <Reveal variant="fade-up" threshold={0}>
-            <SectionHeading
-              eyebrow="Simulasi Kredit"
-              heading="Hitung Cicilan Anda"
-              subheading="Estimasi angsuran dengan bunga flat 10%/tahun. Hubungi kami untuk simulasi resmi."
-            />
-          </Reveal>
-          <Reveal variant="fade-up" delay={100} threshold={0}>
-            {/* Price dari model data — TIDAK hardcode */}
-            <FinanceCalculator
-              price={model.default_variant.price_idr}
-              modelName={model.name}
-            />
-          </Reveal>
-        </Container>
-      </section>
+      {/* ── Finance Calculator — hanya jika price_status memungkinkan ── */}
+      {priceStatusAllowsCalculator(
+        model.default_variant.price_status,
+        model.default_variant.price_idr
+      ) && (
+        <section className={styles.calcSection}>
+          <Container size="narrow">
+            <Reveal variant="fade-up" threshold={0}>
+              <SectionHeading
+                eyebrow="Simulasi Kredit"
+                heading="Hitung Cicilan Anda"
+                subheading="Estimasi angsuran dengan bunga flat 10%/tahun. Hubungi kami untuk simulasi resmi."
+              />
+            </Reveal>
+            <Reveal variant="fade-up" delay={100} threshold={0}>
+              {/* price_idr sudah divalidasi non-null oleh priceStatusAllowsCalculator */}
+              <FinanceCalculator
+                price={model.default_variant.price_idr!}
+                modelName={model.name}
+              />
+            </Reveal>
+          </Container>
+        </section>
+      )}
+
+      {/* ── CTA Hubungi Sales — untuk status tanpa calculator ── */}
+      {!priceStatusAllowsCalculator(
+        model.default_variant.price_status,
+        model.default_variant.price_idr
+      ) && model.default_variant.price_status !== "hidden" && (
+        <section className={styles.calcSection}>
+          <Container size="narrow">
+            <Reveal variant="fade-up" threshold={0}>
+              <SectionHeading
+                eyebrow="Harga & Pemesanan"
+                heading="Hubungi Sales Kami"
+                subheading="Dapatkan informasi harga terkini, test drive, dan penawaran spesial langsung dari Alvan."
+              />
+            </Reveal>
+          </Container>
+        </section>
+      )}
 
       {/* ── Global CTA ── */}
       <section className={styles.ctaSection}>

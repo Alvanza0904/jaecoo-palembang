@@ -14,6 +14,7 @@ import { getPublishedNews } from "@/lib/data/news";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Button } from "@/components/ui/Button";
+import { PriceDisplay } from "@/components/price/PriceDisplay";
 import { GoldLine } from "@/components/ui/GoldLine";
 import { Reveal } from "@/components/motion/Reveal";
 import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
@@ -110,12 +111,14 @@ export default function HomePage() {
                   {/* Price + CTA */}
                   <div className={styles.modelPricing}>
                     <div>
-                      <p className={styles.modelPrice}>
-                        {model.default_variant.price_display}
-                      </p>
-                      <p className={styles.modelRegion}>
-                        {model.default_variant.price_region}
-                      </p>
+                      <PriceDisplay
+                        price_status={model.default_variant.price_status}
+                        price_idr={model.default_variant.price_idr}
+                        price_display={model.default_variant.price_display}
+                        price_display_override={model.default_variant.price_display_override}
+                        price_region={model.default_variant.price_region}
+                        className={styles.homePriceDisplay}
+                      />
                     </div>
                     <Button
                       as="link"

@@ -13,6 +13,7 @@ import { Reveal } from "@/components/motion/Reveal";
 import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { FinanceCalculator } from "@/components/finance/FinanceCalculator";
+import { priceStatusAllowsCalculator } from "@/lib/types/model";
 import { buildWhatsAppUrl, SALES_NAME, WHATSAPP_NUMBER } from "@/lib/utils/whatsapp";
 import { getModels } from "@/lib/data/models";
 import styles from "./sales.module.css";
@@ -145,14 +146,21 @@ export default function SalesPage() {
           </Reveal>
 
           <div className={styles.calcGrid}>
-            {models.map((model, i) => (
-              <Reveal key={model.slug} variant="fade-up" delay={i * 80} threshold={0}>
-                <FinanceCalculator
-                  price={model.default_variant.price_idr}
-                  modelName={model.name}
-                />
-              </Reveal>
-            ))}
+            {models
+              .filter((model) =>
+                priceStatusAllowsCalculator(
+                  model.default_variant.price_status,
+                  model.default_variant.price_idr
+                )
+              )
+              .map((model, i) => (
+                <Reveal key={model.slug} variant="fade-up" delay={i * 80} threshold={0}>
+                  <FinanceCalculator
+                    price={model.default_variant.price_idr!}
+                    modelName={model.name}
+                  />
+                </Reveal>
+              ))}
           </div>
         </Container>
       </section>

@@ -49,6 +49,7 @@ export const MODELS: ModelData[] = [
     default_variant: {
       id: "j5-ev-standard",
       name: "JAECOO J5 EV",
+      price_status: "official",
       price_idr: MODEL_PRICES["jaecoo-j5-ev"],
       price_display: "Rp354.900.000",
       price_region: "OTR Palembang",
@@ -57,6 +58,7 @@ export const MODELS: ModelData[] = [
       {
         id: "j5-ev-standard",
         name: "JAECOO J5 EV",
+        price_status: "official",
         price_idr: MODEL_PRICES["jaecoo-j5-ev"],
         price_display: "Rp354.900.000",
         price_region: "OTR Palembang",
@@ -198,6 +200,7 @@ export const MODELS: ModelData[] = [
     default_variant: {
       id: "j7-shs-standard",
       name: "JAECOO J7 SHS",
+      price_status: "official",
       price_idr: MODEL_PRICES["jaecoo-j7-shs"],
       price_display: "Rp534.900.000",
       price_region: "OTR Palembang",
@@ -206,6 +209,7 @@ export const MODELS: ModelData[] = [
       {
         id: "j7-shs-standard",
         name: "JAECOO J7 SHS",
+        price_status: "official",
         price_idr: MODEL_PRICES["jaecoo-j7-shs"],
         price_display: "Rp534.900.000",
         price_region: "OTR Palembang",
@@ -215,6 +219,7 @@ export const MODELS: ModelData[] = [
         id: "j7-sivp",
         name: "JAECOO J7 SHS-P",
         label: "SIVP",
+        price_status: "official",
         price_idr: MODEL_PRICES["jaecoo-j7-shs"],
         price_display: "Rp534.900.000",
         price_region: "OTR Palembang",
@@ -357,6 +362,7 @@ export const MODELS: ModelData[] = [
     default_variant: {
       id: "j8-ardis-shs-standard",
       name: "JAECOO J8 Ardis SHS",
+      price_status: "official",
       price_idr: MODEL_PRICES["jaecoo-j8-shs"],
       price_display: "Rp865.000.000",
       price_region: "OTR Palembang",
@@ -365,6 +371,7 @@ export const MODELS: ModelData[] = [
       {
         id: "j8-ardis-shs-standard",
         name: "JAECOO J8 Ardis SHS",
+        price_status: "official",
         price_idr: MODEL_PRICES["jaecoo-j8-shs"],
         price_display: "Rp865.000.000",
         price_region: "OTR Palembang",
@@ -507,7 +514,7 @@ export function getModelSlugs(): string[] {
  * Get price for a model slug — use this in calculator to avoid hardcoding.
  * Returns the default variant price_idr.
  */
-export function getModelPrice(slug: string): number {
+export function getModelPrice(slug: string): number | null {
   const model = getModelBySlug(slug);
-  return model?.default_variant.price_idr ?? 0;
+  return model?.default_variant.price_idr ?? null;
 }

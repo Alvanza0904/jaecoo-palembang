@@ -13,13 +13,34 @@ import styles from './editor.module.css'
 
 /* ─── Types ────────────────────────────────────────────── */
 
+type PriceStatusOption =
+  | 'official'
+  | 'prebook'
+  | 'coming_soon'
+  | 'contact_sales'
+  | 'starting_from'
+  | 'hidden'
+
+const PRICE_STATUS_OPTIONS: { value: PriceStatusOption; label: string }[] = [
+  { value: 'official', label: 'Official — tampil nominal Rp' },
+  { value: 'starting_from', label: 'Mulai Dari — tampil "Mulai dari Rp..."' },
+  { value: 'prebook', label: 'Pre-Book — badge PRE-BOOK' },
+  { value: 'coming_soon', label: 'Coming Soon — badge COMING SOON' },
+  { value: 'contact_sales', label: 'Hubungi Sales — CTA tanpa harga' },
+  { value: 'hidden', label: 'Hidden — harga tidak tampil' },
+]
+
+const PRICE_STATUS_REQUIRES_AMOUNT: PriceStatusOption[] = ['official', 'starting_from']
+
 interface Variant {
   id: string
   variant_key: string
   name: string
   label: string | null
-  price_idr: number
-  price_display: string
+  price_status: PriceStatusOption
+  price_idr: number | null
+  price_display: string | null
+  price_display_override: string | null
   price_region: string
   is_default: boolean
 }
@@ -217,11 +238,13 @@ function VariantRow({
   const [form, setForm] = useState({
     name: variant.name,
     label: variant.label ?? '',
-    price_idr: variant.price_idr,
-    price_display: variant.price_display,
+    price_status: variant.price_status ?? 'official' as PriceStatusOption,
+    price_idr: variant.price_idr ?? 0,
+    price_display_override: variant.price_display_override ?? '',
     price_region: variant.price_region,
     is_default: variant.is_default,
   })
+  const requiresAmount = PRICE_STATUS_REQUIRES_AMOUNT.includes(form.price_status)
   const [isPending, startTransition] = useTransition()
   const [feedback, setFeedback] = useState<string | null>(null)
 
@@ -230,18 +253,34 @@ function VariantRow({
 
     startTransition(async () => {
       try {
+        const payload = {
+          name: form.name,
+          label: form.label || null,
+          price_status: form.price_status,
+          price_idr: requiresAmount ? form.price_idr : null,
+          price_display: requiresAmount && form.price_idr ? formatIDR(form.price_idr) : null,
+          price_display_override: form.price_display_override || null,
+          price_region: form.price_region,
+          is_default: form.is_default,
+        }
         const res = await fetch(`/api/admin/models/${slug}/variants/${variant.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...form,
-            label: form.label || null,
-            price_display: formatIDR(form.price_idr),
-          }),
+          body: JSON.stringify(payload),
         })
         const json = await res.json()
         if (!res.ok) throw new Error(json.error || 'Gagal menyimpan')
-        onSaved({ ...variant, ...form, label: form.label || null, price_display: formatIDR(form.price_idr) })
+        onSaved({
+          ...variant,
+          name: form.name,
+          label: form.label || null,
+          price_status: form.price_status,
+          price_idr: requiresAmount ? form.price_idr : null,
+          price_display: requiresAmount && form.price_idr ? formatIDR(form.price_idr) : null,
+          price_display_override: form.price_display_override || null,
+          price_region: form.price_region,
+          is_default: form.is_default,
+        })
         setEditing(false)
         setFeedback(null)
       } catch (err) {
@@ -271,9 +310,12 @@ function VariantRow({
           <span className={styles.rowName}>{variant.name}</span>
           {variant.label && <span className={styles.badge}>{variant.label}</span>}
           {variant.is_default && <span className={styles.badgeDefault}>Default</span>}
+          <span className={styles.badge}>{variant.price_status ?? 'official'}</span>
         </div>
         <div className={styles.rowMeta}>
-          <span className={styles.rowPrice}>{variant.price_display}</span>
+          <span className={styles.rowPrice}>
+            {variant.price_idr ? formatIDR(variant.price_idr) : '—'}
+          </span>
           <span className={styles.rowRegion}>{variant.price_region}</span>
         </div>
         <div className={styles.rowActions}>
@@ -305,14 +347,38 @@ function VariantRow({
           />
         </div>
         <div className={styles.field}>
-          <label className={styles.label}>Harga (IDR) *</label>
+          <label className={styles.label}>Status Harga *</label>
+          <select
+            className={styles.input}
+            value={form.price_status}
+            onChange={(e) => setForm((f) => ({ ...f, price_status: e.target.value as PriceStatusOption }))}
+          >
+            {PRICE_STATUS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+        {requiresAmount && (
+          <div className={styles.field}>
+            <label className={styles.label}>Harga (IDR){requiresAmount ? ' *' : ''}</label>
+            <input
+              className={styles.input}
+              type="number"
+              value={form.price_idr ?? ''}
+              onChange={(e) => setForm((f) => ({ ...f, price_idr: Number(e.target.value) }))}
+            />
+            {!!form.price_idr && <span className={styles.fieldNote}>{formatIDR(form.price_idr)}</span>}
+          </div>
+        )}
+        <div className={styles.field}>
+          <label className={styles.label}>Display Override (opsional)</label>
           <input
             className={styles.input}
-            type="number"
-            value={form.price_idr}
-            onChange={(e) => setForm((f) => ({ ...f, price_idr: Number(e.target.value) }))}
+            value={form.price_display_override}
+            onChange={(e) => setForm((f) => ({ ...f, price_display_override: e.target.value }))}
+            placeholder='e.g. "Mulai dari Rp500 juta"'
           />
-          <span className={styles.fieldNote}>{formatIDR(form.price_idr)}</span>
+          <span className={styles.fieldNote}>Jika diisi, override auto-format dari price_idr</span>
         </div>
         <div className={styles.field}>
           <label className={styles.label}>Region Harga</label>
@@ -356,7 +422,9 @@ function VariantsTab({ model, slug }: { model: AdminModel; slug: string }) {
     variant_key: '',
     name: '',
     label: '',
+    price_status: 'official' as PriceStatusOption,
     price_idr: 0,
+    price_display_override: '',
     price_region: 'OTR Palembang',
     is_default: false,
   })
@@ -378,20 +446,27 @@ function VariantsTab({ model, slug }: { model: AdminModel; slug: string }) {
 
     startTransition(async () => {
       try {
+        const requiresAmt = PRICE_STATUS_REQUIRES_AMOUNT.includes(newForm.price_status)
         const res = await fetch(`/api/admin/models/${slug}/variants`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            ...newForm,
+            variant_key: newForm.variant_key,
+            name: newForm.name,
             label: newForm.label || null,
-            price_display: formatIDR(newForm.price_idr),
+            price_status: newForm.price_status,
+            price_idr: requiresAmt ? newForm.price_idr : null,
+            price_display: requiresAmt && newForm.price_idr ? formatIDR(newForm.price_idr) : null,
+            price_display_override: newForm.price_display_override || null,
+            price_region: newForm.price_region,
+            is_default: newForm.is_default,
           }),
         })
         const json = await res.json()
         if (!res.ok) throw new Error(json.error || 'Gagal menambah variant')
         setVariants((vs) => [...vs, json.variant])
         setAdding(false)
-        setNewForm({ variant_key: '', name: '', label: '', price_idr: 0, price_region: 'OTR Palembang', is_default: false })
+        setNewForm({ variant_key: '', name: '', label: '', price_status: 'official', price_idr: 0, price_display_override: '', price_region: 'OTR Palembang', is_default: false })
         setFeedback(null)
       } catch (err) {
         setFeedback(String(err))
@@ -459,15 +534,38 @@ function VariantsTab({ model, slug }: { model: AdminModel; slug: string }) {
               />
             </div>
             <div className={styles.field}>
-              <label className={styles.label}>Harga IDR *</label>
+              <label className={styles.label}>Status Harga *</label>
+              <select
+                className={styles.input}
+                value={newForm.price_status}
+                onChange={(e) => setNewForm((f) => ({ ...f, price_status: e.target.value as PriceStatusOption }))}
+              >
+                {PRICE_STATUS_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+            {PRICE_STATUS_REQUIRES_AMOUNT.includes(newForm.price_status) && (
+              <div className={styles.field}>
+                <label className={styles.label}>Harga IDR *</label>
+                <input
+                  className={styles.input}
+                  type="number"
+                  value={newForm.price_idr || ''}
+                  onChange={(e) => setNewForm((f) => ({ ...f, price_idr: Number(e.target.value) }))}
+                  placeholder="534900000"
+                />
+                {!!newForm.price_idr && <span className={styles.fieldNote}>{formatIDR(newForm.price_idr)}</span>}
+              </div>
+            )}
+            <div className={styles.field}>
+              <label className={styles.label}>Display Override (opsional)</label>
               <input
                 className={styles.input}
-                type="number"
-                value={newForm.price_idr || ''}
-                onChange={(e) => setNewForm((f) => ({ ...f, price_idr: Number(e.target.value) }))}
-                placeholder="534900000"
+                value={newForm.price_display_override}
+                onChange={(e) => setNewForm((f) => ({ ...f, price_display_override: e.target.value }))}
+                placeholder='e.g. "Mulai dari Rp500 juta"'
               />
-              {!!newForm.price_idr && <span className={styles.fieldNote}>{formatIDR(newForm.price_idr)}</span>}
             </div>
             <div className={styles.field}>
               <label className={styles.label}>Region Harga</label>

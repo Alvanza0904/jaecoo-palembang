@@ -1,5 +1,5 @@
 import { supabase } from './client'
-import type { ModelData, ModelVariant, ModelColor, ModelSpecCategory, ModelTechnologySection } from '@/lib/types/model'
+import type { ModelData, ModelVariant, ModelColor, ModelSpecCategory, ModelTechnologySection, PriceStatus } from '@/lib/types/model'
 import {
   getModels as getStaticModels,
   getModelBySlug as getStaticModelBySlug,
@@ -27,8 +27,10 @@ interface SupabaseVariant {
   variant_key: string
   name: string
   label: string | null
-  price_idr: number
-  price_display: string
+  price_status: string
+  price_idr: number | null
+  price_display: string | null
+  price_display_override: string | null
   price_region: string
   is_default: boolean
 }
@@ -60,8 +62,10 @@ function mapModel(row: SupabaseModel, staticFallback?: ModelData): ModelData {
     id: v.variant_key,
     name: v.name,
     label: v.label ?? undefined,
-    price_idr: v.price_idr,
-    price_display: v.price_display,
+    price_status: (v.price_status ?? 'official') as PriceStatus,
+    price_idr: v.price_idr ?? null,
+    price_display: v.price_display ?? null,
+    price_display_override: v.price_display_override ?? null,
     price_region: v.price_region,
   }))
 
@@ -123,8 +127,10 @@ function mapModel(row: SupabaseModel, staticFallback?: ModelData): ModelData {
           id: defaultVariant.variant_key,
           name: defaultVariant.name,
           label: defaultVariant.label ?? undefined,
-          price_idr: defaultVariant.price_idr,
-          price_display: defaultVariant.price_display,
+          price_status: (defaultVariant.price_status ?? 'official') as PriceStatus,
+          price_idr: defaultVariant.price_idr ?? null,
+          price_display: defaultVariant.price_display ?? null,
+          price_display_override: defaultVariant.price_display_override ?? null,
           price_region: defaultVariant.price_region,
         }
       : staticFallback!.default_variant,

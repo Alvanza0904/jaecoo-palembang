@@ -1,0 +1,62 @@
+/* JAECOO Palembang — PriceDisplay — STEP 5B.1 */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Official / Starting From: nominal Rp */
+.nominal {
+  font-size: var(--text-lg, 1.125rem);
+  font-weight: 600;
+  color: var(--color-text-primary, #e8e0d0);
+  letter-spacing: 0.01em;
+}
+
+.mulaiDari {
+  font-size: var(--text-xs, 0.75rem);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted, #8a8178);
+}
+
+.region {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--color-text-muted, #8a8178);
+}
+
+/* PRE-BOOK badge */
+.badgePrebook {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-gold, #c8a96e);
+  border: 1px solid var(--color-gold, #c8a96e);
+  border-radius: 2px;
+  width: fit-content;
+}
+
+/* COMING SOON badge */
+.badgeComingSoon {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted, #8a8178);
+  border: 1px solid var(--color-border, #3a3530);
+  border-radius: 2px;
+  width: fit-content;
+}
+
+/* CONTACT SALES */
+.contactSales {
+  font-size: var(--text-sm, 0.875rem);
+  color: var(--color-text-muted, #8a8178);
+  font-style: italic;
+}

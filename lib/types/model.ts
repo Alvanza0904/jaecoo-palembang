@@ -5,11 +5,57 @@
  * Variants (e.g. J7 SIVP) belong to a model, not a separate page.
  *
  * STEP 4A: Updated slugs to jaecoo-* format.
+ * STEP 5B.1: Added PriceStatus — price_status lives on ModelVariant.
+ *            price_idr and price_display are now nullable (non-official statuses).
  */
 
 import type { MediaWithArtDirection, ResponsiveImage } from "./media";
 
 export type ModelSlug = "jaecoo-j5-ev" | "jaecoo-j7-shs" | "jaecoo-j8-shs";
+
+// ─── Price Status ─────────────────────────────────────────────────────────────
+
+/**
+ * Controls how price is rendered on the public website.
+ *
+ * official      → tampil nominal Rp, calculator aktif
+ * starting_from → tampil "Mulai dari Rp...", calculator boleh aktif jika price valid
+ * prebook       → tampil badge PRE-BOOK, calculator disabled
+ * coming_soon   → tampil badge COMING SOON, calculator disabled
+ * contact_sales → tampil CTA Hubungi Sales, calculator disabled
+ * hidden        → harga tidak tampil sama sekali, calculator disabled
+ */
+export type PriceStatus =
+  | "official"
+  | "starting_from"
+  | "prebook"
+  | "coming_soon"
+  | "contact_sales"
+  | "hidden";
+
+/**
+ * Returns true if this status requires a price_idr amount to render correctly.
+ * (Used to decide if calculator can be shown and if price_idr should be required
+ * in API validation.)
+ */
+export function priceStatusRequiresAmount(status: PriceStatus): boolean {
+  return status === "official" || status === "starting_from";
+}
+
+/**
+ * Returns true if FinanceCalculator should be shown for this variant.
+ * Calculator is only meaningful when price_idr is a real number.
+ */
+export function priceStatusAllowsCalculator(
+  status: PriceStatus,
+  price_idr: number | null | undefined
+): boolean {
+  if (!priceStatusRequiresAmount(status)) return false;
+  if (!price_idr || price_idr <= 0 || isNaN(price_idr)) return false;
+  return true;
+}
+
+// ─── Model entities ───────────────────────────────────────────────────────────
 
 export interface ModelColor {
   id: string;
@@ -25,10 +71,14 @@ export interface ModelVariant {
   name: string;
   /** e.g. "SIVP" */
   label?: string;
-  /** OTR price in IDR */
-  price_idr: number;
-  /** Price formatted for display */
-  price_display: string;
+  /** Price status — controls display & calculator */
+  price_status: PriceStatus;
+  /** OTR price in IDR — nullable for non-official statuses */
+  price_idr: number | null;
+  /** Price formatted for display — nullable */
+  price_display: string | null;
+  /** Optional override e.g. "Mulai dari Rp500 juta" */
+  price_display_override?: string | null;
   /** Region for OTR price */
   price_region: string;
 }

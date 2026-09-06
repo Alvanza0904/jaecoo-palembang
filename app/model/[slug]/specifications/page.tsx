@@ -3,6 +3,7 @@
  * Route: /model/[slug]/specifications
  *
  * STEP 4A: Real spec data from model. Calculator integrated with correct price.
+ * STEP 5B.1: PriceDisplay component, calculator guarded by priceStatusAllowsCalculator.
  */
 
 import type { Metadata } from "next";
@@ -14,6 +15,8 @@ import { GoldLine } from "@/components/ui/GoldLine";
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/motion/Reveal";
 import { FinanceCalculator } from "@/components/finance/FinanceCalculator";
+import { PriceDisplay } from "@/components/price/PriceDisplay";
+import { priceStatusAllowsCalculator } from "@/lib/types/model";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import styles from "./specifications.module.css";
@@ -28,9 +31,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const model = getModelBySlug(slug);
   if (!model) return {};
+
+  const v = model.default_variant;
+  // SEO: hanya sertakan harga jika status menghasilkan nominal nyata
+  const priceText =
+    v.price_status === "official" || v.price_status === "starting_from"
+      ? (v.price_display ? `. ${v.price_display} ${v.price_region}` : "")
+      : "";
+
   return {
     title: buildPageTitle(`${model.name} — Spesifikasi`),
-    description: `Spesifikasi lengkap ${model.name}. ${model.default_variant.price_display} ${model.default_variant.price_region}.`,
+    description: `Spesifikasi lengkap ${model.name}${priceText}.`,
   };
 }
 
@@ -46,6 +57,9 @@ export default async function SpecificationsPage({ params }: Props) {
     source_cta: "specs_cta",
   });
 
+  const v = model.default_variant;
+  const showCalculator = priceStatusAllowsCalculator(v.price_status, v.price_idr);
+
   return (
     <section className={styles.section}>
       <Container size="content">
@@ -59,12 +73,17 @@ export default async function SpecificationsPage({ params }: Props) {
               heading={`${model.short_name} — Every Detail Matters.`}
               size="large"
             />
-            <div className={styles.priceTag}>
-              <span className={styles.priceFrom}>OTR Palembang</span>
-              <span className={styles.priceValue}>
-                {model.default_variant.price_display}
-              </span>
-            </div>
+            {v.price_status !== "hidden" && (
+              <div className={styles.priceTag}>
+                <PriceDisplay
+                  price_status={v.price_status}
+                  price_idr={v.price_idr}
+                  price_display={v.price_display}
+                  price_display_override={v.price_display_override}
+                  price_region={v.price_region}
+                />
+              </div>
+            )}
           </div>
         </Reveal>
 
@@ -102,15 +121,17 @@ export default async function SpecificationsPage({ params }: Props) {
           </p>
         </Reveal>
 
-        {/* Finance Calculator — price from model data */}
-        <Reveal variant="fade-up" delay={100} threshold={0}>
-          <div className={styles.calcWrapper}>
-            <FinanceCalculator
-              price={model.default_variant.price_idr}
-              modelName={model.name}
-            />
-          </div>
-        </Reveal>
+        {/* Finance Calculator — hanya jika price_status memungkinkan */}
+        {showCalculator && (
+          <Reveal variant="fade-up" delay={100} threshold={0}>
+            <div className={styles.calcWrapper}>
+              <FinanceCalculator
+                price={v.price_idr!}
+                modelName={model.name}
+              />
+            </div>
+          </Reveal>
+        )}
 
         {/* CTA */}
         <Reveal variant="fade-up" delay={100}>
