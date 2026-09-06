@@ -1,4 +1,4 @@
-import styles from '../../dashboard.module.css'
+import styles from '../dashboard.module.css'
 
 export default function AdminPage() {
   return (
@@ -6,7 +6,7 @@ export default function AdminPage() {
       <div className={styles.header}>
         <div>
           <p className={styles.greeting}>Admin</p>
-          <h1 className={styles.title}>models</h1>
+          <h1 className={styles.title}>leads</h1>
         </div>
       </div>
       <div className={styles.goldLine} />

@@ -1,29 +1,38 @@
 /**
- * JAECOO Palembang — Admin Layout
- * STEP 5A: Protected layout with sidebar navigation
+ * JAECOO Palembang — Admin Root Layout
+ * STEP 5A v5: Shell wrapper untuk semua /admin/* pages
  *
- * - noindex (admin area)
- * - Renders AdminShell (client component) with user context
- * - Auth check via server-side getServerUser()
- * - Unauthenticated → middleware redirects to /admin/login
+ * Auth guard HANYA di middleware.ts — tidak di sini.
+ * Login page di /admin/login punya layout sendiri yang override ini.
+ *
+ * Middleware sudah handle:
+ * - /admin/login → bypass (no redirect if not logged in)
+ * - /admin/* → redirect ke login jika tidak auth
+ * - /admin/login saat sudah login → redirect ke /admin
  */
 
-import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { getServerUser } from '@/lib/supabase/server'
 import { AdminShell } from './AdminShell'
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
   title: { default: 'Admin — JAECOO Palembang', template: '%s — Admin JAECOO' },
 }
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  // Middleware sudah pastikan user ada di sini (kecuali login page)
+  // Login page pakai layout override sendiri → tidak sampai sini
   const user = await getServerUser()
 
-  // Double-check server-side (middleware is primary guard)
+  // Fallback safety — seharusnya tidak terjadi karena middleware
   if (!user) {
-    redirect('/admin/login')
+    // Render children saja (middleware akan handle redirect)
+    return <>{children}</>
   }
 
   return (
