@@ -33,7 +33,7 @@ interface ModelPageProps {
 }
 
 export async function generateStaticParams() {
-  return getModelSlugs().map((slug) => ({ slug }));
+  return (await getModelSlugs()).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: ModelPageProps): Promise<Metadata> {
