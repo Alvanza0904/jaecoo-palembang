@@ -91,7 +91,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
                   >
                     <span className={styles.navIcon}>{item.icon}</span>
                     <span>{item.label}</span>
-                    {item.href !== '/admin' && (
+                    {item.href !== '/admin' && item.href !== '/admin/models' && (
                       <span className={styles.navBadge}>Soon</span>
                     )}
                   </a>
