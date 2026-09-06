@@ -5,9 +5,7 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [],
   },
-  experimental: {
-    optimizeCss: true,
-  },
+  // experimental.optimizeCss dihapus — bug dengan route groups Next.js 15
 };
 
 export default nextConfig;
