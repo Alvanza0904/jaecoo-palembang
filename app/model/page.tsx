@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     "Jelajahi lineup JAECOO di Palembang: J5 EV, J7 SHS, dan J8 Ardis SHS. Temukan SUV premium yang sesuai untuk Anda.",
 };
 
-export default function ModelIndexPage() {
+export default async function ModelIndexPage() {
   const models = await getModels();
 
   return (

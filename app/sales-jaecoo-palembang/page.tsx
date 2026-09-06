@@ -50,7 +50,7 @@ const SERVICES = [
   },
 ];
 
-export default function SalesPage() {
+export default async function SalesPage() {
   const whatsappUrl = buildWhatsAppUrl({
     source: "sales_page",
     source_cta: "sales_page_cta",
