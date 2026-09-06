@@ -1,0 +1,22 @@
+.loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-toast);
+  height: 3px;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  width: 40%;
+  background-color: var(--color-gold);
+  border-radius: var(--radius-full);
+  animation: slide 1.2s var(--ease-in-out) infinite;
+}
+
+@keyframes slide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
