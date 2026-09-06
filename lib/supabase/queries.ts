@@ -103,17 +103,31 @@ function mapModel(row: SupabaseModel, staticFallback?: ModelData): ModelData {
     staticFallback?.technology ?? { headline: '', features: [] }
 
   const heroContent = (row.model_content ?? []).find((c) => c.section === 'hero')
-  const hero_media =
-        (heroContent?.content as unknown as ModelData['hero_media']) ??
+  const heroRaw = heroContent?.content as Record<string, unknown> | undefined
 
-    staticFallback?.hero_media ?? {
-      image: {
-        desktop: `/images/models/${row.slug}/hero-desktop.jpg`,
-        tablet: `/images/models/${row.slug}/hero-tablet.jpg`,
-        mobile: `/images/models/${row.slug}/hero-mobile.jpg`,
-        alt: row.name,
-      },
-    }
+  // Map stored hero content → MediaWithArtDirection
+  // Model Editor stores: { image: {...}, cutout_url: "...", media_asset_id: "..." }
+  // LayeredHero expects:  { image: { ...image, cutout: "..." }, art_direction: {...} }
+  const hero_media: ModelData['hero_media'] = heroRaw
+    ? {
+        image: {
+          ...((heroRaw.image as Record<string, unknown>) ?? {}),
+          alt: ((heroRaw.image as Record<string, string>)?.alt) ?? row.name,
+          // Map cutout_url (root level) → image.cutout (where LayeredHero reads it)
+          cutout: (heroRaw.cutout_url as string | undefined)
+            ?? ((heroRaw.image as Record<string, string>)?.cutout)
+            ?? undefined,
+        },
+        art_direction: (heroRaw.art_direction as ModelData['hero_media']['art_direction']) ?? undefined,
+      }
+    : staticFallback?.hero_media ?? {
+        image: {
+          desktop: `/images/models/${row.slug}/hero-desktop.jpg`,
+          tablet: `/images/models/${row.slug}/hero-tablet.jpg`,
+          mobile: `/images/models/${row.slug}/hero-mobile.jpg`,
+          alt: row.name,
+        },
+      }
 
   return {
     slug: row.slug as ModelData['slug'],
