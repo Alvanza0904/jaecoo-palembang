@@ -20,6 +20,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/motion/Reveal";
 import { Stagger } from "@/components/motion/Stagger";
 import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
+import { LayeredHero } from "@/components/hero/LayeredHero";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { FinanceCalculator } from "@/components/finance/FinanceCalculator";
 import { PriceDisplay } from "@/components/price/PriceDisplay";
@@ -67,31 +68,58 @@ export default async function ModelPage({ params }: ModelPageProps) {
     <>
       <TransparentHeader />
 
-      {/* ── Hero — tagline dari model data ── */}
-      <HeroPlaceholder
-        tagline="OVERVIEW"
-        heading={model.tagline}
-        subheading={model.name}
-        cta={
-          <div className={styles.heroCtas}>
-            <Button
-              as="a"
-              href={whatsappUrl}
-              variant="primary"
-              size="lg"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Talk to Alvan →
-            </Button>
-            <Button as="link" href={`/model/${slug}/specifications`} variant="ghost" size="lg">
-              Spesifikasi
-            </Button>
-          </div>
-        }
-        size="large"
-        accent="cool"
-      />
+      {/* ── Hero — gunakan LayeredHero jika ada hero image, fallback ke HeroPlaceholder ── */}
+      {model.hero_media?.image?.desktop ? (
+        <LayeredHero
+          media={model.hero_media}
+          heading={model.tagline}
+          subheading={model.name}
+          tagline="OVERVIEW"
+          size="full"
+          cta={
+            <div className={styles.heroCtas}>
+              <Button
+                as="a"
+                href={whatsappUrl}
+                variant="primary"
+                size="lg"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Talk to Alvan →
+              </Button>
+              <Button as="link" href={`/model/${slug}/specifications`} variant="ghost" size="lg">
+                Spesifikasi
+              </Button>
+            </div>
+          }
+        />
+      ) : (
+        <HeroPlaceholder
+          tagline="OVERVIEW"
+          heading={model.tagline}
+          subheading={model.name}
+          cta={
+            <div className={styles.heroCtas}>
+              <Button
+                as="a"
+                href={whatsappUrl}
+                variant="primary"
+                size="lg"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Talk to Alvan →
+              </Button>
+              <Button as="link" href={`/model/${slug}/specifications`} variant="ghost" size="lg">
+                Spesifikasi
+              </Button>
+            </div>
+          }
+          size="large"
+          accent="cool"
+        />
+      )}
 
       {/* ── Model Description ── */}
       <section className={styles.descSection}>
