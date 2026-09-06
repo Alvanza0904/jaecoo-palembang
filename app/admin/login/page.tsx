@@ -2,19 +2,18 @@
  * JAECOO Palembang — Admin Login Page
  * STEP 5A: Authentication
  *
- * Email + password login via Supabase Auth.
- * Server Action handles auth — no client-side secret exposure.
+ * Menggunakan window.location.href setelah login supaya
+ * server layout baca session cookie yang baru (hard redirect).
  */
 
 'use client'
 
 import { useState, useTransition } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import styles from './login.module.css'
 
 export default function AdminLoginPage() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const next = searchParams.get('next') ?? '/admin'
 
@@ -35,8 +34,8 @@ export default function AdminLoginPage() {
         return
       }
 
-      router.push(next)
-      router.refresh()
+      // Hard redirect — paksa server re-read session cookie
+      window.location.href = next
     })
   }
 
