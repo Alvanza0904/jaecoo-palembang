@@ -8,6 +8,7 @@
  */
 
 import { useState, useTransition, useCallback } from 'react'
+import Link from 'next/link'
 import styles from './editor.module.css'
 
 /* ─── Types ────────────────────────────────────────────── */
@@ -845,7 +846,7 @@ export function ModelEditor({ initialModel, slug }: ModelEditorProps) {
       {/* Header */}
       <div className={styles.topHeader}>
         <div>
-          <a href="/admin/models" className={styles.backLink}>← Models</a>
+          <Link href="/admin/models" className={styles.backLink}>← Models</Link>
           <h1 className={styles.pageTitle}>{initialModel.name}</h1>
         </div>
         <div className={styles.headerMeta}>
