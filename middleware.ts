@@ -1,28 +1,21 @@
 /**
  * JAECOO Palembang — Middleware
  * STEP 5A: Admin Route Protection
- *
- * Protects /admin/* — unauthenticated users redirected to /admin/login.
- * Uses @supabase/ssr for cookie-based session verification.
- *
- * ✅ Server-side: cannot be bypassed by client JS manipulation.
- * ✅ Public website unaffected.
  */
 
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+type CookieItem = { name: string; value: string; options?: object }
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Only protect /admin routes
   if (!pathname.startsWith('/admin')) {
     return NextResponse.next()
   }
 
-  // Allow /admin/login through (otherwise infinite redirect)
   if (pathname === '/admin/login') {
-    // If already logged in, redirect to dashboard
     const response = NextResponse.next()
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -31,7 +24,7 @@ export async function middleware(request: NextRequest) {
       {
         cookies: {
           getAll() { return request.cookies.getAll() },
-          setAll(cookiesToSet) {
+          setAll(cookiesToSet: CookieItem[]) {
             cookiesToSet.forEach(({ name, value, options }) =>
               response.cookies.set(name, value, options)
             )
@@ -47,7 +40,6 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  // For all other /admin/* routes — verify session
   const response = NextResponse.next()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -56,7 +48,7 @@ export async function middleware(request: NextRequest) {
     {
       cookies: {
         getAll() { return request.cookies.getAll() },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: CookieItem[]) {
           cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set(name, value)
             response.cookies.set(name, value, options)
