@@ -7,7 +7,7 @@
 export const revalidate = 0; // selalu fetch fresh dari Supabase
 
 import type { Metadata } from "next";
-import { getModels } from "@/lib/data/models";
+import { getModels } from "@/lib/supabase/queries";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { GoldLine } from "@/components/ui/GoldLine";

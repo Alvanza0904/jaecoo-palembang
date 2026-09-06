@@ -17,7 +17,7 @@ import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { FinanceCalculator } from "@/components/finance/FinanceCalculator";
 import { priceStatusAllowsCalculator } from "@/lib/types/model";
 import { buildWhatsAppUrl, SALES_NAME, WHATSAPP_NUMBER } from "@/lib/utils/whatsapp";
-import { getModels } from "@/lib/data/models";
+import { getModels } from "@/lib/supabase/queries";
 import styles from "./sales.module.css";
 
 export const metadata: Metadata = {

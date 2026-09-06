@@ -12,7 +12,7 @@ export const revalidate = 0; // selalu fetch fresh dari Supabase
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getModelBySlug, getModelSlugs } from "@/lib/data/models";
+import { getModelBySlug, getModelSlugs } from "@/lib/supabase/queries";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { GoldLine } from "@/components/ui/GoldLine";

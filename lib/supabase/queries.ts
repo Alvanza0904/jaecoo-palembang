@@ -1,4 +1,4 @@
-import { supabase } from './client'
+import { createSupabaseServerClient } from './server'
 import type { ModelData, ModelVariant, ModelColor, ModelSpecCategory, ModelTechnologySection, PriceStatus } from '@/lib/types/model'
 import {
   getModels as getStaticModels,
@@ -153,6 +153,7 @@ const MODEL_SELECT = `
 
 export async function getModels(): Promise<ModelData[]> {
   try {
+    const supabase = await createSupabaseServerClient()
     const { data, error } = await supabase
       .from('models')
       .select(MODEL_SELECT)
@@ -175,6 +176,7 @@ export async function getModels(): Promise<ModelData[]> {
 
 export async function getModelBySlug(slug: string): Promise<ModelData | undefined> {
   try {
+    const supabase = await createSupabaseServerClient()
     const { data, error } = await supabase
       .from('models')
       .select(MODEL_SELECT)
@@ -195,6 +197,7 @@ export async function getModelBySlug(slug: string): Promise<ModelData | undefine
 
 export async function getModelSlugs(): Promise<string[]> {
   try {
+    const supabase = await createSupabaseServerClient()
     const { data, error } = await supabase
       .from('models')
       .select('slug')
@@ -213,6 +216,7 @@ export async function getModelSlugs(): Promise<string[]> {
 
 export async function testConnection(): Promise<{ ok: boolean; error?: string }> {
   try {
+    const supabase = await createSupabaseServerClient()
     const { error } = await supabase.from('models').select('slug').limit(1)
     if (error) throw error
     return { ok: true }
