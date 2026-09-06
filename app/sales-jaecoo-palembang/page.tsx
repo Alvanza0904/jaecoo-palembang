@@ -4,6 +4,8 @@
  * Phase 2: Premium editorial layout.
  */
 
+export const revalidate = 0; // selalu fetch fresh dari Supabase
+
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";

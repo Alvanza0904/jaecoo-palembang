@@ -8,6 +8,8 @@
  * - Routes: /model/jaecoo-j5-ev, /model/jaecoo-j7-shs, /model/jaecoo-j8-shs
  */
 
+export const revalidate = 0; // selalu fetch fresh dari Supabase
+
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getModelBySlug, getModelSlugs } from "@/lib/data/models";

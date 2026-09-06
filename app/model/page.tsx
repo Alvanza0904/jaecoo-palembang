@@ -4,6 +4,8 @@
  * Phase 2: Redirect atau daftar semua model.
  */
 
+export const revalidate = 0; // selalu fetch fresh dari Supabase
+
 import type { Metadata } from "next";
 import { getModels } from "@/lib/data/models";
 import { Container } from "@/components/ui/Container";

@@ -6,6 +6,8 @@
  * STEP 5B.1: PriceDisplay component, calculator guarded by priceStatusAllowsCalculator.
  */
 
+export const revalidate = 0; // selalu fetch fresh dari Supabase
+
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getModelBySlug, getModelSlugs } from "@/lib/data/models";
