@@ -260,7 +260,6 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
                     })
                     if (res.ok) {
                       setHeroImageUrl('')
-                      setHeroAssetId(null)
                     }
                   }}
                 >
