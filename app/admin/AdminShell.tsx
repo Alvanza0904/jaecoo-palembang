@@ -49,6 +49,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
   }
 
   const initials = user.email.substring(0, 2).toUpperCase()
+  const isDashboard = pathname === '/admin'
 
   return (
     <div className={styles.shell}>
@@ -136,6 +137,13 @@ export function AdminShell({ user, children }: AdminShellProps) {
             <span />
             <span />
           </button>
+
+          {/* Back to Dashboard — muncul di semua halaman kecuali /admin itu sendiri */}
+          {!isDashboard && (
+            <a href="/admin" className={styles.backBtn} aria-label="Kembali ke Dashboard">
+              ← Kembali ke Dashboard
+            </a>
+          )}
 
           <div className={styles.topbarRight}>
             <div className={styles.statusDot} aria-label="Connected" title="Supabase connected" />

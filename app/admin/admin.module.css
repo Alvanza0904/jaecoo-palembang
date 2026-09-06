@@ -331,3 +331,40 @@
     padding: 2rem 2.5rem;
   }
 }
+
+/* ─── Back to Dashboard Button ───────────────────────────── */
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 500;
+  color: var(--color-ink-subtle);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background 0.12s ease, color 0.12s ease;
+  min-height: 44px; /* tap target */
+  white-space: nowrap;
+}
+
+.backBtn:hover {
+  background: var(--color-gold-subtle, rgba(200, 169, 110, 0.10));
+  color: var(--color-ink);
+}
+
+/* On mobile, hide text — show only arrow to save space */
+@media (max-width: 480px) {
+  .backBtn {
+    font-size: 0;
+    padding: 0.5rem;
+    gap: 0;
+  }
+
+  .backBtn::before {
+    content: '←';
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+}
