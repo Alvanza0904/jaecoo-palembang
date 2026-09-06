@@ -6,6 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 interface RouteParams {
@@ -47,6 +48,10 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     if (error) throw error
     if (!data) return NextResponse.json({ error: 'Color not found' }, { status: 404 })
 
+    const { slug } = await params
+    revalidatePath(`/model/${slug}`, 'page')
+    revalidatePath(`/model/${slug}/specifications`, 'page')
+
     return NextResponse.json({ color: data })
   } catch (err) {
     console.error('[API] PATCH color error:', err)
@@ -70,6 +75,10 @@ export async function DELETE(_req: NextRequest, { params }: RouteParams) {
       .eq('id', colorId)
 
     if (error) throw error
+
+    const { slug } = await params
+    revalidatePath(`/model/${slug}`, 'page')
+    revalidatePath(`/model/${slug}/specifications`, 'page')
 
     return NextResponse.json({ ok: true })
   } catch (err) {

@@ -6,6 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 interface RouteParams {
@@ -59,6 +60,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       }
       throw error
     }
+
+    revalidatePath(`/model/${slug}`, 'page')
+    revalidatePath(`/model/${slug}/specifications`, 'page')
 
     return NextResponse.json({ color: data }, { status: 201 })
   } catch (err) {

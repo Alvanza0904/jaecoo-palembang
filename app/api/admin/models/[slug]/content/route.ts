@@ -6,6 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 interface RouteParams {
@@ -60,6 +61,9 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       .single()
 
     if (error) throw error
+
+    revalidatePath(`/model/${slug}`, 'page')
+    revalidatePath(`/model/${slug}/specifications`, 'page')
 
     return NextResponse.json({ content: data })
   } catch (err) {

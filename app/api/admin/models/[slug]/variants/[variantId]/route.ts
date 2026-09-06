@@ -7,6 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 const VALID_PRICE_STATUSES = [
@@ -98,6 +99,12 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     if (error) throw error
     if (!data) return NextResponse.json({ error: 'Variant not found' }, { status: 404 })
 
+    const { slug } = await params
+    revalidatePath(`/model/${slug}`, 'page')
+    revalidatePath(`/model/${slug}/specifications`, 'page')
+    revalidatePath(`/sales-jaecoo-palembang`, 'page')
+    revalidatePath('/', 'page')
+
     return NextResponse.json({ variant: data })
   } catch (err) {
     console.error('[API] PATCH variant error:', err)
@@ -121,6 +128,12 @@ export async function DELETE(_req: NextRequest, { params }: RouteParams) {
       .eq('id', variantId)
 
     if (error) throw error
+
+    const { slug } = await params
+    revalidatePath(`/model/${slug}`, 'page')
+    revalidatePath(`/model/${slug}/specifications`, 'page')
+    revalidatePath(`/sales-jaecoo-palembang`, 'page')
+    revalidatePath('/', 'page')
 
     return NextResponse.json({ ok: true })
   } catch (err) {

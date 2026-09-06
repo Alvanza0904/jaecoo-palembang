@@ -7,6 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 const VALID_PRICE_STATUSES = [
@@ -113,6 +114,11 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       }
       throw error
     }
+
+    revalidatePath(`/model/${slug}`, 'page')
+    revalidatePath(`/model/${slug}/specifications`, 'page')
+    revalidatePath(`/sales-jaecoo-palembang`, 'page')
+    revalidatePath('/', 'page')
 
     return NextResponse.json({ variant: data }, { status: 201 })
   } catch (err) {
