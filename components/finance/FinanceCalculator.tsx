@@ -61,16 +61,16 @@ interface FinanceCalculatorProps {
 }
 
 export function FinanceCalculator({ price, modelName }: FinanceCalculatorProps) {
+  // Hooks MUST be called before any early return (Rules of Hooks)
   const [dpPercent, setDpPercent] = useState<typeof DP_OPTIONS[number]>(30);
   const [tenor, setTenor] = useState<typeof TENOR_OPTIONS[number]>(3);
+
   // Guard: jangan render jika price tidak valid
   // Caller seharusnya sudah diproteksi oleh priceStatusAllowsCalculator,
   // tapi ini lapisan kedua untuk mencegah Rp0 / NaN / null
   if (!price || price <= 0 || isNaN(price)) {
     return null;
   }
-
-  
 
   const result = calculate({ price, dp_percent: dpPercent, tenor_years: tenor });
 

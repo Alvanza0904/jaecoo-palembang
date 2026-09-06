@@ -1,6 +1,7 @@
 /**
  * JAECOO Palembang — API Admin: Single Color
- * STEP 5B: PATCH update + DELETE color
+ * STEP 5B + 5C: PATCH update + DELETE color
+ * STEP 5C: allows image_path and media_asset_id
  *
  * Auth: Supabase session wajib.
  */
@@ -24,7 +25,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     }
 
     const body = await req.json()
-    const allowed = ['name', 'hex', 'sort_order']
+    const allowed = ['name', 'hex', 'sort_order', 'image_path', 'media_asset_id']
     const updates: Record<string, unknown> = {}
 
     for (const key of allowed) {

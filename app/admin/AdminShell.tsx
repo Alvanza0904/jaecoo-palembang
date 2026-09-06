@@ -26,6 +26,7 @@ interface AdminShellProps {
 const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard', icon: '◈' },
   { href: '/admin/models', label: 'Models', icon: '◉' },
+  { href: '/admin/media', label: 'Media', icon: '◈' },
   { href: '/admin/promo', label: 'Promo', icon: '◈' },
   { href: '/admin/news', label: 'News', icon: '◈' },
   { href: '/admin/gallery', label: 'Gallery', icon: '◈' },
@@ -91,7 +92,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
                   >
                     <span className={styles.navIcon}>{item.icon}</span>
                     <span>{item.label}</span>
-                    {item.href !== '/admin' && item.href !== '/admin/models' && (
+                    {item.href !== '/admin' && item.href !== '/admin/models' && item.href !== '/admin/media' && (
                       <span className={styles.navBadge}>Soon</span>
                     )}
                   </a>

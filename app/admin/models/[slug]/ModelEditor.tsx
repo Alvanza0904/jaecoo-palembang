@@ -2,7 +2,8 @@
 
 /**
  * JAECOO Palembang — Model Editor (Client Component)
- * STEP 5B: Full CMS editor dengan tab Basic / Variants / Colors / Content
+ * STEP 5B + 5C: Full CMS editor dengan tab Basic / Variants / Colors / Content
+ * STEP 5C: Tambah Media Picker untuk Hero Image dan Color images
  *
  * Semua save langsung ke Supabase via API routes (authenticated).
  */
@@ -10,6 +11,8 @@
 import { useState, useTransition, useCallback } from 'react'
 import Link from 'next/link'
 import styles from './editor.module.css'
+import { MediaPicker } from '@/components/admin/media/MediaPicker'
+import type { MediaAsset } from '@/lib/types/media-asset'
 
 /* ─── Types ────────────────────────────────────────────── */
 
@@ -51,6 +54,8 @@ interface Color {
   name: string
   hex: string
   sort_order: number
+  image_path?: string | null
+  media_asset_id?: string | null
 }
 
 interface ContentRow {
@@ -111,6 +116,12 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
   const [isPending, startTransition] = useTransition()
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
   const [dirty, setDirty] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
+
+  // Hero image — loaded from model_content.hero section
+  const heroContent = model.model_content?.find((c) => c.section === 'hero')?.content as Record<string, unknown> | undefined
+  const heroImageInit = (heroContent?.image as Record<string, string> | undefined)?.desktop ?? ''
+  const [heroImageUrl, setHeroImageUrl] = useState(heroImageInit)
 
   function update(key: keyof typeof form, val: string | boolean) {
     setForm((f) => ({ ...f, [key]: val }))
@@ -217,6 +228,91 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
           {isPending ? 'Menyimpan...' : 'Simpan Basic Info'}
         </button>
       </div>
+
+      {/* ── Hero Image ─────────────────────────────── */}
+      <div className={styles.mediaSection}>
+        <h3 className={styles.mediaSectionTitle}>Hero Image</h3>
+        <p className={styles.mediaSectionNote}>
+          Gambar utama yang tampil di halaman model. Tersimpan sebagai hero media reference.
+        </p>
+
+        {heroImageUrl ? (
+          <div className={styles.mediaCurrent}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={heroImageUrl} alt="Hero current" className={styles.mediaThumb} />
+            <div className={styles.mediaInfo}>
+              <div className={styles.mediaUrl}>{heroImageUrl}</div>
+              <div className={styles.mediaActions}>
+                <button className={styles.btnSecondary} onClick={() => setPickerOpen(true)}>
+                  Ganti Gambar
+                </button>
+                <button
+                  className={styles.btnDanger}
+                  onClick={async () => {
+                    // Save empty hero to DB
+                    const res = await fetch(`/api/admin/models/${slug}/content`, {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        section: 'hero',
+                        content: { image: { desktop: '', tablet: '', mobile: '', alt: model.name }, media_asset_id: null },
+                      }),
+                    })
+                    if (res.ok) {
+                      setHeroImageUrl('')
+                      setHeroAssetId(null)
+                    }
+                  }}
+                >
+                  Hapus
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <button
+            className={styles.mediaPickBtn}
+            onClick={() => setPickerOpen(true)}
+          >
+            <span className={styles.mediaPickIcon}>◈</span>
+            <span>Pilih Hero Image dari Media Library</span>
+          </button>
+        )}
+      </div>
+
+      {/* Media Picker Modal */}
+      <MediaPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        title="Pilih Hero Image"
+        defaultCategory="models"
+        onSelect={async (asset: MediaAsset) => {
+          setPickerOpen(false)
+          setHeroImageUrl(asset.public_url ?? '')
+          // Save to model_content.hero
+          await fetch(`/api/admin/models/${slug}/content`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              section: 'hero',
+              content: {
+                image: {
+                  desktop: asset.public_url,
+                  tablet:  asset.public_url,
+                  mobile:  asset.public_url,
+                  alt:     model.name,
+                  width:   asset.width,
+                  height:  asset.height,
+                },
+                media_asset_id: asset.id,
+                focal_x: asset.focal_x,
+                focal_y: asset.focal_y,
+                text_color_mode: asset.text_color_mode,
+              },
+            }),
+          })
+        }}
+      />
     </div>
   )
 }
@@ -619,6 +715,8 @@ function ColorRow({
   const [form, setForm] = useState({ name: color.name, hex: color.hex, sort_order: color.sort_order })
   const [isPending, startTransition] = useTransition()
   const [feedback, setFeedback] = useState<string | null>(null)
+  const [colorPickerOpen, setColorPickerOpen] = useState(false)
+  const [colorImageUrl, setColorImageUrl] = useState(color.image_path ?? '')
 
   function handleSave() {
     if (!form.name.trim()) { setFeedback('Nama warna wajib diisi'); return }
@@ -633,7 +731,7 @@ function ColorRow({
         })
         const json = await res.json()
         if (!res.ok) throw new Error(json.error || 'Gagal menyimpan')
-        onSaved({ ...color, ...form })
+        onSaved({ ...color, ...form, image_path: colorImageUrl })
         setEditing(false)
         setFeedback(null)
       } catch (err) {
@@ -703,6 +801,42 @@ function ColorRow({
           />
         </div>
       </div>
+      {/* Color Image */}
+      <div className={styles.field}>
+        <label className={styles.label}>Gambar Warna (opsional)</label>
+        {colorImageUrl ? (
+          <div className={styles.mediaRowCompact}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={colorImageUrl} alt={form.name} className={styles.mediaThumbSm} />
+            <div className={styles.mediaRowActions}>
+              <button className={styles.btnSecondary} onClick={() => setColorPickerOpen(true)}>Ganti</button>
+              <button className={styles.btnDanger} onClick={() => setColorImageUrl('')}>Hapus</button>
+            </div>
+          </div>
+        ) : (
+          <button className={styles.mediaPickBtnSm} onClick={() => setColorPickerOpen(true)}>
+            + Pilih Gambar dari Media Library
+          </button>
+        )}
+      </div>
+
+      <MediaPicker
+        open={colorPickerOpen}
+        onClose={() => setColorPickerOpen(false)}
+        title={`Pilih Gambar — ${color.name}`}
+        defaultCategory="models"
+        onSelect={async (asset: MediaAsset) => {
+          setColorPickerOpen(false)
+          setColorImageUrl(asset.public_url ?? '')
+          // Patch color image_path in DB
+          await fetch(`/api/admin/models/${slug}/colors/${color.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image_path: asset.public_url, media_asset_id: asset.id }),
+          })
+        }}
+      />
+
       {feedback && <p className={styles.errorInline}>{feedback}</p>}
       <div className={styles.rowActions}>
         <button className={styles.btnPrimary} onClick={handleSave} disabled={isPending}>{isPending ? '...' : 'Simpan'}</button>

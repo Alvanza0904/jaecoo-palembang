@@ -597,3 +597,128 @@
     align-items: flex-start;
   }
 }
+
+/* ─── STEP 5C: Media Integration ───────────────────── */
+
+.mediaSection {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border, #e0ddd6);
+}
+
+.mediaSectionTitle {
+  font-size: var(--text-base, 1rem);
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 0 0 0.25rem;
+}
+
+.mediaSectionNote {
+  font-size: var(--text-sm);
+  color: var(--color-ink-subtle);
+  margin: 0 0 1rem;
+}
+
+.mediaCurrent {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.mediaThumb {
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--color-border, #e0ddd6);
+  flex-shrink: 0;
+}
+
+.mediaThumbSm {
+  width: 60px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--color-border, #e0ddd6);
+  flex-shrink: 0;
+}
+
+.mediaInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.mediaUrl {
+  font-size: 0.75rem;
+  font-family: var(--font-mono, monospace);
+  color: var(--color-ink-subtle);
+  word-break: break-all;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.mediaActions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.mediaPickBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  border: 2px dashed var(--color-border, #e0ddd6);
+  border-radius: 8px;
+  background: var(--color-surface, #fafaf8);
+  color: var(--color-ink-subtle);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: all 0.12s;
+  min-height: 52px;
+}
+
+.mediaPickBtn:hover {
+  border-color: var(--color-gold);
+  color: var(--color-ink);
+  background: rgba(184, 147, 78, 0.04);
+}
+
+.mediaPickIcon {
+  font-size: 1.125rem;
+  color: var(--color-gold);
+  flex-shrink: 0;
+}
+
+.mediaPickBtnSm {
+  padding: 0.5rem 0.875rem;
+  border: 1px dashed var(--color-border, #e0ddd6);
+  border-radius: 6px;
+  background: var(--color-surface, #fafaf8);
+  color: var(--color-ink-subtle);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s;
+  min-height: 38px;
+}
+
+.mediaPickBtnSm:hover {
+  border-color: var(--color-gold);
+  color: var(--color-ink);
+}
+
+.mediaRowCompact {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.mediaRowActions {
+  display: flex;
+  gap: 0.5rem;
+}
