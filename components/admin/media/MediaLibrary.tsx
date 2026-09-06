@@ -1,14 +1,13 @@
 /**
  * JAECOO Palembang — Media Library (Client Component)
- * STEP 5C: Full media management UI
+ * STEP 5D: Updated with processing status, variants, cutout display
  *
  * Features:
- * - Grid display with thumbnail, metadata
- * - Upload with progress, validation, error messages
+ * - Grid display with thumbnail, processing status badge
+ * - Upload with progress → auto-trigger processing
+ * - Media detail panel (click card → open detail)
  * - Search + category filter
- * - Delete confirmation
- * - Copy URL
- * - Mobile-friendly layout
+ * - Delete with cleanup of all variants + cutout
  */
 
 'use client'
@@ -20,7 +19,10 @@ import {
   validateFile,
   getImageDimensions,
   formatFileSize,
+  PROCESSING_STATUS_LABEL,
+  PROCESSING_STATUS_COLOR,
 } from '@/lib/types/media-asset'
+import { MediaDetail } from './MediaDetail'
 import styles from './MediaLibrary.module.css'
 
 /* ─── Helpers ────────────────────────────────────────── */
@@ -31,9 +33,7 @@ function isImage(mime: string) {
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('id-ID', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
+    day: '2-digit', month: 'short', year: 'numeric',
   })
 }
 
@@ -53,17 +53,12 @@ function UploadZone({ category, onUploaded }: UploadZoneProps) {
 
   async function handleFile(file: File) {
     const validationError = validateFile(file)
-    if (validationError) {
-      setError(validationError)
-      setStatus('error')
-      return
-    }
+    if (validationError) { setError(validationError); setStatus('error'); return }
 
     setStatus('uploading')
     setError(null)
     setProgress(10)
 
-    // Get image dimensions client-side before upload
     let width: number | undefined
     let height: number | undefined
     if (isImage(file.type)) {
@@ -71,9 +66,7 @@ function UploadZone({ category, onUploaded }: UploadZoneProps) {
         const dims = await getImageDimensions(file)
         width = dims.width
         height = dims.height
-      } catch {
-        // not critical — continue without dimensions
-      }
+      } catch { /* non-critical */ }
     }
     setProgress(30)
 
@@ -86,19 +79,10 @@ function UploadZone({ category, onUploaded }: UploadZoneProps) {
     setProgress(50)
 
     try {
-      const res = await fetch('/api/admin/media/upload', {
-        method: 'POST',
-        body: fd,
-      })
+      const res = await fetch('/api/admin/media/upload', { method: 'POST', body: fd })
       setProgress(90)
       const json = await res.json()
-
-      if (!res.ok) {
-        setError(json.error || 'Upload gagal. Coba lagi.')
-        setStatus('error')
-        return
-      }
-
+      if (!res.ok) { setError(json.error || 'Upload gagal.'); setStatus('error'); return }
       setProgress(100)
       setStatus('success')
       onUploaded(json.asset)
@@ -143,7 +127,7 @@ function UploadZone({ category, onUploaded }: UploadZoneProps) {
           <div className={styles.uploadIcon}>↑</div>
           <div className={styles.uploadTitle}>Upload Media</div>
           <div className={styles.uploadSub}>Klik atau seret file ke sini</div>
-          <div className={styles.uploadHint}>JPG · PNG · WebP · AVIF · MP4 — max 10 MB</div>
+          <div className={styles.uploadHint}>JPG · PNG · WebP · AVIF · MP4 — max 20 MB</div>
         </>
       )}
 
@@ -154,6 +138,9 @@ function UploadZone({ category, onUploaded }: UploadZoneProps) {
               <div className={styles.progressFill} style={{ width: `${progress}%` }} />
             </div>
             <div className={styles.uploadSub}>Mengupload… {progress}%</div>
+            {progress >= 90 && (
+              <div className={styles.uploadHint}>Processing variants di background…</div>
+            )}
           </div>
         </>
       )}
@@ -162,6 +149,7 @@ function UploadZone({ category, onUploaded }: UploadZoneProps) {
         <>
           <div className={styles.uploadIcon} style={{ color: '#22c55e' }}>✓</div>
           <div className={styles.uploadTitle}>Upload berhasil!</div>
+          <div className={styles.uploadHint}>Variants sedang diproses…</div>
         </>
       )}
 
@@ -184,21 +172,15 @@ interface MediaCardProps {
   onDeleted: (id: string) => void
   onSelect?: (asset: MediaAsset) => void
   selectable?: boolean
+  onOpenDetail: (asset: MediaAsset) => void
 }
 
-function MediaCard({ asset, onDeleted, onSelect, selectable }: MediaCardProps) {
-  const [copying, setCopying] = useState(false)
+function MediaCard({ asset, onDeleted, onSelect, selectable, onOpenDetail }: MediaCardProps) {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
-  async function handleCopy() {
-    if (!asset.public_url) return
-    await navigator.clipboard.writeText(asset.public_url)
-    setCopying(true)
-    setTimeout(() => setCopying(false), 1500)
-  }
-
-  async function handleDelete() {
+  async function handleDelete(e: React.MouseEvent) {
+    e.stopPropagation()
     if (!confirmDelete) { setConfirmDelete(true); return }
     setDeleting(true)
     try {
@@ -219,14 +201,18 @@ function MediaCard({ asset, onDeleted, onSelect, selectable }: MediaCardProps) {
 
   const url = asset.public_url ?? ''
   const isImg = isImage(asset.mime_type)
+  const status = asset.processing_status ?? 'uploaded'
+  const statusColor = PROCESSING_STATUS_COLOR[status]
+  const hasVariants = Object.keys(asset.variants ?? {}).length > 0
+  const hasCutout = !!asset.cutout_url
 
   return (
-    <div className={`${styles.card} ${selectable ? styles.cardSelectable : ''}`}>
+    <div
+      className={`${styles.card} ${selectable ? styles.cardSelectable : ''}`}
+      onClick={() => onOpenDetail(asset)}
+    >
       {/* Thumbnail */}
-      <div
-        className={styles.thumb}
-        onClick={() => selectable && onSelect?.(asset)}
-      >
+      <div className={styles.thumb}>
         {isImg && url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={url} alt={asset.filename} className={styles.thumbImg} loading="lazy" />
@@ -235,8 +221,21 @@ function MediaCard({ asset, onDeleted, onSelect, selectable }: MediaCardProps) {
             {asset.mime_type.startsWith('video/') ? '▶' : '◈'}
           </div>
         )}
+
+        {/* Processing status badge */}
+        <div
+          className={styles.statusBadge}
+          style={{
+            backgroundColor: statusColor + '33',
+            color: statusColor,
+            borderColor: statusColor + '55',
+          }}
+        >
+          {PROCESSING_STATUS_LABEL[status]}
+        </div>
+
         {selectable && (
-          <div className={styles.selectOverlay}>
+          <div className={styles.selectOverlay} onClick={(e) => { e.stopPropagation(); onSelect?.(asset) }}>
             <span className={styles.selectBtn}>Pilih</span>
           </div>
         )}
@@ -244,9 +243,7 @@ function MediaCard({ asset, onDeleted, onSelect, selectable }: MediaCardProps) {
 
       {/* Metadata */}
       <div className={styles.cardBody}>
-        <div className={styles.cardFilename} title={asset.filename}>
-          {asset.filename}
-        </div>
+        <div className={styles.cardFilename} title={asset.filename}>{asset.filename}</div>
         <div className={styles.cardMeta}>
           <span className={styles.cardCategory}>{asset.category}</span>
           <span className={styles.cardSize}>{formatFileSize(asset.size_bytes)}</span>
@@ -254,26 +251,30 @@ function MediaCard({ asset, onDeleted, onSelect, selectable }: MediaCardProps) {
         {asset.width && asset.height && (
           <div className={styles.cardDim}>{asset.width} × {asset.height} px</div>
         )}
+
+        {/* Variant + cutout indicators */}
+        <div className={styles.cardIndicators}>
+          {hasVariants && (
+            <span className={styles.indicatorGreen} title="Responsive variants tersedia">
+              ⊞ Variants
+            </span>
+          )}
+          {hasCutout && (
+            <span className={styles.indicatorGold} title="Cutout tersedia">
+              ✂ Cutout
+            </span>
+          )}
+        </div>
+
         <div className={styles.cardDate}>{formatDate(asset.created_at)}</div>
       </div>
 
       {/* Actions */}
-      <div className={styles.cardActions}>
-        {asset.public_url && (
-          <button
-            className={styles.actionBtn}
-            onClick={handleCopy}
-            title="Salin URL"
-            aria-label="Salin URL"
-          >
-            {copying ? '✓' : '⎘'}
-          </button>
-        )}
+      <div className={styles.cardActions} onClick={(e) => e.stopPropagation()}>
         {selectable && (
           <button
             className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}
             onClick={() => onSelect?.(asset)}
-            title="Gunakan media ini"
           >
             ✓ Pilih
           </button>
@@ -295,11 +296,8 @@ function MediaCard({ asset, onDeleted, onSelect, selectable }: MediaCardProps) {
 /* ─── Main MediaLibrary ───────────────────────────────── */
 
 interface MediaLibraryProps {
-  /** If provided, renders in picker mode — user selects one asset */
   onSelect?: (asset: MediaAsset) => void
-  /** Pre-selected category filter in picker mode */
   defaultCategory?: MediaCategory
-  /** Compact mode for embedding in modals */
   compact?: boolean
 }
 
@@ -310,6 +308,7 @@ export function MediaLibrary({ onSelect, defaultCategory, compact }: MediaLibrar
   const [category, setCategory] = useState<string>(defaultCategory ?? 'all')
   const [search, setSearch] = useState('')
   const [searchInput, setSearchInput] = useState('')
+  const [detailAsset, setDetailAsset] = useState<MediaAsset | null>(null)
 
   const fetchAssets = useCallback(async () => {
     setLoading(true)
@@ -337,6 +336,12 @@ export function MediaLibrary({ onSelect, defaultCategory, compact }: MediaLibrar
 
   function handleDeleted(id: string) {
     setAssets((prev) => prev.filter((a) => a.id !== id))
+    if (detailAsset?.id === id) setDetailAsset(null)
+  }
+
+  function handleUpdated(updated: MediaAsset) {
+    setAssets((prev) => prev.map((a) => a.id === updated.id ? updated : a))
+    if (detailAsset?.id === updated.id) setDetailAsset(updated)
   }
 
   function handleSearch(e: React.FormEvent) {
@@ -354,7 +359,7 @@ export function MediaLibrary({ onSelect, defaultCategory, compact }: MediaLibrar
           <div>
             <h1 className={styles.title}>Media Library</h1>
             <p className={styles.subtitle}>
-              Upload dan kelola gambar untuk website JAECOO Palembang
+              Upload dan kelola gambar — variants diproses otomatis, cutout tersedia via detail
             </p>
           </div>
         </div>
@@ -364,7 +369,6 @@ export function MediaLibrary({ onSelect, defaultCategory, compact }: MediaLibrar
 
       {/* Upload + Filters row */}
       <div className={styles.toolbar}>
-        {/* Category filter */}
         <div className={styles.filterRow}>
           <button
             className={`${styles.filterBtn} ${category === 'all' ? styles.filterBtnActive : ''}`}
@@ -383,7 +387,6 @@ export function MediaLibrary({ onSelect, defaultCategory, compact }: MediaLibrar
           ))}
         </div>
 
-        {/* Search */}
         <form className={styles.searchForm} onSubmit={handleSearch}>
           <input
             className={styles.searchInput}
@@ -396,7 +399,6 @@ export function MediaLibrary({ onSelect, defaultCategory, compact }: MediaLibrar
         </form>
       </div>
 
-      {/* Upload zone — only visible when not in picker/compact mode, or in picker for quick upload */}
       <UploadZone
         category={(category !== 'all' ? category : 'system') as MediaCategory}
         onUploaded={handleUploaded}
@@ -405,9 +407,10 @@ export function MediaLibrary({ onSelect, defaultCategory, compact }: MediaLibrar
       {/* Stats */}
       {!loading && (
         <div className={styles.stats}>
-          {assets.length} file{assets.length !== 1 ? '' : ''}
+          {assets.length} file
           {search && ` — hasil pencarian "${search}"`}
           {category !== 'all' && ` — kategori ${category}`}
+          <span className={styles.statsHint}> · Klik kartu untuk detail & cutout</span>
         </div>
       )}
 
@@ -443,9 +446,19 @@ export function MediaLibrary({ onSelect, defaultCategory, compact }: MediaLibrar
               onDeleted={handleDeleted}
               onSelect={onSelect}
               selectable={selectable}
+              onOpenDetail={setDetailAsset}
             />
           ))}
         </div>
+      )}
+
+      {/* Detail Panel */}
+      {detailAsset && (
+        <MediaDetail
+          asset={detailAsset}
+          onClose={() => setDetailAsset(null)}
+          onUpdated={handleUpdated}
+        />
       )}
     </div>
   )

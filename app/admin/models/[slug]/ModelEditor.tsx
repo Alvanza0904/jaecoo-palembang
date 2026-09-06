@@ -2,8 +2,9 @@
 
 /**
  * JAECOO Palembang — Model Editor (Client Component)
- * STEP 5B + 5C: Full CMS editor dengan tab Basic / Variants / Colors / Content
+ * STEP 5B + 5C + 5D: Full CMS editor dengan tab Basic / Variants / Colors / Content
  * STEP 5C: Tambah Media Picker untuk Hero Image dan Color images
+ * STEP 5D: Tambah Cutout Media picker untuk layered Hero
  *
  * Semua save langsung ke Supabase via API routes (authenticated).
  */
@@ -122,6 +123,53 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
   const heroContent = model.model_content?.find((c) => c.section === 'hero')?.content as Record<string, unknown> | undefined
   const heroImageInit = (heroContent?.image as Record<string, string> | undefined)?.desktop ?? ''
   const [heroImageUrl, setHeroImageUrl] = useState(heroImageInit)
+
+  // Cutout media picker
+  const [cutoutPickerOpen, setCutoutPickerOpen] = useState(false)
+  const [cutoutUrl, setCutoutUrl] = useState<string>('')
+  const [cutoutSaving, setCutoutSaving] = useState(false)
+  const [cutoutFeedback, setCutoutFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
+
+  async function handleCutoutSelect(asset: MediaAsset) {
+    setCutoutPickerOpen(false)
+    if (!asset.cutout_url) {
+      setCutoutFeedback({
+        type: 'error',
+        msg: 'Media ini belum memiliki cutout. Buka Media Library → klik media → hapus background dulu.',
+      })
+      return
+    }
+    setCutoutSaving(true)
+    setCutoutFeedback(null)
+    try {
+      const res = await fetch(`/api/admin/models/${slug}/content`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          section: 'hero',
+          content: {
+            ...(heroContent ?? {}),
+            cutout_url: asset.cutout_url,
+            cutout_media_id: asset.id,
+          },
+        }),
+      })
+      if (res.ok) {
+        setCutoutUrl(asset.cutout_url)
+        setCutoutFeedback({ type: 'success', msg: 'Cutout berhasil disimpan.' })
+      } else {
+        const j = await res.json()
+        setCutoutFeedback({ type: 'error', msg: j.error || 'Gagal menyimpan cutout.' })
+      }
+    } catch {
+      setCutoutFeedback({ type: 'error', msg: 'Koneksi gagal.' })
+    } finally {
+      setCutoutSaving(false)
+    }
+  }
+
+  // Init cutout from hero content
+  const cutoutUrlInit = (heroContent?.cutout_url as string | undefined) ?? ''
 
   function update(key: keyof typeof form, val: string | boolean) {
     setForm((f) => ({ ...f, [key]: val }))
@@ -279,6 +327,60 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
         )}
       </div>
 
+      {/* ── Cutout Media ───────────────────────────── */}
+      <div className={styles.mediaSection}>
+        <h3 className={styles.mediaSectionTitle}>Cutout Kendaraan</h3>
+        <p className={styles.mediaSectionNote}>
+          Gambar kendaraan tanpa background (transparan) untuk layered Hero effect.
+          Buka Media Library → klik gambar → hapus background terlebih dahulu.
+        </p>
+
+        {cutoutFeedback && (
+          <Feedback type={cutoutFeedback.type} message={cutoutFeedback.msg} />
+        )}
+
+        {(cutoutUrl || cutoutUrlInit) ? (
+          <div className={styles.mediaCurrent}>
+            <div style={{
+              background: 'repeating-conic-gradient(#333 0% 25%, #1a1a1a 0% 50%) 0 0 / 16px 16px',
+              borderRadius: 6,
+              overflow: 'hidden',
+              width: 80,
+              height: 60,
+              flexShrink: 0,
+            }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={cutoutUrl || cutoutUrlInit}
+                alt="Cutout"
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              />
+            </div>
+            <div className={styles.mediaInfo}>
+              <div className={styles.mediaUrl}>Cutout tersedia ✓</div>
+              <div className={styles.mediaActions}>
+                <button
+                  className={styles.btnSecondary}
+                  onClick={() => setCutoutPickerOpen(true)}
+                  disabled={cutoutSaving}
+                >
+                  Ganti Cutout
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <button
+            className={styles.mediaPickBtn}
+            onClick={() => setCutoutPickerOpen(true)}
+            disabled={cutoutSaving}
+          >
+            <span className={styles.mediaPickIcon}>✂</span>
+            <span>Pilih Media dengan Cutout</span>
+          </button>
+        )}
+      </div>
+
       {/* Media Picker Modal */}
       <MediaPicker
         open={pickerOpen}
@@ -311,6 +413,15 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
             }),
           })
         }}
+      />
+
+      {/* Cutout Picker Modal */}
+      <MediaPicker
+        open={cutoutPickerOpen}
+        onClose={() => setCutoutPickerOpen(false)}
+        title="Pilih Media dengan Cutout"
+        defaultCategory="models"
+        onSelect={handleCutoutSelect}
       />
     </div>
   )

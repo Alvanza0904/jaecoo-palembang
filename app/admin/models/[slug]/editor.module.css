@@ -92,6 +92,12 @@
   overflow-x: auto;
 }
 
+.tabContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 .tab {
   padding: 0.625rem 1rem;
   font-size: var(--text-sm);

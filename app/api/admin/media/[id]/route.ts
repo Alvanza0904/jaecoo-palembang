@@ -1,9 +1,9 @@
 /**
  * JAECOO Palembang — Media Asset API
- * STEP 5C:
- *   GET    /api/admin/media/[id] — get single asset
- *   PATCH  /api/admin/media/[id] — update focal point, category, etc.
- *   DELETE /api/admin/media/[id] — delete asset + storage file
+ * STEP 5D:
+ *   GET    /api/admin/media/[id] — get single asset (incl. variants + cutout)
+ *   PATCH  /api/admin/media/[id] — update focal point, alt_text, etc.
+ *   DELETE /api/admin/media/[id] — delete asset + all variants + cutout from storage
  *
  * Protected: requires authenticated admin session.
  */
@@ -57,7 +57,11 @@ export async function PATCH(
   }
 
   // Only allow safe fields to be updated
-  const allowed = ['focal_x', 'focal_y', 'category', 'responsive_settings', 'text_color_mode', 'filename']
+  const allowed = [
+    'focal_x', 'focal_y', 'category',
+    'responsive_settings', 'text_color_mode',
+    'filename', 'alt_text',
+  ]
   const update: Record<string, unknown> = {}
   for (const key of allowed) {
     if (key in body) update[key] = body[key]
@@ -90,10 +94,10 @@ export async function DELETE(
   const user = await requireAdmin(supabase)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Get asset first to find storage path
+  // Get asset first to find all storage paths
   const { data: asset, error: fetchErr } = await supabase
     .from('media_assets')
-    .select('storage_path, storage_bucket')
+    .select('storage_path, storage_bucket, cutout_storage_path, variants')
     .eq('id', id)
     .single()
 
@@ -101,14 +105,39 @@ export async function DELETE(
     return NextResponse.json({ error: 'Media tidak ditemukan' }, { status: 404 })
   }
 
-  // Delete from storage
+  // Collect all storage paths to delete
+  const pathsToDelete: string[] = [asset.storage_path]
+
+  if (asset.cutout_storage_path) {
+    pathsToDelete.push(asset.cutout_storage_path)
+  }
+
+  // Add variant paths from variants JSONB
+  if (asset.variants && typeof asset.variants === 'object') {
+    const variants = asset.variants as Record<string, string>
+    for (const url of Object.values(variants)) {
+      // Extract path from public URL
+      // URL: https://xxx.supabase.co/storage/v1/object/public/jaecoo-media/category/originals/file__1920w.webp
+      try {
+        const urlObj = new URL(url)
+        const pathMatch = urlObj.pathname.match(/\/storage\/v1\/object\/public\/[^/]+\/(.+)$/)
+        if (pathMatch?.[1]) {
+          pathsToDelete.push(pathMatch[1])
+        }
+      } catch {
+        // Skip malformed URLs
+      }
+    }
+  }
+
+  // Delete all storage files (non-critical — continue even if some fail)
+  const bucket = asset.storage_bucket || BUCKET
   const { error: storageErr } = await supabase.storage
-    .from(asset.storage_bucket || BUCKET)
-    .remove([asset.storage_path])
+    .from(bucket)
+    .remove(pathsToDelete)
 
   if (storageErr) {
     console.warn('[Media DELETE] storage error (continuing):', storageErr)
-    // Don't abort — still delete the DB record even if storage fails
   }
 
   // Delete from DB

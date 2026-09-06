@@ -1,0 +1,280 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 200;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.panel {
+  width: min(480px, 100vw);
+  height: 100vh;
+  background: #0a0a0a;
+  border-left: 1px solid #1e293b;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header */
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #1e293b;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.panelTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.closeBtn:hover {
+  color: #e2e8f0;
+}
+
+/* Body */
+.panelBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Preview */
+.previewSection {
+  background: #111;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.previewImg {
+  display: block;
+  width: 100%;
+  height: 200px;
+  object-fit: contain;
+}
+
+.previewPlaceholder {
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+  font-size: 2rem;
+}
+
+/* Status */
+.statusSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.statusLabel {
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.statusBadge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid;
+}
+
+.processingError {
+  font-size: 0.7rem;
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 4px;
+  padding: 0.4rem 0.5rem;
+  line-height: 1.4;
+}
+
+/* Metadata */
+.metaSection {}
+
+.metaGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.metaKey {
+  font-size: 0.65rem;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.metaVal {
+  font-size: 0.78rem;
+  color: #cbd5e1;
+}
+
+/* Section title */
+.sectionTitle {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.5rem;
+}
+
+/* Variants */
+.variantsSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.variantGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.variantRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.65rem;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.variantRow:last-child {
+  border-bottom: none;
+}
+
+.variantLabel {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-family: ui-monospace, monospace;
+}
+
+.variantCheck {
+  font-size: 0.78rem;
+  color: #22c55e;
+  text-decoration: none;
+}
+
+.variantCheck:hover {
+  text-decoration: underline;
+}
+
+.variantMissing {
+  font-size: 0.78rem;
+  color: #334155;
+}
+
+.reprocessRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.reprocessBtn {
+  width: 100%;
+  padding: 0.5rem;
+  background: transparent;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.reprocessBtn:hover:not(:disabled) {
+  border-color: #475569;
+  color: #e2e8f0;
+}
+
+.reprocessBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.reprocessError {
+  font-size: 0.7rem;
+  color: #f87171;
+}
+
+/* URL */
+.urlSection {}
+
+.urlRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #111;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+}
+
+.urlCode {
+  flex: 1;
+  font-size: 0.65rem;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: ui-monospace, monospace;
+}
+
+.copyBtn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.copyBtn:hover {
+  color: #c9a84c;
+}
