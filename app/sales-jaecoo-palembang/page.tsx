@@ -56,7 +56,7 @@ export default function SalesPage() {
     source_cta: "sales_page_cta",
   });
 
-  const models = getModels();
+  const models = await getModels();
 
   return (
     <>

@@ -38,7 +38,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: ModelPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const model = getModelBySlug(slug);
+  const model = await getModelBySlug(slug);
   if (!model) return {};
 
   return {
@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
 
 export default async function ModelPage({ params }: ModelPageProps) {
   const { slug } = await params;
-  const model = getModelBySlug(slug);
+  const model = await getModelBySlug(slug);
   if (!model) notFound();
 
   const whatsappUrl = buildWhatsAppUrl({

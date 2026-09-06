@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 };
 
 export default function ModelIndexPage() {
-  const models = getModels();
+  const models = await getModels();
 
   return (
     <>
