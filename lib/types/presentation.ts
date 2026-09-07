@@ -233,3 +233,21 @@ export function positionToCSS(x: number, y: number): string {
 export function scaleToCSS(scale: number): string {
   return `scale(${scale / 100})`
 }
+
+/**
+ * Cutout transform shared by the Visual Media Editor and public LayeredHero.
+ * The cutout element fills the same 0–100 canvas in both places, so the
+ * editor's canvas-coordinate delta maps directly to CSS percentage translation.
+ * Scale is applied first; dividing the translation by scale preserves the
+ * requested canvas displacement after scaling.
+ */
+export function cutoutTransformToCSS(
+  positionX: number,
+  positionY: number,
+  scale: number,
+): string {
+  const safeScale = scale > 0 ? scale / 100 : 1
+  const offsetX = positionX - 50
+  const offsetY = positionY - 50
+  return `scale(${safeScale}) translate(${offsetX / safeScale}%, ${offsetY / safeScale}%)`
+}

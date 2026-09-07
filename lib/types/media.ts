@@ -53,6 +53,9 @@ export interface ResponsiveImage {
 
 export interface MediaWithArtDirection {
   image: ResponsiveImage;
+  /** Source asset focal point used by AUTO presentation mode. */
+  focal_x?: number;
+  focal_y?: number;
   /** Visual Media Editor presentation settings */
   presentation_settings?: PresentationSettings
   art_direction?: {

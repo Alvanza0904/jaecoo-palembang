@@ -58,11 +58,21 @@ interface SupabaseContent {
   content: Record<string, unknown>
 }
 
+interface SupabaseMediaPresentationRow {
+  id: string
+  presentation_settings: unknown
+  cutout_url: string | null
+  focal_x: number | null
+  focal_y: number | null
+}
+
 function mapModel(
   row: SupabaseModel,
   staticFallback?: ModelData,
   heroPresentationSettings?: PresentationSettings,
   heroCutoutUrl?: string,
+  heroFocalX?: number,
+  heroFocalY?: number,
 ): ModelData {
   const variants: ModelVariant[] = (row.model_variants ?? []).map((v) => ({
     id: v.variant_key,
@@ -125,6 +135,8 @@ function mapModel(
             ?? ((heroRaw.image as Record<string, string>)?.cutout)
             ?? undefined,
         },
+        focal_x: heroFocalX,
+        focal_y: heroFocalY,
         art_direction: (heroRaw.art_direction as ModelData['hero_media']['art_direction']) ?? undefined,
         presentation_settings: heroPresentationSettings,
       }
@@ -213,28 +225,65 @@ export async function getModelBySlug(slug: string): Promise<ModelData | undefine
     const heroContent = (row.model_content ?? []).find((c) => c.section === 'hero')
     const heroRaw = heroContent?.content as Record<string, unknown> | undefined
     const mediaAssetId = heroRaw?.media_asset_id
+    const cutoutMediaId = heroRaw?.cutout_media_id
 
-    // model_content.hero stores only the media asset ID. The Visual Media Editor
-    // stores its source-of-truth presentation settings on media_assets.
+    // The Visual Media Editor writes its source-of-truth presentation settings
+    // to the hero media asset. The model may also reference a separate cutout
+    // asset (STEP 5D). Keep those relationships explicit so the public hero
+    // never silently falls back to default positioning when the cutout asset
+    // is separate from the hero background asset.
     let heroPresentationSettings: PresentationSettings | undefined
     let heroCutoutUrl: string | undefined
-    if (typeof mediaAssetId === 'string' && mediaAssetId) {
-      const { data: mediaAsset, error: mediaError } = await supabase
+    let heroFocalX: number | undefined
+    let heroFocalY: number | undefined
+    let cutoutPresentationSettings: PresentationSettings | undefined
+    let cutoutFocalX: number | undefined
+    let cutoutFocalY: number | undefined
+
+    const mediaIds = Array.from(new Set(
+      [mediaAssetId, cutoutMediaId].filter(
+        (id): id is string => typeof id === 'string' && id.length > 0,
+      ),
+    ))
+
+    if (mediaIds.length > 0) {
+      const { data: mediaAssets, error: mediaError } = await supabase
         .from('media_assets')
-        .select('presentation_settings, cutout_url')
-        .eq('id', mediaAssetId)
-        .maybeSingle()
+        .select('id, presentation_settings, cutout_url, focal_x, focal_y')
+        .in('id', mediaIds)
 
       if (mediaError) {
         console.warn(`[Supabase] Hero media lookup failed for ${slug}:`, mediaError)
       } else {
-        heroPresentationSettings = mediaAsset?.presentation_settings as PresentationSettings | undefined
-        heroCutoutUrl = mediaAsset?.cutout_url ?? undefined
+        const mediaRows = (mediaAssets ?? []) as SupabaseMediaPresentationRow[]
+        const heroAsset = mediaRows.find((asset) => asset.id === mediaAssetId)
+        const cutoutAsset = mediaRows.find((asset) => asset.id === cutoutMediaId)
+
+        heroPresentationSettings = heroAsset?.presentation_settings as PresentationSettings | undefined
+        heroFocalX = typeof heroAsset?.focal_x === 'number' ? heroAsset.focal_x : undefined
+        heroFocalY = typeof heroAsset?.focal_y === 'number' ? heroAsset.focal_y : undefined
+
+        cutoutPresentationSettings = cutoutAsset?.presentation_settings as PresentationSettings | undefined
+        cutoutFocalX = typeof cutoutAsset?.focal_x === 'number' ? cutoutAsset.focal_x : undefined
+        cutoutFocalY = typeof cutoutAsset?.focal_y === 'number' ? cutoutAsset.focal_y : undefined
+
+        // Prefer the explicit cutout asset URL when one is configured. If the
+        // cutout is the same asset as the hero, this naturally resolves to the
+        // same URL. Legacy hero.cutout_url remains the final fallback.
+        heroCutoutUrl = cutoutAsset?.cutout_url ?? heroAsset?.cutout_url ?? undefined
       }
     }
 
+    // If a separate cutout asset is configured and the hero asset has no
+    // presentation settings yet, use the cutout asset's settings as a safe
+    // compatibility fallback. This does not override the hero asset when it
+    // contains the editor's source-of-truth settings.
+    const presentationSettings = heroPresentationSettings ?? cutoutPresentationSettings
+    const focalX = heroFocalX ?? cutoutFocalX
+    const focalY = heroFocalY ?? cutoutFocalY
+
     const fallback = getStaticModelBySlug(slug)
-    return mapModel(row, fallback, heroPresentationSettings, heroCutoutUrl)
+    return mapModel(row, fallback, presentationSettings, heroCutoutUrl, focalX, focalY)
   } catch (err) {
     console.warn(`[Supabase] getModelBySlug(${slug}) failed — using static fallback:`, err)
     return getStaticModelBySlug(slug)

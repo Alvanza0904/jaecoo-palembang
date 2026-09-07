@@ -12,6 +12,7 @@ import type { MediaWithArtDirection, ResponsiveVideo } from "@/lib/types/media";
 import {
   BREAKPOINT_ORDER,
   resolveBreakpointSettings,
+  cutoutTransformToCSS,
   type BreakpointKey,
   type PresentationSettings,
 } from "@/lib/types/presentation";
@@ -53,19 +54,15 @@ function getCutoutStyle(
     assetFocalY,
   );
   const cutout = effective.cutout;
-  const scale = cutout.scale / 100;
-  const offsetX = cutout.position_x - 50;
-  const offsetY = cutout.position_y - 50;
 
-  // The cutout <img> fills the hero, exactly like the editor canvas. Since
-  // translate percentages are relative to that same element, the editor's
-  // canvas-percent delta maps 1:1 to the live hero. Dividing by scale keeps
-  // the final translated distance unchanged after CSS scale(), matching the
-  // editor's transform implementation.
   return {
     objectFit: "cover",
     objectPosition: "50% 50%",
-    transform: `scale(${scale}) translate(${offsetX / scale}%, ${offsetY / scale}%)`,
+    transform: cutoutTransformToCSS(
+      cutout.position_x,
+      cutout.position_y,
+      cutout.scale,
+    ),
     transformOrigin: "50% 50%",
   };
 }
@@ -84,6 +81,8 @@ export function LayeredHero({
   const { image, art_direction } = media;
   const presentationSettings = media.presentation_settings;
   const hasCutout = !!image.cutout;
+  const assetFocalX = media.focal_x ?? 50;
+  const assetFocalY = media.focal_y ?? 50;
 
   const getObjectPosition = (breakpoint: "desktop" | "tablet" | "mobile") => {
     const dir = art_direction?.[breakpoint];
@@ -194,8 +193,8 @@ export function LayeredHero({
               style={getCutoutStyle(
                 presentationSettings,
                 breakpoint,
-                undefined,
-                undefined,
+                assetFocalX,
+                assetFocalY,
               )}
               sizes="100vw"
             />

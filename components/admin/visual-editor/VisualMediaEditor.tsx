@@ -40,6 +40,7 @@ import {
   BREAKPOINT_INHERIT_DEFAULTS,
   DEFAULT_BREAKPOINT_SETTINGS,
   resolveBreakpointSettings,
+  cutoutTransformToCSS,
 } from '@/lib/types/presentation'
 import { detectCutoutBBox } from '@/lib/utils/cutout-bbox'
 import styles from './VisualMediaEditor.module.css'
@@ -174,18 +175,6 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
   //
   // This replaces the old left/top/width/height approach which caused
   // letterbox mismatch when canvas and image aspect ratios differed.
-
-  // CUSTOM offset: translate from center (50,50) by delta in %
-  // cutout.position_x = 50 means no offset; 60 means +10% right
-  const cutoutOffsetX = cutoutSettings.position_x - 50  // in % of canvas
-  const cutoutOffsetY = cutoutSettings.position_y - 50  // in % of canvas
-  const cutoutScaleVal = cutoutSettings.scale / 100      // multiplier
-
-  // CSS transform for cutout: apply scale then translate offset
-  // translateX/Y in % is relative to the ELEMENT, not the canvas —
-  // so we convert canvas-% offset to pixel offset using canvas dimensions
-  const cutoutOffsetXpx = (cutoutOffsetX / 100) * previewW
-  const cutoutOffsetYpx = (cutoutOffsetY / 100) * previewH
 
   // ── Change helpers ────────────────────────────────────
 
@@ -632,10 +621,15 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
                   // Base: same cover mapping as background
                   objectFit: 'cover',
                   objectPosition: '50% 50%',
-                  // CUSTOM mode: apply offset + scale via transform
-                  // Scale from center, then translate by canvas-% offset
+                  // Use the exact same transform function as public LayeredHero.
+                  // The image fills the canvas, so its percentage translation is
+                  // the editor's 0–100 canvas coordinate system.
                   transform: isCustom
-                    ? `scale(${cutoutScaleVal}) translate(${cutoutOffsetXpx / cutoutScaleVal}px, ${cutoutOffsetYpx / cutoutScaleVal}px)`
+                    ? cutoutTransformToCSS(
+                        cutoutSettings.position_x,
+                        cutoutSettings.position_y,
+                        cutoutSettings.scale,
+                      )
                     : 'none',
                   transformOrigin: '50% 50%',
                   opacity: cutoutOpacity / 100,
