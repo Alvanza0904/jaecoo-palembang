@@ -15,7 +15,7 @@
 
 import Image from "next/image";
 import type { MediaWithArtDirection, ResponsiveVideo } from "@/lib/types/media";
-import { BREAKPOINT_ORDER, resolveBreakpointSettings, cutoutTransformToCSS, type BreakpointKey, type PresentationSettings } from "@/lib/types/presentation";
+import { BREAKPOINT_ORDER, resolveBreakpointSettings, cutoutTransformToCSS, type BreakpointKey, type PresentationSettings, type PresentationMeta } from "@/lib/types/presentation";
 import styles from "./LayeredHero.module.css";
 
 export interface LayeredHeroProps {
@@ -44,12 +44,13 @@ function getCutoutStyle(
   breakpoint: BreakpointKey,
   focalX = 50,
   focalY = 50,
+  bboxHPct?: number,
 ): React.CSSProperties {
-  const effective = resolveBreakpointSettings(settings ?? {}, breakpoint, focalX, focalY)
+  const effective = resolveBreakpointSettings(settings ?? {}, breakpoint, focalX, focalY, bboxHPct)
   const cutout = effective.cutout
   // Use objectFit:contain so the cutout PNG renders without cropping.
   // translate+scale transform positions it within the hero container.
-  // objectPosition is omitted — positioning is fully handled by transform.
+  // Auto scale computed from bbox so vehicle fills frame per breakpoint.
   return {
     objectFit: "contain",
     objectPosition: "50% 50%",
@@ -86,6 +87,10 @@ export function LayeredHero({
     const fy = dir.focal_y ?? 50;
     return `${fx}% ${fy}%`;
   };
+
+  // Extract cutout bbox from presentation_settings._meta for auto-scale
+  const cutoutMeta = (cutoutPresentationSettings as (PresentationSettings & { _meta?: PresentationMeta }) | undefined)?._meta
+  const cutoutBboxHPct = cutoutMeta?.cutout_bbox?.h_pct
 
   const hasCutout = !!image.cutout;
 
@@ -199,7 +204,7 @@ export function LayeredHero({
               fill
               priority
               className={`${styles.cutoutImg} ${styles[`cutoutImg--${breakpoint}`]}`}
-              style={getCutoutStyle(cutoutPresentationSettings, breakpoint, cutoutFocalX, cutoutFocalY)}
+              style={getCutoutStyle(cutoutPresentationSettings, breakpoint, cutoutFocalX, cutoutFocalY, cutoutBboxHPct)}
               data-cutout-breakpoint={breakpoint}
               data-cutout-mode={resolveBreakpointSettings(cutoutPresentationSettings ?? {}, breakpoint, cutoutFocalX, cutoutFocalY).mode}
               data-cutout-position-x={resolveBreakpointSettings(cutoutPresentationSettings ?? {}, breakpoint, cutoutFocalX, cutoutFocalY).cutout.position_x}

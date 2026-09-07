@@ -169,6 +169,45 @@ export const BREAKPOINT_PREVIEW_DIMS: Record<BreakpointKey, { width: number; hei
   small_mobile: { width: 130, height: 220 },  // narrow portrait
 }
 
+/**
+ * AUTO mode: target fill ratio for the vehicle per breakpoint.
+ * Defines how much of the hero height the vehicle should fill.
+ * These are tuned so the car looks "right-sized" at each breakpoint
+ * without manual adjustment.
+ *
+ * desktop: vehicle fills ~70% of hero height (dramatic, wide canvas)
+ * tablet:  vehicle fills ~80% (slightly tighter)
+ * mobile:  vehicle fills ~90% (portrait — more vertical space)
+ * small_mobile: vehicle fills ~95% (very tight portrait)
+ */
+export const BREAKPOINT_AUTO_FILL_TARGET: Record<BreakpointKey, number> = {
+  desktop:      0.70,
+  tablet:       0.80,
+  mobile:       0.90,
+  small_mobile: 0.95,
+}
+
+/**
+ * Compute the AUTO scale % for a cutout based on its bbox and the target
+ * breakpoint. Returns a scale value (100 = image natural size) such that
+ * the vehicle occupies approximately BREAKPOINT_AUTO_FILL_TARGET of the
+ * hero height.
+ *
+ * @param bboxHPct   - vehicle height as % of cutout canvas (from cutout_bbox.h_pct)
+ * @param breakpoint - target breakpoint
+ * @returns scale as integer percentage (e.g. 140 = 140%)
+ */
+export function computeAutoScale(bboxHPct: number, breakpoint: BreakpointKey): number {
+  if (!bboxHPct || bboxHPct <= 0) return 100
+  const fillTarget = BREAKPOINT_AUTO_FILL_TARGET[breakpoint]
+  // cutout canvas fills the hero (100% height). vehicle occupies bboxHPct% of that.
+  // We want vehicle to fill fillTarget of hero height.
+  // So: scale = fillTarget / (bboxHPct / 100)
+  const scale = Math.round((fillTarget / (bboxHPct / 100)) * 100)
+  // Clamp to reasonable range
+  return Math.max(50, Math.min(400, scale))
+}
+
 /** All breakpoints in display order */
 export const BREAKPOINT_ORDER: BreakpointKey[] = ['desktop', 'tablet', 'mobile', 'small_mobile']
 
@@ -181,6 +220,7 @@ export function resolveBreakpointSettings(
   key: BreakpointKey,
   assetFocalX = 50,
   assetFocalY = 50,
+  cutoutBboxHPct?: number,
 ): BreakpointSettings {
   const raw = settings[key] ?? {}
   const mode: PresentationMode = raw.mode ?? 'auto'
@@ -192,6 +232,10 @@ export function resolveBreakpointSettings(
   }
 
   if (mode === 'auto') {
+    // Compute auto-scale from bbox if available so vehicle fills the frame naturally
+    const autoScale = cutoutBboxHPct && cutoutBboxHPct > 0
+      ? computeAutoScale(cutoutBboxHPct, key)
+      : DEFAULT_BREAKPOINT_SETTINGS.cutout.scale
     return {
       ...DEFAULT_BREAKPOINT_SETTINGS,
       focal_x: assetFocalX,
@@ -199,6 +243,10 @@ export function resolveBreakpointSettings(
       position_x: assetFocalX,
       position_y: assetFocalY,
       mode: 'auto',
+      cutout: {
+        ...DEFAULT_BREAKPOINT_SETTINGS.cutout,
+        scale: autoScale,
+      },
     }
   }
 

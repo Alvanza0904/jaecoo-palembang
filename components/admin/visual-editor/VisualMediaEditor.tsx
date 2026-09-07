@@ -38,6 +38,7 @@ import {
   BREAKPOINT_LABELS,
   BREAKPOINT_PREVIEW_DIMS,
   BREAKPOINT_INHERIT_DEFAULTS,
+  computeAutoScale,
   resolveBreakpointSettings,
   cutoutTransformToCSS,
 } from '@/lib/types/presentation'
@@ -155,11 +156,13 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
   const isCustom = effectiveSettings.mode === 'custom'
   const isInherited = effectiveSettings.mode === 'inherited'
 
+  // Pass bbox h_pct so auto mode uses correct per-breakpoint scale
   const cutoutEffectiveSettings = resolveBreakpointSettings(
     separateCutoutAsset ? cutoutAssetSettings : settings,
     activeBp,
     cutoutSourceAsset.focal_x ?? 50,
     cutoutSourceAsset.focal_y ?? 50,
+    cutoutBbox?.h_pct,
   )
   const cutoutSettings: CutoutPlacement = cutoutEffectiveSettings.cutout
 
@@ -846,7 +849,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
                     <span className={styles.sliderValue}>{effectiveSettings.scale}%</span>
                   </div>
                   <input
-                    type="range" min={80} max={150} step={1}
+                    type="range" min={10} max={300} step={1}
                     value={effectiveSettings.scale}
                     disabled={!isCustom}
                     className={styles.slider}
@@ -1000,7 +1003,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
                   <span className={styles.sliderValue}>{cutoutSettings.scale}%</span>
                 </div>
                 <input
-                  type="range" min={40} max={160} step={1}
+                  type="range" min={10} max={300} step={1}
                   value={cutoutSettings.scale}
                   disabled={!isCustom}
                   className={styles.slider}
@@ -1013,7 +1016,20 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
               </div>
 
               {!isCustom && (
-                <div className={styles.sliderDisabledNote}>Aktifkan CUSTOM untuk mengatur cutout</div>
+                <div className={styles.sliderDisabledNote}>
+                  AUTO: Scale dihitung otomatis dari bbox cutout.
+                  {cutoutBbox ? (
+                    <span style={{ display: 'block', marginTop: 4, color: 'rgba(200,169,110,0.85)', fontStyle: 'normal', fontWeight: 600 }}>
+                      Auto Scale {activeBp}: {computeAutoScale(cutoutBbox.h_pct, activeBp)}%
+                      <span style={{ fontWeight: 400, color: 'rgba(255,255,255,0.4)', marginLeft: 6 }}>(vehicle {cutoutBbox.h_pct}% tinggi canvas)</span>
+                    </span>
+                  ) : (
+                    <span style={{ display: 'block', marginTop: 4, color: 'rgba(255,255,255,0.35)' }}>
+                      Bbox belum tersedia — scale default 100%
+                    </span>
+                  )}
+                  <span style={{ display: 'block', marginTop: 6 }}>Pilih CUSTOM untuk override manual.</span>
+                </div>
               )}
             </div>
           )}
@@ -1051,6 +1067,20 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
                       x:{cutoutBbox.x_pct}% y:{cutoutBbox.y_pct}%
                     </span>
                   </div>
+                  {/* Auto scale per breakpoint — ditampilkan agar user tahu nilai otomatis */}
+                  <div className={styles.bboxRow} style={{ marginTop: 6, borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 6 }}>
+                    <span className={styles.bboxLabel}>Auto scale per device</span>
+                  </div>
+                  {BREAKPOINT_ORDER.map((bp) => (
+                    <div key={bp} className={styles.bboxRow} style={{ paddingLeft: 8 }}>
+                      <span className={styles.bboxLabel} style={{ color: bp === activeBp ? 'rgba(200,169,110,0.9)' : undefined }}>
+                        {BREAKPOINT_LABELS[bp]}
+                      </span>
+                      <span className={styles.bboxValue} style={{ color: bp === activeBp ? 'rgba(200,169,110,0.9)' : undefined }}>
+                        {computeAutoScale(cutoutBbox.h_pct, bp)}%
+                      </span>
+                    </div>
+                  ))}
                   {meta.bbox_anomaly && (
                     <div className={styles.bboxWarning}>
                       ⚠ Cutout object area appears unusually small.
@@ -1061,7 +1091,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
                   )}
                   {!meta.bbox_anomaly && (
                     <div className={styles.bboxOk}>
-                      ✓ Cutout looks normal
+                      ✓ Cutout looks normal — auto scale aktif
                     </div>
                   )}
                 </div>
