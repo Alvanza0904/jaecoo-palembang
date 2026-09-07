@@ -102,7 +102,6 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
   const [showTypography, setShowTypography] = useState(false)
 
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const focalRef = useRef<HTMLDivElement | null>(null)
 
   const hasCutout = !!asset.cutout_url
 
