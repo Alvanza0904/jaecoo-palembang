@@ -1,20 +1,14 @@
 /**
  * JAECOO Palembang — Visual Media Editor
- * STEP 5E: Breakpoint presentation editor for media assets
+ * STEP 5E.1: Unified Background + Cutout canvas editor
  *
- * Features:
- * - Per-breakpoint settings (desktop / tablet / mobile / small mobile)
- * - Live preview with focal point drag
- * - Position X/Y sliders
- * - Scale / zoom
- * - Object fit (cover / contain)
- * - Focal point picker
- * - AUTO / CUSTOM / INHERITED modes
- * - Responsive inheritance
- * - Cutout positioning (if asset has cutout)
- * - Typography placement readiness (data only)
- * - Save / autosave
- * - Mobile-first UX (44px touch targets)
+ * Perubahan dari 5E:
+ * - Satu canvas menampilkan BG + Cutout sekaligus (OVERLAY mode)
+ * - Selector layer aktif: [ BACKGROUND ] [ CUTOUT ]
+ * - Drag langsung di canvas untuk memindahkan layer aktif
+ * - Preview mode: OVERLAY / BG ONLY / CUTOUT ONLY
+ * - Cutout opacity control untuk alignment
+ * - Semua fitur 5E dipertahankan (breakpoints, AUTO/CUSTOM/INHERIT, save, reset)
  */
 
 'use client'
@@ -43,7 +37,13 @@ import {
 } from '@/lib/types/presentation'
 import styles from './VisualMediaEditor.module.css'
 
-// ─── Breakpoint icons ────────────────────────────────────
+// ─── Types ───────────────────────────────────────────────
+
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
+type ActiveLayer = 'background' | 'cutout'
+type PreviewMode = 'overlay' | 'bg' | 'cutout'
+
+// ─── Constants ───────────────────────────────────────────
 
 const BP_ICONS: Record<BreakpointKey, string> = {
   desktop:      '🖥',
@@ -52,9 +52,8 @@ const BP_ICONS: Record<BreakpointKey, string> = {
   small_mobile: '📟',
 }
 
-// ─── Save status ─────────────────────────────────────────
-
-type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
+// Checkerboard pattern sebagai data URL (untuk preview cutout)
+const CHECKER_BG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='8' height='8' fill='%23ccc'/%3E%3Crect x='8' y='8' width='8' height='8' fill='%23ccc'/%3E%3Crect x='8' width='8' height='8' fill='%23eee'/%3E%3Crect y='8' width='8' height='8' fill='%23eee'/%3E%3C/svg%3E")`
 
 // ─── Props ────────────────────────────────────────────────
 
@@ -92,20 +91,28 @@ function tabModeClass(mode: PresentationMode, s: typeof styles): string {
 // ─── Component ───────────────────────────────────────────
 
 export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
-  // ── State ──────────────────────────────────────────────
+
+  // ── Core state ─────────────────────────────────────────
   const [activeBp, setActiveBp] = useState<BreakpointKey>('desktop')
   const [settings, setSettings] = useState<PresentationSettings>(() => getStoredSettings(asset))
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [saveError, setSaveError] = useState<string | null>(null)
   const [isDirty, setIsDirty] = useState(false)
-  const [cutoutView, setCutoutView] = useState<'background' | 'cutout'>('background')
+
+  // ── 5E.1: Unified editor state ─────────────────────────
+  const [activeLayer, setActiveLayer] = useState<ActiveLayer>('background')
+  const [previewMode, setPreviewMode] = useState<PreviewMode>('overlay')
+  const [cutoutOpacity, setCutoutOpacity] = useState(100)
   const [showTypography, setShowTypography] = useState(false)
 
+  // ── Refs ───────────────────────────────────────────────
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const canvasRef = useRef<HTMLDivElement | null>(null)
+  const focalGridRef = useRef<HTMLDivElement | null>(null)
 
+  // ── Derived ────────────────────────────────────────────
   const hasCutout = !!asset.cutout_url
 
-  // ── Resolve effective settings for current bp ──────────
   const effectiveSettings: BreakpointSettings = resolveBreakpointSettings(
     settings,
     activeBp,
@@ -113,8 +120,36 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
     asset.focal_y ?? 50,
   )
 
-  // Stored (may be partial/undefined)
   const stored = settings[activeBp as BreakpointKey] ?? {}
+  const isCustom = effectiveSettings.mode === 'custom'
+  const isInherited = effectiveSettings.mode === 'inherited'
+
+  const cutoutSettings: CutoutPlacement = isCustom
+    ? { ...DEFAULT_BREAKPOINT_SETTINGS.cutout, ...(stored.cutout ?? {}) }
+    : effectiveSettings.cutout
+
+  // ── Preview dimensions ─────────────────────────────────
+  const dims = BREAKPOINT_PREVIEW_DIMS[activeBp as BreakpointKey]
+  const maxW = 320
+  const scaleRatio = Math.min(1, maxW / dims.width)
+  const previewW = Math.round(dims.width * scaleRatio)
+  const previewH = Math.round(dims.height * scaleRatio)
+
+  // Image URLs
+  const previewUrl = (asset.variants as Record<string, string>)?.['768']
+    ?? (asset.variants as Record<string, string>)?.['480']
+    ?? asset.public_url
+    ?? ''
+  const cutoutUrl = asset.cutout_url ?? ''
+
+  // ── Cutout pixel position on canvas ───────────────────
+  // position_x/y dalam % dari canvas → translate ke px center
+  const cutoutScaleFactor = cutoutSettings.scale / 100
+  // Ukuran cutout relatif terhadap lebar canvas
+  const cutoutW = previewW * cutoutScaleFactor
+  const cutoutH = previewH * cutoutScaleFactor
+  const cutoutLeft = (cutoutSettings.position_x / 100) * previewW - cutoutW / 2
+  const cutoutTop  = (cutoutSettings.position_y / 100) * previewH - cutoutH / 2
 
   // ── Change helpers ────────────────────────────────────
 
@@ -133,7 +168,6 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
   const setMode = useCallback(
     (mode: PresentationMode) => {
       if (mode === 'custom') {
-        // Copy current effective settings into custom, so Admin starts from current view
         const eff = effectiveSettings
         updateBreakpoint(activeBp, {
           mode: 'custom',
@@ -148,12 +182,8 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
         })
       } else if (mode === 'inherited') {
         const defaultParent = BREAKPOINT_INHERIT_DEFAULTS[activeBp as BreakpointKey]
-        updateBreakpoint(activeBp, {
-          mode: 'inherited',
-          inherit_from: defaultParent,
-        })
+        updateBreakpoint(activeBp, { mode: 'inherited', inherit_from: defaultParent })
       } else {
-        // auto — clear custom settings for this bp
         setSettings((prev: PresentationSettings) => {
           const next = { ...prev }
           delete next[activeBp as BreakpointKey]
@@ -166,12 +196,77 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
     [activeBp, effectiveSettings, updateBreakpoint],
   )
 
-  const isCustom = effectiveSettings.mode === 'custom'
-  const isInherited = effectiveSettings.mode === 'inherited'
+  // ── Drag state ────────────────────────────────────────
 
-  // ── Focal point drag on preview ───────────────────────
+  const dragRef = useRef<{
+    layer: ActiveLayer
+    startX: number
+    startY: number
+    startPosX: number
+    startPosY: number
+    w: number
+    h: number
+  } | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
 
-  const focalGridRef = useRef<HTMLDivElement | null>(null)
+  const handleCanvasPointerDown = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
+      if (!isCustom) return
+      e.currentTarget.setPointerCapture(e.pointerId)
+
+      const startPosX = activeLayer === 'background'
+        ? effectiveSettings.position_x
+        : cutoutSettings.position_x
+      const startPosY = activeLayer === 'background'
+        ? effectiveSettings.position_y
+        : cutoutSettings.position_y
+
+      dragRef.current = {
+        layer: activeLayer,
+        startX: e.clientX,
+        startY: e.clientY,
+        startPosX,
+        startPosY,
+        w: previewW,
+        h: previewH,
+      }
+      setIsDragging(true)
+    },
+    [isCustom, activeLayer, effectiveSettings, cutoutSettings, previewW, previewH],
+  )
+
+  const handleCanvasPointerMove = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
+      if (!dragRef.current || !isCustom) return
+      const d = dragRef.current
+      const dx = e.clientX - d.startX
+      const dy = e.clientY - d.startY
+
+      // Convert px delta to % delta
+      const dxPct = Math.round((dx / d.w) * 100)
+      const dyPct = Math.round((dy / d.h) * 100)
+
+      const newX = Math.max(0, Math.min(100, d.startPosX + dxPct))
+      const newY = Math.max(0, Math.min(100, d.startPosY + dyPct))
+
+      if (d.layer === 'background') {
+        updateBreakpoint(activeBp, { position_x: newX, position_y: newY })
+      } else {
+        updateBreakpoint(activeBp, {
+          cutout: { ...cutoutSettings, position_x: newX, position_y: newY },
+        })
+      }
+    },
+    [isCustom, activeBp, updateBreakpoint, cutoutSettings],
+  )
+
+  const handleCanvasPointerUp = useCallback(() => {
+    dragRef.current = null
+    setIsDragging(false)
+  }, [])
+
+  // ── Focal point drag (pada grid di bawah, bukan canvas utama) ───
+
   const [isDraggingFocal, setIsDraggingFocal] = useState(false)
 
   const handleFocalPointerDown = useCallback(
@@ -194,9 +289,7 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
     [isDraggingFocal, isCustom, activeBp, updateBreakpoint],
   )
 
-  const handleFocalPointerUp = useCallback(() => {
-    setIsDraggingFocal(false)
-  }, [])
+  const handleFocalPointerUp = useCallback(() => setIsDraggingFocal(false), [])
 
   // ── Save ──────────────────────────────────────────────
 
@@ -218,10 +311,7 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
       }
       setSaveStatus('saved')
       setIsDirty(false)
-      if (json.asset) {
-        onUpdated(json.asset as MediaAsset)
-      }
-      // Auto-clear saved badge
+      if (json.asset) onUpdated(json.asset as MediaAsset)
       setTimeout(() => setSaveStatus('idle'), 2500)
     } catch (err) {
       setSaveStatus('error')
@@ -229,20 +319,16 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
     }
   }, [asset.id, settings, saveStatus, onUpdated])
 
-  // Autosave on change (debounced 1.5s)
+  // Autosave debounced 1.5s
   useEffect(() => {
     if (!isDirty) return
     if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
-    autosaveTimer.current = setTimeout(() => {
-      doSave()
-    }, 1500)
-    return () => {
-      if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
-    }
+    autosaveTimer.current = setTimeout(() => { doSave() }, 1500)
+    return () => { if (autosaveTimer.current) clearTimeout(autosaveTimer.current) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings, isDirty])
 
-  // ── Reset breakpoint to auto ─────────────────────────
+  // ── Reset ─────────────────────────────────────────────
 
   const handleReset = useCallback(() => {
     setSettings((prev: PresentationSettings) => {
@@ -254,37 +340,18 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
     setSaveStatus('idle')
   }, [activeBp])
 
-  // ── Preview size ──────────────────────────────────────
-
-  const dims = BREAKPOINT_PREVIEW_DIMS[activeBp as BreakpointKey]
-  // Scale preview to max 320px width
-  const maxW = 300
-  const scale = Math.min(1, maxW / dims.width)
-  const previewW = Math.round(dims.width * scale)
-  const previewH = Math.round(dims.height * scale)
-
-  // Image URL — use best variant for preview
-  const previewUrl = (asset.variants as Record<string, string>)?.['768']
-    ?? (asset.variants as Record<string, string>)?.['480']
-    ?? asset.public_url
-    ?? ''
-
-  const cutoutUrl = asset.cutout_url ?? ''
-
-  // ── Cutout computed style ─────────────────────────────
-
-  const cutoutSettings: CutoutPlacement = isCustom
-    ? { ...(DEFAULT_BREAKPOINT_SETTINGS.cutout), ...(stored.cutout ?? {}) }
-    : effectiveSettings.cutout
-
-  const cutoutLeft = (cutoutSettings.position_x / 100) * previewW
-  const cutoutTop  = (cutoutSettings.position_y / 100) * previewH
-  const cutoutSize = (cutoutSettings.scale / 100) * previewW
+  // ── Canvas cursor ─────────────────────────────────────
+  const canvasCursor = !isCustom ? 'default' : isDragging ? 'grabbing' : 'grab'
 
   // ─── Render ──────────────────────────────────────────
 
   return (
-    <div className={styles.overlay} onClick={(e: { target: EventTarget | null; currentTarget: EventTarget | null }) => { if (e.target === e.currentTarget) onClose() }}>
+    <div
+      className={styles.overlay}
+      onClick={(e: { target: EventTarget | null; currentTarget: EventTarget | null }) => {
+        if (e.target === e.currentTarget) onClose()
+      }}
+    >
       <div className={styles.panel} role="dialog" aria-label="Visual Media Editor">
 
         {/* ── Header ──────────────────────────────────── */}
@@ -293,15 +360,11 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
             🎨 Visual Editor
           </div>
           <div className={styles.headerActions}>
-            <div className={styles.saveStatus}>
+            <div className={styles.saveStatusWrap}>
               {saveStatus === 'saving' && <span className={styles.saveStatusSaving}>Menyimpan…</span>}
-              {saveStatus === 'saved' && <span className={styles.saveStatusSaved}>✓ Tersimpan</span>}
-              {saveStatus === 'error' && (
-                <span className={styles.saveStatusError} title={saveError ?? ''}>⚠ Error</span>
-              )}
-              {saveStatus === 'idle' && isDirty && (
-                <span className={styles.saveStatus}>● Belum simpan</span>
-              )}
+              {saveStatus === 'saved'  && <span className={styles.saveStatusSaved}>✓ Tersimpan</span>}
+              {saveStatus === 'error'  && <span className={styles.saveStatusError} title={saveError ?? ''}>⚠ Error</span>}
+              {saveStatus === 'idle' && isDirty && <span className={styles.saveStatusDirty}>● Belum simpan</span>}
             </div>
             <button className={styles.closeBtn} onClick={onClose} aria-label="Tutup">✕</button>
           </div>
@@ -310,8 +373,7 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
         {/* ── Breakpoint Tabs ──────────────────────────── */}
         <div className={styles.breakpointTabs} role="tablist">
           {BREAKPOINT_ORDER.map((bp) => {
-            const bpStored = settings[bp]
-            const bpMode: PresentationMode = bpStored?.mode ?? 'auto'
+            const bpMode: PresentationMode = settings[bp]?.mode ?? 'auto'
             const isActive = bp === activeBp
             return (
               <button
@@ -331,69 +393,147 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
           })}
         </div>
 
-        {/* ── Preview Area ─────────────────────────────── */}
-        <div className={styles.previewArea}>
-          <div className={styles.previewLabel}>
-            Preview — {BREAKPOINT_LABELS[activeBp as BreakpointKey]}
+        {/* ── Layer Selector (BG / CUTOUT) ─────────────── */}
+        {hasCutout && (
+          <div className={styles.layerBar}>
+            <span className={styles.layerBarLabel}>Edit:</span>
+            <button
+              className={`${styles.layerBtn} ${activeLayer === 'background' ? styles.layerBtnActive : ''}`}
+              onClick={() => setActiveLayer('background')}
+            >
+              🖼 Background
+            </button>
+            <button
+              className={`${styles.layerBtn} ${activeLayer === 'cutout' ? styles.layerBtnActiveCutout : ''}`}
+              onClick={() => setActiveLayer('cutout')}
+            >
+              🚗 Cutout
+            </button>
+          </div>
+        )}
+
+        {/* ── Unified Canvas ───────────────────────────── */}
+        <div className={styles.canvasArea}>
+
+          {/* Preview mode pills */}
+          <div className={styles.previewModeRow}>
+            {(['overlay', 'bg', 'cutout'] as PreviewMode[]).map((pm) => (
+              <button
+                key={pm}
+                className={`${styles.previewModeBtn} ${previewMode === pm ? styles.previewModeBtnActive : ''}`}
+                onClick={() => setPreviewMode(pm)}
+              >
+                {pm === 'overlay' ? 'Overlay' : pm === 'bg' ? 'BG' : 'Cutout'}
+              </button>
+            ))}
+            <span className={styles.canvasDims}>{dims.width}×{dims.height}</span>
           </div>
 
-          {/* Preview stage */}
+          {/* Canvas */}
           <div
-            className={styles.previewStage}
-            style={{ width: previewW, height: previewH }}
+            ref={canvasRef}
+            className={styles.canvas}
+            style={{
+              width: previewW,
+              height: previewH,
+              cursor: canvasCursor,
+              background: previewMode === 'cutout' ? CHECKER_BG : '#1a1a1a',
+            }}
+            onPointerDown={handleCanvasPointerDown}
+            onPointerMove={handleCanvasPointerMove}
+            onPointerUp={handleCanvasPointerUp}
+            onPointerLeave={handleCanvasPointerUp}
           >
-            {previewUrl && (
+            {/* Background layer */}
+            {previewUrl && previewMode !== 'cutout' && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                className={styles.previewImg}
-                src={cutoutView === 'background' ? previewUrl : ''}
+                className={styles.canvasBg}
+                src={previewUrl}
                 alt={asset.alt_text ?? asset.filename}
+                draggable={false}
                 style={{
                   objectFit: effectiveSettings.object_fit,
                   objectPosition: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
                   transform: `scale(${effectiveSettings.scale / 100})`,
                   transformOrigin: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
+                  // Dim BG slightly saat layer cutout aktif
+                  opacity: hasCutout && activeLayer === 'cutout' ? 0.7 : 1,
+                  transition: 'opacity 0.2s',
                 }}
               />
             )}
 
-            {/* Cutout overlay */}
-            {hasCutout && cutoutView === 'cutout' && (
-              <div
-                className={styles.previewCutout}
+            {/* Cutout layer — selalu di atas BG saat overlay/cutout mode */}
+            {hasCutout && cutoutUrl && previewMode !== 'bg' && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                className={styles.canvasCutout}
+                src={cutoutUrl}
+                alt="Cutout kendaraan"
+                draggable={false}
                 style={{
-                  left: cutoutLeft - cutoutSize / 2,
-                  top:  cutoutTop - cutoutSize / 2,
-                  width: cutoutSize,
-                  height: cutoutSize,
+                  left: cutoutLeft,
+                  top: cutoutTop,
+                  width: cutoutW,
+                  height: cutoutH,
+                  opacity: cutoutOpacity / 100,
+                  // Highlight border saat layer cutout aktif
+                  outline: activeLayer === 'cutout' && isCustom
+                    ? '2px dashed rgba(200,169,110,0.7)'
+                    : 'none',
+                  outlineOffset: '2px',
+                  transition: 'outline 0.15s',
                 }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  className={styles.previewCutoutImg}
-                  src={cutoutUrl}
-                  alt="Cutout"
-                />
-              </div>
+              />
             )}
 
-            {/* Focal marker */}
-            {isCustom && (
+            {/* Focal marker — hanya saat BG aktif dan custom */}
+            {isCustom && activeLayer === 'background' && (
               <div
                 className={styles.focalMarker}
                 style={{
                   left: `${effectiveSettings.focal_x}%`,
-                  top:  `${effectiveSettings.focal_y}%`,
+                  top: `${effectiveSettings.focal_y}%`,
                 }}
               >
                 <div className={styles.focalMarkerInner} />
               </div>
             )}
+
+            {/* Drag hint overlay saat tidak custom */}
+            {!isCustom && (
+              <div className={styles.canvasLockHint}>
+                Pilih CUSTOM untuk drag
+              </div>
+            )}
           </div>
 
-          <div className={styles.previewDims}>
-            {dims.width}×{dims.height}px
-          </div>
+          {/* Cutout opacity slider — di bawah canvas, hanya saat hasCutout */}
+          {hasCutout && (
+            <div className={styles.opacityRow}>
+              <span className={styles.opacityLabel}>Opacity cutout</span>
+              <input
+                type="range"
+                min={10}
+                max={100}
+                step={5}
+                value={cutoutOpacity}
+                className={styles.opacitySlider}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setCutoutOpacity(Number(e.target.value))
+                }
+              />
+              <span className={styles.opacityValue}>{cutoutOpacity}%</span>
+            </div>
+          )}
+
+          {/* Info saat belum ada cutout */}
+          {!hasCutout && (
+            <div className={styles.noCutoutNote}>
+              ℹ️ Cutout belum tersedia untuk gambar ini. Proses cutout di Media Library terlebih dahulu.
+            </div>
+          )}
         </div>
 
         <div className={styles.divider} />
@@ -416,18 +556,12 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
                   className={`${styles.modeBtn} ${effectiveSettings.mode === m ? styles.modeBtnActive : ''}`}
                   onClick={() => setMode(m)}
                   disabled={m === 'inherited' && activeBp === 'desktop'}
-                  title={
-                    m === 'inherited' && activeBp === 'desktop'
-                      ? 'Desktop tidak bisa inherit'
-                      : undefined
-                  }
                 >
                   {m === 'auto' ? 'AUTO' : m === 'custom' ? 'CUSTOM' : 'INHERIT'}
                 </button>
               ))}
             </div>
 
-            {/* Inherit source picker */}
             {effectiveSettings.mode === 'inherited' && (
               <select
                 className={styles.inheritSelect}
@@ -455,275 +589,222 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
 
           <div className={styles.divider} />
 
-          {/* ── Position ───────────────────────────────── */}
-          <div className={styles.controlSection}>
-            <div className={styles.controlSectionTitle}>Posisi Gambar</div>
-
-            {/* Position X */}
-            <div className={styles.sliderRow}>
-              <div className={styles.sliderLabel}>
-                <span className={styles.sliderLabelText}>Position X</span>
-                <span className={styles.sliderValue}>{effectiveSettings.position_x}%</span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                step={1}
-                value={effectiveSettings.position_x}
-                disabled={!isCustom}
-                className={styles.slider}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  updateBreakpoint(activeBp, { position_x: Number(e.target.value) })
-                }
-              />
-            </div>
-
-            {/* Position Y */}
-            <div className={styles.sliderRow}>
-              <div className={styles.sliderLabel}>
-                <span className={styles.sliderLabelText}>Position Y</span>
-                <span className={styles.sliderValue}>{effectiveSettings.position_y}%</span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                step={1}
-                value={effectiveSettings.position_y}
-                disabled={!isCustom}
-                className={styles.slider}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  updateBreakpoint(activeBp, { position_y: Number(e.target.value) })
-                }
-              />
-            </div>
-
-            {!isCustom && (
-              <div className={styles.sliderDisabledNote}>Aktifkan CUSTOM untuk mengatur posisi</div>
-            )}
-          </div>
-
-          <div className={styles.divider} />
-
-          {/* ── Scale ──────────────────────────────────── */}
-          <div className={styles.controlSection}>
-            <div className={styles.controlSectionTitle}>Zoom / Scale</div>
-            <div className={styles.sliderRow}>
-              <div className={styles.sliderLabel}>
-                <span className={styles.sliderLabelText}>Scale</span>
-                <span className={styles.sliderValue}>{effectiveSettings.scale}%</span>
-              </div>
-              <input
-                type="range"
-                min={80}
-                max={150}
-                step={1}
-                value={effectiveSettings.scale}
-                disabled={!isCustom}
-                className={styles.slider}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  updateBreakpoint(activeBp, { scale: Number(e.target.value) })
-                }
-              />
-            </div>
-            {!isCustom && (
-              <div className={styles.sliderDisabledNote}>Aktifkan CUSTOM untuk mengatur zoom</div>
-            )}
-          </div>
-
-          <div className={styles.divider} />
-
-          {/* ── Object Fit ─────────────────────────────── */}
-          <div className={styles.controlSection}>
-            <div className={styles.controlSectionTitle}>Crop / Object Fit</div>
-            <div className={styles.fitSelector}>
-              {(['cover', 'contain'] as const).map((fit) => (
-                <button
-                  key={fit}
-                  className={`${styles.fitBtn} ${effectiveSettings.object_fit === fit ? styles.fitBtnActive : ''}`}
-                  onClick={() => {
-                    if (!isCustom) return
-                    updateBreakpoint(activeBp, { object_fit: fit })
-                  }}
-                  disabled={!isCustom}
-                >
-                  {fit === 'cover' ? '⊡ Cover' : '⬜ Contain'}
-                </button>
-              ))}
-            </div>
-            {!isCustom && (
-              <div className={styles.sliderDisabledNote}>Aktifkan CUSTOM untuk mengatur crop</div>
-            )}
-          </div>
-
-          <div className={styles.divider} />
-
-          {/* ── Focal Point ────────────────────────────── */}
-          <div className={styles.controlSection}>
-            <div className={styles.controlSectionTitle}>Focal Point</div>
-            <div className={styles.sliderRow}>
-              <div className={styles.sliderLabel}>
-                <span className={styles.sliderLabelText}>Focal X</span>
-                <span className={styles.sliderValue}>{effectiveSettings.focal_x}%</span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                step={1}
-                value={effectiveSettings.focal_x}
-                disabled={!isCustom}
-                className={styles.slider}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  updateBreakpoint(activeBp, { focal_x: Number(e.target.value) })
-                }
-              />
-            </div>
-            <div className={styles.sliderRow}>
-              <div className={styles.sliderLabel}>
-                <span className={styles.sliderLabelText}>Focal Y</span>
-                <span className={styles.sliderValue}>{effectiveSettings.focal_y}%</span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                step={1}
-                value={effectiveSettings.focal_y}
-                disabled={!isCustom}
-                className={styles.slider}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  updateBreakpoint(activeBp, { focal_y: Number(e.target.value) })
-                }
-              />
-            </div>
-
-            {/* Focal Grid — drag to pick focal point */}
-            {isCustom && previewUrl && (
-              <>
-                <div className={styles.controlSectionTitle} style={{ marginTop: 4 }}>
-                  Klik / drag gambar untuk pilih focal point
-                </div>
-                <div
-                  ref={focalGridRef}
-                  className={styles.focalGrid}
-                  onPointerDown={handleFocalPointerDown}
-                  onPointerMove={handleFocalPointerMove}
-                  onPointerUp={handleFocalPointerUp}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={previewUrl}
-                    alt="Focal picker"
-                    className={styles.focalGridImg}
-                    draggable={false}
-                  />
-                  <div
-                    className={styles.focalGridMarker}
-                    style={{
-                      left: `${effectiveSettings.focal_x}%`,
-                      top:  `${effectiveSettings.focal_y}%`,
-                    }}
-                  />
-                  <div className={styles.focalGridHint}>Seret untuk atur titik fokus</div>
-                </div>
-              </>
-            )}
-
-            {!isCustom && (
-              <div className={styles.sliderDisabledNote}>Aktifkan CUSTOM untuk mengatur focal point</div>
-            )}
-          </div>
-
-          {/* ── Cutout Settings ─────────────────────────── */}
-          {hasCutout && (
+          {/* ── Background Controls ─────────────────────── */}
+          {(activeLayer === 'background' || !hasCutout) && (
             <>
-              <div className={styles.divider} />
               <div className={styles.controlSection}>
-                <div className={styles.controlSectionHeader}>
-                  <div className={styles.controlSectionTitle}>Cutout / Kendaraan</div>
-                  <div className={styles.cutoutTabs}>
-                    <button
-                      className={`${styles.cutoutTab} ${cutoutView === 'background' ? styles.cutoutTabActive : ''}`}
-                      onClick={() => setCutoutView('background')}
-                    >
-                      BG
-                    </button>
-                    <button
-                      className={`${styles.cutoutTab} ${cutoutView === 'cutout' ? styles.cutoutTabActive : ''}`}
-                      onClick={() => setCutoutView('cutout')}
-                    >
-                      Cutout
-                    </button>
-                  </div>
+                <div className={styles.controlSectionTitle}>
+                  🖼 Background — Posisi
                 </div>
 
                 <div className={styles.sliderRow}>
                   <div className={styles.sliderLabel}>
-                    <span className={styles.sliderLabelText}>Cutout Position X</span>
-                    <span className={styles.sliderValue}>{cutoutSettings.position_x}%</span>
+                    <span className={styles.sliderLabelText}>Position X</span>
+                    <span className={styles.sliderValue}>{effectiveSettings.position_x}%</span>
                   </div>
                   <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    step={1}
-                    value={cutoutSettings.position_x}
+                    type="range" min={0} max={100} step={1}
+                    value={effectiveSettings.position_x}
                     disabled={!isCustom}
                     className={styles.slider}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      updateBreakpoint(activeBp, {
-                        cutout: { ...cutoutSettings, position_x: Number(e.target.value) },
-                      })
+                      updateBreakpoint(activeBp, { position_x: Number(e.target.value) })
                     }
                   />
                 </div>
+
                 <div className={styles.sliderRow}>
                   <div className={styles.sliderLabel}>
-                    <span className={styles.sliderLabelText}>Cutout Position Y</span>
-                    <span className={styles.sliderValue}>{cutoutSettings.position_y}%</span>
+                    <span className={styles.sliderLabelText}>Position Y</span>
+                    <span className={styles.sliderValue}>{effectiveSettings.position_y}%</span>
                   </div>
                   <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    step={1}
-                    value={cutoutSettings.position_y}
+                    type="range" min={0} max={100} step={1}
+                    value={effectiveSettings.position_y}
                     disabled={!isCustom}
                     className={styles.slider}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      updateBreakpoint(activeBp, {
-                        cutout: { ...cutoutSettings, position_y: Number(e.target.value) },
-                      })
+                      updateBreakpoint(activeBp, { position_y: Number(e.target.value) })
                     }
                   />
                 </div>
+
                 <div className={styles.sliderRow}>
                   <div className={styles.sliderLabel}>
-                    <span className={styles.sliderLabelText}>Cutout Scale</span>
-                    <span className={styles.sliderValue}>{cutoutSettings.scale}%</span>
+                    <span className={styles.sliderLabelText}>Scale</span>
+                    <span className={styles.sliderValue}>{effectiveSettings.scale}%</span>
                   </div>
                   <input
-                    type="range"
-                    min={40}
-                    max={160}
-                    step={1}
-                    value={cutoutSettings.scale}
+                    type="range" min={80} max={150} step={1}
+                    value={effectiveSettings.scale}
                     disabled={!isCustom}
                     className={styles.slider}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      updateBreakpoint(activeBp, {
-                        cutout: { ...cutoutSettings, scale: Number(e.target.value) },
-                      })
+                      updateBreakpoint(activeBp, { scale: Number(e.target.value) })
                     }
                   />
                 </div>
+
                 {!isCustom && (
-                  <div className={styles.sliderDisabledNote}>Aktifkan CUSTOM untuk mengatur cutout</div>
+                  <div className={styles.sliderDisabledNote}>Aktifkan CUSTOM untuk drag atau geser slider</div>
+                )}
+              </div>
+
+              <div className={styles.divider} />
+
+              {/* Object Fit */}
+              <div className={styles.controlSection}>
+                <div className={styles.controlSectionTitle}>Crop / Object Fit</div>
+                <div className={styles.fitSelector}>
+                  {(['cover', 'contain'] as const).map((fit) => (
+                    <button
+                      key={fit}
+                      className={`${styles.fitBtn} ${effectiveSettings.object_fit === fit ? styles.fitBtnActive : ''}`}
+                      onClick={() => { if (isCustom) updateBreakpoint(activeBp, { object_fit: fit }) }}
+                      disabled={!isCustom}
+                    >
+                      {fit === 'cover' ? '⊡ Cover' : '⬜ Contain'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.divider} />
+
+              {/* Focal Point */}
+              <div className={styles.controlSection}>
+                <div className={styles.controlSectionTitle}>Focal Point</div>
+
+                <div className={styles.sliderRow}>
+                  <div className={styles.sliderLabel}>
+                    <span className={styles.sliderLabelText}>Focal X</span>
+                    <span className={styles.sliderValue}>{effectiveSettings.focal_x}%</span>
+                  </div>
+                  <input
+                    type="range" min={0} max={100} step={1}
+                    value={effectiveSettings.focal_x}
+                    disabled={!isCustom}
+                    className={styles.slider}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      updateBreakpoint(activeBp, { focal_x: Number(e.target.value) })
+                    }
+                  />
+                </div>
+
+                <div className={styles.sliderRow}>
+                  <div className={styles.sliderLabel}>
+                    <span className={styles.sliderLabelText}>Focal Y</span>
+                    <span className={styles.sliderValue}>{effectiveSettings.focal_y}%</span>
+                  </div>
+                  <input
+                    type="range" min={0} max={100} step={1}
+                    value={effectiveSettings.focal_y}
+                    disabled={!isCustom}
+                    className={styles.slider}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      updateBreakpoint(activeBp, { focal_y: Number(e.target.value) })
+                    }
+                  />
+                </div>
+
+                {isCustom && previewUrl && (
+                  <>
+                    <div className={styles.controlSectionTitle} style={{ marginTop: 4 }}>
+                      Klik / drag untuk pilih focal point
+                    </div>
+                    <div
+                      ref={focalGridRef}
+                      className={styles.focalGrid}
+                      onPointerDown={handleFocalPointerDown}
+                      onPointerMove={handleFocalPointerMove}
+                      onPointerUp={handleFocalPointerUp}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={previewUrl} alt="focal" className={styles.focalGridImg} draggable={false} />
+                      <div
+                        className={styles.focalGridMarker}
+                        style={{ left: `${effectiveSettings.focal_x}%`, top: `${effectiveSettings.focal_y}%` }}
+                      />
+                      <div className={styles.focalGridHint}>Seret untuk atur titik fokus</div>
+                    </div>
+                  </>
+                )}
+
+                {!isCustom && (
+                  <div className={styles.sliderDisabledNote}>Aktifkan CUSTOM untuk mengatur focal point</div>
                 )}
               </div>
             </>
+          )}
+
+          {/* ── Cutout Controls ─────────────────────────── */}
+          {hasCutout && activeLayer === 'cutout' && (
+            <div className={styles.controlSection}>
+              <div className={styles.controlSectionTitle}>
+                🚗 Cutout — Posisi &amp; Scale
+              </div>
+              <div className={styles.sliderDisabledNote} style={{ marginBottom: 8, fontStyle: 'normal', color: 'var(--color-ink-muted-dark)' }}>
+                Drag langsung di canvas atau gunakan slider di bawah.
+              </div>
+
+              <div className={styles.sliderRow}>
+                <div className={styles.sliderLabel}>
+                  <span className={styles.sliderLabelText}>Position X</span>
+                  <span className={styles.sliderValue}>{cutoutSettings.position_x}%</span>
+                </div>
+                <input
+                  type="range" min={0} max={100} step={1}
+                  value={cutoutSettings.position_x}
+                  disabled={!isCustom}
+                  className={styles.slider}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    updateBreakpoint(activeBp, {
+                      cutout: { ...cutoutSettings, position_x: Number(e.target.value) },
+                    })
+                  }
+                />
+              </div>
+
+              <div className={styles.sliderRow}>
+                <div className={styles.sliderLabel}>
+                  <span className={styles.sliderLabelText}>Position Y</span>
+                  <span className={styles.sliderValue}>{cutoutSettings.position_y}%</span>
+                </div>
+                <input
+                  type="range" min={0} max={100} step={1}
+                  value={cutoutSettings.position_y}
+                  disabled={!isCustom}
+                  className={styles.slider}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    updateBreakpoint(activeBp, {
+                      cutout: { ...cutoutSettings, position_y: Number(e.target.value) },
+                    })
+                  }
+                />
+              </div>
+
+              <div className={styles.sliderRow}>
+                <div className={styles.sliderLabel}>
+                  <span className={styles.sliderLabelText}>Scale</span>
+                  <span className={styles.sliderValue}>{cutoutSettings.scale}%</span>
+                </div>
+                <input
+                  type="range" min={40} max={160} step={1}
+                  value={cutoutSettings.scale}
+                  disabled={!isCustom}
+                  className={styles.slider}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    updateBreakpoint(activeBp, {
+                      cutout: { ...cutoutSettings, scale: Number(e.target.value) },
+                    })
+                  }
+                />
+              </div>
+
+              {!isCustom && (
+                <div className={styles.sliderDisabledNote}>Aktifkan CUSTOM untuk mengatur cutout</div>
+              )}
+            </div>
           )}
 
           {/* ── Typography Readiness ────────────────────── */}
@@ -734,31 +815,26 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
               <button
                 className={styles.sectionCollapse}
                 onClick={() => setShowTypography((v: boolean) => !v)}
-                aria-label={showTypography ? 'Sembunyikan' : 'Tampilkan'}
               >
-                {showTypography ? '▲ Sembunyikan' : '▼ Tampilkan'}
+                {showTypography ? '▲' : '▼'}
               </button>
             </div>
 
             {showTypography && (
               <>
                 <div className={styles.sliderDisabledNote}>
-                  Data posisi typography disimpan untuk Hero Editor (tahap berikutnya). Belum dirender di website.
+                  Struktur data untuk Hero Editor (tahap berikutnya). Belum dirender di website.
                 </div>
                 <div className={styles.sliderRow}>
                   <div className={styles.sliderLabel}>
                     <span className={styles.sliderLabelText}>Text X</span>
                     <span className={styles.sliderValue}>{effectiveSettings.typography.x}%</span>
                   </div>
-                  <input
-                    type="range" min={0} max={80} step={1}
-                    value={effectiveSettings.typography.x}
-                    disabled={!isCustom}
+                  <input type="range" min={0} max={80} step={1}
+                    value={effectiveSettings.typography.x} disabled={!isCustom}
                     className={styles.slider}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      updateBreakpoint(activeBp, {
-                        typography: { ...effectiveSettings.typography, x: Number(e.target.value) },
-                      })
+                      updateBreakpoint(activeBp, { typography: { ...effectiveSettings.typography, x: Number(e.target.value) } })
                     }
                   />
                 </div>
@@ -767,32 +843,24 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
                     <span className={styles.sliderLabelText}>Text Y</span>
                     <span className={styles.sliderValue}>{effectiveSettings.typography.y}%</span>
                   </div>
-                  <input
-                    type="range" min={0} max={90} step={1}
-                    value={effectiveSettings.typography.y}
-                    disabled={!isCustom}
+                  <input type="range" min={0} max={90} step={1}
+                    value={effectiveSettings.typography.y} disabled={!isCustom}
                     className={styles.slider}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      updateBreakpoint(activeBp, {
-                        typography: { ...effectiveSettings.typography, y: Number(e.target.value) },
-                      })
+                      updateBreakpoint(activeBp, { typography: { ...effectiveSettings.typography, y: Number(e.target.value) } })
                     }
                   />
                 </div>
                 <div className={styles.sliderRow}>
                   <div className={styles.sliderLabel}>
-                    <span className={styles.sliderLabelText}>Text Width</span>
+                    <span className={styles.sliderLabelText}>Width</span>
                     <span className={styles.sliderValue}>{effectiveSettings.typography.width}%</span>
                   </div>
-                  <input
-                    type="range" min={20} max={90} step={1}
-                    value={effectiveSettings.typography.width}
-                    disabled={!isCustom}
+                  <input type="range" min={20} max={90} step={1}
+                    value={effectiveSettings.typography.width} disabled={!isCustom}
                     className={styles.slider}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      updateBreakpoint(activeBp, {
-                        typography: { ...effectiveSettings.typography, width: Number(e.target.value) },
-                      })
+                      updateBreakpoint(activeBp, { typography: { ...effectiveSettings.typography, width: Number(e.target.value) } })
                     }
                   />
                 </div>
