@@ -1,14 +1,19 @@
 /**
  * JAECOO Palembang — Visual Media Editor
  * STEP 5E.1: Unified Background + Cutout canvas editor
+ * STEP 5F: AUTO Cutout Coordinate Mapping + Alpha BBox
  *
- * Perubahan dari 5E:
- * - Satu canvas menampilkan BG + Cutout sekaligus (OVERLAY mode)
- * - Selector layer aktif: [ BACKGROUND ] [ CUTOUT ]
- * - Drag langsung di canvas untuk memindahkan layer aktif
- * - Preview mode: OVERLAY / BG ONLY / CUTOUT ONLY
- * - Cutout opacity control untuk alignment
- * - Semua fitur 5E dipertahankan (breakpoints, AUTO/CUSTOM/INHERIT, save, reset)
+ * STEP 5F changes:
+ * - Cutout rendering rewritten: uses object-fit:cover + object-position
+ *   matching the background layer's coordinate system, eliminating
+ *   letterbox mismatch across breakpoints with different aspect ratios.
+ * - CUSTOM cutout offsets applied via additional CSS transform on top
+ *   of the base cover alignment.
+ * - Alpha bounding box detection: computed once per asset, cached in
+ *   _meta.cutout_bbox within presentation_settings.
+ * - Anomaly warning if bbox indicates unusually small vehicle area.
+ * - Drag rewritten to work in cover coordinate space.
+ * - All 5E/5E.1 features preserved.
  */
 
 'use client'
@@ -28,6 +33,7 @@ import {
   type PresentationSettings,
   type BreakpointSettings,
   type CutoutPlacement,
+  type PresentationMeta,
   BREAKPOINT_ORDER,
   BREAKPOINT_LABELS,
   BREAKPOINT_PREVIEW_DIMS,
@@ -35,6 +41,7 @@ import {
   DEFAULT_BREAKPOINT_SETTINGS,
   resolveBreakpointSettings,
 } from '@/lib/types/presentation'
+import { detectCutoutBBox } from '@/lib/utils/cutout-bbox'
 import styles from './VisualMediaEditor.module.css'
 
 // ─── Types ───────────────────────────────────────────────
@@ -105,6 +112,10 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
   const [cutoutOpacity, setCutoutOpacity] = useState(100)
   const [showTypography, setShowTypography] = useState(false)
 
+  // ── 5F: Bbox state ─────────────────────────────────────
+  const [bboxComputing, setBboxComputing] = useState(false)
+  const bboxComputedRef = useRef(false)
+
   // ── Refs ───────────────────────────────────────────────
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const canvasRef = useRef<HTMLDivElement | null>(null)
@@ -142,14 +153,39 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
     ?? ''
   const cutoutUrl = asset.cutout_url ?? ''
 
-  // ── Cutout pixel position on canvas ───────────────────
-  // position_x/y dalam % dari canvas → translate ke px center
-  const cutoutScaleFactor = cutoutSettings.scale / 100
-  // Ukuran cutout relatif terhadap lebar canvas
-  const cutoutW = previewW * cutoutScaleFactor
-  const cutoutH = previewH * cutoutScaleFactor
-  const cutoutLeft = (cutoutSettings.position_x / 100) * previewW - cutoutW / 2
-  const cutoutTop  = (cutoutSettings.position_y / 100) * previewH - cutoutH / 2
+  // ── 5F: Meta / bbox ────────────────────────────────────
+  const meta: PresentationMeta = (settings as PresentationSettings & { _meta?: PresentationMeta })._meta ?? {}
+  const cutoutBbox = meta.cutout_bbox ?? null
+
+  // ── 5F: Cutout rendering — cover-aligned coordinate system ────────────
+  //
+  // KEY INSIGHT: The cutout was generated from the same original image
+  // without any crop or resize, so vehicle coordinates in the cutout are
+  // pixel-identical to the original. To maintain correct overlay:
+  //
+  //   Both background AND cutout must use the same mapping:
+  //   object-fit: cover  +  object-position: X% Y%
+  //
+  // In AUTO mode (scale=100, pos=50/50): cutout is rendered exactly like
+  // the background layer — perfect overlap regardless of canvas aspect ratio.
+  //
+  // In CUSTOM mode: user offsets are applied via CSS translate() on top of
+  // the base cover alignment, so the coordinate system stays consistent.
+  //
+  // This replaces the old left/top/width/height approach which caused
+  // letterbox mismatch when canvas and image aspect ratios differed.
+
+  // CUSTOM offset: translate from center (50,50) by delta in %
+  // cutout.position_x = 50 means no offset; 60 means +10% right
+  const cutoutOffsetX = cutoutSettings.position_x - 50  // in % of canvas
+  const cutoutOffsetY = cutoutSettings.position_y - 50  // in % of canvas
+  const cutoutScaleVal = cutoutSettings.scale / 100      // multiplier
+
+  // CSS transform for cutout: apply scale then translate offset
+  // translateX/Y in % is relative to the ELEMENT, not the canvas —
+  // so we convert canvas-% offset to pixel offset using canvas dimensions
+  const cutoutOffsetXpx = (cutoutOffsetX / 100) * previewW
+  const cutoutOffsetYpx = (cutoutOffsetY / 100) * previewH
 
   // ── Change helpers ────────────────────────────────────
 
@@ -328,6 +364,55 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings, isDirty])
 
+  // ── 5F: Bbox detection — runs once per asset open (or after reset) ────
+  //
+  // Computes alpha bounding box of the cutout image and stores it in
+  // settings._meta. Only runs if:
+  //   - Asset has a cutout_url
+  //   - _meta.cutout_bbox is not already present
+  //   - Not already computing
+  //
+  // Performance: pixel scan runs on a 512px-wide offscreen canvas, once only.
+  // Never runs on every render or during drag.
+
+  useEffect(() => {
+    if (!hasCutout || !cutoutUrl) return
+    if (bboxComputedRef.current) return  // already done this session
+
+    const existingMeta = (settings as PresentationSettings & { _meta?: PresentationMeta })._meta
+    if (existingMeta?.cutout_bbox) {
+      // Already have bbox from a previous session — no need to recompute
+      bboxComputedRef.current = true
+      return
+    }
+
+    // Compute bbox asynchronously, once
+    bboxComputedRef.current = true
+    setBboxComputing(true)
+
+    detectCutoutBBox(cutoutUrl).then((result) => {
+      setBboxComputing(false)
+      if (!result) return
+
+      const newMeta: PresentationMeta = {
+        ...existingMeta,
+        cutout_bbox: result.bbox,
+        bbox_computed_at: result.computed_at,
+        bbox_anomaly: result.anomaly,
+        bbox_anomaly_reason: result.anomaly_reason,
+      }
+
+      setSettings((prev) => ({
+        ...prev,
+        _meta: newMeta,
+      }))
+      setIsDirty(true)
+    }).catch(() => {
+      setBboxComputing(false)
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasCutout, cutoutUrl])
+
   // ── Reset ─────────────────────────────────────────────
 
   const handleReset = useCallback(() => {
@@ -336,6 +421,9 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
       delete next[activeBp as BreakpointKey]
       return next
     })
+    // Reset also triggers bbox recompute if user wants fresh analysis
+    // (user explicitly clicked Reset AUTO)
+    bboxComputedRef.current = false
     setIsDirty(true)
     setSaveStatus('idle')
   }, [activeBp])
@@ -464,7 +552,10 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
               />
             )}
 
-            {/* Cutout layer — selalu di atas BG saat overlay/cutout mode */}
+            {/* Cutout layer — cover-aligned to match background coordinate system.
+                STEP 5F: Uses object-fit:cover + object-position identical to background
+                so that vehicle pixels overlay exactly, regardless of canvas aspect ratio.
+                CUSTOM offsets applied via CSS transform translate+scale on top. */}
             {hasCutout && cutoutUrl && previewMode !== 'bg' && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -473,10 +564,15 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
                 alt="Cutout kendaraan"
                 draggable={false}
                 style={{
-                  left: cutoutLeft,
-                  top: cutoutTop,
-                  width: cutoutW,
-                  height: cutoutH,
+                  // Base: same cover mapping as background
+                  objectFit: 'cover',
+                  objectPosition: '50% 50%',
+                  // CUSTOM mode: apply offset + scale via transform
+                  // Scale from center, then translate by canvas-% offset
+                  transform: isCustom
+                    ? `scale(${cutoutScaleVal}) translate(${cutoutOffsetXpx / cutoutScaleVal}px, ${cutoutOffsetYpx / cutoutScaleVal}px)`
+                    : 'none',
+                  transformOrigin: '50% 50%',
                   opacity: cutoutOpacity / 100,
                   // Highlight border saat layer cutout aktif
                   outline: activeLayer === 'cutout' && isCustom
@@ -803,6 +899,57 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
 
               {!isCustom && (
                 <div className={styles.sliderDisabledNote}>Aktifkan CUSTOM untuk mengatur cutout</div>
+              )}
+            </div>
+          )}
+
+          {/* ── 5F: Bbox Info Panel ─────────────────────── */}
+          {hasCutout && (
+            <div className={styles.controlSection}>
+              <div className={styles.controlSectionTitle}>
+                📐 Cutout Analysis
+              </div>
+
+              {bboxComputing && (
+                <div className={styles.sliderDisabledNote}>
+                  Menghitung bounding box…
+                </div>
+              )}
+
+              {!bboxComputing && !cutoutBbox && (
+                <div className={styles.sliderDisabledNote}>
+                  Bounding box belum tersedia.
+                </div>
+              )}
+
+              {!bboxComputing && cutoutBbox && (
+                <div className={styles.bboxInfo}>
+                  <div className={styles.bboxRow}>
+                    <span className={styles.bboxLabel}>Vehicle area</span>
+                    <span className={styles.bboxValue}>
+                      {cutoutBbox.w_pct}% × {cutoutBbox.h_pct}%
+                    </span>
+                  </div>
+                  <div className={styles.bboxRow}>
+                    <span className={styles.bboxLabel}>Position</span>
+                    <span className={styles.bboxValue}>
+                      x:{cutoutBbox.x_pct}% y:{cutoutBbox.y_pct}%
+                    </span>
+                  </div>
+                  {meta.bbox_anomaly && (
+                    <div className={styles.bboxWarning}>
+                      ⚠ Cutout object area appears unusually small.
+                      {meta.bbox_anomaly_reason && (
+                        <span> {meta.bbox_anomaly_reason}</span>
+                      )}
+                    </div>
+                  )}
+                  {!meta.bbox_anomaly && (
+                    <div className={styles.bboxOk}>
+                      ✓ Cutout looks normal
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           )}

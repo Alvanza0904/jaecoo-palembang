@@ -239,9 +239,15 @@
   user-select: none;
 }
 
+/* STEP 5F: Cutout uses cover-aligned coordinate system to match background.
+   inset:0 + width/height 100% makes it fill canvas exactly like .canvasBg.
+   object-fit:cover ensures same pixel mapping. Custom offsets via transform. */
 .canvasCutout {
   position: absolute;
-  object-fit: contain;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   pointer-events: none;
   user-select: none;
 }
@@ -637,4 +643,48 @@
 
 @media (min-width: 1024px) {
   .panel { max-width: 400px; }
+}
+
+/* ─── STEP 5F: Bbox Info Panel ──────────────────────────── */
+
+.bboxInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.bboxRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--text-xs, 11px);
+}
+
+.bboxLabel {
+  color: var(--color-ink-muted-dark);
+}
+
+.bboxValue {
+  color: var(--color-ink-on-dark);
+  font-variant-numeric: tabular-nums;
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.bboxWarning {
+  margin-top: 6px;
+  padding: 6px 8px;
+  background: rgba(220, 160, 60, 0.12);
+  border: 1px solid rgba(220, 160, 60, 0.3);
+  border-radius: 4px;
+  font-size: var(--text-xs, 11px);
+  color: rgb(220, 160, 60);
+  line-height: 1.4;
+}
+
+.bboxOk {
+  margin-top: 4px;
+  font-size: var(--text-xs, 11px);
+  color: rgba(100, 200, 120, 0.8);
 }

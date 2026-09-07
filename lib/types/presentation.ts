@@ -85,9 +85,34 @@ export interface BreakpointSettings {
 }
 
 /**
+ * STEP 5F: Cutout bounding box metadata.
+ * Stored under _meta key in PresentationSettings.
+ * Computed client-side once per asset via Canvas API alpha scan.
+ */
+export interface PresentationMeta {
+  cutout_bbox?: {
+    /** Left edge of vehicle, as % of cutout canvas width */
+    x_pct: number
+    /** Top edge of vehicle, as % of cutout canvas height */
+    y_pct: number
+    /** Vehicle width, as % of cutout canvas width */
+    w_pct: number
+    /** Vehicle height, as % of cutout canvas height */
+    h_pct: number
+  }
+  /** ISO timestamp when bbox was last computed */
+  bbox_computed_at?: string
+  /** True if bbox indicates a processing anomaly */
+  bbox_anomaly?: boolean
+  /** Description of anomaly if present */
+  bbox_anomaly_reason?: string
+}
+
+/**
  * Full presentation settings object stored in media_assets.presentation_settings
  */
 export interface PresentationSettings {
+  _meta?: PresentationMeta
   desktop?: Partial<BreakpointSettings>
   tablet?: Partial<BreakpointSettings>
   mobile?: Partial<BreakpointSettings>
