@@ -53,16 +53,18 @@ export interface ResponsiveImage {
 
 export interface MediaWithArtDirection {
   image: ResponsiveImage;
-  /** Source asset focal point used by AUTO presentation mode. */
+  /** Database media asset ID used as the hero background source. */
+  media_asset_id?: string;
+  /** Database media asset ID used as the transparent cutout source. */
+  cutout_media_id?: string;
+  /** Presentation settings for the hero/background asset. */
+  presentation_settings?: PresentationSettings;
+  /** Presentation settings for the separate cutout asset. */
+  cutout_presentation_settings?: PresentationSettings;
   focal_x?: number;
   focal_y?: number;
-  /** Visual Media Editor presentation settings for the background/hero asset */
-  presentation_settings?: PresentationSettings
-  /** Presentation settings for a separate transparent cutout asset */
-  cutout_presentation_settings?: PresentationSettings
-  /** Source focal point for the separate cutout asset (AUTO fallback) */
-  cutout_focal_x?: number
-  cutout_focal_y?: number
+  cutout_focal_x?: number;
+  cutout_focal_y?: number;
   art_direction?: {
     desktop?: ArtDirectionSettings;
     tablet?: ArtDirectionSettings;

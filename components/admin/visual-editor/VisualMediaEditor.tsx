@@ -21,7 +21,6 @@
 import {
   useState,
   useCallback,
-  useMemo,
   useRef,
   useEffect,
   type ChangeEvent,
@@ -57,7 +56,7 @@ const BP_ICONS: Record<BreakpointKey, string> = {
   desktop:      '🖥',
   tablet:       '📱',
   mobile:       '📲',
-  small_mobile: '📱',
+  small_mobile: '📟',
 }
 
 // Checkerboard pattern sebagai data URL (untuk preview cutout)
@@ -66,9 +65,9 @@ const CHECKER_BG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000
 // ─── Props ────────────────────────────────────────────────
 
 interface Props {
-  /** Hero/background media asset. */
+  /** Hero/background asset. */
   asset: MediaAsset
-  /** Separate cutout media asset, when Hero uses one. */
+  /** Separate cutout asset when the model uses cutout_media_id. */
   cutoutAsset?: MediaAsset | null
   onClose: () => void
   onUpdated: (asset: MediaAsset) => void
@@ -105,9 +104,6 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
 
   // ── Core state ─────────────────────────────────────────
   const [activeBp, setActiveBp] = useState<BreakpointKey>('desktop')
-  // Background settings belong to the hero/background asset. When Hero Cutout
-  // is a separate media asset, its presentation settings belong to that asset.
-  // This keeps the editor and public renderer on the exact same source rows.
   const [settings, setSettings] = useState<PresentationSettings>(() => getStoredSettings(asset))
   const [cutoutAssetSettings, setCutoutAssetSettings] = useState<PresentationSettings>(() =>
     getStoredSettings(cutoutAsset ?? asset),
@@ -138,63 +134,34 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
   const cutoutSourceAsset = cutoutAsset ?? asset
   const hasCutout = !!cutoutSourceAsset.cutout_url
 
-  // The active layer determines which media row owns the settings being edited.
   const activeSettings = activeLayer === 'cutout' && separateCutoutAsset
     ? cutoutAssetSettings
     : settings
   const activeFocalX = activeLayer === 'cutout' && separateCutoutAsset
     ? cutoutSourceAsset.focal_x ?? 50
     : asset.focal_x ?? 50
+  const activeFocalY = activeLayer === 'cutout' && separateCutoutAsset
+    ? cutoutSourceAsset.focal_y ?? 50
+    : asset.focal_y ?? 50
 
   const effectiveSettings: BreakpointSettings = resolveBreakpointSettings(
     activeSettings,
     activeBp,
     activeFocalX,
-    activeLayer === 'cutout' && separateCutoutAsset
-      ? cutoutSourceAsset.focal_y ?? 50
-      : asset.focal_y ?? 50,
+    activeFocalY,
   )
-
-  const backgroundEffectiveSettings = resolveBreakpointSettings(
-    settings,
-    activeBp,
-    asset.focal_x ?? 50,
-    asset.focal_y ?? 50,
-  )
-  const cutoutSettings: CutoutPlacement = useMemo(() => {
-    return resolveBreakpointSettings(
-      separateCutoutAsset ? cutoutAssetSettings : settings,
-      activeBp,
-      cutoutSourceAsset.focal_x ?? 50,
-      cutoutSourceAsset.focal_y ?? 50,
-    ).cutout
-  }, [
-    separateCutoutAsset,
-    cutoutAssetSettings,
-    settings,
-    activeBp,
-    cutoutSourceAsset.focal_x,
-    cutoutSourceAsset.focal_y,
-  ])
-  const cutoutEffectiveSettings: BreakpointSettings = useMemo(() => (
-    resolveBreakpointSettings(
-      separateCutoutAsset ? cutoutAssetSettings : settings,
-      activeBp,
-      cutoutSourceAsset.focal_x ?? 50,
-      cutoutSourceAsset.focal_y ?? 50,
-    )
-  ), [
-    separateCutoutAsset,
-    cutoutAssetSettings,
-    settings,
-    activeBp,
-    cutoutSourceAsset.focal_x,
-    cutoutSourceAsset.focal_y,
-  ])
 
   const stored = activeSettings[activeBp as BreakpointKey] ?? {}
   const isCustom = effectiveSettings.mode === 'custom'
   const isInherited = effectiveSettings.mode === 'inherited'
+
+  const cutoutEffectiveSettings = resolveBreakpointSettings(
+    separateCutoutAsset ? cutoutAssetSettings : settings,
+    activeBp,
+    cutoutSourceAsset.focal_x ?? 50,
+    cutoutSourceAsset.focal_y ?? 50,
+  )
+  const cutoutSettings: CutoutPlacement = cutoutEffectiveSettings.cutout
 
   // ── Preview dimensions ─────────────────────────────────
   const dims = BREAKPOINT_PREVIEW_DIMS[activeBp as BreakpointKey]
@@ -211,10 +178,9 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
   const cutoutUrl = cutoutSourceAsset.cutout_url ?? ''
 
   // ── 5F: Meta / bbox ────────────────────────────────────
-  const cutoutMeta = (cutoutAssetSettings as PresentationSettings & { _meta?: PresentationMeta })._meta ?? {}
-  const meta: PresentationMeta = (activeLayer === 'cutout' && separateCutoutAsset)
-    ? cutoutMeta
-    : ((settings as PresentationSettings & { _meta?: PresentationMeta })._meta ?? {})
+  const meta: PresentationMeta = (
+    (separateCutoutAsset ? cutoutAssetSettings : settings) as PresentationSettings & { _meta?: PresentationMeta }
+  )._meta ?? {}
   const cutoutBbox = meta.cutout_bbox ?? null
 
   // ── 5F: Cutout rendering — cover-aligned coordinate system ────────────
@@ -358,7 +324,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
         })
       }
     },
-    [isCustom, activeBp, activeLayer, separateCutoutAsset, updateBreakpoint, cutoutSettings],
+    [isCustom, activeBp, updateBreakpoint, cutoutSettings],
   )
 
   const handleCanvasPointerUp = useCallback(() => {
@@ -385,14 +351,9 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
       const rect = e.currentTarget.getBoundingClientRect()
       const x = Math.round(Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100)))
       const y = Math.round(Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100)))
-      setSettings((prev: PresentationSettings) => {
-        const current = prev[activeBp] ?? {}
-        return { ...prev, [activeBp]: { ...current, focal_x: x, focal_y: y, position_x: x, position_y: y } }
-      })
-      setDirtyBackground(true)
-      setSaveStatus('idle')
+      updateBreakpoint(activeBp, { focal_x: x, focal_y: y, position_x: x, position_y: y })
     },
-    [isDraggingFocal, isCustom, activeBp],
+    [isDraggingFocal, isCustom, activeBp, updateBreakpoint],
   )
 
   const handleFocalPointerUp = useCallback(() => setIsDraggingFocal(false), [])
@@ -444,6 +405,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
     if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
     autosaveTimer.current = setTimeout(() => { void doSave() }, 1500)
     return () => { if (autosaveTimer.current) clearTimeout(autosaveTimer.current) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cutoutAssetSettings, doSave, isDirty, settings])
 
   // ── 5F: Bbox detection — runs once per asset open (or after reset) ────
@@ -520,25 +482,18 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
     setSaveStatus('idle')
   }, [activeBp, activeLayer, separateCutoutAsset])
 
-  // ── Close / lifecycle ─────────────────────────────────
-  // Closing the editor must never discard the latest edits. The editor already
-  // autosaves, but a close can happen before the debounce fires, so flush a
-  // dirty save before returning to the previous screen.
   const handleClose = useCallback(async () => {
     if (autosaveTimer.current) {
       clearTimeout(autosaveTimer.current)
       autosaveTimer.current = null
     }
-
     if (isDirty && saveStatus !== 'saving') {
       const saved = await doSave()
       if (!saved) return
     }
-
     onClose()
-  }, [isDirty, saveStatus, doSave, onClose])
+  }, [doSave, isDirty, onClose, saveStatus])
 
-  // Escape behaves like the explicit close button.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -547,18 +502,13 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
       }
     }
     document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [handleClose])
-
-  // The editor is a full-screen workspace; prevent the page behind it from
-  // scrolling while it is open (including mobile Safari).
-  useEffect(() => {
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
+      document.removeEventListener('keydown', onKeyDown)
       document.body.style.overflow = previousOverflow
     }
-  }, [])
+  }, [handleClose])
 
   // ── Canvas cursor ─────────────────────────────────────
   const canvasCursor = !isCustom ? 'default' : isDragging ? 'grabbing' : 'grab'
@@ -580,40 +530,18 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
             🎨 Visual Editor
           </div>
           <div className={styles.headerActions}>
-            <button
-              type="button"
-              className={styles.backBtn}
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                void handleClose()
-              }}
-            >
-              ← Kembali
-            </button>
+            <button className={styles.backBtn} type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); void handleClose() }}>← Kembali</button>
             <div className={styles.saveStatusWrap}>
               {saveStatus === 'saving' && <span className={styles.saveStatusSaving}>Menyimpan…</span>}
               {saveStatus === 'saved'  && <span className={styles.saveStatusSaved}>✓ Tersimpan</span>}
               {saveStatus === 'error'  && <span className={styles.saveStatusError} title={saveError ?? ''}>⚠ Error</span>}
               {saveStatus === 'idle' && isDirty && <span className={styles.saveStatusDirty}>● Belum simpan</span>}
             </div>
-            <button
-              type="button"
-              className={styles.closeBtn}
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                void handleClose()
-              }}
-              aria-label="Tutup Visual Editor"
-              title="Tutup editor"
-            >
-              ✕
-            </button>
+            <button className={styles.closeBtn} type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); void handleClose() }} aria-label="Tutup">✕</button>
           </div>
         </div>
 
-        {/* ── Responsive Device Preview ───────────────── */}
+        {/* ── Breakpoint Tabs ──────────────────────────── */}
         <div className={styles.breakpointTabs} role="tablist">
           {BREAKPOINT_ORDER.map((bp) => {
             const bpMode: PresentationMode = (activeLayer === 'cutout' && separateCutoutAsset
@@ -641,9 +569,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
         <div className={styles.previewIndicator} aria-live="polite">
           <span>Preview</span>
           <strong>{BREAKPOINT_LABELS[activeBp]}</strong>
-          {activeLayer === 'cutout' && separateCutoutAsset && (
-            <span className={styles.previewIndicatorNote}>Cutout asset terpisah</span>
-          )}
+          <span className={styles.previewIndicatorNote}>Editing: {BREAKPOINT_LABELS[activeBp]}</span>
         </div>
 
         {/* ── Layer Selector (BG / CUTOUT) ─────────────── */}
@@ -706,10 +632,10 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
                 alt={asset.alt_text ?? asset.filename}
                 draggable={false}
                 style={{
-                  objectFit: backgroundEffectiveSettings.object_fit,
-                  objectPosition: `${backgroundEffectiveSettings.position_x}% ${backgroundEffectiveSettings.position_y}%`,
-                  transform: `scale(${backgroundEffectiveSettings.scale / 100})`,
-                  transformOrigin: `${backgroundEffectiveSettings.position_x}% ${backgroundEffectiveSettings.position_y}%`,
+                  objectFit: effectiveSettings.object_fit,
+                  objectPosition: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
+                  transform: `scale(${effectiveSettings.scale / 100})`,
+                  transformOrigin: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
                   // Dim BG slightly saat layer cutout aktif
                   opacity: hasCutout && activeLayer === 'cutout' ? 0.7 : 1,
                   transition: 'opacity 0.2s',
@@ -728,13 +654,18 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
                 src={cutoutUrl}
                 alt="Cutout kendaraan"
                 draggable={false}
+                data-visual-asset-id={cutoutSourceAsset.id}
+                data-visual-breakpoint={activeBp}
+                data-visual-mode={cutoutEffectiveSettings.mode}
+                data-visual-position-x={cutoutSettings.position_x}
+                data-visual-position-y={cutoutSettings.position_y}
+                data-visual-scale={cutoutSettings.scale}
                 style={{
                   // Base: same cover mapping as background
                   objectFit: 'cover',
                   objectPosition: '50% 50%',
-                  // Use the exact same transform function as public LayeredHero.
-                  // The image fills the canvas, so its percentage translation is
-                  // the editor's 0–100 canvas coordinate system.
+                  // CUSTOM mode: apply offset + scale via transform
+                  // Scale from center, then translate by canvas-% offset
                   transform: cutoutEffectiveSettings.mode === 'custom'
                     ? cutoutTransformToCSS(
                         cutoutSettings.position_x,
@@ -759,8 +690,8 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
               <div
                 className={styles.focalMarker}
                 style={{
-                  left: `${backgroundEffectiveSettings.focal_x}%`,
-                  top: `${backgroundEffectiveSettings.focal_y}%`,
+                  left: `${effectiveSettings.focal_x}%`,
+                  top: `${effectiveSettings.focal_y}%`,
                 }}
               >
                 <div className={styles.focalMarkerInner} />
@@ -989,7 +920,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
                       <img src={previewUrl} alt="focal" className={styles.focalGridImg} draggable={false} />
                       <div
                         className={styles.focalGridMarker}
-                        style={{ left: `${backgroundEffectiveSettings.focal_x}%`, top: `${backgroundEffectiveSettings.focal_y}%` }}
+                        style={{ left: `${effectiveSettings.focal_x}%`, top: `${effectiveSettings.focal_y}%` }}
                       />
                       <div className={styles.focalGridHint}>Seret untuk atur titik fokus</div>
                     </div>

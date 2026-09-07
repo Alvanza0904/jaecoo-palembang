@@ -1,21 +1,21 @@
 /**
  * JAECOO Palembang — Layered Hero
  *
- * The public hero consumes the same PresentationSettings written by the
- * Visual Media Editor. Cutout placement uses the editor's 0–100 coordinate
- * system and breakpoint inheritance resolver; there is no independent
- * public-hero positioning system.
+ * Architecture:
+ *   BACKGROUND MEDIA (image/video)
+ *     ↓
+ *   TYPOGRAPHY LAYER
+ *     ↓
+ *   VEHICLE CUTOUT (foreground — overlaps typography)
+ *
+ * Supports: desktop / tablet / mobile / small_mobile
+ * Art direction: focal_x, focal_y, mode (auto | custom)
+ * Video: muted autoplay loop with poster fallback
  */
 
 import Image from "next/image";
 import type { MediaWithArtDirection, ResponsiveVideo } from "@/lib/types/media";
-import {
-  BREAKPOINT_ORDER,
-  resolveBreakpointSettings,
-  cutoutTransformToCSS,
-  type BreakpointKey,
-  type PresentationSettings,
-} from "@/lib/types/presentation";
+import { BREAKPOINT_ORDER, resolveBreakpointSettings, cutoutTransformToCSS, type BreakpointKey, type PresentationSettings } from "@/lib/types/presentation";
 import styles from "./LayeredHero.module.css";
 
 export interface LayeredHeroProps {
@@ -39,32 +39,20 @@ export interface LayeredHeroProps {
   lightBackground?: boolean;
 }
 
-type CutoutBreakpoint = BreakpointKey;
-
 function getCutoutStyle(
   settings: PresentationSettings | undefined,
-  breakpoint: CutoutBreakpoint,
-  assetFocalX = 50,
-  assetFocalY = 50,
+  breakpoint: BreakpointKey,
+  focalX = 50,
+  focalY = 50,
 ): React.CSSProperties {
-  const effective = resolveBreakpointSettings(
-    settings ?? {},
-    breakpoint,
-    assetFocalX,
-    assetFocalY,
-  );
-  const cutout = effective.cutout;
-
+  const effective = resolveBreakpointSettings(settings ?? {}, breakpoint, focalX, focalY)
+  const cutout = effective.cutout
   return {
     objectFit: "cover",
     objectPosition: "50% 50%",
-    transform: cutoutTransformToCSS(
-      cutout.position_x,
-      cutout.position_y,
-      cutout.scale,
-    ),
+    transform: cutoutTransformToCSS(cutout.position_x, cutout.position_y, cutout.scale),
     transformOrigin: "50% 50%",
-  };
+  }
 }
 
 export function LayeredHero({
@@ -81,12 +69,10 @@ export function LayeredHero({
   const { image, art_direction } = media;
   const presentationSettings = media.presentation_settings;
   const cutoutPresentationSettings = media.cutout_presentation_settings ?? presentationSettings;
-  const hasCutout = !!image.cutout;
-  const assetFocalX = media.focal_x ?? 50;
-  const assetFocalY = media.focal_y ?? 50;
-  const cutoutFocalX = media.cutout_focal_x ?? assetFocalX;
-  const cutoutFocalY = media.cutout_focal_y ?? assetFocalY;
+  const cutoutFocalX = media.cutout_focal_x ?? media.focal_x ?? 50;
+  const cutoutFocalY = media.cutout_focal_y ?? media.focal_y ?? 50;
 
+  // Build object-position from art direction
   const getObjectPosition = (breakpoint: "desktop" | "tablet" | "mobile") => {
     const dir = art_direction?.[breakpoint];
     if (!dir) return "center center";
@@ -98,6 +84,8 @@ export function LayeredHero({
     return `${fx}% ${fy}%`;
   };
 
+  const hasCutout = !!image.cutout;
+
   return (
     <section
       className={[
@@ -106,13 +94,18 @@ export function LayeredHero({
         lightBackground ? styles.heroLight : styles.heroDark,
       ].join(" ")}
       aria-label="Hero section"
+      data-hero-media-asset-id={media.media_asset_id}
+      data-hero-cutout-media-id={media.cutout_media_id}
     >
       {/* ── Background layer ── */}
       <div className={styles.bg} aria-hidden="true">
         {video ? (
+          /* Video background with image fallback */
           <VideoBackground video={video} />
         ) : (
+          /* Responsive image background */
           <div className={styles.bgImages}>
+            {/* Mobile */}
             {(image.small_mobile || image.mobile) && (
               <div className={styles.bgImageMobile}>
                 <Image
@@ -127,6 +120,7 @@ export function LayeredHero({
                 />
               </div>
             )}
+            {/* Tablet */}
             {image.tablet && (
               <div className={styles.bgImageTablet}>
                 <Image
@@ -141,6 +135,7 @@ export function LayeredHero({
                 />
               </div>
             )}
+            {/* Desktop */}
             {image.desktop && (
               <div className={styles.bgImageDesktop}>
                 <Image
@@ -155,12 +150,14 @@ export function LayeredHero({
                 />
               </div>
             )}
+            {/* Fallback placeholder when no images provided */}
             {!image.desktop && !image.mobile && (
               <div className={styles.bgPlaceholder} />
             )}
           </div>
         )}
 
+        {/* Overlay */}
         <div
           className={styles.overlay}
           style={{ "--overlay-opacity": overlayOpacity / 100 } as React.CSSProperties}
@@ -171,20 +168,26 @@ export function LayeredHero({
       {/* ── Typography layer ── */}
       <div className={styles.content}>
         <div className={styles.contentInner}>
-          {tagline && <p className={styles.tagline}>{tagline}</p>}
+          {tagline && (
+            <p className={styles.tagline}>{tagline}</p>
+          )}
 
           <div className={styles.headingBlock}>
             <h1 className={styles.heading}>{heading}</h1>
-            {subheading && <p className={styles.subheading}>{subheading}</p>}
+            {subheading && (
+              <p className={styles.subheading}>{subheading}</p>
+            )}
           </div>
 
-          {cta && <div className={styles.cta}>{cta}</div>}
+          {cta && (
+            <div className={styles.cta}>{cta}</div>
+          )}
         </div>
       </div>
 
       {/* ── Vehicle cutout layer (foreground) ── */}
       {hasCutout && (
-        <div className={styles.cutout} aria-hidden="true">
+        <div className={styles.cutout} aria-hidden="true" data-cutout-layer>
           {BREAKPOINT_ORDER.map((breakpoint) => (
             <Image
               key={breakpoint}
@@ -193,22 +196,25 @@ export function LayeredHero({
               fill
               priority
               className={`${styles.cutoutImg} ${styles[`cutoutImg--${breakpoint}`]}`}
-              style={getCutoutStyle(
-                cutoutPresentationSettings,
-                breakpoint,
-                cutoutFocalX,
-                cutoutFocalY,
-              )}
+              style={getCutoutStyle(cutoutPresentationSettings, breakpoint, cutoutFocalX, cutoutFocalY)}
+              data-cutout-breakpoint={breakpoint}
+              data-cutout-mode={resolveBreakpointSettings(cutoutPresentationSettings ?? {}, breakpoint, cutoutFocalX, cutoutFocalY).mode}
+              data-cutout-position-x={resolveBreakpointSettings(cutoutPresentationSettings ?? {}, breakpoint, cutoutFocalX, cutoutFocalY).cutout.position_x}
+              data-cutout-position-y={resolveBreakpointSettings(cutoutPresentationSettings ?? {}, breakpoint, cutoutFocalX, cutoutFocalY).cutout.position_y}
+              data-cutout-scale={resolveBreakpointSettings(cutoutPresentationSettings ?? {}, breakpoint, cutoutFocalX, cutoutFocalY).cutout.scale}
               sizes="100vw"
             />
           ))}
         </div>
       )}
 
+      {/* Screen-reader alt for hero image */}
       <span className="sr-only">{image.alt}</span>
     </section>
   );
 }
+
+/* ── Video Background sub-component ── */
 
 function VideoBackground({ video }: { video: ResponsiveVideo }) {
   return (
@@ -229,8 +235,11 @@ function VideoBackground({ video }: { video: ResponsiveVideo }) {
             type="video/mp4"
           />
         )}
-        {video.desktop && <source src={video.desktop} type="video/mp4" />}
+        {video.desktop && (
+          <source src={video.desktop} type="video/mp4" />
+        )}
       </video>
+      {/* Poster fallback image */}
       <Image
         src={video.poster}
         alt={video.alt}

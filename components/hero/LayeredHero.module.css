@@ -187,22 +187,17 @@
   pointer-events: none;
 }
 
-/* Every breakpoint image fills the same hero coordinate space as the editor
-   canvas. Placement/scale come exclusively from presentation_settings. */
+/* Cutout fills the exact hero coordinate space. All placement and scale come
+   from presentation_settings; there is no bottom/right/width/height override. */
 .cutoutImg {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
   object-fit: cover;
   object-position: 50% 50%;
-  transition: none;
-}
-
-.cutoutImg--desktop,
-.cutoutImg--tablet,
-.cutoutImg--mobile,
-.cutoutImg--small_mobile {
   display: none;
 }
-
-/* ─── Responsive breakpoints ──────────────────────────── */
 
 @media (max-width: 767px) {
   .cutoutImg--mobile { display: block; }
@@ -214,41 +209,12 @@
 }
 
 @media (min-width: 768px) {
-  .bgImageMobile { display: none; }
-  .bgImageTablet { display: block; }
-
-  .content {
-    align-items: center;
-    padding-top: calc(var(--header-height-desktop) + var(--space-12));
-  }
-
-  .heading {
-    font-size: var(--text-5xl);
-  }
-
   .cutoutImg--mobile,
   .cutoutImg--small_mobile { display: none; }
   .cutoutImg--tablet { display: block; }
 }
 
 @media (min-width: 1024px) {
-  .content {
-    padding-top: calc(var(--header-height-desktop) + var(--space-16));
-    padding-bottom: var(--space-20);
-  }
-
-  .bgImageTablet { display: none; }
-  .bgImageDesktop { display: block; }
-
-  .heading {
-    font-size: var(--text-hero);
-  }
-
-  .subheading {
-    font-size: var(--text-xl);
-    max-width: 560px;
-  }
-
   .cutoutImg--tablet { display: none; }
   .cutoutImg--desktop { display: block; }
 }
