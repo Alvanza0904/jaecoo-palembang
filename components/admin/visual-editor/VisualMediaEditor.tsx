@@ -329,8 +329,8 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
 
   // ── Save ──────────────────────────────────────────────
 
-  const doSave = useCallback(async () => {
-    if (saveStatus === 'saving') return
+  const doSave = useCallback(async (): Promise<boolean> => {
+    if (saveStatus === 'saving') return true
     setSaveStatus('saving')
     setSaveError(null)
     try {
@@ -343,15 +343,17 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
       if (!res.ok) {
         setSaveStatus('error')
         setSaveError(json.error || 'Gagal menyimpan')
-        return
+        return false
       }
       setSaveStatus('saved')
       setIsDirty(false)
       if (json.asset) onUpdated(json.asset as MediaAsset)
       setTimeout(() => setSaveStatus('idle'), 2500)
+      return true
     } catch (err) {
       setSaveStatus('error')
       setSaveError(String(err))
+      return false
     }
   }, [asset.id, settings, saveStatus, onUpdated])
 
@@ -428,6 +430,46 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
     setSaveStatus('idle')
   }, [activeBp])
 
+  // ── Close / lifecycle ─────────────────────────────────
+  // Closing the editor must never discard the latest edits. The editor already
+  // autosaves, but a close can happen before the debounce fires, so flush a
+  // dirty save before returning to the previous screen.
+  const handleClose = useCallback(async () => {
+    if (autosaveTimer.current) {
+      clearTimeout(autosaveTimer.current)
+      autosaveTimer.current = null
+    }
+
+    if (isDirty && saveStatus !== 'saving') {
+      const saved = await doSave()
+      if (!saved) return
+    }
+
+    onClose()
+  }, [isDirty, saveStatus, doSave, onClose])
+
+  // Escape behaves like the explicit close button.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        void handleClose()
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [handleClose])
+
+  // The editor is a full-screen workspace; prevent the page behind it from
+  // scrolling while it is open (including mobile Safari).
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [])
+
   // ── Canvas cursor ─────────────────────────────────────
   const canvasCursor = !isCustom ? 'default' : isDragging ? 'grabbing' : 'grab'
 
@@ -437,7 +479,7 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
     <div
       className={styles.overlay}
       onClick={(e: { target: EventTarget | null; currentTarget: EventTarget | null }) => {
-        if (e.target === e.currentTarget) onClose()
+        if (e.target === e.currentTarget) void handleClose()
       }}
     >
       <div className={styles.panel} role="dialog" aria-label="Visual Media Editor">
@@ -448,13 +490,36 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
             🎨 Visual Editor
           </div>
           <div className={styles.headerActions}>
+            <button
+              type="button"
+              className={styles.backBtn}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                void handleClose()
+              }}
+            >
+              ← Kembali
+            </button>
             <div className={styles.saveStatusWrap}>
               {saveStatus === 'saving' && <span className={styles.saveStatusSaving}>Menyimpan…</span>}
               {saveStatus === 'saved'  && <span className={styles.saveStatusSaved}>✓ Tersimpan</span>}
               {saveStatus === 'error'  && <span className={styles.saveStatusError} title={saveError ?? ''}>⚠ Error</span>}
               {saveStatus === 'idle' && isDirty && <span className={styles.saveStatusDirty}>● Belum simpan</span>}
             </div>
-            <button className={styles.closeBtn} onClick={onClose} aria-label="Tutup">✕</button>
+            <button
+              type="button"
+              className={styles.closeBtn}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                void handleClose()
+              }}
+              aria-label="Tutup Visual Editor"
+              title="Tutup editor"
+            >
+              ✕
+            </button>
           </div>
         </div>
 

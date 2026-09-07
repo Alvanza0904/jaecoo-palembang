@@ -9,16 +9,21 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.75);
-  z-index: 200;
+  width: 100vw;
+  height: 100dvh;
+  background: var(--color-charcoal);
+  z-index: 3000;
   display: flex;
   align-items: stretch;
-  justify-content: flex-end;
+  justify-content: stretch;
+  overflow: hidden;
 }
 
 .panel {
   width: 100%;
-  max-width: 480px;
+  max-width: none;
+  height: 100%;
+  min-height: 100dvh;
   background: var(--color-charcoal);
   color: var(--color-ink-on-dark);
   display: flex;
@@ -33,7 +38,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: max(12px, env(safe-area-inset-top)) 16px 12px;
   border-bottom: 1px solid var(--color-border-dark);
   background: var(--color-charcoal-mid);
   position: sticky;
@@ -68,9 +73,29 @@
 .saveStatusError  { color: #f87171; }
 .saveStatusDirty  { color: var(--color-ink-muted-dark); }
 
+.backBtn {
+  min-height: 40px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--color-border-dark);
+  color: var(--color-ink-muted-dark);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.backBtn:hover {
+  color: var(--color-ink-on-dark);
+  background: rgba(255,255,255,0.06);
+}
+
 .closeBtn {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -635,14 +660,16 @@
 /* ─── Responsive ───────────────────────────────────────── */
 
 @media (min-width: 768px) {
-  .panel {
-    max-width: 440px;
-    box-shadow: -4px 0 32px rgba(0,0,0,0.5);
+  .header {
+    padding-left: 24px;
+    padding-right: 24px;
   }
-}
 
-@media (min-width: 1024px) {
-  .panel { max-width: 400px; }
+  .controls,
+  .canvasArea {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
 }
 
 /* ─── STEP 5F: Bbox Info Panel ──────────────────────────── */
