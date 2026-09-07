@@ -39,7 +39,6 @@ import {
   BREAKPOINT_LABELS,
   BREAKPOINT_PREVIEW_DIMS,
   BREAKPOINT_INHERIT_DEFAULTS,
-  DEFAULT_BREAKPOINT_SETTINGS,
   resolveBreakpointSettings,
   cutoutTransformToCSS,
 } from '@/lib/types/presentation'
@@ -378,7 +377,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
       setDirtyBackground(true)
       setSaveStatus('idle')
     },
-    [isDraggingFocal, isCustom, activeBp, updateBreakpoint],
+    [isDraggingFocal, isCustom, activeBp],
   )
 
   const handleFocalPointerUp = useCallback(() => setIsDraggingFocal(false), [])
