@@ -22,6 +22,7 @@ import {
   PROCESSING_STATUS_COLOR,
 } from '@/lib/types/media-asset'
 import { BackgroundRemoval } from './BackgroundRemoval'
+import { VisualMediaEditor } from '@/components/admin/visual-editor'
 import styles from './MediaDetail.module.css'
 
 interface Props {
@@ -43,6 +44,7 @@ export function MediaDetail({ asset: initialAsset, onClose, onUpdated }: Props) 
   const [asset, setAsset] = useState<MediaAsset>(initialAsset)
   const [reprocessing, setReprocessing] = useState(false)
   const [reprocessError, setReprocessError] = useState<string | null>(null)
+  const [showVisualEditor, setShowVisualEditor] = useState(false)
 
   function handleCutoutComplete(updatedAsset: MediaAsset) {
     setAsset(updatedAsset)
@@ -79,6 +81,7 @@ export function MediaDetail({ asset: initialAsset, onClose, onUpdated }: Props) 
   const statusColor = PROCESSING_STATUS_COLOR[asset.processing_status ?? 'uploaded']
 
   return (
+    <>
     <div className={styles.overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className={styles.panel}>
         {/* Header */}
@@ -220,6 +223,19 @@ export function MediaDetail({ asset: initialAsset, onClose, onUpdated }: Props) 
             </div>
           )}
 
+          {/* Visual Editor Button */}
+          {isImage && (
+            <div className={styles.reprocessRow} style={{ marginBottom: 0 }}>
+              <button
+                className={styles.reprocessBtn}
+                style={{ background: 'var(--color-gold)', color: '#111', borderColor: 'var(--color-gold)' }}
+                onClick={() => setShowVisualEditor(true)}
+              >
+                🎨 Buka Visual Editor
+              </button>
+            </div>
+          )}
+
           {/* Background Removal */}
           {isImage && (
             <BackgroundRemoval
@@ -251,5 +267,18 @@ export function MediaDetail({ asset: initialAsset, onClose, onUpdated }: Props) 
         </div>
       </div>
     </div>
+
+    {/* Visual Media Editor modal */}
+    {showVisualEditor && (
+      <VisualMediaEditor
+        asset={asset}
+        onClose={() => setShowVisualEditor(false)}
+        onUpdated={(updated) => {
+          setAsset(updated)
+          onUpdated(updated)
+        }}
+      />
+    )}
+    </>
   )
 }

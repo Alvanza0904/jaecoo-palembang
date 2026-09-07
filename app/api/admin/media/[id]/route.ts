@@ -61,6 +61,7 @@ export async function PATCH(
     'focal_x', 'focal_y', 'category',
     'responsive_settings', 'text_color_mode',
     'filename', 'alt_text',
+    'presentation_settings',
   ]
   const update: Record<string, unknown> = {}
   for (const key of allowed) {

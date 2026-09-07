@@ -77,6 +77,8 @@ export interface MediaAsset {
   variants: MediaVariants
   alt_text: string | null
   processing_error: string | null
+  // STEP 5E: Visual Editor presentation settings
+  presentation_settings?: import('./presentation').PresentationSettings
   // Meta
   uploaded_by: string | null
   created_at: string
