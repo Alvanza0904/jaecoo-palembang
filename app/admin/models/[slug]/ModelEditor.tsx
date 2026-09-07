@@ -13,6 +13,7 @@ import { useState, useTransition, useCallback } from 'react'
 import Link from 'next/link'
 import styles from './editor.module.css'
 import { MediaPicker } from '@/components/admin/media/MediaPicker'
+import { VisualMediaEditor } from '@/components/admin/visual-editor'
 import type { MediaAsset } from '@/lib/types/media-asset'
 
 /* ─── Types ────────────────────────────────────────────── */
@@ -118,11 +119,39 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
   const [dirty, setDirty] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [visualEditorAsset, setVisualEditorAsset] = useState<MediaAsset | null>(null)
+  const [visualEditorLoading, setVisualEditorLoading] = useState(false)
 
   // Hero image — loaded from model_content.hero section
   const heroContent = model.model_content?.find((c) => c.section === 'hero')?.content as Record<string, unknown> | undefined
   const heroImageInit = (heroContent?.image as Record<string, string> | undefined)?.desktop ?? ''
   const [heroImageUrl, setHeroImageUrl] = useState(heroImageInit)
+
+  async function openVisualEditor() {
+    const mediaAssetId = heroContent?.media_asset_id
+    if (typeof mediaAssetId !== 'string' || !mediaAssetId) {
+      setFeedback({ type: 'error', msg: 'Hero image belum terhubung ke Media Asset.' })
+      return
+    }
+
+    setVisualEditorLoading(true)
+    setFeedback(null)
+    try {
+      const res = await fetch(`/api/admin/media/${mediaAssetId}`)
+      const json = await res.json()
+      if (!res.ok || !json.asset) {
+        throw new Error(json.error || 'Media asset tidak ditemukan.')
+      }
+      setVisualEditorAsset(json.asset as MediaAsset)
+    } catch (err) {
+      setFeedback({
+        type: 'error',
+        msg: err instanceof Error ? err.message : 'Gagal membuka Visual Editor.',
+      })
+    } finally {
+      setVisualEditorLoading(false)
+    }
+  }
 
   // Cutout media picker
   const [cutoutPickerOpen, setCutoutPickerOpen] = useState(false)
@@ -295,6 +324,13 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
                   Ganti Gambar
                 </button>
                 <button
+                  className={styles.btnSecondary}
+                  onClick={() => void openVisualEditor()}
+                  disabled={visualEditorLoading}
+                >
+                  {visualEditorLoading ? 'Membuka…' : '🎨 Edit Posisi'}
+                </button>
+                <button
                   className={styles.btnDanger}
                   onClick={async () => {
                     // Save empty hero to DB
@@ -423,6 +459,20 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
         defaultCategory="models"
         onSelect={handleCutoutSelect}
       />
+
+      {/* Visual Editor — opened directly from Model Editor.
+          Full-screen editor owns its close/back action and returns here without
+          resetting the model form. Its autosave is flushed before close. */}
+      {visualEditorAsset && (
+        <VisualMediaEditor
+          asset={visualEditorAsset}
+          onClose={() => setVisualEditorAsset(null)}
+          onUpdated={(updated) => {
+            setVisualEditorAsset(updated)
+            if (updated.cutout_url) setCutoutUrl(updated.cutout_url)
+          }}
+        />
+      )}
     </div>
   )
 }
