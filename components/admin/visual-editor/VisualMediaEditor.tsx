@@ -541,7 +541,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
           </div>
         </div>
 
-        {/* ── Breakpoint Tabs ──────────────────────────── */}
+        {/* ── Breakpoint Mode Status Tabs (juga sebagai selector sekunder) ── */}
         <div className={styles.breakpointTabs} role="tablist">
           {BREAKPOINT_ORDER.map((bp) => {
             const bpMode: PresentationMode = (activeLayer === 'cutout' && separateCutoutAsset
@@ -566,10 +566,26 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
           })}
         </div>
 
-        <div className={styles.previewIndicator} aria-live="polite">
-          <span>Preview</span>
-          <strong>{BREAKPOINT_LABELS[activeBp]}</strong>
-          <span className={styles.previewIndicatorNote}>Editing: {BREAKPOINT_LABELS[activeBp]}</span>
+        {/* ── Device Preview Selector ──────────────────── */}
+        <div className={styles.devicePreviewBar}>
+          <span className={styles.devicePreviewLabel}>PREVIEW</span>
+          <div className={styles.devicePreviewBtns} role="group" aria-label="Device preview">
+            {BREAKPOINT_ORDER.map((bp) => (
+              <button
+                key={bp}
+                className={`${styles.devicePreviewBtn} ${activeBp === bp ? styles.devicePreviewBtnActive : ''}`}
+                onClick={() => setActiveBp(bp)}
+                title={BREAKPOINT_LABELS[bp]}
+                aria-pressed={activeBp === bp}
+              >
+                <span className={styles.devicePreviewBtnIcon}>{BP_ICONS[bp]}</span>
+                <span className={styles.devicePreviewBtnLabel}>{BREAKPOINT_LABELS[bp]}</span>
+              </button>
+            ))}
+          </div>
+          <span className={styles.devicePreviewEditing} aria-live="polite">
+            Editing: <strong>{BREAKPOINT_LABELS[activeBp]}</strong>
+          </span>
         </div>
 
         {/* ── Layer Selector (BG / CUTOUT) ─────────────── */}
@@ -661,18 +677,16 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
                 data-visual-position-y={cutoutSettings.position_y}
                 data-visual-scale={cutoutSettings.scale}
                 style={{
-                  // Base: same cover mapping as background
-                  objectFit: 'cover',
+                  // Contain ensures the full transparent PNG is visible (no crop).
+                  // translate+scale transform positions it per presentation_settings.
+                  objectFit: 'contain',
                   objectPosition: '50% 50%',
-                  // CUSTOM mode: apply offset + scale via transform
-                  // Scale from center, then translate by canvas-% offset
-                  transform: cutoutEffectiveSettings.mode === 'custom'
-                    ? cutoutTransformToCSS(
-                        cutoutSettings.position_x,
-                        cutoutSettings.position_y,
-                        cutoutSettings.scale,
-                      )
-                    : 'none',
+                  // Always apply transform (auto mode = translate(0%,0%) scale(1))
+                  transform: cutoutTransformToCSS(
+                    cutoutSettings.position_x,
+                    cutoutSettings.position_y,
+                    cutoutSettings.scale,
+                  ),
                   transformOrigin: '50% 50%',
                   opacity: cutoutOpacity / 100,
                   // Highlight border saat layer cutout aktif

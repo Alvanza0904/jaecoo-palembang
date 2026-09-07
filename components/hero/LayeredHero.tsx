@@ -47,8 +47,11 @@ function getCutoutStyle(
 ): React.CSSProperties {
   const effective = resolveBreakpointSettings(settings ?? {}, breakpoint, focalX, focalY)
   const cutout = effective.cutout
+  // Use objectFit:contain so the cutout PNG renders without cropping.
+  // translate+scale transform positions it within the hero container.
+  // objectPosition is omitted — positioning is fully handled by transform.
   return {
-    objectFit: "cover",
+    objectFit: "contain",
     objectPosition: "50% 50%",
     transform: cutoutTransformToCSS(cutout.position_x, cutout.position_y, cutout.scale),
     transformOrigin: "50% 50%",

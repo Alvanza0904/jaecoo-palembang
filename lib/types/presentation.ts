@@ -235,10 +235,28 @@ export function scaleToCSS(scale: number): string {
 }
 
 /**
- * Convert the existing 0–100 Cutout coordinates to the CSS transform used by
- * both the Visual Media Editor and the public LayeredHero.
- * 50/50 is the neutral position; 100/100 moves the cutout by half a canvas
- * to the right/bottom, and scale is applied around the canvas center.
+ * Convert 0–100 Cutout coordinates to CSS transform for LayeredHero and
+ * VisualMediaEditor canvas.
+ *
+ * COORDINATE SYSTEM:
+ *   - 50/50 = neutral center (no movement)
+ *   - 0/0   = move cutout to top-left corner
+ *   - 100/100 = move cutout to bottom-right corner
+ *
+ * IMPLEMENTATION:
+ *   We apply scale() first from center (50% 50%), then translate using
+ *   percentage units. CSS translate(X%, Y%) references the element's own
+ *   size — since the cutout element fills the hero (100vw / 100vh approx),
+ *   each 1% ≈ 1% of hero width/height.
+ *
+ *   Neutral offset = 50 (maps to 0% shift).
+ *   Max range: -50% to +50% from center.
+ *
+ *   translateX = (positionX - 50)%  →  range -50% to +50%
+ *   translateY = (positionY - 50)%  →  range -50% to +50%
+ *
+ *   Scale is applied AFTER translate so the position is scale-independent
+ *   (translate first, then scale from center).
  */
 export function cutoutTransformToCSS(
   positionX: number,
@@ -246,7 +264,9 @@ export function cutoutTransformToCSS(
   scale: number,
 ): string {
   const safeScale = scale > 0 ? scale / 100 : 1
-  const offsetX = positionX - 50
-  const offsetY = positionY - 50
-  return `scale(${safeScale}) translate(${offsetX / safeScale}%, ${offsetY / safeScale}%)`
+  // Each unit of offset from 50 = 1% of the element's own size (which fills the hero)
+  const tX = positionX - 50  // -50 to +50
+  const tY = positionY - 50  // -50 to +50
+  // Apply translate then scale (not nested) so both are independent
+  return `translate(${tX}%, ${tY}%) scale(${safeScale})`
 }

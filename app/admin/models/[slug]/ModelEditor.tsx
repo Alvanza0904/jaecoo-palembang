@@ -127,10 +127,8 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
   const heroContent = model.model_content?.find((c) => c.section === 'hero')?.content as Record<string, unknown> | undefined
   const heroImageInit = (heroContent?.image as Record<string, string> | undefined)?.desktop ?? ''
   const [heroImageUrl, setHeroImageUrl] = useState(heroImageInit)
-  const heroMediaAssetIdInit = typeof heroContent?.media_asset_id === 'string' ? heroContent.media_asset_id : ''
-  const cutoutMediaAssetIdInit = typeof heroContent?.cutout_media_id === 'string' ? heroContent.cutout_media_id : ''
-  const [heroMediaAssetId, setHeroMediaAssetId] = useState(heroMediaAssetIdInit)
-  const [cutoutMediaAssetId, setCutoutMediaAssetId] = useState(cutoutMediaAssetIdInit)
+  const heroMediaAssetId = typeof heroContent?.media_asset_id === 'string' ? heroContent.media_asset_id : ''
+  const cutoutMediaAssetId = typeof heroContent?.cutout_media_id === 'string' ? heroContent.cutout_media_id : ''
 
   async function openVisualEditor() {
     if (!heroMediaAssetId) {
@@ -189,7 +187,6 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
       })
       if (res.ok) {
         setCutoutUrl(asset.cutout_url)
-        setCutoutMediaAssetId(asset.id)
         setCutoutFeedback({ type: 'success', msg: 'Cutout berhasil disimpan.' })
       } else {
         const j = await res.json()
@@ -427,7 +424,6 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
         onSelect={async (asset: MediaAsset) => {
           setPickerOpen(false)
           setHeroImageUrl(asset.public_url ?? '')
-        setHeroMediaAssetId(asset.id)
           // Save to model_content.hero
           await fetch(`/api/admin/models/${slug}/content`, {
             method: 'PATCH',
@@ -445,7 +441,6 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
                   height:  asset.height,
                 },
                 media_asset_id: asset.id,
-                ...(cutoutMediaAssetId ? { cutout_media_id: cutoutMediaAssetId } : {}),
                 focal_x: asset.focal_x,
                 focal_y: asset.focal_y,
                 text_color_mode: asset.text_color_mode,

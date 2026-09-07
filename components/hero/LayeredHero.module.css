@@ -189,48 +189,16 @@
 
 /* Cutout fills the exact hero coordinate space. All placement and scale come
    from presentation_settings; there is no bottom/right/width/height override. */
+/* Cutout image fills the hero coordinate space.
+   object-fit and transform come from inline style (getCutoutStyle).
+   CSS here only sets position/size/visibility — no positioning override. */
 .cutoutImg {
   position: absolute !important;
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  object-fit: cover;
-  object-position: 50% 50%;
+  /* object-fit is set via inline style from getCutoutStyle() */
   display: none;
-}
-
-/* Existing responsive background/content breakpoints remain unchanged. */
-@media (min-width: 768px) {
-  .bgImageMobile { display: none; }
-  .bgImageTablet { display: block; }
-
-  .content {
-    align-items: center;
-    padding-top: calc(var(--header-height-desktop) + var(--space-12));
-  }
-
-  .heading {
-    font-size: var(--text-5xl);
-  }
-}
-
-@media (min-width: 1024px) {
-  .bgImageTablet { display: none; }
-  .bgImageDesktop { display: block; }
-
-  .content {
-    padding-top: calc(var(--header-height-desktop) + var(--space-16));
-    padding-bottom: var(--space-20);
-  }
-
-  .heading {
-    font-size: var(--text-hero);
-  }
-
-  .subheading {
-    font-size: var(--text-xl);
-    max-width: 560px;
-  }
 }
 
 @media (max-width: 767px) {
