@@ -1,20 +1,20 @@
 /**
  * JAECOO Palembang — Layered Hero
  *
- * Architecture:
- *   BACKGROUND MEDIA (image/video)
- *     ↓
- *   TYPOGRAPHY LAYER
- *     ↓
- *   VEHICLE CUTOUT (foreground — overlaps typography)
- *
- * Supports: desktop / tablet / mobile / small_mobile
- * Art direction: focal_x, focal_y, mode (auto | custom)
- * Video: muted autoplay loop with poster fallback
+ * The public hero consumes the same PresentationSettings written by the
+ * Visual Media Editor. Cutout placement uses the editor's 0–100 coordinate
+ * system and breakpoint inheritance resolver; there is no independent
+ * public-hero positioning system.
  */
 
 import Image from "next/image";
 import type { MediaWithArtDirection, ResponsiveVideo } from "@/lib/types/media";
+import {
+  BREAKPOINT_ORDER,
+  resolveBreakpointSettings,
+  type BreakpointKey,
+  type PresentationSettings,
+} from "@/lib/types/presentation";
 import styles from "./LayeredHero.module.css";
 
 export interface LayeredHeroProps {
@@ -38,6 +38,38 @@ export interface LayeredHeroProps {
   lightBackground?: boolean;
 }
 
+type CutoutBreakpoint = BreakpointKey;
+
+function getCutoutStyle(
+  settings: PresentationSettings | undefined,
+  breakpoint: CutoutBreakpoint,
+  assetFocalX = 50,
+  assetFocalY = 50,
+): React.CSSProperties {
+  const effective = resolveBreakpointSettings(
+    settings ?? {},
+    breakpoint,
+    assetFocalX,
+    assetFocalY,
+  );
+  const cutout = effective.cutout;
+  const scale = cutout.scale / 100;
+  const offsetX = cutout.position_x - 50;
+  const offsetY = cutout.position_y - 50;
+
+  // The cutout <img> fills the hero, exactly like the editor canvas. Since
+  // translate percentages are relative to that same element, the editor's
+  // canvas-percent delta maps 1:1 to the live hero. Dividing by scale keeps
+  // the final translated distance unchanged after CSS scale(), matching the
+  // editor's transform implementation.
+  return {
+    objectFit: "cover",
+    objectPosition: "50% 50%",
+    transform: `scale(${scale}) translate(${offsetX / scale}%, ${offsetY / scale}%)`,
+    transformOrigin: "50% 50%",
+  };
+}
+
 export function LayeredHero({
   media,
   video,
@@ -50,8 +82,9 @@ export function LayeredHero({
   lightBackground = false,
 }: LayeredHeroProps) {
   const { image, art_direction } = media;
+  const presentationSettings = media.presentation_settings;
+  const hasCutout = !!image.cutout;
 
-  // Build object-position from art direction
   const getObjectPosition = (breakpoint: "desktop" | "tablet" | "mobile") => {
     const dir = art_direction?.[breakpoint];
     if (!dir) return "center center";
@@ -62,8 +95,6 @@ export function LayeredHero({
     const fy = dir.focal_y ?? 50;
     return `${fx}% ${fy}%`;
   };
-
-  const hasCutout = !!image.cutout;
 
   return (
     <section
@@ -77,12 +108,9 @@ export function LayeredHero({
       {/* ── Background layer ── */}
       <div className={styles.bg} aria-hidden="true">
         {video ? (
-          /* Video background with image fallback */
           <VideoBackground video={video} />
         ) : (
-          /* Responsive image background */
           <div className={styles.bgImages}>
-            {/* Mobile */}
             {(image.small_mobile || image.mobile) && (
               <div className={styles.bgImageMobile}>
                 <Image
@@ -97,7 +125,6 @@ export function LayeredHero({
                 />
               </div>
             )}
-            {/* Tablet */}
             {image.tablet && (
               <div className={styles.bgImageTablet}>
                 <Image
@@ -112,7 +139,6 @@ export function LayeredHero({
                 />
               </div>
             )}
-            {/* Desktop */}
             {image.desktop && (
               <div className={styles.bgImageDesktop}>
                 <Image
@@ -127,14 +153,12 @@ export function LayeredHero({
                 />
               </div>
             )}
-            {/* Fallback placeholder when no images provided */}
             {!image.desktop && !image.mobile && (
               <div className={styles.bgPlaceholder} />
             )}
           </div>
         )}
 
-        {/* Overlay */}
         <div
           className={styles.overlay}
           style={{ "--overlay-opacity": overlayOpacity / 100 } as React.CSSProperties}
@@ -145,44 +169,44 @@ export function LayeredHero({
       {/* ── Typography layer ── */}
       <div className={styles.content}>
         <div className={styles.contentInner}>
-          {tagline && (
-            <p className={styles.tagline}>{tagline}</p>
-          )}
+          {tagline && <p className={styles.tagline}>{tagline}</p>}
 
           <div className={styles.headingBlock}>
             <h1 className={styles.heading}>{heading}</h1>
-            {subheading && (
-              <p className={styles.subheading}>{subheading}</p>
-            )}
+            {subheading && <p className={styles.subheading}>{subheading}</p>}
           </div>
 
-          {cta && (
-            <div className={styles.cta}>{cta}</div>
-          )}
+          {cta && <div className={styles.cta}>{cta}</div>}
         </div>
       </div>
 
       {/* ── Vehicle cutout layer (foreground) ── */}
       {hasCutout && (
         <div className={styles.cutout} aria-hidden="true">
-          <Image
-            src={image.cutout!}
-            alt={image.alt}
-            fill
-            priority
-            className={styles.cutoutImg}
-            sizes="(max-width: 768px) 100vw, 80vw"
-          />
+          {BREAKPOINT_ORDER.map((breakpoint) => (
+            <Image
+              key={breakpoint}
+              src={image.cutout!}
+              alt={image.alt}
+              fill
+              priority
+              className={`${styles.cutoutImg} ${styles[`cutoutImg--${breakpoint}`]}`}
+              style={getCutoutStyle(
+                presentationSettings,
+                breakpoint,
+                undefined,
+                undefined,
+              )}
+              sizes="100vw"
+            />
+          ))}
         </div>
       )}
 
-      {/* Screen-reader alt for hero image */}
       <span className="sr-only">{image.alt}</span>
     </section>
   );
 }
-
-/* ── Video Background sub-component ── */
 
 function VideoBackground({ video }: { video: ResponsiveVideo }) {
   return (
@@ -203,11 +227,8 @@ function VideoBackground({ video }: { video: ResponsiveVideo }) {
             type="video/mp4"
           />
         )}
-        {video.desktop && (
-          <source src={video.desktop} type="video/mp4" />
-        )}
+        {video.desktop && <source src={video.desktop} type="video/mp4" />}
       </video>
-      {/* Poster fallback image */}
       <Image
         src={video.poster}
         alt={video.alt}

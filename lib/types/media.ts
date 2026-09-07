@@ -1,3 +1,5 @@
+import type { PresentationSettings } from './presentation';
+
 /**
  * JAECOO Palembang — Media Types
  *
@@ -51,6 +53,8 @@ export interface ResponsiveImage {
 
 export interface MediaWithArtDirection {
   image: ResponsiveImage;
+  /** Visual Media Editor presentation settings */
+  presentation_settings?: PresentationSettings
   art_direction?: {
     desktop?: ArtDirectionSettings;
     tablet?: ArtDirectionSettings;

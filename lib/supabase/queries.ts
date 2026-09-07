@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from './server'
 import type { ModelData, ModelVariant, ModelColor, ModelSpecCategory, ModelTechnologySection, PriceStatus } from '@/lib/types/model'
+import type { PresentationSettings } from '@/lib/types/presentation'
 import {
   getModels as getStaticModels,
   getModelBySlug as getStaticModelBySlug,
@@ -57,7 +58,11 @@ interface SupabaseContent {
   content: Record<string, unknown>
 }
 
-function mapModel(row: SupabaseModel, staticFallback?: ModelData): ModelData {
+function mapModel(
+  row: SupabaseModel,
+  staticFallback?: ModelData,
+  heroPresentationSettings?: PresentationSettings,
+): ModelData {
   const variants: ModelVariant[] = (row.model_variants ?? []).map((v) => ({
     id: v.variant_key,
     name: v.name,
@@ -119,6 +124,7 @@ function mapModel(row: SupabaseModel, staticFallback?: ModelData): ModelData {
             ?? undefined,
         },
         art_direction: (heroRaw.art_direction as ModelData['hero_media']['art_direction']) ?? undefined,
+        presentation_settings: heroPresentationSettings,
       }
     : staticFallback?.hero_media ?? {
         image: {
@@ -201,8 +207,30 @@ export async function getModelBySlug(slug: string): Promise<ModelData | undefine
     if (error) throw error
     if (!data) return undefined
 
+    const row = data as SupabaseModel
+    const heroContent = (row.model_content ?? []).find((c) => c.section === 'hero')
+    const heroRaw = heroContent?.content as Record<string, unknown> | undefined
+    const mediaAssetId = heroRaw?.media_asset_id
+
+    // model_content.hero stores only the media asset ID. The Visual Media Editor
+    // stores its source-of-truth presentation settings on media_assets.
+    let heroPresentationSettings: PresentationSettings | undefined
+    if (typeof mediaAssetId === 'string' && mediaAssetId) {
+      const { data: mediaAsset, error: mediaError } = await supabase
+        .from('media_assets')
+        .select('presentation_settings')
+        .eq('id', mediaAssetId)
+        .maybeSingle()
+
+      if (mediaError) {
+        console.warn(`[Supabase] Hero media presentation lookup failed for ${slug}:`, mediaError)
+      } else {
+        heroPresentationSettings = mediaAsset?.presentation_settings as PresentationSettings | undefined
+      }
+    }
+
     const fallback = getStaticModelBySlug(slug)
-    return mapModel(data as SupabaseModel, fallback)
+    return mapModel(row, fallback, heroPresentationSettings)
   } catch (err) {
     console.warn(`[Supabase] getModelBySlug(${slug}) failed — using static fallback:`, err)
     return getStaticModelBySlug(slug)
