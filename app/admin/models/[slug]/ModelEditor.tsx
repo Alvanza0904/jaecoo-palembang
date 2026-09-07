@@ -456,6 +456,7 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
             body: JSON.stringify({
               section: 'hero',
               content: {
+                ...(heroContent ?? {}),
                 image: {
                   desktop: asset.public_url,
                   tablet:  asset.public_url,

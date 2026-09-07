@@ -176,15 +176,14 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
     cutoutSourceAsset.focal_x,
     cutoutSourceAsset.focal_y,
   ])
-
-  const cutoutEffectiveSettings: BreakpointSettings = useMemo(() => {
-    return resolveBreakpointSettings(
+  const cutoutEffectiveSettings: BreakpointSettings = useMemo(() => (
+    resolveBreakpointSettings(
       separateCutoutAsset ? cutoutAssetSettings : settings,
       activeBp,
       cutoutSourceAsset.focal_x ?? 50,
       cutoutSourceAsset.focal_y ?? 50,
     )
-  }, [
+  ), [
     separateCutoutAsset,
     cutoutAssetSettings,
     settings,
@@ -295,7 +294,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
         setSaveStatus('idle')
       }
     },
-    [activeBp, effectiveSettings, updateBreakpoint, activeLayer, separateCutoutAsset],
+    [activeBp, activeLayer, effectiveSettings, separateCutoutAsset, updateBreakpoint],
   )
 
   // ── Drag state ────────────────────────────────────────
@@ -359,7 +358,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
         })
       }
     },
-    [isCustom, activeBp, updateBreakpoint, cutoutSettings],
+    [isCustom, activeBp, activeLayer, separateCutoutAsset, updateBreakpoint, cutoutSettings],
   )
 
   const handleCanvasPointerUp = useCallback(() => {
