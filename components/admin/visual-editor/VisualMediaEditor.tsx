@@ -177,6 +177,22 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
     cutoutSourceAsset.focal_y,
   ])
 
+  const cutoutEffectiveSettings: BreakpointSettings = useMemo(() => {
+    return resolveBreakpointSettings(
+      separateCutoutAsset ? cutoutAssetSettings : settings,
+      activeBp,
+      cutoutSourceAsset.focal_x ?? 50,
+      cutoutSourceAsset.focal_y ?? 50,
+    )
+  }, [
+    separateCutoutAsset,
+    cutoutAssetSettings,
+    settings,
+    activeBp,
+    cutoutSourceAsset.focal_x,
+    cutoutSourceAsset.focal_y,
+  ])
+
   const stored = activeSettings[activeBp as BreakpointKey] ?? {}
   const isCustom = effectiveSettings.mode === 'custom'
   const isInherited = effectiveSettings.mode === 'inherited'
@@ -279,7 +295,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
         setSaveStatus('idle')
       }
     },
-    [activeBp, effectiveSettings, updateBreakpoint],
+    [activeBp, effectiveSettings, updateBreakpoint, activeLayer, separateCutoutAsset],
   )
 
   // ── Drag state ────────────────────────────────────────
