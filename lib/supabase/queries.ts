@@ -62,6 +62,7 @@ function mapModel(
   row: SupabaseModel,
   staticFallback?: ModelData,
   heroPresentationSettings?: PresentationSettings,
+  heroCutoutUrl?: string,
 ): ModelData {
   const variants: ModelVariant[] = (row.model_variants ?? []).map((v) => ({
     id: v.variant_key,
@@ -119,7 +120,8 @@ function mapModel(
           ...((heroRaw.image as Record<string, unknown>) ?? {}),
           alt: ((heroRaw.image as Record<string, string>)?.alt) ?? row.name,
           // Map cutout_url (root level) → image.cutout (where LayeredHero reads it)
-          cutout: (heroRaw.cutout_url as string | undefined)
+          cutout: heroCutoutUrl
+            ?? (heroRaw.cutout_url as string | undefined)
             ?? ((heroRaw.image as Record<string, string>)?.cutout)
             ?? undefined,
         },
@@ -215,22 +217,24 @@ export async function getModelBySlug(slug: string): Promise<ModelData | undefine
     // model_content.hero stores only the media asset ID. The Visual Media Editor
     // stores its source-of-truth presentation settings on media_assets.
     let heroPresentationSettings: PresentationSettings | undefined
+    let heroCutoutUrl: string | undefined
     if (typeof mediaAssetId === 'string' && mediaAssetId) {
       const { data: mediaAsset, error: mediaError } = await supabase
         .from('media_assets')
-        .select('presentation_settings')
+        .select('presentation_settings, cutout_url')
         .eq('id', mediaAssetId)
         .maybeSingle()
 
       if (mediaError) {
-        console.warn(`[Supabase] Hero media presentation lookup failed for ${slug}:`, mediaError)
+        console.warn(`[Supabase] Hero media lookup failed for ${slug}:`, mediaError)
       } else {
         heroPresentationSettings = mediaAsset?.presentation_settings as PresentationSettings | undefined
+        heroCutoutUrl = mediaAsset?.cutout_url ?? undefined
       }
     }
 
     const fallback = getStaticModelBySlug(slug)
-    return mapModel(row, fallback, heroPresentationSettings)
+    return mapModel(row, fallback, heroPresentationSettings, heroCutoutUrl)
   } catch (err) {
     console.warn(`[Supabase] getModelBySlug(${slug}) failed — using static fallback:`, err)
     return getStaticModelBySlug(slug)
