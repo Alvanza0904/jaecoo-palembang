@@ -120,16 +120,22 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
   const [dirty, setDirty] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [visualEditorAsset, setVisualEditorAsset] = useState<MediaAsset | null>(null)
+  const [visualEditorCutoutAsset, setVisualEditorCutoutAsset] = useState<MediaAsset | null>(null)
   const [visualEditorLoading, setVisualEditorLoading] = useState(false)
 
   // Hero image — loaded from model_content.hero section
   const heroContent = model.model_content?.find((c) => c.section === 'hero')?.content as Record<string, unknown> | undefined
   const heroImageInit = (heroContent?.image as Record<string, string> | undefined)?.desktop ?? ''
   const [heroImageUrl, setHeroImageUrl] = useState(heroImageInit)
+  const [heroMediaAssetId, setHeroMediaAssetId] = useState(
+    typeof heroContent?.media_asset_id === 'string' ? heroContent.media_asset_id : '',
+  )
+  const [cutoutMediaAssetId, setCutoutMediaAssetId] = useState(
+    typeof heroContent?.cutout_media_id === 'string' ? heroContent.cutout_media_id : '',
+  )
 
   async function openVisualEditor() {
-    const mediaAssetId = heroContent?.media_asset_id
-    if (typeof mediaAssetId !== 'string' || !mediaAssetId) {
+    if (!heroMediaAssetId) {
       setFeedback({ type: 'error', msg: 'Hero image belum terhubung ke Media Asset.' })
       return
     }
@@ -137,12 +143,22 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
     setVisualEditorLoading(true)
     setFeedback(null)
     try {
-      const res = await fetch(`/api/admin/media/${mediaAssetId}`)
-      const json = await res.json()
-      if (!res.ok || !json.asset) {
-        throw new Error(json.error || 'Media asset tidak ditemukan.')
-      }
-      setVisualEditorAsset(json.asset as MediaAsset)
+      const ids = Array.from(new Set([heroMediaAssetId, cutoutMediaAssetId].filter(Boolean)))
+      const responses = await Promise.all(ids.map(async (id) => {
+        const res = await fetch(`/api/admin/media/${id}`)
+        const json = await res.json()
+        if (!res.ok || !json.asset) {
+          throw new Error(json.error || `Media asset ${id} tidak ditemukan.`)
+        }
+        return json.asset as MediaAsset
+      }))
+
+      const heroAsset = responses.find((candidate) => candidate.id === heroMediaAssetId) ?? null
+      const cutoutAsset = responses.find((candidate) => candidate.id === cutoutMediaAssetId) ?? null
+      if (!heroAsset) throw new Error('Hero media asset tidak ditemukan.')
+
+      setVisualEditorAsset(heroAsset)
+      setVisualEditorCutoutAsset(cutoutAsset)
     } catch (err) {
       setFeedback({
         type: 'error',
@@ -185,6 +201,7 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
       })
       if (res.ok) {
         setCutoutUrl(asset.cutout_url)
+        setCutoutMediaAssetId(asset.id)
         setCutoutFeedback({ type: 'success', msg: 'Cutout berhasil disimpan.' })
       } else {
         const j = await res.json()
@@ -344,6 +361,11 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
                     })
                     if (res.ok) {
                       setHeroImageUrl('')
+                      setHeroMediaAssetId('')
+                      setCutoutMediaAssetId('')
+                      setCutoutUrl('')
+                      setVisualEditorAsset(null)
+                      setVisualEditorCutoutAsset(null)
                     }
                   }}
                 >
@@ -426,6 +448,7 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
         onSelect={async (asset: MediaAsset) => {
           setPickerOpen(false)
           setHeroImageUrl(asset.public_url ?? '')
+          setHeroMediaAssetId(asset.id)
           // Save to model_content.hero
           await fetch(`/api/admin/models/${slug}/content`, {
             method: 'PATCH',
@@ -466,9 +489,14 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
       {visualEditorAsset && (
         <VisualMediaEditor
           asset={visualEditorAsset}
-          onClose={() => setVisualEditorAsset(null)}
+          cutoutAsset={visualEditorCutoutAsset}
+          onClose={() => {
+            setVisualEditorAsset(null)
+            setVisualEditorCutoutAsset(null)
+          }}
           onUpdated={(updated) => {
-            setVisualEditorAsset(updated)
+            if (updated.id === heroMediaAssetId) setVisualEditorAsset(updated)
+            if (updated.id === cutoutMediaAssetId) setVisualEditorCutoutAsset(updated)
             if (updated.cutout_url) setCutoutUrl(updated.cutout_url)
           }}
         />
