@@ -715,3 +715,25 @@
   font-size: var(--text-xs, 11px);
   color: rgba(100, 200, 120, 0.8);
 }
+
+/* Active responsive composition indicator */
+.previewIndicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--color-border-dark);
+  background: var(--color-charcoal);
+  color: var(--color-ink-muted-dark);
+  font-size: var(--text-xs);
+}
+
+.previewIndicator strong {
+  color: var(--color-ink-on-dark);
+  font-weight: var(--weight-semibold);
+}
+
+.previewIndicatorNote {
+  margin-left: auto;
+  opacity: 0.7;
+}

@@ -158,7 +158,7 @@ export const BREAKPOINT_LABELS: Record<BreakpointKey, string> = {
   desktop: 'Desktop',
   tablet: 'Tablet',
   mobile: 'Mobile',
-  small_mobile: 'S. Mobile',
+  small_mobile: 'Small Mobile',
 }
 
 /** Preview container dimensions (px) */

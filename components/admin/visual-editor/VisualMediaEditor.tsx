@@ -21,6 +21,7 @@
 import {
   useState,
   useCallback,
+  useMemo,
   useRef,
   useEffect,
   type ChangeEvent,
@@ -57,7 +58,7 @@ const BP_ICONS: Record<BreakpointKey, string> = {
   desktop:      '🖥',
   tablet:       '📱',
   mobile:       '📲',
-  small_mobile: '📟',
+  small_mobile: '📱',
 }
 
 // Checkerboard pattern sebagai data URL (untuk preview cutout)
@@ -66,7 +67,10 @@ const CHECKER_BG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000
 // ─── Props ────────────────────────────────────────────────
 
 interface Props {
+  /** Hero/background media asset. */
   asset: MediaAsset
+  /** Separate cutout media asset, when Hero uses one. */
+  cutoutAsset?: MediaAsset | null
   onClose: () => void
   onUpdated: (asset: MediaAsset) => void
 }
@@ -98,14 +102,22 @@ function tabModeClass(mode: PresentationMode, s: typeof styles): string {
 
 // ─── Component ───────────────────────────────────────────
 
-export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
+export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Props) {
 
   // ── Core state ─────────────────────────────────────────
   const [activeBp, setActiveBp] = useState<BreakpointKey>('desktop')
+  // Background settings belong to the hero/background asset. When Hero Cutout
+  // is a separate media asset, its presentation settings belong to that asset.
+  // This keeps the editor and public renderer on the exact same source rows.
   const [settings, setSettings] = useState<PresentationSettings>(() => getStoredSettings(asset))
+  const [cutoutAssetSettings, setCutoutAssetSettings] = useState<PresentationSettings>(() =>
+    getStoredSettings(cutoutAsset ?? asset),
+  )
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [saveError, setSaveError] = useState<string | null>(null)
-  const [isDirty, setIsDirty] = useState(false)
+  const [dirtyBackground, setDirtyBackground] = useState(false)
+  const [dirtyCutout, setDirtyCutout] = useState(false)
+  const isDirty = dirtyBackground || dirtyCutout
 
   // ── 5E.1: Unified editor state ─────────────────────────
   const [activeLayer, setActiveLayer] = useState<ActiveLayer>('background')
@@ -123,22 +135,52 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
   const focalGridRef = useRef<HTMLDivElement | null>(null)
 
   // ── Derived ────────────────────────────────────────────
-  const hasCutout = !!asset.cutout_url
+  const separateCutoutAsset = !!cutoutAsset && cutoutAsset.id !== asset.id
+  const cutoutSourceAsset = cutoutAsset ?? asset
+  const hasCutout = !!cutoutSourceAsset.cutout_url
+
+  // The active layer determines which media row owns the settings being edited.
+  const activeSettings = activeLayer === 'cutout' && separateCutoutAsset
+    ? cutoutAssetSettings
+    : settings
+  const activeFocalX = activeLayer === 'cutout' && separateCutoutAsset
+    ? cutoutSourceAsset.focal_x ?? 50
+    : asset.focal_x ?? 50
 
   const effectiveSettings: BreakpointSettings = resolveBreakpointSettings(
+    activeSettings,
+    activeBp,
+    activeFocalX,
+    activeLayer === 'cutout' && separateCutoutAsset
+      ? cutoutSourceAsset.focal_y ?? 50
+      : asset.focal_y ?? 50,
+  )
+
+  const backgroundEffectiveSettings = resolveBreakpointSettings(
     settings,
     activeBp,
     asset.focal_x ?? 50,
     asset.focal_y ?? 50,
   )
+  const cutoutSettings: CutoutPlacement = useMemo(() => {
+    return resolveBreakpointSettings(
+      separateCutoutAsset ? cutoutAssetSettings : settings,
+      activeBp,
+      cutoutSourceAsset.focal_x ?? 50,
+      cutoutSourceAsset.focal_y ?? 50,
+    ).cutout
+  }, [
+    separateCutoutAsset,
+    cutoutAssetSettings,
+    settings,
+    activeBp,
+    cutoutSourceAsset.focal_x,
+    cutoutSourceAsset.focal_y,
+  ])
 
-  const stored = settings[activeBp as BreakpointKey] ?? {}
+  const stored = activeSettings[activeBp as BreakpointKey] ?? {}
   const isCustom = effectiveSettings.mode === 'custom'
   const isInherited = effectiveSettings.mode === 'inherited'
-
-  const cutoutSettings: CutoutPlacement = isCustom
-    ? { ...DEFAULT_BREAKPOINT_SETTINGS.cutout, ...(stored.cutout ?? {}) }
-    : effectiveSettings.cutout
 
   // ── Preview dimensions ─────────────────────────────────
   const dims = BREAKPOINT_PREVIEW_DIMS[activeBp as BreakpointKey]
@@ -152,10 +194,13 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
     ?? (asset.variants as Record<string, string>)?.['480']
     ?? asset.public_url
     ?? ''
-  const cutoutUrl = asset.cutout_url ?? ''
+  const cutoutUrl = cutoutSourceAsset.cutout_url ?? ''
 
   // ── 5F: Meta / bbox ────────────────────────────────────
-  const meta: PresentationMeta = (settings as PresentationSettings & { _meta?: PresentationMeta })._meta ?? {}
+  const cutoutMeta = (cutoutAssetSettings as PresentationSettings & { _meta?: PresentationMeta })._meta ?? {}
+  const meta: PresentationMeta = (activeLayer === 'cutout' && separateCutoutAsset)
+    ? cutoutMeta
+    : ((settings as PresentationSettings & { _meta?: PresentationMeta })._meta ?? {})
   const cutoutBbox = meta.cutout_bbox ?? null
 
   // ── 5F: Cutout rendering — cover-aligned coordinate system ────────────
@@ -180,14 +225,22 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
 
   const updateBreakpoint = useCallback(
     (key: BreakpointKey, patch: Partial<BreakpointSettings>) => {
-      setSettings((prev: PresentationSettings) => {
-        const current = prev[key] ?? {}
-        return { ...prev, [key]: { ...current, ...patch } }
-      })
-      setIsDirty(true)
+      if (activeLayer === 'cutout' && separateCutoutAsset) {
+        setCutoutAssetSettings((prev: PresentationSettings) => {
+          const current = prev[key] ?? {}
+          return { ...prev, [key]: { ...current, ...patch } }
+        })
+        setDirtyCutout(true)
+      } else {
+        setSettings((prev: PresentationSettings) => {
+          const current = prev[key] ?? {}
+          return { ...prev, [key]: { ...current, ...patch } }
+        })
+        setDirtyBackground(true)
+      }
       setSaveStatus('idle')
     },
-    [],
+    [activeLayer, separateCutoutAsset],
   )
 
   const setMode = useCallback(
@@ -209,12 +262,21 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
         const defaultParent = BREAKPOINT_INHERIT_DEFAULTS[activeBp as BreakpointKey]
         updateBreakpoint(activeBp, { mode: 'inherited', inherit_from: defaultParent })
       } else {
-        setSettings((prev: PresentationSettings) => {
-          const next = { ...prev }
-          delete next[activeBp as BreakpointKey]
-          return next
-        })
-        setIsDirty(true)
+        if (activeLayer === 'cutout' && separateCutoutAsset) {
+          setCutoutAssetSettings((prev: PresentationSettings) => {
+            const next = { ...prev }
+            delete next[activeBp as BreakpointKey]
+            return next
+          })
+          setDirtyCutout(true)
+        } else {
+          setSettings((prev: PresentationSettings) => {
+            const next = { ...prev }
+            delete next[activeBp as BreakpointKey]
+            return next
+          })
+          setDirtyBackground(true)
+        }
         setSaveStatus('idle')
       }
     },
@@ -309,7 +371,12 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
       const rect = e.currentTarget.getBoundingClientRect()
       const x = Math.round(Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100)))
       const y = Math.round(Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100)))
-      updateBreakpoint(activeBp, { focal_x: x, focal_y: y, position_x: x, position_y: y })
+      setSettings((prev: PresentationSettings) => {
+        const current = prev[activeBp] ?? {}
+        return { ...prev, [activeBp]: { ...current, focal_x: x, focal_y: y, position_x: x, position_y: y } }
+      })
+      setDirtyBackground(true)
+      setSaveStatus('idle')
     },
     [isDraggingFocal, isCustom, activeBp, updateBreakpoint],
   )
@@ -318,42 +385,52 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
 
   // ── Save ──────────────────────────────────────────────
 
+  const savePresentation = useCallback(async (mediaId: string, nextSettings: PresentationSettings) => {
+    const res = await fetch('/api/admin/media/presentation', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mediaId, settings: nextSettings }),
+    })
+    const json = await res.json()
+    if (!res.ok) throw new Error(json.error || 'Gagal menyimpan')
+    return json.asset as MediaAsset
+  }, [])
+
   const doSave = useCallback(async (): Promise<boolean> => {
     if (saveStatus === 'saving') return true
+    if (!isDirty) return true
     setSaveStatus('saving')
     setSaveError(null)
     try {
-      const res = await fetch('/api/admin/media/presentation', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mediaId: asset.id, settings }),
-      })
-      const json = await res.json()
-      if (!res.ok) {
-        setSaveStatus('error')
-        setSaveError(json.error || 'Gagal menyimpan')
-        return false
+      const updates: Promise<MediaAsset>[] = []
+      if (dirtyBackground) updates.push(savePresentation(asset.id, settings))
+      if (dirtyCutout && separateCutoutAsset && cutoutAsset) {
+        updates.push(savePresentation(cutoutAsset.id, cutoutAssetSettings))
       }
+      const updatedAssets = await Promise.all(updates)
+      updatedAssets.forEach((updated) => onUpdated(updated))
+      setDirtyBackground(false)
+      setDirtyCutout(false)
       setSaveStatus('saved')
-      setIsDirty(false)
-      if (json.asset) onUpdated(json.asset as MediaAsset)
       setTimeout(() => setSaveStatus('idle'), 2500)
       return true
     } catch (err) {
       setSaveStatus('error')
-      setSaveError(String(err))
+      setSaveError(err instanceof Error ? err.message : String(err))
       return false
     }
-  }, [asset.id, settings, saveStatus, onUpdated])
+  }, [
+    asset.id, cutoutAsset, cutoutAssetSettings, dirtyBackground, dirtyCutout, isDirty,
+    onUpdated, savePresentation, saveStatus, separateCutoutAsset, settings,
+  ])
 
   // Autosave debounced 1.5s
   useEffect(() => {
     if (!isDirty) return
     if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
-    autosaveTimer.current = setTimeout(() => { doSave() }, 1500)
+    autosaveTimer.current = setTimeout(() => { void doSave() }, 1500)
     return () => { if (autosaveTimer.current) clearTimeout(autosaveTimer.current) }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings, isDirty])
+  }, [cutoutAssetSettings, doSave, isDirty, settings])
 
   // ── 5F: Bbox detection — runs once per asset open (or after reset) ────
   //
@@ -370,7 +447,8 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
     if (!hasCutout || !cutoutUrl) return
     if (bboxComputedRef.current) return  // already done this session
 
-    const existingMeta = (settings as PresentationSettings & { _meta?: PresentationMeta })._meta
+    const bboxSettings = separateCutoutAsset ? cutoutAssetSettings : settings
+    const existingMeta = (bboxSettings as PresentationSettings & { _meta?: PresentationMeta })._meta
     if (existingMeta?.cutout_bbox) {
       // Already have bbox from a previous session — no need to recompute
       bboxComputedRef.current = true
@@ -393,11 +471,13 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
         bbox_anomaly_reason: result.anomaly_reason,
       }
 
-      setSettings((prev) => ({
-        ...prev,
-        _meta: newMeta,
-      }))
-      setIsDirty(true)
+      if (separateCutoutAsset) {
+        setCutoutAssetSettings((prev) => ({ ...prev, _meta: newMeta }))
+        setDirtyCutout(true)
+      } else {
+        setSettings((prev) => ({ ...prev, _meta: newMeta }))
+        setDirtyBackground(true)
+      }
     }).catch(() => {
       setBboxComputing(false)
     })
@@ -407,17 +487,24 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
   // ── Reset ─────────────────────────────────────────────
 
   const handleReset = useCallback(() => {
-    setSettings((prev: PresentationSettings) => {
-      const next = { ...prev }
-      delete next[activeBp as BreakpointKey]
-      return next
-    })
-    // Reset also triggers bbox recompute if user wants fresh analysis
-    // (user explicitly clicked Reset AUTO)
+    if (activeLayer === 'cutout' && separateCutoutAsset) {
+      setCutoutAssetSettings((prev: PresentationSettings) => {
+        const next = { ...prev }
+        delete next[activeBp as BreakpointKey]
+        return next
+      })
+      setDirtyCutout(true)
+    } else {
+      setSettings((prev: PresentationSettings) => {
+        const next = { ...prev }
+        delete next[activeBp as BreakpointKey]
+        return next
+      })
+      setDirtyBackground(true)
+    }
     bboxComputedRef.current = false
-    setIsDirty(true)
     setSaveStatus('idle')
-  }, [activeBp])
+  }, [activeBp, activeLayer, separateCutoutAsset])
 
   // ── Close / lifecycle ─────────────────────────────────
   // Closing the editor must never discard the latest edits. The editor already
@@ -512,10 +599,12 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
           </div>
         </div>
 
-        {/* ── Breakpoint Tabs ──────────────────────────── */}
+        {/* ── Responsive Device Preview ───────────────── */}
         <div className={styles.breakpointTabs} role="tablist">
           {BREAKPOINT_ORDER.map((bp) => {
-            const bpMode: PresentationMode = settings[bp]?.mode ?? 'auto'
+            const bpMode: PresentationMode = (activeLayer === 'cutout' && separateCutoutAsset
+              ? cutoutAssetSettings[bp]?.mode
+              : settings[bp]?.mode) ?? 'auto'
             const isActive = bp === activeBp
             return (
               <button
@@ -533,6 +622,14 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
               </button>
             )
           })}
+        </div>
+
+        <div className={styles.previewIndicator} aria-live="polite">
+          <span>Preview</span>
+          <strong>{BREAKPOINT_LABELS[activeBp]}</strong>
+          {activeLayer === 'cutout' && separateCutoutAsset && (
+            <span className={styles.previewIndicatorNote}>Cutout asset terpisah</span>
+          )}
         </div>
 
         {/* ── Layer Selector (BG / CUTOUT) ─────────────── */}
@@ -595,10 +692,10 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
                 alt={asset.alt_text ?? asset.filename}
                 draggable={false}
                 style={{
-                  objectFit: effectiveSettings.object_fit,
-                  objectPosition: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
-                  transform: `scale(${effectiveSettings.scale / 100})`,
-                  transformOrigin: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
+                  objectFit: backgroundEffectiveSettings.object_fit,
+                  objectPosition: `${backgroundEffectiveSettings.position_x}% ${backgroundEffectiveSettings.position_y}%`,
+                  transform: `scale(${backgroundEffectiveSettings.scale / 100})`,
+                  transformOrigin: `${backgroundEffectiveSettings.position_x}% ${backgroundEffectiveSettings.position_y}%`,
                   // Dim BG slightly saat layer cutout aktif
                   opacity: hasCutout && activeLayer === 'cutout' ? 0.7 : 1,
                   transition: 'opacity 0.2s',
@@ -624,7 +721,7 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
                   // Use the exact same transform function as public LayeredHero.
                   // The image fills the canvas, so its percentage translation is
                   // the editor's 0–100 canvas coordinate system.
-                  transform: isCustom
+                  transform: cutoutEffectiveSettings.mode === 'custom'
                     ? cutoutTransformToCSS(
                         cutoutSettings.position_x,
                         cutoutSettings.position_y,
@@ -634,7 +731,7 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
                   transformOrigin: '50% 50%',
                   opacity: cutoutOpacity / 100,
                   // Highlight border saat layer cutout aktif
-                  outline: activeLayer === 'cutout' && isCustom
+                  outline: activeLayer === 'cutout' && cutoutEffectiveSettings.mode === 'custom'
                     ? '2px dashed rgba(200,169,110,0.7)'
                     : 'none',
                   outlineOffset: '2px',
@@ -648,8 +745,8 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
               <div
                 className={styles.focalMarker}
                 style={{
-                  left: `${effectiveSettings.focal_x}%`,
-                  top: `${effectiveSettings.focal_y}%`,
+                  left: `${backgroundEffectiveSettings.focal_x}%`,
+                  top: `${backgroundEffectiveSettings.focal_y}%`,
                 }}
               >
                 <div className={styles.focalMarkerInner} />
@@ -878,7 +975,7 @@ export function VisualMediaEditor({ asset, onClose, onUpdated }: Props) {
                       <img src={previewUrl} alt="focal" className={styles.focalGridImg} draggable={false} />
                       <div
                         className={styles.focalGridMarker}
-                        style={{ left: `${effectiveSettings.focal_x}%`, top: `${effectiveSettings.focal_y}%` }}
+                        style={{ left: `${backgroundEffectiveSettings.focal_x}%`, top: `${backgroundEffectiveSettings.focal_y}%` }}
                       />
                       <div className={styles.focalGridHint}>Seret untuk atur titik fokus</div>
                     </div>

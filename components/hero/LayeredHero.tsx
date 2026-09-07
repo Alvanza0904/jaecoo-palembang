@@ -80,9 +80,12 @@ export function LayeredHero({
 }: LayeredHeroProps) {
   const { image, art_direction } = media;
   const presentationSettings = media.presentation_settings;
+  const cutoutPresentationSettings = media.cutout_presentation_settings ?? presentationSettings;
   const hasCutout = !!image.cutout;
   const assetFocalX = media.focal_x ?? 50;
   const assetFocalY = media.focal_y ?? 50;
+  const cutoutFocalX = media.cutout_focal_x ?? assetFocalX;
+  const cutoutFocalY = media.cutout_focal_y ?? assetFocalY;
 
   const getObjectPosition = (breakpoint: "desktop" | "tablet" | "mobile") => {
     const dir = art_direction?.[breakpoint];
@@ -191,10 +194,10 @@ export function LayeredHero({
               priority
               className={`${styles.cutoutImg} ${styles[`cutoutImg--${breakpoint}`]}`}
               style={getCutoutStyle(
-                presentationSettings,
+                cutoutPresentationSettings,
                 breakpoint,
-                assetFocalX,
-                assetFocalY,
+                cutoutFocalX,
+                cutoutFocalY,
               )}
               sizes="100vw"
             />

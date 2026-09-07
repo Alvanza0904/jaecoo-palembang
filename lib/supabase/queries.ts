@@ -73,6 +73,9 @@ function mapModel(
   heroCutoutUrl?: string,
   heroFocalX?: number,
   heroFocalY?: number,
+  cutoutPresentationSettings?: PresentationSettings,
+  cutoutFocalX?: number,
+  cutoutFocalY?: number,
 ): ModelData {
   const variants: ModelVariant[] = (row.model_variants ?? []).map((v) => ({
     id: v.variant_key,
@@ -139,6 +142,9 @@ function mapModel(
         focal_y: heroFocalY,
         art_direction: (heroRaw.art_direction as ModelData['hero_media']['art_direction']) ?? undefined,
         presentation_settings: heroPresentationSettings,
+        cutout_presentation_settings: cutoutPresentationSettings ?? heroPresentationSettings,
+        cutout_focal_x: cutoutFocalX,
+        cutout_focal_y: cutoutFocalY,
       }
     : staticFallback?.hero_media ?? {
         image: {
@@ -278,12 +284,28 @@ export async function getModelBySlug(slug: string): Promise<ModelData | undefine
     // presentation settings yet, use the cutout asset's settings as a safe
     // compatibility fallback. This does not override the hero asset when it
     // contains the editor's source-of-truth settings.
-    const presentationSettings = heroPresentationSettings ?? cutoutPresentationSettings
-    const focalX = heroFocalX ?? cutoutFocalX
-    const focalY = heroFocalY ?? cutoutFocalY
+    const presentationSettings = heroPresentationSettings
+    const isSeparateCutout = typeof mediaAssetId === 'string' && typeof cutoutMediaId === 'string' && mediaAssetId !== cutoutMediaId
+    const resolvedCutoutPresentationSettings = isSeparateCutout
+      ? (cutoutPresentationSettings ?? heroPresentationSettings)
+      : heroPresentationSettings
+    const focalX = heroFocalX
+    const focalY = heroFocalY
+    const resolvedCutoutFocalX = isSeparateCutout ? (cutoutFocalX ?? heroFocalX) : heroFocalX
+    const resolvedCutoutFocalY = isSeparateCutout ? (cutoutFocalY ?? heroFocalY) : heroFocalY
 
     const fallback = getStaticModelBySlug(slug)
-    return mapModel(row, fallback, presentationSettings, heroCutoutUrl, focalX, focalY)
+    return mapModel(
+      row,
+      fallback,
+      presentationSettings,
+      heroCutoutUrl,
+      focalX,
+      focalY,
+      resolvedCutoutPresentationSettings,
+      resolvedCutoutFocalX,
+      resolvedCutoutFocalY,
+    )
   } catch (err) {
     console.warn(`[Supabase] getModelBySlug(${slug}) failed — using static fallback:`, err)
     return getStaticModelBySlug(slug)

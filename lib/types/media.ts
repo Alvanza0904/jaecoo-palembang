@@ -56,8 +56,13 @@ export interface MediaWithArtDirection {
   /** Source asset focal point used by AUTO presentation mode. */
   focal_x?: number;
   focal_y?: number;
-  /** Visual Media Editor presentation settings */
+  /** Visual Media Editor presentation settings for the background/hero asset */
   presentation_settings?: PresentationSettings
+  /** Presentation settings for a separate transparent cutout asset */
+  cutout_presentation_settings?: PresentationSettings
+  /** Source focal point for the separate cutout asset (AUTO fallback) */
+  cutout_focal_x?: number
+  cutout_focal_y?: number
   art_direction?: {
     desktop?: ArtDirectionSettings;
     tablet?: ArtDirectionSettings;
