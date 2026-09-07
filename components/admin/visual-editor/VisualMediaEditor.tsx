@@ -156,16 +156,6 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
   const isCustom = effectiveSettings.mode === 'custom'
   const isInherited = effectiveSettings.mode === 'inherited'
 
-  // Pass bbox h_pct so auto mode uses correct per-breakpoint scale
-  const cutoutEffectiveSettings = resolveBreakpointSettings(
-    separateCutoutAsset ? cutoutAssetSettings : settings,
-    activeBp,
-    cutoutSourceAsset.focal_x ?? 50,
-    cutoutSourceAsset.focal_y ?? 50,
-    cutoutBbox?.h_pct,
-  )
-  const cutoutSettings: CutoutPlacement = cutoutEffectiveSettings.cutout
-
   // ── Preview dimensions ─────────────────────────────────
   const dims = BREAKPOINT_PREVIEW_DIMS[activeBp as BreakpointKey]
   const maxW = 320
@@ -180,11 +170,21 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
     ?? ''
   const cutoutUrl = cutoutSourceAsset.cutout_url ?? ''
 
-  // ── 5F: Meta / bbox ────────────────────────────────────
+  // ── 5F: Meta / bbox — MUST be declared before cutoutEffectiveSettings ─
   const meta: PresentationMeta = (
     (separateCutoutAsset ? cutoutAssetSettings : settings) as PresentationSettings & { _meta?: PresentationMeta }
   )._meta ?? {}
   const cutoutBbox = meta.cutout_bbox ?? null
+
+  // Pass bbox h_pct so auto mode uses correct per-breakpoint scale
+  const cutoutEffectiveSettings = resolveBreakpointSettings(
+    separateCutoutAsset ? cutoutAssetSettings : settings,
+    activeBp,
+    cutoutSourceAsset.focal_x ?? 50,
+    cutoutSourceAsset.focal_y ?? 50,
+    cutoutBbox?.h_pct,
+  )
+  const cutoutSettings: CutoutPlacement = cutoutEffectiveSettings.cutout
 
   // ── 5F: Cutout rendering — cover-aligned coordinate system ────────────
   //
