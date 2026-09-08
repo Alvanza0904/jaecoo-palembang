@@ -40,25 +40,13 @@ export interface LayeredHeroProps {
 }
 
 function getCutoutStyle(
-  backgroundSettings: PresentationSettings | undefined,
-  cutoutSettings: PresentationSettings | undefined,
+  settings: PresentationSettings | undefined,
   breakpoint: BreakpointKey,
-  backgroundFocalX = 50,
-  backgroundFocalY = 50,
-  cutoutFocalX = 50,
-  cutoutFocalY = 50,
+  focalX = 50,
+  focalY = 50,
   bboxHPct?: number,
 ): React.CSSProperties {
-  return getCutoutLayerStyle(
-    backgroundSettings ?? {},
-    cutoutSettings ?? backgroundSettings ?? {},
-    breakpoint,
-    backgroundFocalX,
-    backgroundFocalY,
-    cutoutFocalX,
-    cutoutFocalY,
-    bboxHPct,
-  )
+  return getCutoutLayerStyle(settings ?? {}, breakpoint, focalX, focalY, bboxHPct)
 }
 
 export function LayeredHero({
@@ -78,8 +66,8 @@ export function LayeredHero({
   const cutoutFocalX = media.cutout_focal_x ?? media.focal_x ?? 50;
   const cutoutFocalY = media.cutout_focal_y ?? media.focal_y ?? 50;
 
-  // Background placement is resolved by the same shared helper used by the
-  // Visual Editor. Legacy art_direction remains a fallback for old assets.
+  // Background presentation uses the same style calculation as the Visual
+  // Editor. Legacy art_direction remains the fallback for old assets.
   const getBackgroundStyle = (breakpoint: BreakpointKey): React.CSSProperties => {
     if (presentationSettings) {
       return getBackgroundLayerStyle(
@@ -146,7 +134,7 @@ export function LayeredHero({
                   fill
                   priority
                   quality={90}
-                  style={getBackgroundStyle("small_mobile")}
+                  style={{ objectPosition: getObjectPosition("small_mobile") }}
                   className={styles.bgImg}
                   sizes="100vw"
                 />
@@ -161,7 +149,7 @@ export function LayeredHero({
                   fill
                   priority
                   quality={90}
-                  style={getBackgroundStyle("mobile")}
+                  style={{ objectPosition: getObjectPosition("mobile") }}
                   className={styles.bgImg}
                   sizes="100vw"
                 />
@@ -176,7 +164,7 @@ export function LayeredHero({
                   fill
                   priority
                   quality={90}
-                  style={getBackgroundStyle("tablet")}
+                  style={{ objectPosition: getObjectPosition("tablet") }}
                   className={styles.bgImg}
                   sizes="100vw"
                 />
@@ -191,7 +179,7 @@ export function LayeredHero({
                   fill
                   priority
                   quality={90}
-                  style={getBackgroundStyle("desktop")}
+                  style={{ objectPosition: getObjectPosition("desktop") }}
                   className={styles.bgImg}
                   sizes="100vw"
                 />
@@ -243,16 +231,7 @@ export function LayeredHero({
               fill
               priority
               className={`${styles.cutoutImg} ${styles[`cutoutImg--${breakpoint}`]}`}
-              style={getCutoutStyle(
-                presentationSettings,
-                cutoutPresentationSettings,
-                breakpoint,
-                media.focal_x ?? 50,
-                media.focal_y ?? 50,
-                cutoutFocalX,
-                cutoutFocalY,
-                cutoutBboxHPct,
-              )}
+              style={getCutoutStyle(cutoutPresentationSettings, breakpoint, cutoutFocalX, cutoutFocalY, cutoutBboxHPct)}
               data-cutout-breakpoint={breakpoint}
               data-cutout-mode={resolveBreakpointSettings(cutoutPresentationSettings ?? {}, breakpoint, cutoutFocalX, cutoutFocalY).mode}
               data-cutout-position-x={resolveBreakpointSettings(cutoutPresentationSettings ?? {}, breakpoint, cutoutFocalX, cutoutFocalY).cutout.position_x}

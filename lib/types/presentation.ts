@@ -165,8 +165,8 @@ export const BREAKPOINT_LABELS: Record<BreakpointKey, string> = {
 export const BREAKPOINT_PREVIEW_DIMS: Record<BreakpointKey, { width: number; height: number }> = {
   desktop:      { width: 320, height: 180 },  // 16:9 landscape
   tablet:       { width: 240, height: 180 },  // 4:3
-  mobile:       { width: 160, height: 240 },  // 9:16 portrait
-  small_mobile: { width: 130, height: 220 },  // narrow portrait
+  mobile:       { width: 135, height: 240 },  // 9:16 portrait — matches full-screen mobile hero
+  small_mobile: { width: 124, height: 220 },  // ~9:16 narrow portrait
 }
 
 /**
@@ -269,12 +269,13 @@ export function resolveBreakpointSettings(
 }
 
 /**
- * Convert presentation settings position (0–100) to CSS object-position string.
+ * Shared layer presentation styles.
+ *
+ * IMPORTANT: these helpers intentionally preserve the STEP 5F rendering
+ * semantics. They do NOT couple background and cutout settings together.
+ * The editor and public hero both call these exact helpers so their CSS
+ * placement rules cannot drift apart.
  */
-export function positionToCSS(x: number, y: number): string {
-  return `${x}% ${y}%`
-}
-
 export interface PresentationLayerStyle {
   objectFit: ObjectFit
   objectPosition: string
@@ -282,11 +283,6 @@ export interface PresentationLayerStyle {
   transformOrigin: string
 }
 
-/**
- * Shared background rendering style used by both the Visual Editor preview
- * and the public LayeredHero. Keeping this calculation in one place prevents
- * the editor and live page from silently using different placement rules.
- */
 export function getBackgroundLayerStyle(
   settings: PresentationSettings,
   breakpoint: BreakpointKey,
@@ -294,59 +290,37 @@ export function getBackgroundLayerStyle(
   focalY = 50,
 ): PresentationLayerStyle {
   const effective = resolveBreakpointSettings(settings, breakpoint, focalX, focalY)
-  const objectPosition = positionToCSS(effective.position_x, effective.position_y)
-
+  const objectPosition = `${effective.position_x}% ${effective.position_y}%`
   return {
     objectFit: effective.object_fit,
     objectPosition,
-    transform: scaleToCSS(effective.scale),
+    transform: `scale(${effective.scale / 100})`,
     transformOrigin: objectPosition,
   }
 }
 
-/**
- * Shared cutout rendering style.
- *
- * The transparent cutout is rendered into the SAME cover coordinate space as
- * the background. Its object-position therefore comes from the background
- * placement, while cutout position/scale are applied as an additional
- * transform around the canvas centre. This is the key invariant that makes
- * Editor and Public Live agree when the two assets originate from the same
- * source image.
- */
 export function getCutoutLayerStyle(
-  backgroundSettings: PresentationSettings,
-  cutoutSettings: PresentationSettings,
+  settings: PresentationSettings,
   breakpoint: BreakpointKey,
-  backgroundFocalX = 50,
-  backgroundFocalY = 50,
-  cutoutFocalX = 50,
-  cutoutFocalY = 50,
-  cutoutBboxHPct?: number,
+  focalX = 50,
+  focalY = 50,
+  bboxHPct?: number,
 ): PresentationLayerStyle {
-  const background = resolveBreakpointSettings(
-    backgroundSettings,
-    breakpoint,
-    backgroundFocalX,
-    backgroundFocalY,
-  )
-  const cutout = resolveBreakpointSettings(
-    cutoutSettings,
-    breakpoint,
-    cutoutFocalX,
-    cutoutFocalY,
-    cutoutBboxHPct,
-  ).cutout
-
+  const effective = resolveBreakpointSettings(settings, breakpoint, focalX, focalY, bboxHPct)
+  const cutout = effective.cutout
   return {
-    // Critical: the cutout must use the exact same fit mode as the BG.
-    // In the normal hero flow this is `cover`; keeping it coupled also makes
-    // custom `contain` settings deterministic instead of silently diverging.
-    objectFit: background.object_fit,
-    objectPosition: positionToCSS(background.position_x, background.position_y),
+    objectFit: 'contain',
+    objectPosition: '50% 50%',
     transform: cutoutTransformToCSS(cutout.position_x, cutout.position_y, cutout.scale),
     transformOrigin: '50% 50%',
   }
+}
+
+/**
+ * Convert presentation settings position (0–100) to CSS object-position string.
+ */
+export function positionToCSS(x: number, y: number): string {
+  return `${x}% ${y}%`
 }
 
 /**

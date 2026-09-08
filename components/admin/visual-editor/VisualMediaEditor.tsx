@@ -136,17 +136,6 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
   const cutoutSourceAsset = cutoutAsset ?? asset
   const hasCutout = !!cutoutSourceAsset.cutout_url
 
-  // The background always resolves from the hero/background asset.
-  // Never switch this to cutoutAssetSettings when the Cutout tab is active: the
-  // two layers can be stored on separate media_assets and must keep independent
-  // settings while sharing the same canvas coordinate system.
-  const backgroundEffectiveSettings: BreakpointSettings = resolveBreakpointSettings(
-    settings,
-    activeBp,
-    asset.focal_x ?? 50,
-    asset.focal_y ?? 50,
-  )
-
   const activeSettings = activeLayer === 'cutout' && separateCutoutAsset
     ? cutoutAssetSettings
     : settings
@@ -156,6 +145,15 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
   const activeFocalY = activeLayer === 'cutout' && separateCutoutAsset
     ? cutoutSourceAsset.focal_y ?? 50
     : asset.focal_y ?? 50
+
+  // The active layer controls must read that layer's settings, but the canvas
+  // itself must NEVER switch the background to cutout settings.
+  const backgroundEffectiveSettings: BreakpointSettings = resolveBreakpointSettings(
+    settings,
+    activeBp,
+    asset.focal_x ?? 50,
+    asset.focal_y ?? 50,
+  )
 
   const effectiveSettings: BreakpointSettings = resolveBreakpointSettings(
     activeSettings,
@@ -210,9 +208,6 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
   )
   const cutoutSettings: CutoutPlacement = cutoutEffectiveSettings.cutout
 
-  // Shared rendering math: the exact same placement rules are used by the
-  // public LayeredHero. Background and cutout settings remain independent,
-  // but both layers are mapped into the same cover canvas.
   const backgroundLayerStyle = getBackgroundLayerStyle(
     settings,
     activeBp,
@@ -220,17 +215,14 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
     asset.focal_y ?? 50,
   )
   const cutoutLayerStyle = getCutoutLayerStyle(
-    settings,
     separateCutoutAsset ? cutoutAssetSettings : settings,
     activeBp,
-    asset.focal_x ?? 50,
-    asset.focal_y ?? 50,
     cutoutSourceAsset.focal_x ?? 50,
     cutoutSourceAsset.focal_y ?? 50,
     cutoutBbox?.h_pct,
   )
 
-  // ── 5F: Cutout rendering — cover-aligned coordinate system ────────────
+  // ── 5F: Cutout rendering — preserve the STEP 5F canvas semantics ──────
   //
   // KEY INSIGHT: The cutout was generated from the same original image
   // without any crop or resize, so vehicle coordinates in the cutout are
@@ -706,9 +698,10 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
               />
             )}
 
-            {/* Cutout layer — rendered by the SAME placement math as public Live.
-                The cutout uses the background cover/object-position as its base
-                coordinate system, then applies its own X/Y/scale transform. */}
+            {/* Cutout layer — cover-aligned to match background coordinate system.
+                STEP 5F: Uses object-fit:cover + object-position identical to background
+                so that vehicle pixels overlay exactly, regardless of canvas aspect ratio.
+                CUSTOM offsets applied via CSS transform translate+scale on top. */}
             {hasCutout && cutoutUrl && previewMode !== 'bg' && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -723,8 +716,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
                 data-visual-position-y={cutoutSettings.position_y}
                 data-visual-scale={cutoutSettings.scale}
                 style={{
-                  // Cutout uses the same cover/object-position mapping as BG.
-                  // Its own X/Y/scale are then applied as the foreground transform.
+                  // Exact same cutout style as Public LayeredHero.
                   objectFit: cutoutLayerStyle.objectFit,
                   objectPosition: cutoutLayerStyle.objectPosition,
                   transform: cutoutLayerStyle.transform,
