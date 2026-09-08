@@ -76,9 +76,29 @@ export function LayeredHero({
   const cutoutFocalX = media.cutout_focal_x ?? media.focal_x ?? 50;
   const cutoutFocalY = media.cutout_focal_y ?? media.focal_y ?? 50;
 
-  // Build object-position from art direction
-  const getObjectPosition = (breakpoint: "desktop" | "tablet" | "mobile") => {
-    const dir = art_direction?.[breakpoint];
+  // Build object-position from presentation_settings (source of truth from Visual Editor).
+  // Falls back to art_direction for legacy assets that have not been through the editor.
+  const getObjectPosition = (breakpoint: "desktop" | "tablet" | "mobile" | "small_mobile") => {
+    // Map LayeredHero breakpoint names to BreakpointKey
+    const bpKey = breakpoint === "small_mobile" ? "small_mobile" as const
+                : breakpoint === "mobile"       ? "mobile"       as const
+                : breakpoint === "tablet"       ? "tablet"       as const
+                :                                 "desktop"      as const
+
+    // If presentation_settings exist and has a custom/auto setting for this breakpoint, use it
+    if (presentationSettings) {
+      const resolved = resolveBreakpointSettings(
+        presentationSettings,
+        bpKey,
+        media.focal_x ?? 50,
+        media.focal_y ?? 50,
+      )
+      // position_x/y in presentation_settings = object-position %
+      return `${resolved.position_x}% ${resolved.position_y}%`
+    }
+
+    // Legacy fallback: art_direction JSONB field
+    const dir = art_direction?.[breakpoint as "desktop" | "tablet" | "mobile"];
     if (!dir) return "center center";
     if (dir.mode === "custom" && dir.x && dir.y) {
       return `${dir.x} ${dir.y}`;
@@ -113,11 +133,26 @@ export function LayeredHero({
         ) : (
           /* Responsive image background */
           <div className={styles.bgImages}>
+            {/* Small Mobile — applies at narrowest breakpoint */}
+            {image.small_mobile && (
+              <div className={styles.bgImageSmallMobile}>
+                <Image
+                  src={image.small_mobile}
+                  alt=""
+                  fill
+                  priority
+                  quality={90}
+                  style={{ objectPosition: getObjectPosition("small_mobile") }}
+                  className={styles.bgImg}
+                  sizes="100vw"
+                />
+              </div>
+            )}
             {/* Mobile */}
-            {(image.small_mobile || image.mobile) && (
+            {image.mobile && (
               <div className={styles.bgImageMobile}>
                 <Image
-                  src={image.small_mobile ?? image.mobile ?? image.desktop ?? ""}
+                  src={image.mobile}
                   alt=""
                   fill
                   priority

@@ -35,10 +35,18 @@
 }
 
 /* Responsive image containers */
+/* Mobile (375–767px) */
 .bgImageMobile {
   position: absolute;
   inset: 0;
   display: block;
+}
+
+/* Small Mobile (≤389px) — overrides mobile */
+.bgImageSmallMobile {
+  position: absolute;
+  inset: 0;
+  display: none; /* shown via @media below */
 }
 
 .bgImageTablet {
@@ -200,6 +208,29 @@
   /* object-fit is set via inline style from getCutoutStyle() */
   display: none;
 }
+
+/* ─── Background image responsive show/hide ───────────── */
+
+/* Small Mobile (≤389px): show small_mobile bg, hide mobile bg */
+@media (max-width: 389px) {
+  .bgImageSmallMobile { display: block; }
+  .bgImageMobile { display: none; }
+}
+
+/* Tablet (≥768px): hide mobile/small_mobile, show tablet */
+@media (min-width: 768px) {
+  .bgImageSmallMobile { display: none; }
+  .bgImageMobile { display: none; }
+  .bgImageTablet { display: block; }
+}
+
+/* Desktop (≥1024px): hide tablet, show desktop */
+@media (min-width: 1024px) {
+  .bgImageTablet { display: none; }
+  .bgImageDesktop { display: block; }
+}
+
+/* ─── Cutout responsive ──────────────────────────────── */
 
 @media (max-width: 767px) {
   .cutoutImg--mobile { display: block; }
