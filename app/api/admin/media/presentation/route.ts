@@ -79,7 +79,10 @@ export async function PATCH(req: NextRequest) {
       const bgId = heroContent?.media_asset_id
       const cutoutId = heroContent?.cutout_media_id
       if (bgId === mediaId || cutoutId === mediaId) {
-        const slug = (usage.models as { slug: string } | null)?.slug
+        const modelsRaw = usage.models as unknown
+        const slug = Array.isArray(modelsRaw)
+          ? (modelsRaw as { slug: string }[])[0]?.slug
+          : (modelsRaw as { slug: string } | null)?.slug
         if (slug) slugsToRevalidate.add(slug)
       }
     }
