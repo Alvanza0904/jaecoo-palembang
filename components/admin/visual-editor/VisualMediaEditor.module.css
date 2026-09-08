@@ -808,3 +808,127 @@
 
 
 .previewIndicatorNote { margin-left: auto; opacity: .7; }
+
+/* ─── Typography Preview (Step 6G) ──────────────────────── */
+
+.typoPreviewWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.typoPreviewLabel {
+  align-self: flex-start;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(200, 169, 110, 0.8);
+}
+
+/* The composite canvas — BG + Cutout + Text */
+.typoCanvas {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(200, 169, 110, 0.25);
+  background: #1a1a1a;
+  flex-shrink: 0;
+}
+
+.typoCanvasBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Semi-transparent dark overlay matching public hero default overlayOpacity=30 */
+.typoCanvasOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.30);
+  pointer-events: none;
+}
+
+.typoCanvasCutout {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Typography text container — exactly matches LayeredHero typographyContainer logic */
+.typoCanvasText {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: none;
+  outline: 1px dashed rgba(200, 169, 110, 0.45);
+  padding: 2px;
+}
+
+.typoCanvasHeading {
+  color: #ffffff;
+  font-family: var(--font-sans, 'Manrope', sans-serif);
+  /* font-size, font-weight, letter-spacing, line-height come from inline style */
+}
+
+.typoCanvasSubheading {
+  color: rgba(255, 255, 255, 0.72);
+  font-family: var(--font-sans, 'Manrope', sans-serif);
+  /* font-size, font-weight, letter-spacing, line-height come from inline style */
+}
+
+
+.typoPreviewHint {
+  align-self: flex-start;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.3);
+  font-style: italic;
+}
+
+/* ─── Alignment + Weight buttons ─────────────────────────── */
+
+.alignBtns {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.alignBtn {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border-dark);
+  background: transparent;
+  color: var(--color-ink-muted-dark);
+  font-size: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.12s;
+}
+
+.alignBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.alignBtn:not(:disabled):hover {
+  border-color: rgba(200, 169, 110, 0.5);
+  color: rgba(200, 169, 110, 0.8);
+}
+
+.alignBtnActive {
+  background: rgba(200, 169, 110, 0.15);
+  border-color: rgba(200, 169, 110, 0.6);
+  color: rgba(200, 169, 110, 1);
+}

@@ -63,6 +63,14 @@ const BP_ICONS: Record<BreakpointKey, string> = {
 // Checkerboard pattern sebagai data URL (untuk preview cutout)
 const CHECKER_BG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='8' height='8' fill='%23ccc'/%3E%3Crect x='8' y='8' width='8' height='8' fill='%23ccc'/%3E%3Crect x='8' width='8' height='8' fill='%23eee'/%3E%3Crect y='8' width='8' height='8' fill='%23eee'/%3E%3C/svg%3E")`
 
+/**
+ * Base heading font size in rem — matches LayeredHero.tsx TYPOGRAPHY_BASE_REM.
+ * font_size 100 = 4rem (same as --text-4xl).
+ */
+const TYPO_BASE_REM = 4
+/** Subheading base size — matches LayeredHero.tsx SUBHEADING_BASE_REM. */
+const TYPO_SUB_REM = 1.375
+
 // ─── Props ────────────────────────────────────────────────
 
 interface Props {
@@ -72,6 +80,10 @@ interface Props {
   cutoutAsset?: MediaAsset | null
   onClose: () => void
   onUpdated: (asset: MediaAsset) => void
+  /** Preview text for the typography preview (e.g. model tagline) */
+  previewHeading?: string
+  /** Preview subtext for the typography preview (e.g. model name) */
+  previewSubheading?: string
 }
 
 // ─── Helpers ─────────────────────────────────────────────
@@ -101,7 +113,7 @@ function tabModeClass(mode: PresentationMode, s: typeof styles): string {
 
 // ─── Component ───────────────────────────────────────────
 
-export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Props) {
+export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, previewHeading, previewSubheading }: Props) {
 
   // ── Core state ─────────────────────────────────────────
   const [activeBp, setActiveBp] = useState<BreakpointKey>('desktop')
@@ -1132,7 +1144,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
             </div>
           )}
 
-          {/* ── Typography Readiness ────────────────────── */}
+          {/* ── Typography Placement ────────────────────── */}
           <div className={styles.divider} />
           <div className={styles.controlSection}>
             <div className={styles.controlSectionHeader}>
@@ -1147,9 +1159,117 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
 
             {showTypography && (
               <>
+                {/* ── Realtime Typography Preview ──────────────────── */}
+                <div className={styles.typoPreviewWrap}>
+                  <div className={styles.typoPreviewLabel}>
+                    Preview Komposit — {BREAKPOINT_LABELS[activeBp]}
+                  </div>
+                  {/* Canvas composite: bg + cutout + typography */}
+                  <div
+                    className={styles.typoCanvas}
+                    style={{ width: previewW, height: previewH }}
+                  >
+                    {/* Background */}
+                    {previewUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        className={styles.typoCanvasBg}
+                        src={previewUrl}
+                        alt=""
+                        draggable={false}
+                        style={{
+                          objectFit: effectiveSettings.object_fit,
+                          objectPosition: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
+                          transform: `scale(${effectiveSettings.scale / 100})`,
+                          transformOrigin: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
+                        }}
+                      />
+                    )}
+
+                    {/* Dark overlay — matches public hero default */}
+                    <div className={styles.typoCanvasOverlay} />
+
+                    {/* Cutout */}
+                    {hasCutout && cutoutUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        className={styles.typoCanvasCutout}
+                        src={cutoutUrl}
+                        alt=""
+                        draggable={false}
+                        style={{
+                          objectFit: 'contain',
+                          objectPosition: '50% 50%',
+                          transform: cutoutTransformToCSS(
+                            cutoutSettings.position_x,
+                            cutoutSettings.position_y,
+                            cutoutSettings.scale,
+                          ),
+                          transformOrigin: '50% 50%',
+                        }}
+                      />
+                    )}
+
+                    {/* Typography — absolutely positioned per current settings */}
+                    {(() => {
+                      const typo = effectiveSettings.typography
+                      const headingRem = (TYPO_BASE_REM * typo.font_size) / 100
+                      const subMult = Math.max(70, Math.min(typo.font_size, 130))
+                      const subRem = (TYPO_SUB_REM * subMult) / 100
+                      return (
+                        <div
+                          className={styles.typoCanvasText}
+                          style={{
+                            left: `${typo.x}%`,
+                            top: `${typo.y}%`,
+                            width: `${typo.width}%`,
+                            textAlign: typo.alignment,
+                          }}
+                        >
+                          <div
+                            className={styles.typoCanvasHeading}
+                            style={{
+                              fontSize: `${headingRem}rem`,
+                              fontWeight: typo.font_weight,
+                              letterSpacing: `${typo.letter_spacing}em`,
+                              lineHeight: 1.1,
+                            }}
+                          >
+                            {previewHeading ?? 'JAECOO J8'}
+                          </div>
+                          {(previewSubheading ?? true) && (
+                            <div
+                              className={styles.typoCanvasSubheading}
+                              style={{
+                                fontSize: `${subRem}rem`,
+                                fontWeight: typo.font_weight >= 600
+                                  ? Math.max(400, typo.font_weight - 100)
+                                  : typo.font_weight,
+                                letterSpacing: typo.letter_spacing !== 0
+                                  ? `${typo.letter_spacing * 0.5}em`
+                                  : undefined,
+                                lineHeight: 1.4,
+                              }}
+                            >
+                              {previewSubheading ?? 'Luxury SUV'}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })()}
+                  </div>
+                  <div className={styles.typoPreviewHint}>
+                    Preview realtime — update saat slider berubah
+                  </div>
+                </div>
+
+                <div className={styles.divider} style={{ marginTop: 8, marginBottom: 8 }} />
+
                 <div className={styles.sliderDisabledNote}>
                   Positioning typography pada Public Hero. Aktifkan mode CUSTOM untuk mengedit.
                 </div>
+
+                {/* Text X */}
                 <div className={styles.sliderRow}>
                   <div className={styles.sliderLabel}>
                     <span className={styles.sliderLabelText}>Text X</span>
@@ -1163,6 +1283,8 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
                     }
                   />
                 </div>
+
+                {/* Text Y */}
                 <div className={styles.sliderRow}>
                   <div className={styles.sliderLabel}>
                     <span className={styles.sliderLabelText}>Text Y</span>
@@ -1176,6 +1298,8 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
                     }
                   />
                 </div>
+
+                {/* Width */}
                 <div className={styles.sliderRow}>
                   <div className={styles.sliderLabel}>
                     <span className={styles.sliderLabelText}>Width</span>
@@ -1189,6 +1313,86 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
                     }
                   />
                 </div>
+
+                {/* Alignment */}
+                <div className={styles.sliderRow}>
+                  <div className={styles.sliderLabel}>
+                    <span className={styles.sliderLabelText}>Alignment</span>
+                    <span className={styles.sliderValue}>{effectiveSettings.typography.alignment}</span>
+                  </div>
+                  <div className={styles.alignBtns}>
+                    {(['left', 'center', 'right'] as const).map((align) => (
+                      <button
+                        key={align}
+                        className={`${styles.alignBtn} ${effectiveSettings.typography.alignment === align ? styles.alignBtnActive : ''}`}
+                        disabled={!isCustom}
+                        onClick={() =>
+                          updateBreakpoint(activeBp, { typography: { ...effectiveSettings.typography, alignment: align } })
+                        }
+                      >
+                        {align === 'left' ? '⬛◻◻' : align === 'center' ? '◻⬛◻' : '◻◻⬛'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Font Size */}
+                <div className={styles.sliderRow}>
+                  <div className={styles.sliderLabel}>
+                    <span className={styles.sliderLabelText}>Font Size</span>
+                    <span className={styles.sliderValue}>{effectiveSettings.typography.font_size}</span>
+                  </div>
+                  <input type="range" min={40} max={200} step={2}
+                    value={effectiveSettings.typography.font_size} disabled={!isCustom}
+                    className={styles.slider}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      updateBreakpoint(activeBp, { typography: { ...effectiveSettings.typography, font_size: Number(e.target.value) } })
+                    }
+                  />
+                </div>
+
+                {/* Font Weight */}
+                <div className={styles.sliderRow}>
+                  <div className={styles.sliderLabel}>
+                    <span className={styles.sliderLabelText}>Font Weight</span>
+                    <span className={styles.sliderValue}>{effectiveSettings.typography.font_weight}</span>
+                  </div>
+                  <div className={styles.alignBtns}>
+                    {([300, 400, 500, 600, 700, 800] as const).map((w) => (
+                      <button
+                        key={w}
+                        className={`${styles.alignBtn} ${effectiveSettings.typography.font_weight === w ? styles.alignBtnActive : ''}`}
+                        disabled={!isCustom}
+                        onClick={() =>
+                          updateBreakpoint(activeBp, { typography: { ...effectiveSettings.typography, font_weight: w } })
+                        }
+                      >
+                        {w}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Letter Spacing */}
+                <div className={styles.sliderRow}>
+                  <div className={styles.sliderLabel}>
+                    <span className={styles.sliderLabelText}>Letter Spacing</span>
+                    <span className={styles.sliderValue}>{effectiveSettings.typography.letter_spacing}em</span>
+                  </div>
+                  <input type="range" min={-0.05} max={0.2} step={0.005}
+                    value={effectiveSettings.typography.letter_spacing} disabled={!isCustom}
+                    className={styles.slider}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      updateBreakpoint(activeBp, { typography: { ...effectiveSettings.typography, letter_spacing: parseFloat(Number(e.target.value).toFixed(3)) } })
+                    }
+                  />
+                </div>
+
+                {!isCustom && (
+                  <div className={styles.sliderDisabledNote} style={{ marginTop: 4 }}>
+                    Aktifkan CUSTOM untuk mengedit typography positioning.
+                  </div>
+                )}
               </>
             )}
           </div>
