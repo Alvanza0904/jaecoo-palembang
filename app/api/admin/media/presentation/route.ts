@@ -10,6 +10,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import type { PresentationSettings } from '@/lib/types/presentation'
 
@@ -60,6 +61,42 @@ export async function PATCH(req: NextRequest) {
   if (error) {
     console.error('[Presentation PATCH]', error)
     return NextResponse.json({ error: 'Gagal simpan: ' + error.message }, { status: 500 })
+  }
+
+  // Revalidate all model pages that could use this media asset.
+  // We query model_content to find which models reference this mediaId,
+  // then revalidate only those slugs. If query fails, revalidate all models.
+  try {
+    const { data: usages } = await supabase
+      .from('model_content')
+      .select('models!inner(slug), content')
+      .eq('section', 'hero')
+
+    const slugsToRevalidate = new Set<string>()
+
+    for (const usage of usages ?? []) {
+      const heroContent = usage.content as Record<string, unknown> | null
+      const bgId = heroContent?.media_asset_id
+      const cutoutId = heroContent?.cutout_media_id
+      if (bgId === mediaId || cutoutId === mediaId) {
+        const slug = (usage.models as { slug: string } | null)?.slug
+        if (slug) slugsToRevalidate.add(slug)
+      }
+    }
+
+    // If no specific slug found, revalidate common paths
+    if (slugsToRevalidate.size === 0) {
+      revalidatePath('/model/[slug]', 'page')
+    } else {
+      for (const slug of slugsToRevalidate) {
+        revalidatePath(`/model/${slug}`, 'page')
+        revalidatePath(`/model/${slug}/specifications`, 'page')
+        console.log(`[Presentation PATCH] Revalidated /model/${slug}`)
+      }
+    }
+  } catch (revalErr) {
+    // Non-fatal — asset is saved, just cache may be stale
+    console.warn('[Presentation PATCH] revalidatePath failed:', revalErr)
   }
 
   return NextResponse.json({ asset: data })
