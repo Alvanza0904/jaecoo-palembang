@@ -40,8 +40,7 @@ import {
   BREAKPOINT_INHERIT_DEFAULTS,
   computeAutoScale,
   resolveBreakpointSettings,
-  getBackgroundLayerStyle,
-  getCutoutLayerStyle,
+  cutoutTransformToCSS,
 } from '@/lib/types/presentation'
 import { detectCutoutBBox } from '@/lib/utils/cutout-bbox'
 import styles from './VisualMediaEditor.module.css'
@@ -146,15 +145,6 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
     ? cutoutSourceAsset.focal_y ?? 50
     : asset.focal_y ?? 50
 
-  // The active layer controls must read that layer's settings, but the canvas
-  // itself must NEVER switch the background to cutout settings.
-  const backgroundEffectiveSettings: BreakpointSettings = resolveBreakpointSettings(
-    settings,
-    activeBp,
-    asset.focal_x ?? 50,
-    asset.focal_y ?? 50,
-  )
-
   const effectiveSettings: BreakpointSettings = resolveBreakpointSettings(
     activeSettings,
     activeBp,
@@ -167,11 +157,32 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
   const isInherited = effectiveSettings.mode === 'inherited'
 
   // ── Preview dimensions ─────────────────────────────────
+  // The public hero uses min-height: 100svh. A fixed 160×240 editor canvas
+  // has a different aspect ratio, which makes contain-rendered cutouts move
+  // relative to the background even when the saved X/Y values are identical.
+  // Keep the device selectors and their labels, but make the actual stage use
+  // the current viewport aspect ratio so Editor and Public Live share the same
+  // hero coordinate space on the device being used for editing.
   const dims = BREAKPOINT_PREVIEW_DIMS[activeBp as BreakpointKey]
+  const [viewportRatio, setViewportRatio] = useState(0)
+
+  useEffect(() => {
+    const updateViewportRatio = () => {
+      if (window.innerWidth > 0 && window.innerHeight > 0) {
+        setViewportRatio(window.innerWidth / window.innerHeight)
+      }
+    }
+    updateViewportRatio()
+    window.addEventListener('resize', updateViewportRatio)
+    return () => window.removeEventListener('resize', updateViewportRatio)
+  }, [])
+
   const maxW = 320
-  const scaleRatio = Math.min(1, maxW / dims.width)
-  const previewW = Math.round(dims.width * scaleRatio)
-  const previewH = Math.round(dims.height * scaleRatio)
+  const baseRatio = dims.width / dims.height
+  const shouldMatchLiveViewport = activeBp === 'mobile' || activeBp === 'small_mobile'
+  const liveRatio = shouldMatchLiveViewport && viewportRatio > 0 ? viewportRatio : baseRatio
+  const previewH = Math.round(Math.min(dims.height, maxW / Math.max(liveRatio, 0.1)))
+  const previewW = Math.round(previewH * liveRatio)
 
   // Image URLs — dipilih berdasarkan activeBp agar preview editor
   // cocok dengan image yang benar-benar dirender di live per breakpoint.
@@ -208,21 +219,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
   )
   const cutoutSettings: CutoutPlacement = cutoutEffectiveSettings.cutout
 
-  const backgroundLayerStyle = getBackgroundLayerStyle(
-    settings,
-    activeBp,
-    asset.focal_x ?? 50,
-    asset.focal_y ?? 50,
-  )
-  const cutoutLayerStyle = getCutoutLayerStyle(
-    separateCutoutAsset ? cutoutAssetSettings : settings,
-    activeBp,
-    cutoutSourceAsset.focal_x ?? 50,
-    cutoutSourceAsset.focal_y ?? 50,
-    cutoutBbox?.h_pct,
-  )
-
-  // ── 5F: Cutout rendering — preserve the STEP 5F canvas semantics ──────
+  // ── 5F: Cutout rendering — cover-aligned coordinate system ────────────
   //
   // KEY INSIGHT: The cutout was generated from the same original image
   // without any crop or resize, so vehicle coordinates in the cutout are
@@ -321,10 +318,10 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
       e.currentTarget.setPointerCapture(e.pointerId)
 
       const startPosX = activeLayer === 'background'
-        ? backgroundEffectiveSettings.position_x
+        ? effectiveSettings.position_x
         : cutoutSettings.position_x
       const startPosY = activeLayer === 'background'
-        ? backgroundEffectiveSettings.position_y
+        ? effectiveSettings.position_y
         : cutoutSettings.position_y
 
       dragRef.current = {
@@ -338,7 +335,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
       }
       setIsDragging(true)
     },
-    [isCustom, activeLayer, backgroundEffectiveSettings, cutoutSettings, previewW, previewH],
+    [isCustom, activeLayer, effectiveSettings, cutoutSettings, previewW, previewH],
   )
 
   const handleCanvasPointerMove = useCallback(
@@ -687,10 +684,10 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
                 alt={asset.alt_text ?? asset.filename}
                 draggable={false}
                 style={{
-                  objectFit: backgroundLayerStyle.objectFit,
-                  objectPosition: backgroundLayerStyle.objectPosition,
-                  transform: backgroundLayerStyle.transform,
-                  transformOrigin: backgroundLayerStyle.transformOrigin,
+                  objectFit: effectiveSettings.object_fit,
+                  objectPosition: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
+                  transform: `scale(${effectiveSettings.scale / 100})`,
+                  transformOrigin: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
                   // Dim BG slightly saat layer cutout aktif
                   opacity: hasCutout && activeLayer === 'cutout' ? 0.7 : 1,
                   transition: 'opacity 0.2s',
@@ -716,11 +713,17 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
                 data-visual-position-y={cutoutSettings.position_y}
                 data-visual-scale={cutoutSettings.scale}
                 style={{
-                  // Exact same cutout style as Public LayeredHero.
-                  objectFit: cutoutLayerStyle.objectFit,
-                  objectPosition: cutoutLayerStyle.objectPosition,
-                  transform: cutoutLayerStyle.transform,
-                  transformOrigin: cutoutLayerStyle.transformOrigin,
+                  // Contain ensures the full transparent PNG is visible (no crop).
+                  // translate+scale transform positions it per presentation_settings.
+                  objectFit: 'contain',
+                  objectPosition: '50% 50%',
+                  // Always apply transform (auto mode = translate(0%,0%) scale(1))
+                  transform: cutoutTransformToCSS(
+                    cutoutSettings.position_x,
+                    cutoutSettings.position_y,
+                    cutoutSettings.scale,
+                  ),
+                  transformOrigin: '50% 50%',
                   opacity: cutoutOpacity / 100,
                   // Highlight border saat layer cutout aktif
                   outline: activeLayer === 'cutout' && cutoutEffectiveSettings.mode === 'custom'

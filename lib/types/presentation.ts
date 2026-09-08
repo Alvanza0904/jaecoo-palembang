@@ -165,8 +165,8 @@ export const BREAKPOINT_LABELS: Record<BreakpointKey, string> = {
 export const BREAKPOINT_PREVIEW_DIMS: Record<BreakpointKey, { width: number; height: number }> = {
   desktop:      { width: 320, height: 180 },  // 16:9 landscape
   tablet:       { width: 240, height: 180 },  // 4:3
-  mobile:       { width: 135, height: 240 },  // 9:16 portrait — matches full-screen mobile hero
-  small_mobile: { width: 124, height: 220 },  // ~9:16 narrow portrait
+  mobile:       { width: 160, height: 240 },  // 9:16 portrait
+  small_mobile: { width: 130, height: 220 },  // narrow portrait
 }
 
 /**
@@ -269,12 +269,9 @@ export function resolveBreakpointSettings(
 }
 
 /**
- * Shared layer presentation styles.
- *
- * IMPORTANT: these helpers intentionally preserve the STEP 5F rendering
- * semantics. They do NOT couple background and cutout settings together.
- * The editor and public hero both call these exact helpers so their CSS
- * placement rules cannot drift apart.
+ * Shared background rendering style used by Public LayeredHero.
+ * This preserves the editor's existing background semantics exactly:
+ * object-fit/object-position + scale with transform-origin at the chosen position.
  */
 export interface PresentationLayerStyle {
   objectFit: ObjectFit
@@ -296,23 +293,6 @@ export function getBackgroundLayerStyle(
     objectPosition,
     transform: `scale(${effective.scale / 100})`,
     transformOrigin: objectPosition,
-  }
-}
-
-export function getCutoutLayerStyle(
-  settings: PresentationSettings,
-  breakpoint: BreakpointKey,
-  focalX = 50,
-  focalY = 50,
-  bboxHPct?: number,
-): PresentationLayerStyle {
-  const effective = resolveBreakpointSettings(settings, breakpoint, focalX, focalY, bboxHPct)
-  const cutout = effective.cutout
-  return {
-    objectFit: 'contain',
-    objectPosition: '50% 50%',
-    transform: cutoutTransformToCSS(cutout.position_x, cutout.position_y, cutout.scale),
-    transformOrigin: '50% 50%',
   }
 }
 

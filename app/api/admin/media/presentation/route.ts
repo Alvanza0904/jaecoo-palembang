@@ -81,9 +81,9 @@ export async function PATCH(req: NextRequest) {
       if (bgId === mediaId || cutoutId === mediaId) {
         const modelsRaw = usage.models as unknown
         const slug = Array.isArray(modelsRaw)
-          ? (modelsRaw as { slug: string }[])[0]?.slug
-          : (modelsRaw as { slug: string } | null)?.slug
-        if (slug) slugsToRevalidate.add(slug)
+          ? (modelsRaw as Array<{ slug?: unknown }>)[0]?.slug
+          : (modelsRaw as { slug?: unknown } | null)?.slug
+        if (typeof slug === 'string' && slug) slugsToRevalidate.add(slug)
       }
     }
 
