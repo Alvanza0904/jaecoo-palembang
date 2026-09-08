@@ -275,6 +275,80 @@ export function positionToCSS(x: number, y: number): string {
   return `${x}% ${y}%`
 }
 
+export interface PresentationLayerStyle {
+  objectFit: ObjectFit
+  objectPosition: string
+  transform: string
+  transformOrigin: string
+}
+
+/**
+ * Shared background rendering style used by both the Visual Editor preview
+ * and the public LayeredHero. Keeping this calculation in one place prevents
+ * the editor and live page from silently using different placement rules.
+ */
+export function getBackgroundLayerStyle(
+  settings: PresentationSettings,
+  breakpoint: BreakpointKey,
+  focalX = 50,
+  focalY = 50,
+): PresentationLayerStyle {
+  const effective = resolveBreakpointSettings(settings, breakpoint, focalX, focalY)
+  const objectPosition = positionToCSS(effective.position_x, effective.position_y)
+
+  return {
+    objectFit: effective.object_fit,
+    objectPosition,
+    transform: scaleToCSS(effective.scale),
+    transformOrigin: objectPosition,
+  }
+}
+
+/**
+ * Shared cutout rendering style.
+ *
+ * The transparent cutout is rendered into the SAME cover coordinate space as
+ * the background. Its object-position therefore comes from the background
+ * placement, while cutout position/scale are applied as an additional
+ * transform around the canvas centre. This is the key invariant that makes
+ * Editor and Public Live agree when the two assets originate from the same
+ * source image.
+ */
+export function getCutoutLayerStyle(
+  backgroundSettings: PresentationSettings,
+  cutoutSettings: PresentationSettings,
+  breakpoint: BreakpointKey,
+  backgroundFocalX = 50,
+  backgroundFocalY = 50,
+  cutoutFocalX = 50,
+  cutoutFocalY = 50,
+  cutoutBboxHPct?: number,
+): PresentationLayerStyle {
+  const background = resolveBreakpointSettings(
+    backgroundSettings,
+    breakpoint,
+    backgroundFocalX,
+    backgroundFocalY,
+  )
+  const cutout = resolveBreakpointSettings(
+    cutoutSettings,
+    breakpoint,
+    cutoutFocalX,
+    cutoutFocalY,
+    cutoutBboxHPct,
+  ).cutout
+
+  return {
+    // Critical: the cutout must use the exact same fit mode as the BG.
+    // In the normal hero flow this is `cover`; keeping it coupled also makes
+    // custom `contain` settings deterministic instead of silently diverging.
+    objectFit: background.object_fit,
+    objectPosition: positionToCSS(background.position_x, background.position_y),
+    transform: cutoutTransformToCSS(cutout.position_x, cutout.position_y, cutout.scale),
+    transformOrigin: '50% 50%',
+  }
+}
+
 /**
  * Convert scale % to CSS transform.
  */

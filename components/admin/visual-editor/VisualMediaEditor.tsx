@@ -40,7 +40,8 @@ import {
   BREAKPOINT_INHERIT_DEFAULTS,
   computeAutoScale,
   resolveBreakpointSettings,
-  cutoutTransformToCSS,
+  getBackgroundLayerStyle,
+  getCutoutLayerStyle,
 } from '@/lib/types/presentation'
 import { detectCutoutBBox } from '@/lib/utils/cutout-bbox'
 import styles from './VisualMediaEditor.module.css'
@@ -135,6 +136,17 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
   const cutoutSourceAsset = cutoutAsset ?? asset
   const hasCutout = !!cutoutSourceAsset.cutout_url
 
+  // The background always resolves from the hero/background asset.
+  // Never switch this to cutoutAssetSettings when the Cutout tab is active: the
+  // two layers can be stored on separate media_assets and must keep independent
+  // settings while sharing the same canvas coordinate system.
+  const backgroundEffectiveSettings: BreakpointSettings = resolveBreakpointSettings(
+    settings,
+    activeBp,
+    asset.focal_x ?? 50,
+    asset.focal_y ?? 50,
+  )
+
   const activeSettings = activeLayer === 'cutout' && separateCutoutAsset
     ? cutoutAssetSettings
     : settings
@@ -197,6 +209,26 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
     cutoutBbox?.h_pct,
   )
   const cutoutSettings: CutoutPlacement = cutoutEffectiveSettings.cutout
+
+  // Shared rendering math: the exact same placement rules are used by the
+  // public LayeredHero. Background and cutout settings remain independent,
+  // but both layers are mapped into the same cover canvas.
+  const backgroundLayerStyle = getBackgroundLayerStyle(
+    settings,
+    activeBp,
+    asset.focal_x ?? 50,
+    asset.focal_y ?? 50,
+  )
+  const cutoutLayerStyle = getCutoutLayerStyle(
+    settings,
+    separateCutoutAsset ? cutoutAssetSettings : settings,
+    activeBp,
+    asset.focal_x ?? 50,
+    asset.focal_y ?? 50,
+    cutoutSourceAsset.focal_x ?? 50,
+    cutoutSourceAsset.focal_y ?? 50,
+    cutoutBbox?.h_pct,
+  )
 
   // ── 5F: Cutout rendering — cover-aligned coordinate system ────────────
   //
@@ -297,10 +329,10 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
       e.currentTarget.setPointerCapture(e.pointerId)
 
       const startPosX = activeLayer === 'background'
-        ? effectiveSettings.position_x
+        ? backgroundEffectiveSettings.position_x
         : cutoutSettings.position_x
       const startPosY = activeLayer === 'background'
-        ? effectiveSettings.position_y
+        ? backgroundEffectiveSettings.position_y
         : cutoutSettings.position_y
 
       dragRef.current = {
@@ -314,7 +346,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
       }
       setIsDragging(true)
     },
-    [isCustom, activeLayer, effectiveSettings, cutoutSettings, previewW, previewH],
+    [isCustom, activeLayer, backgroundEffectiveSettings, cutoutSettings, previewW, previewH],
   )
 
   const handleCanvasPointerMove = useCallback(
@@ -663,10 +695,10 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
                 alt={asset.alt_text ?? asset.filename}
                 draggable={false}
                 style={{
-                  objectFit: effectiveSettings.object_fit,
-                  objectPosition: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
-                  transform: `scale(${effectiveSettings.scale / 100})`,
-                  transformOrigin: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
+                  objectFit: backgroundLayerStyle.objectFit,
+                  objectPosition: backgroundLayerStyle.objectPosition,
+                  transform: backgroundLayerStyle.transform,
+                  transformOrigin: backgroundLayerStyle.transformOrigin,
                   // Dim BG slightly saat layer cutout aktif
                   opacity: hasCutout && activeLayer === 'cutout' ? 0.7 : 1,
                   transition: 'opacity 0.2s',
@@ -674,10 +706,9 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
               />
             )}
 
-            {/* Cutout layer — cover-aligned to match background coordinate system.
-                STEP 5F: Uses object-fit:cover + object-position identical to background
-                so that vehicle pixels overlay exactly, regardless of canvas aspect ratio.
-                CUSTOM offsets applied via CSS transform translate+scale on top. */}
+            {/* Cutout layer — rendered by the SAME placement math as public Live.
+                The cutout uses the background cover/object-position as its base
+                coordinate system, then applies its own X/Y/scale transform. */}
             {hasCutout && cutoutUrl && previewMode !== 'bg' && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -692,17 +723,12 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
                 data-visual-position-y={cutoutSettings.position_y}
                 data-visual-scale={cutoutSettings.scale}
                 style={{
-                  // Contain ensures the full transparent PNG is visible (no crop).
-                  // translate+scale transform positions it per presentation_settings.
-                  objectFit: 'contain',
-                  objectPosition: '50% 50%',
-                  // Always apply transform (auto mode = translate(0%,0%) scale(1))
-                  transform: cutoutTransformToCSS(
-                    cutoutSettings.position_x,
-                    cutoutSettings.position_y,
-                    cutoutSettings.scale,
-                  ),
-                  transformOrigin: '50% 50%',
+                  // Cutout uses the same cover/object-position mapping as BG.
+                  // Its own X/Y/scale are then applied as the foreground transform.
+                  objectFit: cutoutLayerStyle.objectFit,
+                  objectPosition: cutoutLayerStyle.objectPosition,
+                  transform: cutoutLayerStyle.transform,
+                  transformOrigin: cutoutLayerStyle.transformOrigin,
                   opacity: cutoutOpacity / 100,
                   // Highlight border saat layer cutout aktif
                   outline: activeLayer === 'cutout' && cutoutEffectiveSettings.mode === 'custom'

@@ -198,8 +198,8 @@
 /* Cutout fills the exact hero coordinate space. All placement and scale come
    from presentation_settings; there is no bottom/right/width/height override. */
 /* Cutout image fills the hero coordinate space.
-   object-fit and transform come from inline style (getCutoutStyle).
-   CSS here only sets position/size/visibility — no positioning override. */
+   object-fit, object-position and transform come from the shared placement
+   helper, exactly like the Visual Editor preview. */
 .cutoutImg {
   position: absolute !important;
   inset: 0 !important;
