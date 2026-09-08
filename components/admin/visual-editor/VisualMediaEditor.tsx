@@ -163,11 +163,23 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
   const previewW = Math.round(dims.width * scaleRatio)
   const previewH = Math.round(dims.height * scaleRatio)
 
-  // Image URLs
-  const previewUrl = (asset.variants as Record<string, string>)?.['768']
-    ?? (asset.variants as Record<string, string>)?.['480']
-    ?? asset.public_url
-    ?? ''
+  // Image URLs — dipilih berdasarkan activeBp agar preview editor
+  // cocok dengan image yang benar-benar dirender di live per breakpoint.
+  // Sama dengan logika di queries.ts → mapModel() → heroImage.
+  const variants = asset.variants as Record<string, string> | null | undefined
+  const previewUrl = (() => {
+    if (activeBp === 'desktop') {
+      return variants?.['1920'] ?? variants?.['1440'] ?? asset.public_url ?? ''
+    }
+    if (activeBp === 'tablet') {
+      return variants?.['1024'] ?? variants?.['768'] ?? asset.public_url ?? ''
+    }
+    if (activeBp === 'mobile') {
+      return variants?.['768'] ?? variants?.['480'] ?? asset.public_url ?? ''
+    }
+    // small_mobile
+    return variants?.['480'] ?? asset.public_url ?? ''
+  })()
   const cutoutUrl = cutoutSourceAsset.cutout_url ?? ''
 
   // ── 5F: Meta / bbox — MUST be declared before cutoutEffectiveSettings ─
