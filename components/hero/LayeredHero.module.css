@@ -108,6 +108,7 @@
 
 /* ─── Typography layer ────────────────────────────────── */
 
+/* Fallback content block (no presentation_settings) */
 .content {
   position: relative;
   z-index: 2;
@@ -127,6 +128,56 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+}
+
+/* ─── Step 6G: Positioned typography layer ────────────── */
+
+/*
+ * typographyLayer: fills the hero exactly like .bg and .cutout.
+ * z-index 2 = above overlay (1), below cutout (3).
+ * typographyContainer: absolutely positioned per breakpoint.
+ *   left/top/width come from inline style (presentation_settings.typography).
+ */
+.typographyLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.typographyContainer {
+  position: absolute;
+  /* left, top, width set via inline style from presentation_settings.typography */
+  display: none; /* default hidden; shown by breakpoint media queries below */
+  flex-direction: column;
+  gap: var(--space-3);
+  /* Allow CTA buttons to be clickable */
+  pointer-events: auto;
+}
+
+/* Responsive show/hide — matches breakpoint pattern of cutout images */
+/* Mobile: ≤767px default */
+@media (max-width: 767px) {
+  .typographyContainer--mobile { display: flex; }
+}
+
+/* Small Mobile override: ≤389px */
+@media (max-width: 389px) {
+  .typographyContainer--mobile { display: none; }
+  .typographyContainer--small_mobile { display: flex; }
+}
+
+/* Tablet: ≥768px */
+@media (min-width: 768px) {
+  .typographyContainer--mobile,
+  .typographyContainer--small_mobile { display: none; }
+  .typographyContainer--tablet { display: flex; }
+}
+
+/* Desktop: ≥1024px */
+@media (min-width: 1024px) {
+  .typographyContainer--tablet { display: none; }
+  .typographyContainer--desktop { display: flex; }
 }
 
 /* ─── Hero typography ─────────────────────────────────── */

@@ -1148,7 +1148,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated }: Pr
             {showTypography && (
               <>
                 <div className={styles.sliderDisabledNote}>
-                  Struktur data untuk Hero Editor (tahap berikutnya). Belum dirender di website.
+                  Positioning typography pada Public Hero. Aktifkan mode CUSTOM untuk mengedit.
                 </div>
                 <div className={styles.sliderRow}>
                   <div className={styles.sliderLabel}>

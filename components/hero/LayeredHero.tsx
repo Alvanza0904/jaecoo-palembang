@@ -4,19 +4,115 @@
  * Architecture:
  *   BACKGROUND MEDIA (image/video)
  *     ↓
- *   TYPOGRAPHY LAYER
+ *   TYPOGRAPHY LAYER (Step 6G: positioned via presentation_settings.typography)
  *     ↓
  *   VEHICLE CUTOUT (foreground — overlaps typography)
  *
  * Supports: desktop / tablet / mobile / small_mobile
  * Art direction: focal_x, focal_y, mode (auto | custom)
  * Video: muted autoplay loop with poster fallback
+ *
+ * Step 6G — Typography Positioning:
+ *   - Reads presentation_settings.typography per breakpoint
+ *   - Uses resolveBreakpointSettings() for inheritance
+ *   - Typography containers positioned absolutely per breakpoint
+ *   - Show/hide via CSS breakpoint classes (same pattern as cutout)
+ *   - Fallback to default CSS if presentation_settings not available
  */
 
 import Image from "next/image";
 import type { MediaWithArtDirection, ResponsiveVideo } from "@/lib/types/media";
-import { BREAKPOINT_ORDER, resolveBreakpointSettings, cutoutTransformToCSS, getBackgroundLayerStyle, type BreakpointKey, type PresentationSettings, type PresentationMeta } from "@/lib/types/presentation";
+import {
+  BREAKPOINT_ORDER,
+  resolveBreakpointSettings,
+  cutoutTransformToCSS,
+  getBackgroundLayerStyle,
+  type BreakpointKey,
+  type PresentationSettings,
+  type PresentationMeta,
+  type TypographyPlacement,
+  DEFAULT_BREAKPOINT_SETTINGS,
+} from "@/lib/types/presentation";
 import styles from "./LayeredHero.module.css";
+
+// ── Typography helpers ──────────────────────────────────────────────────────
+
+/**
+ * Base font size in rem for the heading.
+ * font_size multiplier 100 = this value.
+ * Maps to --text-4xl (4rem = 64px at 16px root).
+ */
+const TYPOGRAPHY_BASE_REM = 4; // rem
+
+/**
+ * Subheading base font size in rem.
+ * Maps to --text-lg (1.375rem).
+ */
+const SUBHEADING_BASE_REM = 1.375; // rem
+
+/**
+ * Resolve typography for a breakpoint from presentation_settings.
+ * Falls back to DEFAULT_BREAKPOINT_SETTINGS.typography if not set.
+ */
+function resolveTypography(
+  presentationSettings: PresentationSettings | undefined,
+  breakpoint: BreakpointKey,
+  focalX = 50,
+  focalY = 50,
+): TypographyPlacement {
+  if (!presentationSettings) return DEFAULT_BREAKPOINT_SETTINGS.typography;
+  const effective = resolveBreakpointSettings(
+    presentationSettings,
+    breakpoint,
+    focalX,
+    focalY,
+  );
+  return effective.typography;
+}
+
+/**
+ * Build CSS properties for a typography container from TypographyPlacement.
+ *
+ * COORDINATE SEMANTICS:
+ *   x = left edge of text block, as % of hero container (0 = left edge, 80 = far right)
+ *   y = top edge of text block, as % of hero container (0 = top, 90 = near bottom)
+ *   width = text block width as % of hero container
+ *   alignment = CSS text-align
+ *   font_size = multiplier (100 = base rem), applied to heading
+ *   font_weight = CSS font-weight for heading
+ *   letter_spacing = em units (0 = normal)
+ */
+function getTypographyContainerStyle(typo: TypographyPlacement): React.CSSProperties {
+  return {
+    position: "absolute",
+    left: `${typo.x}%`,
+    top: `${typo.y}%`,
+    width: `${typo.width}%`,
+    textAlign: typo.alignment,
+  };
+}
+
+function getHeadingTypographyStyle(typo: TypographyPlacement): React.CSSProperties {
+  const fontSizeRem = (TYPOGRAPHY_BASE_REM * typo.font_size) / 100;
+  return {
+    fontSize: `${fontSizeRem}rem`,
+    fontWeight: typo.font_weight,
+    letterSpacing: `${typo.letter_spacing}em`,
+    lineHeight: 1.1,
+  };
+}
+
+function getSubheadingTypographyStyle(typo: TypographyPlacement): React.CSSProperties {
+  // Subheading scales at half the rate of the heading multiplier, clamped to readable range
+  const subMult = Math.max(70, Math.min(typo.font_size, 130));
+  const fontSizeRem = (SUBHEADING_BASE_REM * subMult) / 100;
+  return {
+    fontSize: `${fontSizeRem}rem`,
+    fontWeight: typo.font_weight >= 600 ? Math.max(400, typo.font_weight - 100) : typo.font_weight,
+    letterSpacing: typo.letter_spacing !== 0 ? `${typo.letter_spacing * 0.5}em` : undefined,
+    lineHeight: 1.4,
+  };
+}
 
 export interface LayeredHeroProps {
   /** Background media — required */
@@ -211,24 +307,74 @@ export function LayeredHero({
       </div>
 
       {/* ── Typography layer ── */}
-      <div className={styles.content}>
-        <div className={styles.contentInner}>
-          {tagline && (
-            <p className={styles.tagline}>{tagline}</p>
-          )}
-
-          <div className={styles.headingBlock}>
-            <h1 className={styles.heading}>{heading}</h1>
-            {subheading && (
-              <p className={styles.subheading}>{subheading}</p>
+      {/*
+        Step 6G: When presentation_settings.typography is available, render
+        per-breakpoint absolutely-positioned containers. Each breakpoint's
+        container is shown/hidden via CSS media queries (same pattern as cutout).
+        When presentation_settings is NOT available, fall back to the default
+        flow-layout content block so the page never goes blank.
+      */}
+      {presentationSettings ? (
+        /* Positioned typography — reads from presentation_settings per breakpoint */
+        <div className={styles.typographyLayer} aria-hidden="false">
+          {BREAKPOINT_ORDER.map((breakpoint) => {
+            const typo = resolveTypography(
+              presentationSettings,
+              breakpoint,
+              media.focal_x ?? 50,
+              media.focal_y ?? 50,
+            );
+            return (
+              <div
+                key={breakpoint}
+                className={`${styles.typographyContainer} ${styles[`typographyContainer--${breakpoint}`]}`}
+                style={getTypographyContainerStyle(typo)}
+              >
+                {tagline && (
+                  <p className={styles.tagline}>{tagline}</p>
+                )}
+                <div className={styles.headingBlock}>
+                  <h1
+                    className={styles.heading}
+                    style={getHeadingTypographyStyle(typo)}
+                  >
+                    {heading}
+                  </h1>
+                  {subheading && (
+                    <p
+                      className={styles.subheading}
+                      style={getSubheadingTypographyStyle(typo)}
+                    >
+                      {subheading}
+                    </p>
+                  )}
+                </div>
+                {cta && (
+                  <div className={styles.cta}>{cta}</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        /* Fallback: default flow-layout content block (no presentation_settings) */
+        <div className={styles.content}>
+          <div className={styles.contentInner}>
+            {tagline && (
+              <p className={styles.tagline}>{tagline}</p>
+            )}
+            <div className={styles.headingBlock}>
+              <h1 className={styles.heading}>{heading}</h1>
+              {subheading && (
+                <p className={styles.subheading}>{subheading}</p>
+              )}
+            </div>
+            {cta && (
+              <div className={styles.cta}>{cta}</div>
             )}
           </div>
-
-          {cta && (
-            <div className={styles.cta}>{cta}</div>
-          )}
         </div>
-      </div>
+      )}
 
       {/* ── Vehicle cutout layer (foreground) ── */}
       {hasCutout && (
