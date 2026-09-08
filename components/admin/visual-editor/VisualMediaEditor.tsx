@@ -71,6 +71,33 @@ const TYPO_BASE_REM = 4
 /** Subheading base size — matches LayeredHero.tsx SUBHEADING_BASE_REM. */
 const TYPO_SUB_REM = 1.375
 
+/**
+ * Reference live viewport width per breakpoint (px).
+ * This is the actual device width the Public Hero renders at.
+ * Used to scale preview typography proportionally so that
+ *   Editor Preview font-size ≈ Live Hero font-size
+ * relative to the container width.
+ *
+ * Formula:
+ *   previewFontSizePx = liveFontSizePx × (previewW / LIVE_VIEWPORT_WIDTH[bp])
+ *
+ * Since liveFontSizePx = TYPO_BASE_REM × 16 × (font_size / 100),
+ * the scale factor converts that to a px value that LOOKS the same
+ * inside the scaled-down preview canvas.
+ *
+ * Values match common breakpoint representative widths:
+ *   desktop      → 1440px (typical HD desktop)
+ *   tablet       → 1024px (iPad landscape / common tablet)
+ *   mobile       → 390px  (iPhone 14 / standard mobile)
+ *   small_mobile → 375px  (iPhone SE / narrow portrait)
+ */
+const LIVE_VIEWPORT_WIDTH: Record<string, number> = {
+  desktop:      1440,
+  tablet:       1024,
+  mobile:        390,
+  small_mobile:  375,
+}
+
 // ─── Props ────────────────────────────────────────────────
 
 interface Props {
@@ -1210,12 +1237,27 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                       />
                     )}
 
-                    {/* Typography — absolutely positioned per current settings */}
+                    {/* Typography — absolutely positioned per current settings.
+                        Font sizes are scaled proportionally to match the Public Hero:
+                        Public Hero renders at LIVE_VIEWPORT_WIDTH[bp] wide.
+                        Preview canvas is previewW wide.
+                        Scale factor = previewW / LIVE_VIEWPORT_WIDTH[bp]
+                        Live font px = TYPO_BASE_REM × 16 × (font_size / 100)
+                        Preview font px = live font px × scale factor
+                        This makes the text LOOK the same relative to container width
+                        in both Editor Preview and Public Live Hero. */}
                     {(() => {
                       const typo = effectiveSettings.typography
-                      const headingRem = (TYPO_BASE_REM * typo.font_size) / 100
+                      // Live hero font sizes in px (at 16px root)
+                      const liveHeadingPx = TYPO_BASE_REM * 16 * (typo.font_size / 100)
                       const subMult = Math.max(70, Math.min(typo.font_size, 130))
-                      const subRem = (TYPO_SUB_REM * subMult) / 100
+                      const liveSubPx = TYPO_SUB_REM * 16 * (subMult / 100)
+                      // Scale factor: how much smaller is the preview canvas vs live viewport
+                      const liveVpWidth = LIVE_VIEWPORT_WIDTH[activeBp] ?? 390
+                      const typoScale = previewW / liveVpWidth
+                      // Preview font sizes in px
+                      const headingPx = liveHeadingPx * typoScale
+                      const subPx = liveSubPx * typoScale
                       return (
                         <div
                           className={styles.typoCanvasText}
@@ -1229,7 +1271,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                           <div
                             className={styles.typoCanvasHeading}
                             style={{
-                              fontSize: `${headingRem}rem`,
+                              fontSize: `${headingPx}px`,
                               fontWeight: typo.font_weight,
                               letterSpacing: `${typo.letter_spacing}em`,
                               lineHeight: 1.1,
@@ -1241,7 +1283,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                             <div
                               className={styles.typoCanvasSubheading}
                               style={{
-                                fontSize: `${subRem}rem`,
+                                fontSize: `${subPx}px`,
                                 fontWeight: typo.font_weight >= 600
                                   ? Math.max(400, typo.font_weight - 100)
                                   : typo.font_weight,
@@ -1342,7 +1384,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                     <span className={styles.sliderLabelText}>Font Size</span>
                     <span className={styles.sliderValue}>{effectiveSettings.typography.font_size}</span>
                   </div>
-                  <input type="range" min={40} max={200} step={2}
+                  <input type="range" min={25} max={300} step={1}
                     value={effectiveSettings.typography.font_size} disabled={!isCustom}
                     className={styles.slider}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
