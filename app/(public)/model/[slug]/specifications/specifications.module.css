@@ -1,41 +1,38 @@
-/* ─── Section ─────────────────────────────────────────── */
+/* ─── Page wrapper ────────────────────────────────────── */
 
-.section {
-  padding-block: var(--section-gap-md);
-  background-color: var(--color-off-white);
-  /* Account for fixed header + model nav */
-  padding-top: calc(var(--header-height-mobile) + 48px + var(--section-gap-sm));
+.page {
+  /* account for header + model nav */
+  padding-top: calc(var(--header-height-mobile, 60px) + 48px);
 }
 
 @media (min-width: 1024px) {
-  .section {
-    padding-top: calc(var(--header-height-desktop) + 48px + var(--section-gap-sm));
+  .page {
+    padding-top: calc(var(--header-height-desktop, 80px) + 48px);
   }
 }
 
-/* ─── Header ──────────────────────────────────────────── */
+/* ─── Header Section ──────────────────────────────────── */
 
-.header {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-  padding-bottom: var(--space-10);
+.headerSection {
+  padding-block: var(--section-gap-md);
+  background-color: var(--color-off-white);
   border-bottom: 1px solid var(--color-border);
-  margin-bottom: var(--space-10);
 }
 
 .gold {
-  /* decorative — no extra margin needed */
+  margin-bottom: var(--space-6);
 }
 
-.priceTag {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding-top: var(--space-4);
+.pageTitle {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink);
+  line-height: var(--leading-tight);
+  margin-bottom: var(--space-2);
 }
 
-.priceFrom {
+.pageSubtitle {
   font-size: var(--text-xs);
   font-weight: var(--weight-medium);
   letter-spacing: var(--tracking-wider);
@@ -43,23 +40,27 @@
   color: var(--color-gold);
 }
 
-.priceValue {
-  font-size: var(--text-2xl);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-snug);
-  color: var(--color-ink);
+.priceRow {
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
 }
 
 @media (min-width: 768px) {
-  .priceValue { font-size: var(--text-3xl); }
+  .pageTitle { font-size: var(--text-4xl); }
 }
 
-/* ─── Categories ──────────────────────────────────────── */
+/* ─── Specs Section ───────────────────────────────────── */
+
+.specsSection {
+  padding-block: var(--section-gap-md);
+  background-color: var(--color-surface);
+}
 
 .categories {
   display: flex;
   flex-direction: column;
-  gap: var(--space-10);
+  gap: var(--space-12);
 }
 
 /* ─── Category ────────────────────────────────────────── */
@@ -77,7 +78,7 @@
   text-transform: uppercase;
   color: var(--color-gold);
   padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--color-gold-subtle);
+  border-bottom: 1px solid rgba(200, 169, 110, 0.25);
 }
 
 /* ─── Table ───────────────────────────────────────────── */
@@ -135,18 +136,209 @@
   line-height: var(--leading-normal);
 }
 
-/* ─── CTA ─────────────────────────────────────────────── */
+/* ─── Colors Section ──────────────────────────────────── */
 
-.cta {
-  margin-top: var(--space-10);
-  padding-top: var(--space-8);
+.colorsSection {
+  padding-block: var(--section-gap-md);
+  background-color: var(--color-off-white);
   border-top: 1px solid var(--color-border);
 }
 
-/* ─── Calculator ───────────────────────────────────────── */
+.colorGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  margin-top: var(--space-8);
+}
+
+@media (min-width: 480px) {
+  .colorGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .colorGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .colorGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.colorCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.colorImgWrap {
+  width: 100%;
+  overflow: hidden;
+}
+
+.colorImg {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  aspect-ratio: 16/9;
+}
+
+.colorImgPlaceholder {
+  width: 100%;
+}
+
+.colorMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.colorSwatch {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.colorName {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  font-weight: var(--weight-medium);
+}
+
+/* ─── Variants Section ────────────────────────────────── */
+
+.variantsSection {
+  padding-block: var(--section-gap-md);
+  background-color: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+.variantList {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-8);
+  border-top: 1px solid var(--color-border);
+}
+
+.variantItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-block: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.variantTop {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+@media (min-width: 640px) {
+  .variantItem {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .variantTop {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-8);
+    flex: 1;
+  }
+}
+
+.variantName {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--color-ink);
+}
+
+.variantBadge {
+  display: inline-block;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-gold);
+  border: 1px solid var(--color-gold-light);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  margin-top: var(--space-1);
+}
+
+/* ─── Calculator Section ──────────────────────────────── */
+
+.calcSection {
+  padding-block: var(--section-gap-md);
+  background-color: var(--color-off-white);
+  border-top: 1px solid var(--color-border);
+}
 
 .calcWrapper {
-  margin-top: var(--space-12);
-  padding-top: var(--space-8);
+  margin-top: var(--space-8);
+}
+
+/* ─── Navigation ──────────────────────────────────────── */
+
+.navSection {
+  padding-block: var(--space-10);
+  background-color: var(--color-surface);
   border-top: 1px solid var(--color-border);
+}
+
+.navRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+@media (min-width: 640px) {
+  .navRow {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+/* ─── CTA ─────────────────────────────────────────────── */
+
+.ctaSection {
+  padding-block: var(--section-gap-lg);
+  background-color: var(--color-charcoal);
+}
+
+.ctaBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.ctaHeading {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-snug);
+  color: var(--color-white);
+  line-height: var(--leading-tight);
+  max-width: 520px;
+  margin-top: var(--space-4);
+}
+
+.ctaBody {
+  font-size: var(--text-base);
+  color: var(--color-ink-muted-dark);
+  max-width: 440px;
+  line-height: var(--leading-normal);
+}
+
+@media (min-width: 1024px) {
+  .ctaHeading { font-size: var(--text-3xl); }
 }

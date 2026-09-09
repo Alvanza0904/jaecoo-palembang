@@ -1,6 +1,35 @@
-/* ─── Headline Section ────────────────────────────────── */
+/* ─── Hero image hint row ─────────────────────────────── */
 
-.headlineSection {
+.heroImgHint {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-5);
+  background-color: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+.heroImgHintItem {
+  width: 100%;
+}
+
+.heroImgHintMobile {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .heroImgHint {
+    grid-template-columns: 3fr 1fr;
+    padding: var(--space-8);
+  }
+  .heroImgHintMobile {
+    display: block;
+  }
+}
+
+/* ─── Story Section ───────────────────────────────────── */
+
+.storySection {
   padding-block: var(--section-gap-md);
   background-color: var(--color-off-white);
 }
@@ -12,7 +41,7 @@
 /* ─── Features Section ────────────────────────────────── */
 
 .featuresSection {
-  padding-block: var(--section-gap-md);
+  padding-block: var(--section-gap-sm);
   background-color: var(--color-surface);
   border-top: 1px solid var(--color-border);
 }
@@ -20,18 +49,45 @@
 .featureList {
   display: flex;
   flex-direction: column;
+  gap: 0;
 }
 
-.featureRow {
+/* Feature block — alternating layout on desktop */
+.featureBlock {
   display: grid;
-  grid-template-columns: 2.5rem 1fr;
-  gap: var(--space-6);
-  padding-block: var(--space-8);
+  grid-template-columns: 1fr;
+  gap: var(--space-8);
+  padding-block: var(--section-gap-sm);
   border-bottom: 1px solid var(--color-border);
+  align-items: center;
 }
 
-.featureRow:last-child {
+.featureBlock:last-child {
   border-bottom: none;
+}
+
+@media (min-width: 768px) {
+  .featureBlock {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-12);
+  }
+
+  .featureBlockOdd .featureMedia {
+    order: -1;
+  }
+}
+
+@media (min-width: 1024px) {
+  .featureBlock {
+    gap: var(--space-20);
+  }
+}
+
+/* Text */
+.featureText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
 .featureIndex {
@@ -39,13 +95,6 @@
   font-weight: var(--weight-medium);
   letter-spacing: var(--tracking-wider);
   color: var(--color-gold);
-  padding-top: var(--space-1);
-}
-
-.featureContent {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
 }
 
 .featureTag {
@@ -57,7 +106,7 @@
 }
 
 .featureTitle {
-  font-size: var(--text-xl);
+  font-size: var(--text-2xl);
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-snug);
   color: var(--color-ink);
@@ -68,17 +117,7 @@
   font-size: var(--text-base);
   color: var(--color-ink-muted);
   line-height: var(--leading-normal);
-  max-width: 560px;
-}
-
-@media (min-width: 768px) {
-  .featureRow {
-    grid-template-columns: 4rem 1fr;
-    gap: var(--space-8);
-    padding-block: var(--space-10);
-  }
-
-  .featureTitle { font-size: var(--text-2xl); }
+  max-width: 480px;
 }
 
 @media (min-width: 1024px) {
@@ -86,7 +125,48 @@
   .featureDesc  { font-size: var(--text-md); }
 }
 
-/* ─── CTA Section ─────────────────────────────────────── */
+/* Media */
+.featureMedia {
+  width: 100%;
+}
+
+.featureImg {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.featurePlaceholder {
+  width: 100%;
+}
+
+/* ─── Navigation row ──────────────────────────────────── */
+
+.navSection {
+  padding-block: var(--space-10);
+  background-color: var(--color-off-white);
+  border-top: 1px solid var(--color-border);
+}
+
+.navRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+@media (min-width: 640px) {
+  .navRow {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.navBack {}
+.navNext {}
+
+/* ─── CTA ─────────────────────────────────────────────── */
 
 .ctaSection {
   padding-block: var(--section-gap-lg);
@@ -96,7 +176,7 @@
 .ctaBlock {
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
+  gap: var(--space-6);
 }
 
 .ctaHeading {
@@ -106,6 +186,14 @@
   color: var(--color-white);
   line-height: var(--leading-tight);
   max-width: 520px;
+  margin-top: var(--space-4);
+}
+
+.ctaBody {
+  font-size: var(--text-base);
+  color: var(--color-ink-muted-dark);
+  max-width: 420px;
+  line-height: var(--leading-normal);
 }
 
 @media (min-width: 1024px) {
