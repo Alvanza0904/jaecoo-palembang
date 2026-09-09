@@ -828,7 +828,15 @@
   color: rgba(200, 169, 110, 0.8);
 }
 
-/* The composite canvas — BG + Cutout + Text */
+.typoPreviewDragHint {
+  font-weight: 400;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* The composite canvas — BG + Cutout + Text + CTA Safe Area */
 .typoCanvas {
   position: relative;
   border-radius: 4px;
@@ -836,6 +844,7 @@
   border: 1px solid rgba(200, 169, 110, 0.25);
   background: #1a1a1a;
   flex-shrink: 0;
+  touch-action: none; /* prevent scroll during drag */
 }
 
 .typoCanvasBg {
@@ -866,35 +875,177 @@
   user-select: none;
 }
 
-/* Typography text container — exactly matches LayeredHero typographyContainer logic */
+/* Typography bounding box — dashed border, draggable when CUSTOM */
 .typoCanvasText {
   position: absolute;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  pointer-events: none;
-  outline: 1px dashed rgba(200, 169, 110, 0.45);
+  gap: 2px;
+  /* Bounding box indicator — dashed gold */
+  outline: 1px dashed rgba(200, 169, 110, 0.55);
   padding: 2px;
+  transition: outline-color 0.15s;
+  user-select: none;
+}
+
+.typoCanvasText:hover {
+  outline-color: rgba(200, 169, 110, 0.85);
+}
+
+/* Red bounding box when overlapping CTA safe area */
+.typoCanvasTextOverlap {
+  outline-color: rgba(239, 68, 68, 0.75);
 }
 
 .typoCanvasHeading {
   color: #ffffff;
   font-family: var(--font-sans, 'Manrope', sans-serif);
-  /* font-size, font-weight, letter-spacing, line-height come from inline style */
+  /* font-size, font-weight, letter-spacing, line-height from inline style */
 }
 
 .typoCanvasSubheading {
   color: rgba(255, 255, 255, 0.72);
   font-family: var(--font-sans, 'Manrope', sans-serif);
-  /* font-size, font-weight, letter-spacing, line-height come from inline style */
+  /* font-size, font-weight, letter-spacing, line-height from inline style */
 }
 
+/* CTA safe area — anchored to bottom of canvas */
+.typoCanvasCtaSafe {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.20);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 8px;
+  gap: 3px;
+  pointer-events: none;
+}
+
+/* Warning state — red tint when typography overlaps */
+.typoCanvasCtaSafeWarning {
+  border-top-color: rgba(239, 68, 68, 0.55);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.typoCanvasCtaLabel {
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+  line-height: 1;
+}
+
+.typoCanvasCtaButtons {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.typoCanvasCtaBtn {
+  display: inline-block;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #111;
+  font-size: 7px;
+  font-weight: 600;
+  border-radius: 2px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.typoCanvasCtaBtnGhost {
+  display: inline-block;
+  padding: 2px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 7px;
+  font-weight: 500;
+  border-radius: 2px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* Lock hint overlay */
+.typoCanvasLockHint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.18);
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.typoCanvas:hover .typoCanvasLockHint {
+  opacity: 1;
+}
+
+/* Overlap warning below canvas */
+.typoOverlapWarning {
+  align-self: flex-start;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(239, 68, 68, 0.9);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 4px;
+  padding: 3px 7px;
+}
 
 .typoPreviewHint {
   align-self: flex-start;
   font-size: 9px;
   color: rgba(255, 255, 255, 0.3);
   font-style: italic;
+}
+
+/* ─── Numeric input for X/Y/FontSize ─────────────────────── */
+
+.numericInput {
+  width: 44px;
+  padding: 2px 4px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 11px;
+  font-family: inherit;
+  text-align: right;
+  /* remove arrows in Firefox */
+  -moz-appearance: textfield;
+}
+
+.numericInput::-webkit-inner-spin-button,
+.numericInput::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.numericInput:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.numericInput:not(:disabled):focus {
+  outline: 1px solid rgba(200, 169, 110, 0.55);
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.numericInputUnit {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+  margin-left: 1px;
 }
 
 /* ─── Alignment + Weight buttons ─────────────────────────── */

@@ -433,6 +433,60 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
 
   const handleFocalPointerUp = useCallback(() => setIsDraggingFocal(false), [])
 
+  // ── Typography Drag (on typo preview canvas) ──────────
+  // Drag moves X/Y of typography placement directly.
+  // Only X and Y are affected — font_size/weight/etc. are not changed.
+
+  const typoDragRef = useRef<{
+    startX: number
+    startY: number
+    startTypoX: number
+    startTypoY: number
+    w: number
+    h: number
+  } | null>(null)
+  const [isDraggingTypo, setIsDraggingTypo] = useState(false)
+
+  const handleTypoCanvasPointerDown = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
+      if (!isCustom) return
+      e.currentTarget.setPointerCapture(e.pointerId)
+      const typo = effectiveSettings.typography
+      typoDragRef.current = {
+        startX: e.clientX,
+        startY: e.clientY,
+        startTypoX: typo.x,
+        startTypoY: typo.y,
+        w: previewW,
+        h: previewH,
+      }
+      setIsDraggingTypo(true)
+    },
+    [isCustom, effectiveSettings.typography, previewW, previewH],
+  )
+
+  const handleTypoCanvasPointerMove = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
+      if (!typoDragRef.current || !isCustom) return
+      const d = typoDragRef.current
+      const dx = e.clientX - d.startX
+      const dy = e.clientY - d.startY
+      // Convert px delta to % of canvas
+      const dxPct = (dx / d.w) * 100
+      const dyPct = (dy / d.h) * 100
+      const newX = Math.round(Math.max(0, Math.min(80, d.startTypoX + dxPct)))
+      const newY = Math.round(Math.max(0, Math.min(90, d.startTypoY + dyPct)))
+      const typo = effectiveSettings.typography
+      updateBreakpoint(activeBp, { typography: { ...typo, x: newX, y: newY } })
+    },
+    [isCustom, activeBp, updateBreakpoint, effectiveSettings.typography],
+  )
+
+  const handleTypoCanvasPointerUp = useCallback(() => {
+    typoDragRef.current = null
+    setIsDraggingTypo(false)
+  }, [])
+
   // ── Save ──────────────────────────────────────────────
 
   const savePresentation = useCallback(async (mediaId: string, nextSettings: PresentationSettings) => {
@@ -1187,254 +1241,350 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
             {showTypography && (
               <>
                 {/* ── Realtime Typography Preview ──────────────────── */}
-                <div className={styles.typoPreviewWrap}>
-                  <div className={styles.typoPreviewLabel}>
-                    Preview Komposit — {BREAKPOINT_LABELS[activeBp]}
-                  </div>
-                  {/* Canvas composite: bg + cutout + typography */}
-                  <div
-                    className={styles.typoCanvas}
-                    style={{ width: previewW, height: previewH }}
-                  >
-                    {/* Background */}
-                    {previewUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        className={styles.typoCanvasBg}
-                        src={previewUrl}
-                        alt=""
-                        draggable={false}
-                        style={{
-                          objectFit: effectiveSettings.object_fit,
-                          objectPosition: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
-                          transform: `scale(${effectiveSettings.scale / 100})`,
-                          transformOrigin: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
-                        }}
-                      />
-                    )}
+                {/* ─ Step 6G Enhanced Typography Preview ─ */}
+                {(() => {
+                  const typo = effectiveSettings.typography
+                  // Match Public Hero formula exactly (LayeredHero.tsx)
+                  const liveHeadingPx = TYPO_BASE_REM * 16 * (typo.font_size / 100)
+                  // subMult matches LayeredHero.tsx getSubheadingTypographyStyle exactly
+                  const subMult = Math.max(70, Math.min(typo.font_size, 130))
+                  const liveSubPx = TYPO_SUB_REM * 16 * (subMult / 100)
+                  const liveVpWidth = LIVE_VIEWPORT_WIDTH[activeBp] ?? 390
+                  const typoScale = previewW / liveVpWidth
+                  const headingPx = liveHeadingPx * typoScale
+                  const subPx = liveSubPx * typoScale
 
-                    {/* Dark overlay — matches public hero default */}
-                    <div className={styles.typoCanvasOverlay} />
+                  // CTA safe area — matches LayeredHero ctaLayer:
+                  // padding-bottom: var(--space-10) = 2.5rem = 40px at 16px root
+                  // CTA button height approx 48px + margin
+                  // We represent this as a % of preview canvas height
+                  // ctaLayer bottom=0, padBottom=40px+~48px CTA ≈ 88px at live 100svh
+                  // For preview, scale similarly. Use a fixed 18% of canvas height as safe area.
+                  const ctaSafeAreaPct = 20 // % of canvas height from bottom
+                  const ctaSafeAreaPx = Math.round(previewH * (ctaSafeAreaPct / 100))
 
-                    {/* Cutout */}
-                    {hasCutout && cutoutUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        className={styles.typoCanvasCutout}
-                        src={cutoutUrl}
-                        alt=""
-                        draggable={false}
-                        style={{
-                          objectFit: 'contain',
-                          objectPosition: '50% 50%',
-                          transform: cutoutTransformToCSS(
-                            cutoutSettings.position_x,
-                            cutoutSettings.position_y,
-                            cutoutSettings.scale,
-                          ),
-                          transformOrigin: '50% 50%',
-                        }}
-                      />
-                    )}
+                  // Estimate typography bounding box height for overlap check
+                  // Approximate: heading lines * lineHeight * fontSize + subheading
+                  // Use 2 lines heading + 1 line subheading as estimate
+                  const estimatedTypoHeightPct = ((headingPx * 1.1 * 2 + subPx * 1.4) / previewH) * 100
+                  const typoBottomPct = typo.y + estimatedTypoHeightPct
+                  const ctaSafeTopPct = 100 - ctaSafeAreaPct
+                  const hasOverlap = typoBottomPct > ctaSafeTopPct
 
-                    {/* Typography — absolutely positioned per current settings.
-                        Font sizes are scaled proportionally to match the Public Hero:
-                        Public Hero renders at LIVE_VIEWPORT_WIDTH[bp] wide.
-                        Preview canvas is previewW wide.
-                        Scale factor = previewW / LIVE_VIEWPORT_WIDTH[bp]
-                        Live font px = TYPO_BASE_REM × 16 × (font_size / 100)
-                        Preview font px = live font px × scale factor
-                        This makes the text LOOK the same relative to container width
-                        in both Editor Preview and Public Live Hero. */}
-                    {(() => {
-                      const typo = effectiveSettings.typography
-                      // Live hero font sizes in px (at 16px root)
-                      const liveHeadingPx = TYPO_BASE_REM * 16 * (typo.font_size / 100)
-                      const subMult = Math.max(70, Math.min(typo.font_size, 130))
-                      const liveSubPx = TYPO_SUB_REM * 16 * (subMult / 100)
-                      // Scale factor: how much smaller is the preview canvas vs live viewport
-                      const liveVpWidth = LIVE_VIEWPORT_WIDTH[activeBp] ?? 390
-                      const typoScale = previewW / liveVpWidth
-                      // Preview font sizes in px
-                      const headingPx = liveHeadingPx * typoScale
-                      const subPx = liveSubPx * typoScale
-                      return (
+                  return (
+                    <>
+                      <div className={styles.typoPreviewWrap}>
+                        <div className={styles.typoPreviewLabel}>
+                          📐 Preview Komposit — {BREAKPOINT_LABELS[activeBp as BreakpointKey]}
+                          {isCustom && <span className={styles.typoPreviewDragHint}> · Drag text untuk pindah</span>}
+                        </div>
+
+                        {/* Composite canvas: BG + Cutout + Typography + CTA Safe Area */}
                         <div
-                          className={styles.typoCanvasText}
+                          className={styles.typoCanvas}
                           style={{
-                            left: `${typo.x}%`,
-                            top: `${typo.y}%`,
-                            width: `${typo.width}%`,
-                            textAlign: typo.alignment,
+                            width: previewW,
+                            height: previewH,
+                            cursor: isCustom ? (isDraggingTypo ? 'grabbing' : 'grab') : 'default',
                           }}
+                          onPointerDown={handleTypoCanvasPointerDown}
+                          onPointerMove={handleTypoCanvasPointerMove}
+                          onPointerUp={handleTypoCanvasPointerUp}
+                          onPointerLeave={handleTypoCanvasPointerUp}
                         >
+                          {/* Background */}
+                          {previewUrl && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              className={styles.typoCanvasBg}
+                              src={previewUrl}
+                              alt=""
+                              draggable={false}
+                              style={{
+                                objectFit: effectiveSettings.object_fit,
+                                objectPosition: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
+                                transform: `scale(${effectiveSettings.scale / 100})`,
+                                transformOrigin: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
+                              }}
+                            />
+                          )}
+
+                          {/* Dark overlay — matches public hero overlayOpacity=30 */}
+                          <div className={styles.typoCanvasOverlay} />
+
+                          {/* Cutout */}
+                          {hasCutout && cutoutUrl && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              className={styles.typoCanvasCutout}
+                              src={cutoutUrl}
+                              alt=""
+                              draggable={false}
+                              style={{
+                                objectFit: 'contain',
+                                objectPosition: '50% 50%',
+                                transform: cutoutTransformToCSS(
+                                  cutoutSettings.position_x,
+                                  cutoutSettings.position_y,
+                                  cutoutSettings.scale,
+                                ),
+                                transformOrigin: '50% 50%',
+                              }}
+                            />
+                          )}
+
+                          {/* Typography bounding box + text
+                              Uses IDENTICAL formula as LayeredHero.tsx.
+                              Font sizes proportionally scaled by previewW/liveVpWidth. */}
                           <div
-                            className={styles.typoCanvasHeading}
+                            className={`${styles.typoCanvasText} ${hasOverlap ? styles.typoCanvasTextOverlap : ''}`}
                             style={{
-                              fontSize: `${headingPx}px`,
-                              fontWeight: typo.font_weight,
-                              letterSpacing: `${typo.letter_spacing}em`,
-                              lineHeight: 1.1,
+                              left: `${typo.x}%`,
+                              top: `${typo.y}%`,
+                              width: `${typo.width}%`,
+                              textAlign: typo.alignment,
+                              cursor: isCustom ? (isDraggingTypo ? 'grabbing' : 'grab') : 'default',
                             }}
                           >
-                            {previewHeading ?? 'JAECOO J8'}
-                          </div>
-                          {(previewSubheading ?? true) && (
                             <div
-                              className={styles.typoCanvasSubheading}
+                              className={styles.typoCanvasHeading}
                               style={{
-                                fontSize: `${subPx}px`,
-                                fontWeight: typo.font_weight >= 600
-                                  ? Math.max(400, typo.font_weight - 100)
-                                  : typo.font_weight,
-                                letterSpacing: typo.letter_spacing !== 0
-                                  ? `${typo.letter_spacing * 0.5}em`
-                                  : undefined,
-                                lineHeight: 1.4,
+                                fontSize: `${headingPx}px`,
+                                fontWeight: typo.font_weight,
+                                letterSpacing: `${typo.letter_spacing}em`,
+                                lineHeight: 1.1,
                               }}
                             >
-                              {previewSubheading ?? 'Luxury SUV'}
+                              {previewHeading ?? 'JAECOO J8'}
+                            </div>
+                            {(previewSubheading !== undefined || true) && (
+                              <div
+                                className={styles.typoCanvasSubheading}
+                                style={{
+                                  fontSize: `${subPx}px`,
+                                  fontWeight: typo.font_weight >= 600
+                                    ? Math.max(400, typo.font_weight - 100)
+                                    : typo.font_weight,
+                                  letterSpacing: typo.letter_spacing !== 0
+                                    ? `${typo.letter_spacing * 0.5}em`
+                                    : undefined,
+                                  lineHeight: 1.4,
+                                }}
+                              >
+                                {previewSubheading ?? 'Luxury SUV'}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* CTA Safe Area indicator — matches ctaLayer in LayeredHero */}
+                          <div
+                            className={`${styles.typoCanvasCtaSafe} ${hasOverlap ? styles.typoCanvasCtaSafeWarning : ''}`}
+                            style={{ height: ctaSafeAreaPx }}
+                          >
+                            <span className={styles.typoCanvasCtaLabel}>CTA SAFE AREA</span>
+                            {/* Placeholder CTA buttons */}
+                            <div className={styles.typoCanvasCtaButtons}>
+                              <span className={styles.typoCanvasCtaBtn}>Talk to Alvan →</span>
+                              <span className={styles.typoCanvasCtaBtnGhost}>Spesifikasi</span>
+                            </div>
+                          </div>
+
+                          {/* Drag hint when not custom */}
+                          {!isCustom && (
+                            <div className={styles.typoCanvasLockHint}>
+                              Pilih CUSTOM untuk drag
                             </div>
                           )}
                         </div>
-                      )
-                    })()}
-                  </div>
-                  <div className={styles.typoPreviewHint}>
-                    Preview realtime — update saat slider berubah
-                  </div>
-                </div>
 
-                <div className={styles.divider} style={{ marginTop: 8, marginBottom: 8 }} />
+                        {/* Overlap warning */}
+                        {hasOverlap && (
+                          <div className={styles.typoOverlapWarning}>
+                            ⚠ Typography kemungkinan overlap area CTA
+                          </div>
+                        )}
 
-                <div className={styles.sliderDisabledNote}>
-                  Positioning typography pada Public Hero. Aktifkan mode CUSTOM untuk mengedit.
-                </div>
+                        <div className={styles.typoPreviewHint}>
+                          Preview realtime · {Math.round(typoScale * 100)}% skala dari live ({liveVpWidth}px)
+                        </div>
+                      </div>
 
-                {/* Text X */}
-                <div className={styles.sliderRow}>
-                  <div className={styles.sliderLabel}>
-                    <span className={styles.sliderLabelText}>Text X</span>
-                    <span className={styles.sliderValue}>{effectiveSettings.typography.x}%</span>
-                  </div>
-                  <input type="range" min={0} max={80} step={1}
-                    value={effectiveSettings.typography.x} disabled={!isCustom}
-                    className={styles.slider}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      updateBreakpoint(activeBp, { typography: { ...effectiveSettings.typography, x: Number(e.target.value) } })
-                    }
-                  />
-                </div>
+                      <div className={styles.divider} style={{ marginTop: 8, marginBottom: 8 }} />
 
-                {/* Text Y */}
-                <div className={styles.sliderRow}>
-                  <div className={styles.sliderLabel}>
-                    <span className={styles.sliderLabelText}>Text Y</span>
-                    <span className={styles.sliderValue}>{effectiveSettings.typography.y}%</span>
-                  </div>
-                  <input type="range" min={0} max={90} step={1}
-                    value={effectiveSettings.typography.y} disabled={!isCustom}
-                    className={styles.slider}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      updateBreakpoint(activeBp, { typography: { ...effectiveSettings.typography, y: Number(e.target.value) } })
-                    }
-                  />
-                </div>
+                      <div className={styles.sliderDisabledNote}>
+                        Positioning typography pada Public Hero. Aktifkan mode CUSTOM untuk mengedit.
+                      </div>
 
-                {/* Width */}
-                <div className={styles.sliderRow}>
-                  <div className={styles.sliderLabel}>
-                    <span className={styles.sliderLabelText}>Width</span>
-                    <span className={styles.sliderValue}>{effectiveSettings.typography.width}%</span>
-                  </div>
-                  <input type="range" min={20} max={90} step={1}
-                    value={effectiveSettings.typography.width} disabled={!isCustom}
-                    className={styles.slider}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      updateBreakpoint(activeBp, { typography: { ...effectiveSettings.typography, width: Number(e.target.value) } })
-                    }
-                  />
-                </div>
+                      {/* Text X — slider + numeric input */}
+                      <div className={styles.sliderRow}>
+                        <div className={styles.sliderLabel}>
+                          <span className={styles.sliderLabelText}>Text X</span>
+                          <input
+                            type="number" min={0} max={80} step={1}
+                            value={typo.x}
+                            disabled={!isCustom}
+                            className={styles.numericInput}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                              const v = Math.max(0, Math.min(80, Number(e.target.value)))
+                              updateBreakpoint(activeBp, { typography: { ...typo, x: v } })
+                            }}
+                          />
+                          <span className={styles.numericInputUnit}>%</span>
+                        </div>
+                        <input type="range" min={0} max={80} step={1}
+                          value={typo.x} disabled={!isCustom}
+                          className={styles.slider}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                            updateBreakpoint(activeBp, { typography: { ...typo, x: Number(e.target.value) } })
+                          }
+                        />
+                      </div>
 
-                {/* Alignment */}
-                <div className={styles.sliderRow}>
-                  <div className={styles.sliderLabel}>
-                    <span className={styles.sliderLabelText}>Alignment</span>
-                    <span className={styles.sliderValue}>{effectiveSettings.typography.alignment}</span>
-                  </div>
-                  <div className={styles.alignBtns}>
-                    {(['left', 'center', 'right'] as const).map((align) => (
-                      <button
-                        key={align}
-                        className={`${styles.alignBtn} ${effectiveSettings.typography.alignment === align ? styles.alignBtnActive : ''}`}
-                        disabled={!isCustom}
-                        onClick={() =>
-                          updateBreakpoint(activeBp, { typography: { ...effectiveSettings.typography, alignment: align } })
-                        }
-                      >
-                        {align === 'left' ? '⬛◻◻' : align === 'center' ? '◻⬛◻' : '◻◻⬛'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                      {/* Text Y — slider + numeric input */}
+                      <div className={styles.sliderRow}>
+                        <div className={styles.sliderLabel}>
+                          <span className={styles.sliderLabelText}>Text Y</span>
+                          <input
+                            type="number" min={0} max={90} step={1}
+                            value={typo.y}
+                            disabled={!isCustom}
+                            className={styles.numericInput}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                              const v = Math.max(0, Math.min(90, Number(e.target.value)))
+                              updateBreakpoint(activeBp, { typography: { ...typo, y: v } })
+                            }}
+                          />
+                          <span className={styles.numericInputUnit}>%</span>
+                        </div>
+                        <input type="range" min={0} max={90} step={1}
+                          value={typo.y} disabled={!isCustom}
+                          className={styles.slider}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                            updateBreakpoint(activeBp, { typography: { ...typo, y: Number(e.target.value) } })
+                          }
+                        />
+                      </div>
 
-                {/* Font Size */}
-                <div className={styles.sliderRow}>
-                  <div className={styles.sliderLabel}>
-                    <span className={styles.sliderLabelText}>Font Size</span>
-                    <span className={styles.sliderValue}>{effectiveSettings.typography.font_size}</span>
-                  </div>
-                  <input type="range" min={25} max={300} step={1}
-                    value={effectiveSettings.typography.font_size} disabled={!isCustom}
-                    className={styles.slider}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      updateBreakpoint(activeBp, { typography: { ...effectiveSettings.typography, font_size: Number(e.target.value) } })
-                    }
-                  />
-                </div>
+                      {/* Width */}
+                      <div className={styles.sliderRow}>
+                        <div className={styles.sliderLabel}>
+                          <span className={styles.sliderLabelText}>Width</span>
+                          <input
+                            type="number" min={10} max={100} step={1}
+                            value={typo.width}
+                            disabled={!isCustom}
+                            className={styles.numericInput}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                              const v = Math.max(10, Math.min(100, Number(e.target.value)))
+                              updateBreakpoint(activeBp, { typography: { ...typo, width: v } })
+                            }}
+                          />
+                          <span className={styles.numericInputUnit}>%</span>
+                        </div>
+                        <input type="range" min={10} max={100} step={1}
+                          value={typo.width} disabled={!isCustom}
+                          className={styles.slider}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                            updateBreakpoint(activeBp, { typography: { ...typo, width: Number(e.target.value) } })
+                          }
+                        />
+                      </div>
 
-                {/* Font Weight */}
-                <div className={styles.sliderRow}>
-                  <div className={styles.sliderLabel}>
-                    <span className={styles.sliderLabelText}>Font Weight</span>
-                    <span className={styles.sliderValue}>{effectiveSettings.typography.font_weight}</span>
-                  </div>
-                  <div className={styles.alignBtns}>
-                    {([300, 400, 500, 600, 700, 800] as const).map((w) => (
-                      <button
-                        key={w}
-                        className={`${styles.alignBtn} ${effectiveSettings.typography.font_weight === w ? styles.alignBtnActive : ''}`}
-                        disabled={!isCustom}
-                        onClick={() =>
-                          updateBreakpoint(activeBp, { typography: { ...effectiveSettings.typography, font_weight: w } })
-                        }
-                      >
-                        {w}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                      {/* Alignment */}
+                      <div className={styles.sliderRow}>
+                        <div className={styles.sliderLabel}>
+                          <span className={styles.sliderLabelText}>Alignment</span>
+                          <span className={styles.sliderValue}>{typo.alignment}</span>
+                        </div>
+                        <div className={styles.alignBtns}>
+                          {(['left', 'center', 'right'] as const).map((align) => (
+                            <button
+                              key={align}
+                              className={`${styles.alignBtn} ${typo.alignment === align ? styles.alignBtnActive : ''}`}
+                              disabled={!isCustom}
+                              onClick={() =>
+                                updateBreakpoint(activeBp, { typography: { ...typo, alignment: align } })
+                              }
+                            >
+                              {align === 'left' ? '⬛◻◻' : align === 'center' ? '◻⬛◻' : '◻◻⬛'}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
 
-                {/* Letter Spacing */}
-                <div className={styles.sliderRow}>
-                  <div className={styles.sliderLabel}>
-                    <span className={styles.sliderLabelText}>Letter Spacing</span>
-                    <span className={styles.sliderValue}>{effectiveSettings.typography.letter_spacing}em</span>
-                  </div>
-                  <input type="range" min={-0.05} max={0.2} step={0.005}
-                    value={effectiveSettings.typography.letter_spacing} disabled={!isCustom}
-                    className={styles.slider}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      updateBreakpoint(activeBp, { typography: { ...effectiveSettings.typography, letter_spacing: parseFloat(Number(e.target.value).toFixed(3)) } })
-                    }
-                  />
-                </div>
+                      {/* Font Size — 25–300% with numeric input */}
+                      <div className={styles.sliderRow}>
+                        <div className={styles.sliderLabel}>
+                          <span className={styles.sliderLabelText}>Font Size</span>
+                          <input
+                            type="number" min={25} max={300} step={1}
+                            value={typo.font_size}
+                            disabled={!isCustom}
+                            className={styles.numericInput}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                              const v = Math.max(25, Math.min(300, Number(e.target.value)))
+                              if (!isNaN(v)) updateBreakpoint(activeBp, { typography: { ...typo, font_size: v } })
+                            }}
+                          />
+                          <span className={styles.numericInputUnit}>%</span>
+                        </div>
+                        <input type="range" min={25} max={300} step={1}
+                          value={typo.font_size} disabled={!isCustom}
+                          className={styles.slider}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                            updateBreakpoint(activeBp, { typography: { ...typo, font_size: Number(e.target.value) } })
+                          }
+                        />
+                      </div>
+                      <div className={styles.sliderDisabledNote} style={{ marginTop: -4, marginBottom: 4 }}>
+                        100% = {TYPO_BASE_REM}rem ({TYPO_BASE_REM * 16}px) · Live heading: {Math.round(liveHeadingPx)}px
+                      </div>
 
-                {!isCustom && (
-                  <div className={styles.sliderDisabledNote} style={{ marginTop: 4 }}>
-                    Aktifkan CUSTOM untuk mengedit typography positioning.
-                  </div>
-                )}
+                      {/* Font Weight */}
+                      <div className={styles.sliderRow}>
+                        <div className={styles.sliderLabel}>
+                          <span className={styles.sliderLabelText}>Font Weight</span>
+                          <span className={styles.sliderValue}>{typo.font_weight}</span>
+                        </div>
+                        <div className={styles.alignBtns}>
+                          {([300, 400, 500, 600, 700, 800] as const).map((w) => (
+                            <button
+                              key={w}
+                              className={`${styles.alignBtn} ${typo.font_weight === w ? styles.alignBtnActive : ''}`}
+                              disabled={!isCustom}
+                              onClick={() =>
+                                updateBreakpoint(activeBp, { typography: { ...typo, font_weight: w } })
+                              }
+                            >
+                              {w}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Letter Spacing */}
+                      <div className={styles.sliderRow}>
+                        <div className={styles.sliderLabel}>
+                          <span className={styles.sliderLabelText}>Letter Spacing</span>
+                          <span className={styles.sliderValue}>{typo.letter_spacing}em</span>
+                        </div>
+                        <input type="range" min={-0.05} max={0.2} step={0.005}
+                          value={typo.letter_spacing} disabled={!isCustom}
+                          className={styles.slider}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                            updateBreakpoint(activeBp, { typography: { ...typo, letter_spacing: parseFloat(Number(e.target.value).toFixed(3)) } })
+                          }
+                        />
+                      </div>
+
+                      {!isCustom && (
+                        <div className={styles.sliderDisabledNote} style={{ marginTop: 4 }}>
+                          Aktifkan CUSTOM untuk mengedit typography positioning.
+                        </div>
+                      )}
+                    </>
+                  )
+                })()}
               </>
             )}
           </div>

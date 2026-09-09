@@ -316,46 +316,51 @@ export function LayeredHero({
       */}
       {presentationSettings ? (
         /* Positioned typography — reads from presentation_settings per breakpoint */
-        <div className={styles.typographyLayer} aria-hidden="false">
-          {BREAKPOINT_ORDER.map((breakpoint) => {
-            const typo = resolveTypography(
-              presentationSettings,
-              breakpoint,
-              media.focal_x ?? 50,
-              media.focal_y ?? 50,
-            );
-            return (
-              <div
-                key={breakpoint}
-                className={`${styles.typographyContainer} ${styles[`typographyContainer--${breakpoint}`]}`}
-                style={getTypographyContainerStyle(typo)}
-              >
-                {tagline && (
-                  <p className={styles.tagline}>{tagline}</p>
-                )}
-                <div className={styles.headingBlock}>
-                  <h1
-                    className={styles.heading}
-                    style={getHeadingTypographyStyle(typo)}
-                  >
-                    {heading}
-                  </h1>
-                  {subheading && (
-                    <p
-                      className={styles.subheading}
-                      style={getSubheadingTypographyStyle(typo)}
-                    >
-                      {subheading}
-                    </p>
+        <>
+          <div className={styles.typographyLayer} aria-hidden="false">
+            {BREAKPOINT_ORDER.map((breakpoint) => {
+              const typo = resolveTypography(
+                presentationSettings,
+                breakpoint,
+                media.focal_x ?? 50,
+                media.focal_y ?? 50,
+              );
+              return (
+                <div
+                  key={breakpoint}
+                  className={`${styles.typographyContainer} ${styles[`typographyContainer--${breakpoint}`]}`}
+                  style={getTypographyContainerStyle(typo)}
+                >
+                  {tagline && (
+                    <p className={styles.tagline}>{tagline}</p>
                   )}
+                  <div className={styles.headingBlock}>
+                    <h1
+                      className={styles.heading}
+                      style={getHeadingTypographyStyle(typo)}
+                    >
+                      {heading}
+                    </h1>
+                    {subheading && (
+                      <p
+                        className={styles.subheading}
+                        style={getSubheadingTypographyStyle(typo)}
+                      >
+                        {subheading}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                {cta && (
-                  <div className={styles.cta}>{cta}</div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+          {/* ── CTA layer — fixed bottom, independent of typography position ── */}
+          {cta && (
+            <div className={styles.ctaLayer} aria-label="Hero call to action">
+              <div className={styles.ctaInner}>{cta}</div>
+            </div>
+          )}
+        </>
       ) : (
         /* Fallback: default flow-layout content block (no presentation_settings) */
         <div className={styles.content}>
