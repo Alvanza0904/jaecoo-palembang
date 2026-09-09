@@ -40,7 +40,15 @@
 
   /* ─── TYPOGRAPHY ─────────────────────────────────────── */
 
-  --font-sans: 'Manrope', system-ui, -apple-system, sans-serif;
+  /* Primary font — maps to next/font Manrope variable */
+  --font-sans: var(--font-manrope, 'Manrope'), system-ui, -apple-system, sans-serif;
+
+  /* STEP 6I: Additional curated automotive font CSS variables.
+     These are set on <html> by layout.tsx via next/font/google.
+     Typography editor uses these by name via font_family setting. */
+  /* --font-montserrat, --font-outfit, --font-plus-jakarta-sans,
+     --font-space-grotesk, --font-ibm-plex-sans, --font-exo-2
+     are set automatically by next/font on <html className={...}> */
 
   /* Scale — mobile-first, desktop overrides in breakpoints */
   --text-xs:   0.75rem;   /* 12px */

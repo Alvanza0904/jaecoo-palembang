@@ -3,6 +3,7 @@
  * STEP 5E: Visual Media Editor
  * STEP 6H: Unified rendering helpers — single source of truth for
  *           Editor Preview AND Public Hero geometry calculations.
+ * STEP 6I: Typography fix — correct preview font scaling + font_family support.
  *
  * ALL geometry/typography calculations live here.
  * LayeredHero.tsx and VisualMediaEditor.tsx both import from this file.
@@ -15,7 +16,36 @@ export type ObjectFit = 'cover' | 'contain'
 export type InheritSource = 'desktop' | 'tablet' | 'mobile' | null
 
 /**
+ * Curated premium automotive font families.
+ * All are available via next/font/google with variable weights.
+ * Only geometric/grotesque/humanist sans — no decorative or serif.
+ */
+export type TypographyFontFamily =
+  | 'Manrope'
+  | 'Montserrat'
+  | 'Outfit'
+  | 'Plus Jakarta Sans'
+  | 'Space Grotesk'
+  | 'IBM Plex Sans'
+  | 'Exo 2'
+
+/** Default font family — matches the site's global --font-sans */
+export const TYPOGRAPHY_DEFAULT_FONT: TypographyFontFamily = 'Manrope'
+
+/** All available font choices for the typography dropdown */
+export const TYPOGRAPHY_FONT_OPTIONS: TypographyFontFamily[] = [
+  'Manrope',
+  'Montserrat',
+  'Outfit',
+  'Plus Jakarta Sans',
+  'Space Grotesk',
+  'IBM Plex Sans',
+  'Exo 2',
+]
+
+/**
  * Typography placement readiness.
+ * STEP 6I: Added font_family field (optional, backwards-compatible).
  */
 export interface TypographyPlacement {
   /** Horizontal position 0–100 */
@@ -32,6 +62,11 @@ export interface TypographyPlacement {
   font_weight: number
   /** Letter spacing in em (0 = normal) */
   letter_spacing: number
+  /**
+   * Font family — optional for backwards compatibility.
+   * Defaults to TYPOGRAPHY_DEFAULT_FONT ('Manrope') when absent.
+   */
+  font_family?: TypographyFontFamily
 }
 
 /**
@@ -109,16 +144,6 @@ export const SUBHEADING_BASE_REM = 1.375
 /**
  * Canonical aspect ratios for each breakpoint preview canvas.
  * These define the W:H ratio of the preview container in the editor.
- * They represent the typical viewport shape for each device class,
- * NOT a specific pixel width — the editor can scale the canvas to
- * any pixel size while preserving this ratio, and the geometry
- * (object-position %, transform %, typography %) stays proportionally
- * identical to the live hero at that breakpoint.
- *
- * Desktop  16:9   — typical HD landscape screen
- * Tablet   4:3    — iPad / landscape tablet
- * Mobile   9:16   — portrait phone
- * Small Mobile  ~9:18  — narrow portrait phone (SE, older models)
  */
 export const BREAKPOINT_ASPECT_RATIO: Record<BreakpointKey, number> = {
   desktop:      16 / 9,
@@ -127,12 +152,41 @@ export const BREAKPOINT_ASPECT_RATIO: Record<BreakpointKey, number> = {
   small_mobile: 9 / 18,
 }
 
+/**
+ * STEP 6I: Canonical reference viewport widths per breakpoint.
+ *
+ * These are the DESIGN REFERENCE widths — the typical device viewport
+ * the typography was intended to be displayed at for each breakpoint.
+ * They are used to correctly scale font-size from Live px → Preview px.
+ *
+ * Formula: previewFontPx = liveFontPx * (previewW / REFERENCE_WIDTH[bp])
+ *
+ * This ensures that font/container_width ratio is identical between
+ * the Editor preview and the Live Hero, producing the same line wrapping.
+ *
+ * Reference widths:
+ *   Desktop:      1440px  — standard HD design target
+ *   Tablet:        768px  — iPad / standard tablet portrait
+ *   Mobile:        390px  — iPhone 14 Pro / common Android flagship
+ *   Small Mobile:  375px  — iPhone SE / iPhone 13 mini
+ *
+ * These values are DESIGN CONSTANTS, not hardcoded viewport assumptions.
+ * They represent the viewport width the breakpoint CSS was authored for.
+ * Changing them changes the preview ↔ live scaling relationship.
+ */
+export const BREAKPOINT_REFERENCE_WIDTH: Record<BreakpointKey, number> = {
+  desktop:      1440,
+  tablet:        768,
+  mobile:        390,
+  small_mobile:  375,
+}
+
 /** Preview container dimensions (px) — used for sizing only, ratio is canonical above. */
 export const BREAKPOINT_PREVIEW_DIMS: Record<BreakpointKey, { width: number; height: number }> = {
   desktop:      { width: 320, height: 180 },
   tablet:       { width: 240, height: 180 },
-  mobile:       { width: 160, height: 240 },
-  small_mobile: { width: 130, height: 220 },
+  mobile:       { width: 160, height: 284 },  // STEP 6I: fixed 160/(9/16)=284 (was 240)
+  small_mobile: { width: 130, height: 260 },  // STEP 6I: fixed 130/(9/18)=260 (was 220)
 }
 
 /** Default auto settings per breakpoint */
@@ -158,6 +212,7 @@ export const DEFAULT_BREAKPOINT_SETTINGS: BreakpointSettings = {
     font_size: 100,
     font_weight: 700,
     letter_spacing: 0,
+    font_family: TYPOGRAPHY_DEFAULT_FONT,
   },
 }
 
@@ -301,15 +356,6 @@ export function getBackgroundStyleFromResolved(
 /**
  * Convert 0–100 Cutout coordinates to CSS transform.
  * Used by BOTH LayeredHero (Live) and VisualMediaEditor (Preview).
- *
- * COORDINATE SYSTEM:
- *   50/50 = neutral center (no movement)
- *   0/0   = move cutout toward top-left
- *   100/100 = move cutout toward bottom-right
- *
- * translateX = (positionX - 50)%  →  range -50% to +50%
- * translateY = (positionY - 50)%  →  range -50% to +50%
- * Scale applied after translate.
  */
 export function cutoutTransformToCSS(
   positionX: number,
@@ -324,7 +370,6 @@ export function cutoutTransformToCSS(
 
 /**
  * Compute cutout CSS style from already-resolved CutoutPlacement.
- * objectFit:contain + 50%/50% anchor + transform from cutoutTransformToCSS.
  * Used by BOTH LayeredHero and VisualMediaEditor.
  */
 export function getCutoutLayerStyle(cutout: CutoutPlacement): PresentationLayerStyle {
@@ -343,6 +388,7 @@ export interface TypographyHeadingStyle {
   fontWeight: number
   letterSpacing: string
   lineHeight: number
+  fontFamily: string
 }
 
 export interface TypographySubheadingStyle {
@@ -350,6 +396,7 @@ export interface TypographySubheadingStyle {
   fontWeight: number
   letterSpacing?: string
   lineHeight: number
+  fontFamily: string
 }
 
 export interface TypographyContainerStyle {
@@ -358,6 +405,14 @@ export interface TypographyContainerStyle {
   top: string
   width: string
   textAlign: 'left' | 'center' | 'right'
+}
+
+/**
+ * Resolve the effective font family, falling back to the site default.
+ * Used by both Live and Editor.
+ */
+export function resolveTypographyFontFamily(typo: TypographyPlacement): string {
+  return typo.font_family ?? TYPOGRAPHY_DEFAULT_FONT
 }
 
 /**
@@ -382,7 +437,8 @@ export function getSubheadingFontSizeRem(font_size: number): number {
 /**
  * Heading CSS style from TypographyPlacement.
  * fontSize is in rem — identical in Live and Editor (browser resolves rem against root).
- * Used by LayeredHero (Live). Editor uses px-scaled version via getHeadingStylePx().
+ * STEP 6I: includes fontFamily from typo.font_family.
+ * Used by LayeredHero (Live).
  */
 export function getHeadingStyle(typo: TypographyPlacement): TypographyHeadingStyle {
   return {
@@ -390,12 +446,14 @@ export function getHeadingStyle(typo: TypographyPlacement): TypographyHeadingSty
     fontWeight: typo.font_weight,
     letterSpacing: `${typo.letter_spacing}em`,
     lineHeight: 1.1,
+    fontFamily: `'${resolveTypographyFontFamily(typo)}', var(--font-sans, 'Manrope', sans-serif)`,
   }
 }
 
 /**
  * Subheading CSS style from TypographyPlacement.
- * Used by LayeredHero (Live). Editor uses px-scaled version.
+ * STEP 6I: includes fontFamily from typo.font_family.
+ * Used by LayeredHero (Live).
  */
 export function getSubheadingStyle(typo: TypographyPlacement): TypographySubheadingStyle {
   return {
@@ -403,6 +461,7 @@ export function getSubheadingStyle(typo: TypographyPlacement): TypographySubhead
     fontWeight: typo.font_weight >= 600 ? Math.max(400, typo.font_weight - 100) : typo.font_weight,
     letterSpacing: typo.letter_spacing !== 0 ? `${typo.letter_spacing * 0.5}em` : undefined,
     lineHeight: 1.4,
+    fontFamily: `'${resolveTypographyFontFamily(typo)}', var(--font-sans, 'Manrope', sans-serif)`,
   }
 }
 
@@ -421,74 +480,49 @@ export function getTypographyContainerStyle(typo: TypographyPlacement): Typograp
 }
 
 /**
- * Compute heading font-size in px for the editor preview canvas.
+ * STEP 6I: Compute heading font-size in px for the editor preview canvas.
  *
- * The editor canvas is smaller than the live viewport. To make text
- * LOOK proportionally the same as on Live, we scale the rem value by
- * the ratio of the canvas width to the live viewport width for that
- * breakpoint.
+ * CORRECT FORMULA:
+ *   previewFontPx = liveFontPx × (previewW / REFERENCE_WIDTH[breakpoint])
  *
- * The live viewport width for each breakpoint is derived from
- * BREAKPOINT_ASPECT_RATIO × a reference height (100svh). Because
- * 100svh varies by device, we use the canonical aspect ratio instead:
- * for a given canvas height H, the equivalent live width is:
+ * This ensures font/container_width ratio is identical between preview and live,
+ * so text wrapping is the same regardless of canvas size.
  *
- *   liveEquivWidth = canvasH × BREAKPOINT_ASPECT_RATIO[bp]
+ * REFERENCE_WIDTH is the canonical viewport width the breakpoint was designed for
+ * (e.g., 390px for mobile = iPhone 14 Pro). It is a design constant, not a
+ * hardcoded device assumption.
  *
- * For portrait breakpoints (mobile, small_mobile) the ratio is < 1,
- * so liveEquivWidth < canvasH. This is correct because on a phone the
- * hero is tall and narrow — the font is large relative to the narrow
- * width, which is what we want to replicate in the preview.
- *
- * formula:
- *   liveFontPx  = fontSizeRem × 16   (rem at 16px root)
- *   previewFontPx = liveFontPx × (canvasW / liveEquivWidth)
- *               = liveFontPx × (canvasW / (canvasH × aspectRatio))
- *               = liveFontPx / aspectRatio   (when canvasW = canvasH × aspectRatio, exact)
- *
- * This is mathematically identical to rendering at rem in a viewport
- * that has the same aspect ratio as the canvas, which IS the semantic
- * we want.
+ * REMOVED: The old formula used `liveEquivW = canvasH × aspectRatio` which was
+ * incorrect when canvasH ≠ canvasW / aspectRatio (as was the case for mobile
+ * in STEP 6H where mobile dims were 160×240 instead of the correct 160×284).
  */
 export function getHeadingFontSizePxForPreview(
   typo: TypographyPlacement,
-  canvasW: number,
-  canvasH: number,
+  previewW: number,
+  _previewH: number,           // kept for API compatibility, no longer used
   breakpoint: BreakpointKey,
 ): number {
-  const fontRem = getHeadingFontSizeRem(typo.font_size)
-  const liveFontPx = fontRem * 16
-  const liveEquivW = canvasH * BREAKPOINT_ASPECT_RATIO[breakpoint]
-  const scale = canvasW / liveEquivW
-  return liveFontPx * scale
+  const liveFontPx = getHeadingFontSizeRem(typo.font_size) * 16
+  const refW = BREAKPOINT_REFERENCE_WIDTH[breakpoint]
+  return liveFontPx * (previewW / refW)
 }
 
 export function getSubheadingFontSizePxForPreview(
   typo: TypographyPlacement,
-  canvasW: number,
-  canvasH: number,
+  previewW: number,
+  _previewH: number,           // kept for API compatibility, no longer used
   breakpoint: BreakpointKey,
 ): number {
-  const fontRem = getSubheadingFontSizeRem(typo.font_size)
-  const liveFontPx = fontRem * 16
-  const liveEquivW = canvasH * BREAKPOINT_ASPECT_RATIO[breakpoint]
-  const scale = canvasW / liveEquivW
-  return liveFontPx * scale
+  const liveFontPx = getSubheadingFontSizeRem(typo.font_size) * 16
+  const refW = BREAKPOINT_REFERENCE_WIDTH[breakpoint]
+  return liveFontPx * (previewW / refW)
 }
 
 // ─── CTA safe area ────────────────────────────────────────────────────────
 
 /**
  * CTA safe area height as a fraction of canvas height.
- * Matches ctaLayer in LayeredHero.module.css:
- *   padding-bottom: var(--space-10) = 2.5rem = 40px
- *   + CTA button height ≈ 48px (size="lg")
- *   + gap = 12px
- *   Total live ≈ 100px at 16px root
- *
- * Expressed as a fraction of hero height for proportional preview scaling.
- * At 100svh ≈ 700px (typical mobile), 100/700 ≈ 0.143 → we use 0.18
- * to give a comfortable visual margin.
+ * Matches ctaLayer in LayeredHero.module.css.
  */
 export const CTA_SAFE_AREA_FRACTION = 0.18
 

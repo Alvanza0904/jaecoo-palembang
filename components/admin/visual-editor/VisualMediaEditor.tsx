@@ -34,11 +34,13 @@ import {
   type BreakpointSettings,
   type CutoutPlacement,
   type PresentationMeta,
+  type TypographyFontFamily,
   BREAKPOINT_ORDER,
   BREAKPOINT_LABELS,
   BREAKPOINT_PREVIEW_DIMS,
   BREAKPOINT_ASPECT_RATIO,
   BREAKPOINT_INHERIT_DEFAULTS,
+  TYPOGRAPHY_FONT_OPTIONS,
   CTA_SAFE_AREA_FRACTION,
   computeAutoScale,
   resolveBreakpointSettings,
@@ -46,6 +48,7 @@ import {
   getCutoutLayerStyle,
   getHeadingFontSizePxForPreview,
   getSubheadingFontSizePxForPreview,
+  resolveTypographyFontFamily,
 } from '@/lib/types/presentation'
 import { detectCutoutBBox } from '@/lib/utils/cutout-bbox'
 import styles from './VisualMediaEditor.module.css'
@@ -68,8 +71,8 @@ const BP_ICONS: Record<BreakpointKey, string> = {
 // Checkerboard pattern sebagai data URL (untuk preview cutout)
 const CHECKER_BG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='8' height='8' fill='%23ccc'/%3E%3Crect x='8' y='8' width='8' height='8' fill='%23ccc'/%3E%3Crect x='8' width='8' height='8' fill='%23eee'/%3E%3Crect y='8' width='8' height='8' fill='%23eee'/%3E%3C/svg%3E")`
 
-// Typography constants and helpers are imported from @/lib/types/presentation
-// (TYPOGRAPHY_BASE_REM, SUBHEADING_BASE_REM, getHeadingFontSizePxForPreview, etc.)
+// STEP 6I: Typography constants and helpers imported from @/lib/types/presentation.
+// TYPOGRAPHY_FONT_OPTIONS, getHeadingFontSizePxForPreview, resolveTypographyFontFamily, etc.
 // DO NOT duplicate them here — single source of truth.
 
 // ─── Props ────────────────────────────────────────────────
@@ -170,14 +173,14 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
   const isInherited = effectiveSettings.mode === 'inherited'
 
   // ── Preview dimensions ─────────────────────────────────
-  // Use BREAKPOINT_ASPECT_RATIO (canonical, from presentation.ts) to size the
-  // preview canvas. This is the same ratio the Live Hero presents at that
-  // breakpoint (100svh × aspect ratio). The canvas is scaled to fit the panel
-  // but the RATIO is fixed — so % coordinates (BG position, cutout translate%,
-  // typography left/top%) all mean exactly the same thing in Preview as in Live.
-  //
-  // We do NOT use window.innerWidth/innerHeight because the editor is opened on
-  // the admin device which may have a different ratio than the target breakpoint.
+  // STEP 6I: previewW and previewH define the composite canvas size.
+  // previewH is always derived from previewW / canonicalRatio, ensuring the
+  // canvas IS at the exact canonical aspect ratio for that breakpoint.
+  // This is required for font scaling: getHeadingFontSizePxForPreview() uses
+  // BREAKPOINT_REFERENCE_WIDTH[bp] to scale live rem→px down to canvas px,
+  // ensuring font/container_width ratio is identical between preview and live.
+  // All % coordinates (BG position, cutout, typography left/top/width) are
+  // coordinate-system agnostic and work identically in Preview and Live.
   const dims = BREAKPOINT_PREVIEW_DIMS[activeBp as BreakpointKey]
   const canonicalRatio = BREAKPOINT_ASPECT_RATIO[activeBp as BreakpointKey]
 
@@ -1287,6 +1290,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                                 fontWeight: typo.font_weight,
                                 letterSpacing: `${typo.letter_spacing}em`,
                                 lineHeight: 1.1,
+                                fontFamily: `'${resolveTypographyFontFamily(typo)}', var(--font-sans, 'Manrope', sans-serif)`,
                               }}
                             >
                               {previewHeading ?? 'JAECOO J8'}
@@ -1302,6 +1306,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                                   ? `${typo.letter_spacing * 0.5}em`
                                   : undefined,
                                 lineHeight: 1.4,
+                                fontFamily: `'${resolveTypographyFontFamily(typo)}', var(--font-sans, 'Manrope', sans-serif)`,
                               }}
                             >
                               {previewSubheading ?? 'Luxury SUV'}
@@ -1335,6 +1340,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
 
                         <div className={styles.typoPreviewHint}>
                           Preview realtime · rasio {Math.round(BREAKPOINT_ASPECT_RATIO[bp] * 100) / 100}
+                          {' · '}{resolveTypographyFontFamily(typo)}
                         </div>
                       </div>
 
@@ -1504,6 +1510,31 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                             updateBreakpoint(activeBp, { typography: { ...typo, letter_spacing: parseFloat(Number(e.target.value).toFixed(3)) } })
                           }
                         />
+                      </div>
+
+                      {/* Font Family — STEP 6I */}
+                      <div className={styles.sliderRow}>
+                        <div className={styles.sliderLabel}>
+                          <span className={styles.sliderLabelText}>Font Family</span>
+                          <span className={styles.sliderValue} style={{ maxWidth: 90, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {resolveTypographyFontFamily(typo)}
+                          </span>
+                        </div>
+                        <select
+                          className={styles.inheritSelect}
+                          value={resolveTypographyFontFamily(typo)}
+                          disabled={!isCustom}
+                          style={{ marginTop: 4, width: '100%' }}
+                          onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                            updateBreakpoint(activeBp, {
+                              typography: { ...typo, font_family: e.target.value as TypographyFontFamily },
+                            })
+                          }
+                        >
+                          {TYPOGRAPHY_FONT_OPTIONS.map((font) => (
+                            <option key={font} value={font}>{font}</option>
+                          ))}
+                        </select>
                       </div>
 
                       {!isCustom && (
