@@ -17,6 +17,7 @@ import styles from "./berita.module.css";
 export const metadata: Metadata = {
   title: "JAECOO Journal — Berita & Artikel",
   description: "Berita, artikel, dan update terbaru seputar JAECOO Palembang.",
+  alternates: { canonical: "/berita" },
 };
 
 export default function BeritaPage() {

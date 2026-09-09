@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!model) return {};
   return {
     title: buildPageTitle(`${model.name} — Teknologi`),
+    alternates: { canonical: `/model/${slug}/technology` },
     description: model.technology.subheadline ?? `Teknologi terdepan pada ${model.name}.`,
   };
 }

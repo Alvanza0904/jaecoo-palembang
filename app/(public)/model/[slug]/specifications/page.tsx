@@ -43,6 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: buildPageTitle(`${model.name} — Spesifikasi`),
+    alternates: { canonical: `/model/${slug}/specifications` },
     description: `Spesifikasi lengkap ${model.name}${priceText}.`,
   };
 }

@@ -4,6 +4,7 @@ import { Container } from "@/components/ui/Container";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: "Kebijakan privasi JAECOO Palembang.",
+  alternates: { canonical: "/privacy-policy" },
 };
 
 export default function PrivacyPage() {

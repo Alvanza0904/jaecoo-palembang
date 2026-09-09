@@ -27,6 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: promo.title,
     description: promo.description,
+    alternates: { canonical: `/promo/${slug}` },
   };
 }
 

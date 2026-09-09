@@ -24,6 +24,7 @@ export const metadata: Metadata = {
   title: "Sales JAECOO Palembang — Alvan",
   description:
     "Hubungi Sales resmi JAECOO Palembang, Alvan. Konsultasi gratis, test drive, dan simulasi kredit tersedia via WhatsApp.",
+  alternates: { canonical: "/sales-jaecoo-palembang" },
 };
 
 const displayNumber = WHATSAPP_NUMBER.replace("62", "0").replace(

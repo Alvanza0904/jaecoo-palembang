@@ -18,6 +18,7 @@ import styles from "./gallery.module.css";
 export const metadata: Metadata = {
   title: "Gallery JAECOO Palembang — Foto & Video",
   description: "Gallery foto dan video eksklusif JAECOO di Palembang. Lihat detail desain, warna, dan interior setiap model.",
+  alternates: { canonical: "/gallery" },
 };
 
 export default function GalleryPage() {

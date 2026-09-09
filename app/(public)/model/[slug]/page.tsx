@@ -45,7 +45,9 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
   return {
     title: model.meta_title ?? buildPageTitle(model.name),
     description: model.meta_description,
+    alternates: { canonical: `/model/${slug}` },
     openGraph: {
+      url: `/model/${slug}`,
       title: model.meta_title ?? model.name,
       description: model.meta_description ?? model.description,
     },

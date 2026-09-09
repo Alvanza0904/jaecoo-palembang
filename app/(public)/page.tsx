@@ -26,6 +26,7 @@ export const metadata: Metadata = {
   title: "JAECOO Palembang — Dealer Resmi JAECOO",
   description:
     "Dealer resmi JAECOO di Palembang. Temukan JAECOO J5 EV, J7 SHS, dan J8 Ardis SHS. Hubungi Sales JAECOO Palembang untuk test drive dan penawaran terbaik.",
+  alternates: { canonical: "/" },
 };
 
 export default function HomePage() {

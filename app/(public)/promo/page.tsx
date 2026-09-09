@@ -19,6 +19,7 @@ import styles from "./promo.module.css";
 export const metadata: Metadata = {
   title: "Promo JAECOO Palembang — Penawaran Terkini",
   description: "Penawaran dan promo eksklusif JAECOO di Palembang. Dapatkan harga terbaik untuk J5 EV, J7 SHS, dan J8 Ardis SHS.",
+  alternates: { canonical: "/promo" },
 };
 
 export default function PromoPage() {

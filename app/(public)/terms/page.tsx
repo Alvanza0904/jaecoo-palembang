@@ -4,6 +4,7 @@ import { Container } from "@/components/ui/Container";
 export const metadata: Metadata = {
   title: "Terms",
   description: "Syarat dan ketentuan JAECOO Palembang.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {
