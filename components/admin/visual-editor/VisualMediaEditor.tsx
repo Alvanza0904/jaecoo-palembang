@@ -37,10 +37,16 @@ import {
   BREAKPOINT_ORDER,
   BREAKPOINT_LABELS,
   BREAKPOINT_PREVIEW_DIMS,
+  BREAKPOINT_ASPECT_RATIO,
   BREAKPOINT_INHERIT_DEFAULTS,
+  CTA_SAFE_AREA_FRACTION,
   computeAutoScale,
   resolveBreakpointSettings,
   cutoutTransformToCSS,
+  getBackgroundStyleFromResolved,
+  getCutoutLayerStyle,
+  getHeadingFontSizePxForPreview,
+  getSubheadingFontSizePxForPreview,
 } from '@/lib/types/presentation'
 import { detectCutoutBBox } from '@/lib/utils/cutout-bbox'
 import styles from './VisualMediaEditor.module.css'
@@ -63,40 +69,9 @@ const BP_ICONS: Record<BreakpointKey, string> = {
 // Checkerboard pattern sebagai data URL (untuk preview cutout)
 const CHECKER_BG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='8' height='8' fill='%23ccc'/%3E%3Crect x='8' y='8' width='8' height='8' fill='%23ccc'/%3E%3Crect x='8' width='8' height='8' fill='%23eee'/%3E%3Crect y='8' width='8' height='8' fill='%23eee'/%3E%3C/svg%3E")`
 
-/**
- * Base heading font size in rem — matches LayeredHero.tsx TYPOGRAPHY_BASE_REM.
- * font_size 100 = 4rem (same as --text-4xl).
- */
-const TYPO_BASE_REM = 4
-/** Subheading base size — matches LayeredHero.tsx SUBHEADING_BASE_REM. */
-const TYPO_SUB_REM = 1.375
-
-/**
- * Reference live viewport width per breakpoint (px).
- * This is the actual device width the Public Hero renders at.
- * Used to scale preview typography proportionally so that
- *   Editor Preview font-size ≈ Live Hero font-size
- * relative to the container width.
- *
- * Formula:
- *   previewFontSizePx = liveFontSizePx × (previewW / LIVE_VIEWPORT_WIDTH[bp])
- *
- * Since liveFontSizePx = TYPO_BASE_REM × 16 × (font_size / 100),
- * the scale factor converts that to a px value that LOOKS the same
- * inside the scaled-down preview canvas.
- *
- * Values match common breakpoint representative widths:
- *   desktop      → 1440px (typical HD desktop)
- *   tablet       → 1024px (iPad landscape / common tablet)
- *   mobile       → 390px  (iPhone 14 / standard mobile)
- *   small_mobile → 375px  (iPhone SE / narrow portrait)
- */
-const LIVE_VIEWPORT_WIDTH: Record<string, number> = {
-  desktop:      1440,
-  tablet:       1024,
-  mobile:        390,
-  small_mobile:  375,
-}
+// Typography constants and helpers are imported from @/lib/types/presentation
+// (TYPOGRAPHY_BASE_REM, SUBHEADING_BASE_REM, getHeadingFontSizePxForPreview, etc.)
+// DO NOT duplicate them here — single source of truth.
 
 // ─── Props ────────────────────────────────────────────────
 
@@ -196,32 +171,21 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
   const isInherited = effectiveSettings.mode === 'inherited'
 
   // ── Preview dimensions ─────────────────────────────────
-  // The public hero uses min-height: 100svh. A fixed 160×240 editor canvas
-  // has a different aspect ratio, which makes contain-rendered cutouts move
-  // relative to the background even when the saved X/Y values are identical.
-  // Keep the device selectors and their labels, but make the actual stage use
-  // the current viewport aspect ratio so Editor and Public Live share the same
-  // hero coordinate space on the device being used for editing.
+  // Use BREAKPOINT_ASPECT_RATIO (canonical, from presentation.ts) to size the
+  // preview canvas. This is the same ratio the Live Hero presents at that
+  // breakpoint (100svh × aspect ratio). The canvas is scaled to fit the panel
+  // but the RATIO is fixed — so % coordinates (BG position, cutout translate%,
+  // typography left/top%) all mean exactly the same thing in Preview as in Live.
+  //
+  // We do NOT use window.innerWidth/innerHeight because the editor is opened on
+  // the admin device which may have a different ratio than the target breakpoint.
   const dims = BREAKPOINT_PREVIEW_DIMS[activeBp as BreakpointKey]
-  const [viewportRatio, setViewportRatio] = useState(0)
+  const canonicalRatio = BREAKPOINT_ASPECT_RATIO[activeBp as BreakpointKey]
 
-  useEffect(() => {
-    const updateViewportRatio = () => {
-      if (window.innerWidth > 0 && window.innerHeight > 0) {
-        setViewportRatio(window.innerWidth / window.innerHeight)
-      }
-    }
-    updateViewportRatio()
-    window.addEventListener('resize', updateViewportRatio)
-    return () => window.removeEventListener('resize', updateViewportRatio)
-  }, [])
-
+  // Fit within panel: max width 320px, maintain canonical ratio
   const maxW = 320
-  const baseRatio = dims.width / dims.height
-  const shouldMatchLiveViewport = activeBp === 'mobile' || activeBp === 'small_mobile'
-  const liveRatio = shouldMatchLiveViewport && viewportRatio > 0 ? viewportRatio : baseRatio
-  const previewH = Math.round(Math.min(dims.height, maxW / Math.max(liveRatio, 0.1)))
-  const previewW = Math.round(previewH * liveRatio)
+  const previewW = Math.min(dims.width, maxW)
+  const previewH = Math.round(previewW / canonicalRatio)
 
   // Image URLs — dipilih berdasarkan activeBp agar preview editor
   // cocok dengan image yang benar-benar dirender di live per breakpoint.
@@ -713,7 +677,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
             ))}
           </div>
           <span className={styles.devicePreviewEditing} aria-live="polite">
-            Editing: <strong>{BREAKPOINT_LABELS[activeBp]}</strong>
+            Editing: <strong>{BREAKPOINT_LABELS[activeBp as BreakpointKey]}</strong>
           </span>
         </div>
 
@@ -777,10 +741,8 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                 alt={asset.alt_text ?? asset.filename}
                 draggable={false}
                 style={{
-                  objectFit: effectiveSettings.object_fit,
-                  objectPosition: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
-                  transform: `scale(${effectiveSettings.scale / 100})`,
-                  transformOrigin: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
+                  // Uses shared getBackgroundStyleFromResolved() — same as Live Hero
+                  ...getBackgroundStyleFromResolved(effectiveSettings),
                   // Dim BG slightly saat layer cutout aktif
                   opacity: hasCutout && activeLayer === 'cutout' ? 0.7 : 1,
                   transition: 'opacity 0.2s',
@@ -806,17 +768,8 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                 data-visual-position-y={cutoutSettings.position_y}
                 data-visual-scale={cutoutSettings.scale}
                 style={{
-                  // Contain ensures the full transparent PNG is visible (no crop).
-                  // translate+scale transform positions it per presentation_settings.
-                  objectFit: 'contain',
-                  objectPosition: '50% 50%',
-                  // Always apply transform (auto mode = translate(0%,0%) scale(1))
-                  transform: cutoutTransformToCSS(
-                    cutoutSettings.position_x,
-                    cutoutSettings.position_y,
-                    cutoutSettings.scale,
-                  ),
-                  transformOrigin: '50% 50%',
+                  // Uses shared getCutoutLayerStyle() — same formula as Live Hero
+                  ...getCutoutLayerStyle(cutoutSettings),
                   opacity: cutoutOpacity / 100,
                   // Highlight border saat layer cutout aktif
                   outline: activeLayer === 'cutout' && cutoutEffectiveSettings.mode === 'custom'
@@ -1240,46 +1193,51 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
 
             {showTypography && (
               <>
-                {/* ── Realtime Typography Preview ──────────────────── */}
-                {/* ─ Step 6G Enhanced Typography Preview ─ */}
+                {/* ── Typography Preview (Step 6H: uses shared helpers from presentation.ts) */}
                 {(() => {
                   const typo = effectiveSettings.typography
-                  // Match Public Hero formula exactly (LayeredHero.tsx)
-                  const liveHeadingPx = TYPO_BASE_REM * 16 * (typo.font_size / 100)
-                  // subMult matches LayeredHero.tsx getSubheadingTypographyStyle exactly
-                  const subMult = Math.max(70, Math.min(typo.font_size, 130))
-                  const liveSubPx = TYPO_SUB_REM * 16 * (subMult / 100)
-                  const liveVpWidth = LIVE_VIEWPORT_WIDTH[activeBp] ?? 390
-                  const typoScale = previewW / liveVpWidth
-                  const headingPx = liveHeadingPx * typoScale
-                  const subPx = liveSubPx * typoScale
+                  const bp = activeBp as BreakpointKey
 
-                  // CTA safe area — matches LayeredHero ctaLayer:
-                  // padding-bottom: var(--space-10) = 2.5rem = 40px at 16px root
-                  // CTA button height approx 48px + margin
-                  // We represent this as a % of preview canvas height
-                  // ctaLayer bottom=0, padBottom=40px+~48px CTA ≈ 88px at live 100svh
-                  // For preview, scale similarly. Use a fixed 18% of canvas height as safe area.
-                  const ctaSafeAreaPct = 20 // % of canvas height from bottom
-                  const ctaSafeAreaPx = Math.round(previewH * (ctaSafeAreaPct / 100))
+                  // Font sizes in px for preview canvas — uses shared helper from presentation.ts.
+                  // Same formula as Live, scaled to canvas dimensions via canonical aspect ratio.
+                  const headingPx = getHeadingFontSizePxForPreview(typo, previewW, previewH, bp)
+                  const subPx = getSubheadingFontSizePxForPreview(typo, previewW, previewH, bp)
 
-                  // Estimate typography bounding box height for overlap check
-                  // Approximate: heading lines * lineHeight * fontSize + subheading
-                  // Use 2 lines heading + 1 line subheading as estimate
+                  // CTA safe area — uses CTA_SAFE_AREA_FRACTION from presentation.ts
+                  // (matches ctaLayer layout in LayeredHero.module.css)
+                  const ctaSafeAreaPx = Math.round(previewH * CTA_SAFE_AREA_FRACTION)
+
+                  // Overlap check: estimated typo block bottom vs CTA safe top
                   const estimatedTypoHeightPct = ((headingPx * 1.1 * 2 + subPx * 1.4) / previewH) * 100
                   const typoBottomPct = typo.y + estimatedTypoHeightPct
-                  const ctaSafeTopPct = 100 - ctaSafeAreaPct
+                  const ctaSafeTopPct = 100 - CTA_SAFE_AREA_FRACTION * 100
                   const hasOverlap = typoBottomPct > ctaSafeTopPct
+
+                  // Shared BG style — same helper as Live Hero
+                  const bgStyle = getBackgroundStyleFromResolved(effectiveSettings)
+                  // Shared cutout style — same helper as Live Hero
+                  const cutoutStyle = getCutoutLayerStyle(cutoutSettings)
+                  // Typography container — same helper as Live Hero
+                  // (% positioning is coordinate-system agnostic)
+                  const typoContainerStyle = {
+                    left: `${typo.x}%`,
+                    top: `${typo.y}%`,
+                    width: `${typo.width}%`,
+                    textAlign: typo.alignment as 'left' | 'center' | 'right',
+                    cursor: isCustom ? (isDraggingTypo ? 'grabbing' : 'grab') : 'default',
+                  }
 
                   return (
                     <>
                       <div className={styles.typoPreviewWrap}>
                         <div className={styles.typoPreviewLabel}>
-                          📐 Preview Komposit — {BREAKPOINT_LABELS[activeBp as BreakpointKey]}
+                          📐 Preview Komposit — {BREAKPOINT_LABELS[bp]}
                           {isCustom && <span className={styles.typoPreviewDragHint}> · Drag text untuk pindah</span>}
                         </div>
 
-                        {/* Composite canvas: BG + Cutout + Typography + CTA Safe Area */}
+                        {/* Composite canvas: BG + Cutout + Typography + CTA Safe Area
+                            All styles computed by the SAME helpers as LayeredHero (Live).
+                            Canvas is smaller but % coordinates are identical. */}
                         <div
                           className={styles.typoCanvas}
                           style={{
@@ -1292,7 +1250,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                           onPointerUp={handleTypoCanvasPointerUp}
                           onPointerLeave={handleTypoCanvasPointerUp}
                         >
-                          {/* Background */}
+                          {/* Background — getBackgroundStyleFromResolved() shared with Live */}
                           {previewUrl && (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -1300,19 +1258,14 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                               src={previewUrl}
                               alt=""
                               draggable={false}
-                              style={{
-                                objectFit: effectiveSettings.object_fit,
-                                objectPosition: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
-                                transform: `scale(${effectiveSettings.scale / 100})`,
-                                transformOrigin: `${effectiveSettings.position_x}% ${effectiveSettings.position_y}%`,
-                              }}
+                              style={bgStyle}
                             />
                           )}
 
                           {/* Dark overlay — matches public hero overlayOpacity=30 */}
                           <div className={styles.typoCanvasOverlay} />
 
-                          {/* Cutout */}
+                          {/* Cutout — getCutoutLayerStyle() shared with Live */}
                           {hasCutout && cutoutUrl && (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -1320,31 +1273,14 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                               src={cutoutUrl}
                               alt=""
                               draggable={false}
-                              style={{
-                                objectFit: 'contain',
-                                objectPosition: '50% 50%',
-                                transform: cutoutTransformToCSS(
-                                  cutoutSettings.position_x,
-                                  cutoutSettings.position_y,
-                                  cutoutSettings.scale,
-                                ),
-                                transformOrigin: '50% 50%',
-                              }}
+                              style={cutoutStyle}
                             />
                           )}
 
-                          {/* Typography bounding box + text
-                              Uses IDENTICAL formula as LayeredHero.tsx.
-                              Font sizes proportionally scaled by previewW/liveVpWidth. */}
+                          {/* Typography — % positions identical to Live; px font-size scaled to canvas */}
                           <div
                             className={`${styles.typoCanvasText} ${hasOverlap ? styles.typoCanvasTextOverlap : ''}`}
-                            style={{
-                              left: `${typo.x}%`,
-                              top: `${typo.y}%`,
-                              width: `${typo.width}%`,
-                              textAlign: typo.alignment,
-                              cursor: isCustom ? (isDraggingTypo ? 'grabbing' : 'grab') : 'default',
-                            }}
+                            style={typoContainerStyle}
                           >
                             <div
                               className={styles.typoCanvasHeading}
@@ -1357,39 +1293,35 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                             >
                               {previewHeading ?? 'JAECOO J8'}
                             </div>
-                            {(previewSubheading !== undefined || true) && (
-                              <div
-                                className={styles.typoCanvasSubheading}
-                                style={{
-                                  fontSize: `${subPx}px`,
-                                  fontWeight: typo.font_weight >= 600
-                                    ? Math.max(400, typo.font_weight - 100)
-                                    : typo.font_weight,
-                                  letterSpacing: typo.letter_spacing !== 0
-                                    ? `${typo.letter_spacing * 0.5}em`
-                                    : undefined,
-                                  lineHeight: 1.4,
-                                }}
-                              >
-                                {previewSubheading ?? 'Luxury SUV'}
-                              </div>
-                            )}
+                            <div
+                              className={styles.typoCanvasSubheading}
+                              style={{
+                                fontSize: `${subPx}px`,
+                                fontWeight: typo.font_weight >= 600
+                                  ? Math.max(400, typo.font_weight - 100)
+                                  : typo.font_weight,
+                                letterSpacing: typo.letter_spacing !== 0
+                                  ? `${typo.letter_spacing * 0.5}em`
+                                  : undefined,
+                                lineHeight: 1.4,
+                              }}
+                            >
+                              {previewSubheading ?? 'Luxury SUV'}
+                            </div>
                           </div>
 
-                          {/* CTA Safe Area indicator — matches ctaLayer in LayeredHero */}
+                          {/* CTA Safe Area — CTA_SAFE_AREA_FRACTION from presentation.ts */}
                           <div
                             className={`${styles.typoCanvasCtaSafe} ${hasOverlap ? styles.typoCanvasCtaSafeWarning : ''}`}
                             style={{ height: ctaSafeAreaPx }}
                           >
                             <span className={styles.typoCanvasCtaLabel}>CTA SAFE AREA</span>
-                            {/* Placeholder CTA buttons */}
                             <div className={styles.typoCanvasCtaButtons}>
                               <span className={styles.typoCanvasCtaBtn}>Talk to Alvan →</span>
                               <span className={styles.typoCanvasCtaBtnGhost}>Spesifikasi</span>
                             </div>
                           </div>
 
-                          {/* Drag hint when not custom */}
                           {!isCustom && (
                             <div className={styles.typoCanvasLockHint}>
                               Pilih CUSTOM untuk drag
@@ -1397,7 +1329,6 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                           )}
                         </div>
 
-                        {/* Overlap warning */}
                         {hasOverlap && (
                           <div className={styles.typoOverlapWarning}>
                             ⚠ Typography kemungkinan overlap area CTA
@@ -1405,7 +1336,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                         )}
 
                         <div className={styles.typoPreviewHint}>
-                          Preview realtime · {Math.round(typoScale * 100)}% skala dari live ({liveVpWidth}px)
+                          Preview realtime · rasio {Math.round(BREAKPOINT_ASPECT_RATIO[bp] * 100) / 100}
                         </div>
                       </div>
 
@@ -1537,7 +1468,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                         />
                       </div>
                       <div className={styles.sliderDisabledNote} style={{ marginTop: -4, marginBottom: 4 }}>
-                        100% = {TYPO_BASE_REM}rem ({TYPO_BASE_REM * 16}px) · Live heading: {Math.round(liveHeadingPx)}px
+                        100% = 4rem (64px) · Live heading: {Math.round((4 * effectiveSettings.typography.font_size / 100) * 16)}px
                       </div>
 
                       {/* Font Weight */}
