@@ -66,6 +66,39 @@ export default async function AdminDashboardPage() {
         ))}
       </div>
 
+      {/* Global site structure — visual controls intentionally deferred to final pass */}
+      <section className={styles.siteStructure}>
+        <div>
+          <p className={styles.sectionKicker}>GLOBAL DESIGN SYSTEM</p>
+          <h2 className={styles.structureTitle}>Website Structure</h2>
+          <p className={styles.structureIntro}>
+            Semua section utama sudah dipetakan. Detail visual, responsive tuning, typography,
+            animation, dan live preview akan diselesaikan pada final visual pass.
+          </p>
+        </div>
+        <div className={styles.structureGrid}>
+          {[
+            ['01', 'Hero', 'Cinematic J5 EV'],
+            ['02', 'JAECOO Range', 'J5 EV · J7 SHS · J8 SHS'],
+            ['03', 'Experience', 'Go Further · Stay Connected · Arrive Different'],
+            ['04', 'Technology', 'SHS · EV · Intelligent Driving · Smart Cockpit'],
+            ['05', 'Promo', 'Current Offers'],
+            ['06', 'About Alvan', 'Sales Consultant'],
+            ['07', 'Journal', 'News · Tips · Review · Promo'],
+            ['08', 'Global CTA', 'Talk to Alvan'],
+          ].map(([no, title, desc]) => (
+            <div className={styles.structureCard} key={no}>
+              <span>{no}</span>
+              <div>
+                <strong>{title}</strong>
+                <p>{desc}</p>
+              </div>
+              <small>STRUCTURE READY</small>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Architecture note */}
       <div className={styles.note}>
         <h2 className={styles.noteTitle}>Architecture Status</h2>

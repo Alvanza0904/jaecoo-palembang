@@ -91,13 +91,7 @@
   color: var(--color-white);
 }
 
-.logoSub {
-  font-size: var(--text-xs);
-  font-weight: var(--weight-medium);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: var(--color-gold);
-}
+.logoSub { display:none; }
 
 /* ─── Desktop Nav ─────────────────────────────────────── */
 
@@ -140,12 +134,13 @@
     height: var(--header-height-desktop);
   }
 
-  .nav {
-    display: flex;
+  /* Global header is intentionally minimal: logo + hamburger on every layout. */
+  .nav,
+  .cta {
+    display: none;
   }
 
-  .cta {
-    display: block;
-    flex-shrink: 0;
+  .toggle {
+    display: flex;
   }
 }

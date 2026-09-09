@@ -1131,8 +1131,14 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
   const ovInit = getSection('overview') as { headline?: string; description?: string }
   const techInit = getSection('technology') as { headline?: string; description?: string }
 
-  const [overview, setOverview] = useState({ headline: ovInit.headline ?? '', description: ovInit.description ?? '' })
-  const [technology, setTechnology] = useState({ headline: techInit.headline ?? '', description: techInit.description ?? '' })
+  const [overview, setOverview] = useState({
+    headline: ovInit.headline ?? '',
+    description: ovInit.description ?? '',
+  })
+  const [technology, setTechnology] = useState({
+    headline: techInit.headline ?? '',
+    description: techInit.description ?? '',
+  })
   const [isPending, startTransition] = useTransition()
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
 
@@ -1153,18 +1159,55 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
     })
   }
 
+  const sections = [
+    { id: 'hero', no: '01', title: 'Hero', desc: 'Hero visual, headline, background, cutout dan art direction.', status: 'Media + Visual Editor' },
+    { id: 'overview', no: '02', title: 'Overview', desc: 'Opening story, positioning dan pengenalan model.', status: 'Content ready' },
+    { id: 'experience', no: '03', title: 'Experience', desc: 'Storytelling pengalaman, comfort dan lifestyle.', status: 'Section ready' },
+    { id: 'technology', no: '04', title: 'Technology', desc: 'Teknologi utama dan feature storytelling.', status: 'Content ready' },
+    { id: 'specifications', no: '05', title: 'Specifications', desc: 'Spesifikasi teknis dan kategori detail.', status: 'Data ready' },
+    { id: 'colors', no: '06', title: 'Colors', desc: 'Pilihan warna dan media setiap warna.', status: `${model.model_colors?.length ?? 0} colors` },
+    { id: 'variants', no: '07', title: 'Variants', desc: 'Varian, harga dan status ketersediaan.', status: `${model.model_variants?.length ?? 0} variants` },
+    { id: 'cta', no: '08', title: 'CTA / Conversion', desc: 'CTA model, WhatsApp, test drive dan finance flow.', status: 'Section ready' },
+  ]
+
   return (
     <div className={styles.section}>
-      <h2 className={styles.sectionTitle}>Content</h2>
-      <p className={styles.sectionNote}>
-        Konten tersimpan di Supabase model_content. Perubahan langsung terefleksi di public website.
-      </p>
+      <div className={styles.sectionHeader}>
+        <div>
+          <h2 className={styles.sectionTitle}>Page Structure</h2>
+          <p className={styles.sectionNote}>
+            Struktur halaman model sudah disiapkan. Penyesuaian visual, responsive preview, animation,
+            typography dan art direction dilakukan pada final visual pass.
+          </p>
+        </div>
+      </div>
 
       {feedback && <Feedback type={feedback.type} message={feedback.msg} />}
 
-      {/* Overview */}
+      <div className={styles.contentSectionGrid}>
+        {sections.map((section) => (
+          <div key={section.id} className={styles.contentSectionCard}>
+            <div className={styles.contentSectionNo}>{section.no}</div>
+            <div className={styles.contentSectionBody}>
+              <div className={styles.contentSectionTop}>
+                <h3>{section.title}</h3>
+                <span className={styles.contentSectionStatus}>{section.status}</span>
+              </div>
+              <p>{section.desc}</p>
+              <span className={styles.contentSectionHint}>Visual editor → Final QA</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div className={styles.contentBlock}>
-        <h3 className={styles.contentBlockTitle}>Overview</h3>
+        <div className={styles.contentBlockHeader}>
+          <div>
+            <p className={styles.contentBlockKicker}>CONTENT</p>
+            <h3 className={styles.contentBlockTitle}>Overview</h3>
+          </div>
+          <span className={styles.contentSectionStatus}>Editable</span>
+        </div>
         <div className={styles.field}>
           <label className={styles.label}>Headline</label>
           <input
@@ -1192,9 +1235,14 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
         </button>
       </div>
 
-      {/* Technology */}
       <div className={styles.contentBlock}>
-        <h3 className={styles.contentBlockTitle}>Technology</h3>
+        <div className={styles.contentBlockHeader}>
+          <div>
+            <p className={styles.contentBlockKicker}>CONTENT</p>
+            <h3 className={styles.contentBlockTitle}>Technology</h3>
+          </div>
+          <span className={styles.contentSectionStatus}>Editable</span>
+        </div>
         <div className={styles.field}>
           <label className={styles.label}>Headline</label>
           <input

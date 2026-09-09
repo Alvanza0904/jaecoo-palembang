@@ -10,11 +10,11 @@ import { ScrollHeader } from "./ScrollHeader";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 
 export const NAV_LINKS = [
-  { label: "Model", href: "/model" },
-  { label: "Promo", href: "/promo" },
-  { label: "JAECOO Journal", href: "/berita" },
-  { label: "Gallery", href: "/gallery" },
-  { label: "Sales", href: "/sales-jaecoo-palembang" },
+  { label: "MODELS", href: "/model" },
+  { label: "PROMO", href: "/promo" },
+  { label: "BERITA", href: "/berita" },
+  { label: "GALLERY", href: "/gallery" },
+  { label: "SALES ALVAN", href: "/sales-jaecoo-palembang" },
 ];
 
 export function Header() {
