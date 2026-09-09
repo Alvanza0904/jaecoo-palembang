@@ -875,41 +875,26 @@
   user-select: none;
 }
 
-/* Typography bounding box — dashed border, draggable when CUSTOM */
-.typoCanvasTypographyLayer {
+/*
+ * Typography world: the exact public Hero typography is rendered at the
+ * breakpoint design coordinate size and the entire world is scaled down to
+ * the editor canvas. No second font-size/wrapping system is used.
+ */
+.typoCanvasWorld {
   position: absolute;
   left: 0;
   top: 0;
+  transform-origin: 0 0;
   pointer-events: none;
 }
 
+/* Typography bounding box — dashed border, draggable when CUSTOM */
 .typoCanvasText {
   position: absolute;
-  /* Same geometry as Live; outline does not affect layout. */
   outline: 1px dashed rgba(200, 169, 110, 0.55);
   transition: outline-color 0.15s;
   user-select: none;
-  pointer-events: none;
-}
-
-.typoCanvasInner {
-  position: relative;
-}
-
-.typoCanvasTagline {
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.9);
-  opacity: 0.9;
-}
-
-.typoCanvasHeadingBlock {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+  pointer-events: auto;
 }
 
 .typoCanvasText:hover {
@@ -919,16 +904,6 @@
 /* Red bounding box when overlapping CTA safe area */
 .typoCanvasTextOverlap {
   outline-color: rgba(239, 68, 68, 0.75);
-}
-
-.typoCanvasHeading {
-  color: #ffffff;
-  /* font-size, font-weight, letter-spacing, line-height and font-family come from shared helpers */
-}
-
-.typoCanvasSubheading {
-  color: rgba(255, 255, 255, 0.72);
-  /* font-size, font-weight, letter-spacing, line-height and font-family come from shared helpers */
 }
 
 /* CTA safe area — anchored to bottom of canvas */

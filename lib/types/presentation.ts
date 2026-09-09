@@ -153,29 +153,13 @@ export const BREAKPOINT_ASPECT_RATIO: Record<BreakpointKey, number> = {
 }
 
 /**
- * STEP 6I: Canonical reference viewport widths per breakpoint.
+ * Design coordinate width used ONLY by the Editor typography miniature.
  *
- * These are the DESIGN REFERENCE widths — the typical device viewport
- * the typography was intended to be displayed at for each breakpoint.
- * They are used to correctly scale font-size from Live px → Preview px.
- *
- * Formula: previewFontPx = liveFontPx * (previewW / REFERENCE_WIDTH[bp])
- *
- * This ensures that font/container_width ratio is identical between
- * the Editor preview and the Live Hero, producing the same line wrapping.
- *
- * Reference widths:
- *   Desktop:      1440px  — standard HD design target
- *   Tablet:        768px  — iPad / standard tablet portrait
- *   Mobile:        390px  — iPhone 14 Pro / common Android flagship
- *   Small Mobile:  375px  — iPhone SE / iPhone 13 mini
- *
- * These are design/reference widths for the breakpoint coordinate system.
- * On public pages, the active breakpoint is still selected by the existing
- * CSS media-query thresholds; the editor preview uses the matching reference
- * coordinate space so its typography can be rendered as a scaled Hero clone.
+ * This is not a device-width assumption and is not used by the Public Hero.
+ * The Editor renders the real Hero typography at this coordinate width and
+ * scales the whole coordinate space down to its preview canvas.
  */
-export const BREAKPOINT_REFERENCE_WIDTH: Record<BreakpointKey, number> = {
+export const BREAKPOINT_DESIGN_WIDTH: Record<BreakpointKey, number> = {
   desktop:      1440,
   tablet:        768,
   mobile:        390,
@@ -413,17 +397,7 @@ export interface TypographyContainerStyle {
  * Used by both Live and Editor.
  */
 export function resolveTypographyFontFamily(typo: TypographyPlacement): string {
-  const family = typo.font_family ?? TYPOGRAPHY_DEFAULT_FONT
-  const cssVariables: Record<TypographyFontFamily, string> = {
-    'Manrope': 'var(--font-manrope, sans-serif)',
-    'Montserrat': 'var(--font-montserrat, sans-serif)',
-    'Outfit': 'var(--font-outfit, sans-serif)',
-    'Plus Jakarta Sans': 'var(--font-plus-jakarta-sans, sans-serif)',
-    'Space Grotesk': 'var(--font-space-grotesk, sans-serif)',
-    'IBM Plex Sans': 'var(--font-ibm-plex-sans, sans-serif)',
-    'Exo 2': 'var(--font-exo-2, sans-serif)',
-  }
-  return cssVariables[family]
+  return typo.font_family ?? TYPOGRAPHY_DEFAULT_FONT
 }
 
 /**
@@ -457,7 +431,7 @@ export function getHeadingStyle(typo: TypographyPlacement): TypographyHeadingSty
     fontWeight: typo.font_weight,
     letterSpacing: `${typo.letter_spacing}em`,
     lineHeight: 1.1,
-    fontFamily: resolveTypographyFontFamily(typo),
+    fontFamily: `'${resolveTypographyFontFamily(typo)}', var(--font-sans, 'Manrope', sans-serif)`,
   }
 }
 
@@ -472,7 +446,7 @@ export function getSubheadingStyle(typo: TypographyPlacement): TypographySubhead
     fontWeight: typo.font_weight >= 600 ? Math.max(400, typo.font_weight - 100) : typo.font_weight,
     letterSpacing: typo.letter_spacing !== 0 ? `${typo.letter_spacing * 0.5}em` : undefined,
     lineHeight: 1.4,
-    fontFamily: resolveTypographyFontFamily(typo),
+    fontFamily: `'${resolveTypographyFontFamily(typo)}', var(--font-sans, 'Manrope', sans-serif)`,
   }
 }
 
@@ -491,11 +465,56 @@ export function getTypographyContainerStyle(typo: TypographyPlacement): Typograp
 }
 
 /**
- * The editor preview uses BREAKPOINT_REFERENCE_WIDTH only as the width of a
- * virtual Hero coordinate space. The complete typography layer is rendered
- * with the exact Live styles and then uniformly scaled into the preview.
- * It is NOT used to calculate a second font-size formula.
+ * Typography preview coordinate space.
+ *
+ * IMPORTANT: the editor does NOT recalculate typography into a second
+ * font-size system. The preview creates a miniature Hero coordinate space
+ * at the breakpoint design width, renders the exact same Hero typography CSS
+ * inside it, then scales that whole coordinate space down to the editor canvas.
+ *
+ * This preserves browser text metrics, wrapping, line-height, letter-spacing,
+ * font family, and the exact heading/subheading DOM flow used by LayeredHero.
  */
+export function getTypographyPreviewCoordinateSpace(
+  breakpoint: BreakpointKey,
+): { width: number; height: number } {
+  const width = BREAKPOINT_DESIGN_WIDTH[breakpoint]
+  const height = width / BREAKPOINT_ASPECT_RATIO[breakpoint]
+  return { width, height }
+}
+
+export function getTypographyPreviewScale(
+  breakpoint: BreakpointKey,
+  previewWidth: number,
+): number {
+  const { width } = getTypographyPreviewCoordinateSpace(breakpoint)
+  return previewWidth / width
+}
+
+// Legacy preview font helpers are kept for compatibility with any external
+// consumers, but the VisualMediaEditor no longer uses them for rendering.
+// Rendering through a scaled coordinate space is the canonical preview path.
+export function getHeadingFontSizePxForPreview(
+  typo: TypographyPlacement,
+  previewW: number,
+  _previewH: number,
+  breakpoint: BreakpointKey,
+): number {
+  const liveFontPx = getHeadingFontSizeRem(typo.font_size) * 16
+  const { width } = getTypographyPreviewCoordinateSpace(breakpoint)
+  return liveFontPx * (previewW / width)
+}
+
+export function getSubheadingFontSizePxForPreview(
+  typo: TypographyPlacement,
+  previewW: number,
+  _previewH: number,
+  breakpoint: BreakpointKey,
+): number {
+  const liveFontPx = getSubheadingFontSizeRem(typo.font_size) * 16
+  const { width } = getTypographyPreviewCoordinateSpace(breakpoint)
+  return liveFontPx * (previewW / width)
+}
 
 // ─── CTA safe area ────────────────────────────────────────────────────────
 
