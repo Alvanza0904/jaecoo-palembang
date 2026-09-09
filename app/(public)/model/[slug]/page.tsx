@@ -15,13 +15,13 @@ import { notFound } from "next/navigation";
 import { getModelBySlug, getModelSlugs } from "@/lib/supabase/queries";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
-import { GoldLine } from "@/components/ui/GoldLine";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/motion/Reveal";
 import { Stagger } from "@/components/motion/Stagger";
 import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
 import { LayeredHero } from "@/components/hero/LayeredHero";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
+import { ModelOverview } from "@/components/model/ModelOverview";
 import { FinanceCalculator } from "@/components/finance/FinanceCalculator";
 import { PriceDisplay } from "@/components/price/PriceDisplay";
 import { priceStatusAllowsCalculator } from "@/lib/types/model";
@@ -123,29 +123,8 @@ export default async function ModelPage({ params }: ModelPageProps) {
         />
       )}
 
-      {/* ── Model Description ── */}
-      <section className={styles.descSection}>
-        <Container>
-          <Reveal variant="fade-up">
-            <div className={styles.descContent}>
-              <GoldLine width="short" className={styles.descGold} />
-              <h2 className={styles.descName}>{model.name}</h2>
-              <p className={styles.descText}>{model.description}</p>
-
-              <div className={styles.descPrice}>
-                <PriceDisplay
-                  price_status={model.default_variant.price_status}
-                  price_idr={model.default_variant.price_idr}
-                  price_display={model.default_variant.price_display}
-                  price_display_override={model.default_variant.price_display_override}
-                  price_region={model.default_variant.price_region}
-                  className={styles.descPriceDisplay}
-                />
-              </div>
-            </div>
-          </Reveal>
-        </Container>
-      </section>
+      {/* ── Model Overview — STEP 6K ── */}
+      <ModelOverview model={model} />
 
       {/* ── Technology Preview ── */}
       <section className={styles.techPreview}>
