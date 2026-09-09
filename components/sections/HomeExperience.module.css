@@ -49,7 +49,7 @@
 .promoCopy>p:not(.eyebrow):not(.promoModel){color:rgba(255,255,255,.58);max-width:450px}
 .promoCopy .textLink{color:#fff;margin-top:34px}
 .journal{padding:clamp(80px,11vw,160px) var(--container-padding);background:var(--color-off-white)}
-.journalHead{max-width:1440px;margin:auto;display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:55px}
+.journalHead{max-width:1440px;margin:auto;display:flex;justify-content:space-between;align-items:flex-end;gap:30px;margin-bottom:55px}
 .journalGrid{max-width:1440px;margin:auto;display:grid;grid-template-columns:1.7fr 1fr 1fr;gap:18px}
 .featuredArticle,.article{display:block}
 .featuredArticle .media{height:440px}
@@ -65,7 +65,7 @@
 .aboutCopy h2{font-size:clamp(70px,10vw,150px);line-height:.8;letter-spacing:-.07em;margin-bottom:12px}
 .aboutRole{font-size:13px;letter-spacing:.05em;color:var(--color-ink-muted);margin-bottom:30px}
 .aboutBody{max-width:480px;color:var(--color-ink-muted);font-size:17px;margin-bottom:30px}
-.aboutPortrait{min-height:480px;background:linear-gradient(145deg,#c9c5bd,#8f8b83);display:flex;align-items:end;justify-content:center;overflow:hidden}
+.aboutPortrait{min-height:480px;background:linear-gradient(145deg,#c9c5bd,#8f8b83);display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
 .aboutPortrait span{font-size:clamp(50px,8vw,110px);font-weight:700;letter-spacing:-.06em;color:rgba(255,255,255,.45)}
 .finalCta{padding:clamp(90px,13vw,190px) var(--container-padding);background:#111;color:#fff;text-align:center}
 .finalCta .eyebrow{color:var(--color-gold-light)}

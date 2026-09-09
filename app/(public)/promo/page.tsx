@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getActivePromos } from "@/lib/data/promos";
-import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
