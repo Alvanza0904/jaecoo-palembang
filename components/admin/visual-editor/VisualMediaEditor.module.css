@@ -876,16 +876,40 @@
 }
 
 /* Typography bounding box — dashed border, draggable when CUSTOM */
+.typoCanvasTypographyLayer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+}
+
 .typoCanvasText {
   position: absolute;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  /* Bounding box indicator — dashed gold */
+  /* Same geometry as Live; outline does not affect layout. */
   outline: 1px dashed rgba(200, 169, 110, 0.55);
-  padding: 2px;
   transition: outline-color 0.15s;
   user-select: none;
+  pointer-events: none;
+}
+
+.typoCanvasInner {
+  position: relative;
+}
+
+.typoCanvasTagline {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+  opacity: 0.9;
+}
+
+.typoCanvasHeadingBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
 .typoCanvasText:hover {
@@ -899,14 +923,12 @@
 
 .typoCanvasHeading {
   color: #ffffff;
-  font-family: var(--font-sans, 'Manrope', sans-serif);
-  /* font-size, font-weight, letter-spacing, line-height from inline style */
+  /* font-size, font-weight, letter-spacing, line-height and font-family come from shared helpers */
 }
 
 .typoCanvasSubheading {
   color: rgba(255, 255, 255, 0.72);
-  font-family: var(--font-sans, 'Manrope', sans-serif);
-  /* font-size, font-weight, letter-spacing, line-height from inline style */
+  /* font-size, font-weight, letter-spacing, line-height and font-family come from shared helpers */
 }
 
 /* CTA safe area — anchored to bottom of canvas */

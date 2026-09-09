@@ -170,9 +170,10 @@ export const BREAKPOINT_ASPECT_RATIO: Record<BreakpointKey, number> = {
  *   Mobile:        390px  — iPhone 14 Pro / common Android flagship
  *   Small Mobile:  375px  — iPhone SE / iPhone 13 mini
  *
- * These values are DESIGN CONSTANTS, not hardcoded viewport assumptions.
- * They represent the viewport width the breakpoint CSS was authored for.
- * Changing them changes the preview ↔ live scaling relationship.
+ * These are design/reference widths for the breakpoint coordinate system.
+ * On public pages, the active breakpoint is still selected by the existing
+ * CSS media-query thresholds; the editor preview uses the matching reference
+ * coordinate space so its typography can be rendered as a scaled Hero clone.
  */
 export const BREAKPOINT_REFERENCE_WIDTH: Record<BreakpointKey, number> = {
   desktop:      1440,
@@ -412,7 +413,17 @@ export interface TypographyContainerStyle {
  * Used by both Live and Editor.
  */
 export function resolveTypographyFontFamily(typo: TypographyPlacement): string {
-  return typo.font_family ?? TYPOGRAPHY_DEFAULT_FONT
+  const family = typo.font_family ?? TYPOGRAPHY_DEFAULT_FONT
+  const cssVariables: Record<TypographyFontFamily, string> = {
+    'Manrope': 'var(--font-manrope, sans-serif)',
+    'Montserrat': 'var(--font-montserrat, sans-serif)',
+    'Outfit': 'var(--font-outfit, sans-serif)',
+    'Plus Jakarta Sans': 'var(--font-plus-jakarta-sans, sans-serif)',
+    'Space Grotesk': 'var(--font-space-grotesk, sans-serif)',
+    'IBM Plex Sans': 'var(--font-ibm-plex-sans, sans-serif)',
+    'Exo 2': 'var(--font-exo-2, sans-serif)',
+  }
+  return cssVariables[family]
 }
 
 /**
@@ -446,7 +457,7 @@ export function getHeadingStyle(typo: TypographyPlacement): TypographyHeadingSty
     fontWeight: typo.font_weight,
     letterSpacing: `${typo.letter_spacing}em`,
     lineHeight: 1.1,
-    fontFamily: `'${resolveTypographyFontFamily(typo)}', var(--font-sans, 'Manrope', sans-serif)`,
+    fontFamily: resolveTypographyFontFamily(typo),
   }
 }
 
@@ -461,7 +472,7 @@ export function getSubheadingStyle(typo: TypographyPlacement): TypographySubhead
     fontWeight: typo.font_weight >= 600 ? Math.max(400, typo.font_weight - 100) : typo.font_weight,
     letterSpacing: typo.letter_spacing !== 0 ? `${typo.letter_spacing * 0.5}em` : undefined,
     lineHeight: 1.4,
-    fontFamily: `'${resolveTypographyFontFamily(typo)}', var(--font-sans, 'Manrope', sans-serif)`,
+    fontFamily: resolveTypographyFontFamily(typo),
   }
 }
 
@@ -480,43 +491,11 @@ export function getTypographyContainerStyle(typo: TypographyPlacement): Typograp
 }
 
 /**
- * STEP 6I: Compute heading font-size in px for the editor preview canvas.
- *
- * CORRECT FORMULA:
- *   previewFontPx = liveFontPx × (previewW / REFERENCE_WIDTH[breakpoint])
- *
- * This ensures font/container_width ratio is identical between preview and live,
- * so text wrapping is the same regardless of canvas size.
- *
- * REFERENCE_WIDTH is the canonical viewport width the breakpoint was designed for
- * (e.g., 390px for mobile = iPhone 14 Pro). It is a design constant, not a
- * hardcoded device assumption.
- *
- * REMOVED: The old formula used `liveEquivW = canvasH × aspectRatio` which was
- * incorrect when canvasH ≠ canvasW / aspectRatio (as was the case for mobile
- * in STEP 6H where mobile dims were 160×240 instead of the correct 160×284).
+ * The editor preview uses BREAKPOINT_REFERENCE_WIDTH only as the width of a
+ * virtual Hero coordinate space. The complete typography layer is rendered
+ * with the exact Live styles and then uniformly scaled into the preview.
+ * It is NOT used to calculate a second font-size formula.
  */
-export function getHeadingFontSizePxForPreview(
-  typo: TypographyPlacement,
-  previewW: number,
-  _previewH: number,           // kept for API compatibility, no longer used
-  breakpoint: BreakpointKey,
-): number {
-  const liveFontPx = getHeadingFontSizeRem(typo.font_size) * 16
-  const refW = BREAKPOINT_REFERENCE_WIDTH[breakpoint]
-  return liveFontPx * (previewW / refW)
-}
-
-export function getSubheadingFontSizePxForPreview(
-  typo: TypographyPlacement,
-  previewW: number,
-  _previewH: number,           // kept for API compatibility, no longer used
-  breakpoint: BreakpointKey,
-): number {
-  const liveFontPx = getSubheadingFontSizeRem(typo.font_size) * 16
-  const refW = BREAKPOINT_REFERENCE_WIDTH[breakpoint]
-  return liveFontPx * (previewW / refW)
-}
 
 // ─── CTA safe area ────────────────────────────────────────────────────────
 

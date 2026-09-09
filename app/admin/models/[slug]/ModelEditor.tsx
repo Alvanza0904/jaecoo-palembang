@@ -463,6 +463,7 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
         <VisualMediaEditor
           asset={visualEditorAsset}
           cutoutAsset={visualEditorCutoutAsset}
+          previewTagline="OVERVIEW"
           previewHeading={model.tagline || model.name}
           previewSubheading={model.name}
           onClose={() => {

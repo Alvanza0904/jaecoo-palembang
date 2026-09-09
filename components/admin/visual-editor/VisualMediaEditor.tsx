@@ -46,9 +46,11 @@ import {
   resolveBreakpointSettings,
   getBackgroundStyleFromResolved,
   getCutoutLayerStyle,
-  getHeadingFontSizePxForPreview,
-  getSubheadingFontSizePxForPreview,
   resolveTypographyFontFamily,
+  getHeadingStyle,
+  getSubheadingStyle,
+  getTypographyContainerStyle,
+  BREAKPOINT_REFERENCE_WIDTH,
 } from '@/lib/types/presentation'
 import { detectCutoutBBox } from '@/lib/utils/cutout-bbox'
 import styles from './VisualMediaEditor.module.css'
@@ -72,7 +74,7 @@ const BP_ICONS: Record<BreakpointKey, string> = {
 const CHECKER_BG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='8' height='8' fill='%23ccc'/%3E%3Crect x='8' y='8' width='8' height='8' fill='%23ccc'/%3E%3Crect x='8' width='8' height='8' fill='%23eee'/%3E%3Crect y='8' width='8' height='8' fill='%23eee'/%3E%3C/svg%3E")`
 
 // STEP 6I: Typography constants and helpers imported from @/lib/types/presentation.
-// TYPOGRAPHY_FONT_OPTIONS, getHeadingFontSizePxForPreview, resolveTypographyFontFamily, etc.
+// Shared typography helpers are imported from presentation.ts; do not duplicate geometry here.
 // DO NOT duplicate them here — single source of truth.
 
 // ─── Props ────────────────────────────────────────────────
@@ -84,7 +86,9 @@ interface Props {
   cutoutAsset?: MediaAsset | null
   onClose: () => void
   onUpdated: (asset: MediaAsset) => void
-  /** Preview text for the typography preview (e.g. model tagline) */
+  /** Preview eyebrow text; matches the public Hero tagline when provided. */
+  previewTagline?: string
+  /** Preview heading text; matches the public Hero heading. */
   previewHeading?: string
   /** Preview subtext for the typography preview (e.g. model name) */
   previewSubheading?: string
@@ -117,7 +121,7 @@ function tabModeClass(mode: PresentationMode, s: typeof styles): string {
 
 // ─── Component ───────────────────────────────────────────
 
-export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, previewHeading, previewSubheading }: Props) {
+export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, previewTagline, previewHeading, previewSubheading }: Props) {
 
   // ── Core state ─────────────────────────────────────────
   const [activeBp, setActiveBp] = useState<BreakpointKey>('desktop')
@@ -176,11 +180,10 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
   // STEP 6I: previewW and previewH define the composite canvas size.
   // previewH is always derived from previewW / canonicalRatio, ensuring the
   // canvas IS at the exact canonical aspect ratio for that breakpoint.
-  // This is required for font scaling: getHeadingFontSizePxForPreview() uses
-  // BREAKPOINT_REFERENCE_WIDTH[bp] to scale live rem→px down to canvas px,
-  // ensuring font/container_width ratio is identical between preview and live.
-  // All % coordinates (BG position, cutout, typography left/top/width) are
-  // coordinate-system agnostic and work identically in Preview and Live.
+  // Typography preview uses a virtual Hero coordinate space at the same
+  // breakpoint reference width as the public Hero, then scales that complete
+  // layer into the compact preview canvas. This avoids a second typography
+  // rendering system and preserves wrapping/layout metrics.
   const dims = BREAKPOINT_PREVIEW_DIMS[activeBp as BreakpointKey]
   const canonicalRatio = BREAKPOINT_ASPECT_RATIO[activeBp as BreakpointKey]
 
@@ -1199,32 +1202,31 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                   const typo = effectiveSettings.typography
                   const bp = activeBp as BreakpointKey
 
-                  // Font sizes in px for preview canvas — uses shared helper from presentation.ts.
-                  // Same formula as Live, scaled to canvas dimensions via canonical aspect ratio.
-                  const headingPx = getHeadingFontSizePxForPreview(typo, previewW, previewH, bp)
-                  const subPx = getSubheadingFontSizePxForPreview(typo, previewW, previewH, bp)
+                  // Render typography in a virtual Hero coordinate space and scale
+                  // the whole layer. The actual heading/subheading styles come from
+                  // the same helpers used by LayeredHero.
+                  const referenceWidth = BREAKPOINT_REFERENCE_WIDTH[bp]
+                  const referenceHeight = referenceWidth / BREAKPOINT_ASPECT_RATIO[bp]
+                  const previewScale = previewW / referenceWidth
 
                   // CTA safe area — uses CTA_SAFE_AREA_FRACTION from presentation.ts
-                  // (matches ctaLayer layout in LayeredHero.module.css)
                   const ctaSafeAreaPx = Math.round(previewH * CTA_SAFE_AREA_FRACTION)
 
-                  // Overlap check: estimated typo block bottom vs CTA safe top
-                  const estimatedTypoHeightPct = ((headingPx * 1.1 * 2 + subPx * 1.4) / previewH) * 100
+                  // Conservative overlap estimate for the editor warning only.
+                  const headingPx = 64 * (typo.font_size / 100)
+                  const subPx = Math.max(70, Math.min(typo.font_size, 130)) * 1.375 * 16 / 100
+                  const estimatedTypoHeightPct = ((headingPx * 1.1 * 2 + subPx * 1.4) / referenceHeight) * 100
                   const typoBottomPct = typo.y + estimatedTypoHeightPct
                   const ctaSafeTopPct = 100 - CTA_SAFE_AREA_FRACTION * 100
                   const hasOverlap = typoBottomPct > ctaSafeTopPct
 
-                  // Shared BG style — same helper as Live Hero
+                  // Shared BG style — same helper as Live
                   const bgStyle = getBackgroundStyleFromResolved(effectiveSettings)
-                  // Shared cutout style — same helper as Live Hero
+                  // Shared cutout style — same helper as Live
                   const cutoutStyle = getCutoutLayerStyle(cutoutSettings)
-                  // Typography container — same helper as Live Hero
-                  // (% positioning is coordinate-system agnostic)
+                  // Shared typography container geometry — same helper as Live
                   const typoContainerStyle = {
-                    left: `${typo.x}%`,
-                    top: `${typo.y}%`,
-                    width: `${typo.width}%`,
-                    textAlign: typo.alignment as 'left' | 'center' | 'right',
+                    ...getTypographyContainerStyle(typo),
                     cursor: isCustom ? (isDraggingTypo ? 'grabbing' : 'grab') : 'default',
                   }
 
@@ -1278,38 +1280,40 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                             />
                           )}
 
-                          {/* Typography — % positions identical to Live; px font-size scaled to canvas */}
+                          {/* Typography — same Hero coordinate space and shared styles as Live.
+                              Only the complete typography layer is scaled into the preview. */}
                           <div
-                            className={`${styles.typoCanvasText} ${hasOverlap ? styles.typoCanvasTextOverlap : ''}`}
-                            style={typoContainerStyle}
+                            className={styles.typoCanvasTypographyLayer}
+                            style={{
+                              width: referenceWidth,
+                              height: referenceHeight,
+                              transform: `scale(${previewScale})`,
+                              transformOrigin: 'top left',
+                            }}
                           >
                             <div
-                              className={styles.typoCanvasHeading}
-                              style={{
-                                fontSize: `${headingPx}px`,
-                                fontWeight: typo.font_weight,
-                                letterSpacing: `${typo.letter_spacing}em`,
-                                lineHeight: 1.1,
-                                fontFamily: `'${resolveTypographyFontFamily(typo)}', var(--font-sans, 'Manrope', sans-serif)`,
-                              }}
+                              className={`${styles.typoCanvasText} ${hasOverlap ? styles.typoCanvasTextOverlap : ''}`}
+                              style={typoContainerStyle}
                             >
-                              {previewHeading ?? 'JAECOO J8'}
-                            </div>
-                            <div
-                              className={styles.typoCanvasSubheading}
-                              style={{
-                                fontSize: `${subPx}px`,
-                                fontWeight: typo.font_weight >= 600
-                                  ? Math.max(400, typo.font_weight - 100)
-                                  : typo.font_weight,
-                                letterSpacing: typo.letter_spacing !== 0
-                                  ? `${typo.letter_spacing * 0.5}em`
-                                  : undefined,
-                                lineHeight: 1.4,
-                                fontFamily: `'${resolveTypographyFontFamily(typo)}', var(--font-sans, 'Manrope', sans-serif)`,
-                              }}
-                            >
-                              {previewSubheading ?? 'Luxury SUV'}
+                              {previewTagline && (
+                                <p className={styles.typoCanvasTagline}>
+                                  {previewTagline}
+                                </p>
+                              )}
+                              <div className={styles.typoCanvasHeadingBlock}>
+                                <h1
+                                  className={styles.typoCanvasHeading}
+                                  style={getHeadingStyle(typo)}
+                                >
+                                  {previewHeading ?? 'JAECOO J8'}
+                                </h1>
+                                <p
+                                  className={styles.typoCanvasSubheading}
+                                  style={getSubheadingStyle(typo)}
+                                >
+                                  {previewSubheading ?? 'Luxury SUV'}
+                                </p>
+                              </div>
                             </div>
                           </div>
 
