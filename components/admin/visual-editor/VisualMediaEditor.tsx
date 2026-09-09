@@ -42,7 +42,6 @@ import {
   CTA_SAFE_AREA_FRACTION,
   computeAutoScale,
   resolveBreakpointSettings,
-  cutoutTransformToCSS,
   getBackgroundStyleFromResolved,
   getCutoutLayerStyle,
   getHeadingFontSizePxForPreview,
@@ -498,7 +497,6 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
     if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
     autosaveTimer.current = setTimeout(() => { void doSave() }, 1500)
     return () => { if (autosaveTimer.current) clearTimeout(autosaveTimer.current) }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cutoutAssetSettings, doSave, isDirty, settings])
 
   // ── 5F: Bbox detection — runs once per asset open (or after reset) ────

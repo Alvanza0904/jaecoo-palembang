@@ -1,9 +1,12 @@
 /**
  * JAECOO Palembang — Presentation Settings Types
  * STEP 5E: Visual Media Editor
+ * STEP 6H: Unified rendering helpers — single source of truth for
+ *           Editor Preview AND Public Hero geometry calculations.
  *
- * Defines per-breakpoint visual presentation data for media assets.
- * Used by the Visual Media Editor and consumed by Hero/section renderers.
+ * ALL geometry/typography calculations live here.
+ * LayeredHero.tsx and VisualMediaEditor.tsx both import from this file.
+ * There must be NO duplicate formulas in consumer files.
  */
 
 export type BreakpointKey = 'desktop' | 'tablet' | 'mobile' | 'small_mobile'
@@ -13,7 +16,6 @@ export type InheritSource = 'desktop' | 'tablet' | 'mobile' | null
 
 /**
  * Typography placement readiness.
- * Values are stored but not yet used for rendering — Hero Editor (next step).
  */
 export interface TypographyPlacement {
   /** Horizontal position 0–100 */
@@ -34,7 +36,6 @@ export interface TypographyPlacement {
 
 /**
  * Cutout positioning per breakpoint.
- * Used when media has a vehicle cutout (transparent PNG/WebP).
  */
 export interface CutoutPlacement {
   /** Horizontal position 0–100 */
@@ -49,62 +50,30 @@ export interface CutoutPlacement {
  * Per-breakpoint presentation settings.
  */
 export interface BreakpointSettings {
-  /** 
-   * auto: system defaults based on focal point
-   * custom: admin-defined overrides
-   * inherited: copies from a parent breakpoint
-   */
   mode: PresentationMode
-
-  /** Which breakpoint to inherit from (only used when mode = 'inherited') */
   inherit_from?: InheritSource
-
-  /** Horizontal position 0–100 (maps to object-position X%) */
   position_x: number
-
-  /** Vertical position 0–100 (maps to object-position Y%) */
   position_y: number
-
-  /** Scale % — 100 = default, 110 = 10% zoom in */
   scale: number
-
-  /** CSS object-fit */
   object_fit: ObjectFit
-
-  /** Focal point X 0–100 — used by 'auto' mode */
   focal_x: number
-
-  /** Focal point Y 0–100 — used by 'auto' mode */
   focal_y: number
-
-  /** Cutout positioning (only relevant if asset has cutout_url) */
   cutout: CutoutPlacement
-
-  /** Typography placement readiness (for Hero Editor next step) */
   typography: TypographyPlacement
 }
 
 /**
  * STEP 5F: Cutout bounding box metadata.
- * Stored under _meta key in PresentationSettings.
- * Computed client-side once per asset via Canvas API alpha scan.
  */
 export interface PresentationMeta {
   cutout_bbox?: {
-    /** Left edge of vehicle, as % of cutout canvas width */
     x_pct: number
-    /** Top edge of vehicle, as % of cutout canvas height */
     y_pct: number
-    /** Vehicle width, as % of cutout canvas width */
     w_pct: number
-    /** Vehicle height, as % of cutout canvas height */
     h_pct: number
   }
-  /** ISO timestamp when bbox was last computed */
   bbox_computed_at?: string
-  /** True if bbox indicates a processing anomaly */
   bbox_anomaly?: boolean
-  /** Description of anomaly if present */
   bbox_anomaly_reason?: string
 }
 
@@ -117,6 +86,53 @@ export interface PresentationSettings {
   tablet?: Partial<BreakpointSettings>
   mobile?: Partial<BreakpointSettings>
   small_mobile?: Partial<BreakpointSettings>
+}
+
+// ─── Typography Constants (SINGLE SOURCE OF TRUTH) ────────────────────────
+//
+// These values define the Live Hero typography scale.
+// Editor Preview uses these exact same constants — no duplication.
+//
+// Live Hero: heading font-size = (TYPOGRAPHY_BASE_REM × font_size/100) rem
+//            at root 16px  →  100% = 4rem = 64px
+//
+// Live Hero: subheading font-size = (SUBHEADING_BASE_REM × subMult/100) rem
+//            subMult = clamp(70, font_size, 130)
+//            at root 16px  →  100% ≈ 1.375rem ≈ 22px
+
+/** Heading base font-size in rem. 100% multiplier → 4rem = 64px at 16px root. */
+export const TYPOGRAPHY_BASE_REM = 4
+
+/** Subheading base font-size in rem. Maps to --text-lg = 1.375rem. */
+export const SUBHEADING_BASE_REM = 1.375
+
+/**
+ * Canonical aspect ratios for each breakpoint preview canvas.
+ * These define the W:H ratio of the preview container in the editor.
+ * They represent the typical viewport shape for each device class,
+ * NOT a specific pixel width — the editor can scale the canvas to
+ * any pixel size while preserving this ratio, and the geometry
+ * (object-position %, transform %, typography %) stays proportionally
+ * identical to the live hero at that breakpoint.
+ *
+ * Desktop  16:9   — typical HD landscape screen
+ * Tablet   4:3    — iPad / landscape tablet
+ * Mobile   9:16   — portrait phone
+ * Small Mobile  ~9:18  — narrow portrait phone (SE, older models)
+ */
+export const BREAKPOINT_ASPECT_RATIO: Record<BreakpointKey, number> = {
+  desktop:      16 / 9,
+  tablet:       4 / 3,
+  mobile:       9 / 16,
+  small_mobile: 9 / 18,
+}
+
+/** Preview container dimensions (px) — used for sizing only, ratio is canonical above. */
+export const BREAKPOINT_PREVIEW_DIMS: Record<BreakpointKey, { width: number; height: number }> = {
+  desktop:      { width: 320, height: 180 },
+  tablet:       { width: 240, height: 180 },
+  mobile:       { width: 160, height: 240 },
+  small_mobile: { width: 130, height: 220 },
 }
 
 /** Default auto settings per breakpoint */
@@ -161,25 +177,11 @@ export const BREAKPOINT_LABELS: Record<BreakpointKey, string> = {
   small_mobile: 'Small Mobile',
 }
 
-/** Preview container dimensions (px) */
-export const BREAKPOINT_PREVIEW_DIMS: Record<BreakpointKey, { width: number; height: number }> = {
-  desktop:      { width: 320, height: 180 },  // 16:9 landscape
-  tablet:       { width: 240, height: 180 },  // 4:3
-  mobile:       { width: 160, height: 240 },  // 9:16 portrait
-  small_mobile: { width: 130, height: 220 },  // narrow portrait
-}
+/** All breakpoints in display order */
+export const BREAKPOINT_ORDER: BreakpointKey[] = ['desktop', 'tablet', 'mobile', 'small_mobile']
 
-/**
- * AUTO mode: target fill ratio for the vehicle per breakpoint.
- * Defines how much of the hero height the vehicle should fill.
- * These are tuned so the car looks "right-sized" at each breakpoint
- * without manual adjustment.
- *
- * desktop: vehicle fills ~70% of hero height (dramatic, wide canvas)
- * tablet:  vehicle fills ~80% (slightly tighter)
- * mobile:  vehicle fills ~90% (portrait — more vertical space)
- * small_mobile: vehicle fills ~95% (very tight portrait)
- */
+// ─── AUTO mode fill targets ───────────────────────────────────────────────
+
 export const BREAKPOINT_AUTO_FILL_TARGET: Record<BreakpointKey, number> = {
   desktop:      0.70,
   tablet:       0.80,
@@ -187,34 +189,15 @@ export const BREAKPOINT_AUTO_FILL_TARGET: Record<BreakpointKey, number> = {
   small_mobile: 0.95,
 }
 
-/**
- * Compute the AUTO scale % for a cutout based on its bbox and the target
- * breakpoint. Returns a scale value (100 = image natural size) such that
- * the vehicle occupies approximately BREAKPOINT_AUTO_FILL_TARGET of the
- * hero height.
- *
- * @param bboxHPct   - vehicle height as % of cutout canvas (from cutout_bbox.h_pct)
- * @param breakpoint - target breakpoint
- * @returns scale as integer percentage (e.g. 140 = 140%)
- */
 export function computeAutoScale(bboxHPct: number, breakpoint: BreakpointKey): number {
   if (!bboxHPct || bboxHPct <= 0) return 100
   const fillTarget = BREAKPOINT_AUTO_FILL_TARGET[breakpoint]
-  // cutout canvas fills the hero (100% height). vehicle occupies bboxHPct% of that.
-  // We want vehicle to fill fillTarget of hero height.
-  // So: scale = fillTarget / (bboxHPct / 100)
   const scale = Math.round((fillTarget / (bboxHPct / 100)) * 100)
-  // Clamp to reasonable range
   return Math.max(50, Math.min(400, scale))
 }
 
-/** All breakpoints in display order */
-export const BREAKPOINT_ORDER: BreakpointKey[] = ['desktop', 'tablet', 'mobile', 'small_mobile']
+// ─── Breakpoint resolver ─────────────────────────────────────────────────
 
-/**
- * Resolve effective settings for a breakpoint.
- * Handles inheritance chain: inherited → parent → auto defaults.
- */
 export function resolveBreakpointSettings(
   settings: PresentationSettings,
   key: BreakpointKey,
@@ -226,13 +209,11 @@ export function resolveBreakpointSettings(
   const mode: PresentationMode = raw.mode ?? 'auto'
 
   if (mode === 'inherited' && raw.inherit_from) {
-    // Resolve from parent
     const parent = resolveBreakpointSettings(settings, raw.inherit_from, assetFocalX, assetFocalY)
     return { ...parent, mode: 'inherited', inherit_from: raw.inherit_from }
   }
 
   if (mode === 'auto') {
-    // Compute auto-scale from bbox if available so vehicle fills the frame naturally
     const autoScale = cutoutBboxHPct && cutoutBboxHPct > 0
       ? computeAutoScale(cutoutBboxHPct, key)
       : DEFAULT_BREAKPOINT_SETTINGS.cutout.scale
@@ -268,11 +249,8 @@ export function resolveBreakpointSettings(
   }
 }
 
-/**
- * Shared background rendering style used by Public LayeredHero.
- * This preserves the editor's existing background semantics exactly:
- * object-fit/object-position + scale with transform-origin at the chosen position.
- */
+// ─── Background rendering (shared: Live + Editor) ─────────────────────────
+
 export interface PresentationLayerStyle {
   objectFit: ObjectFit
   objectPosition: string
@@ -280,6 +258,11 @@ export interface PresentationLayerStyle {
   transformOrigin: string
 }
 
+/**
+ * Compute background CSS style from presentation settings.
+ * Used by BOTH LayeredHero (Live) and VisualMediaEditor (Preview).
+ * Single source of truth — no duplication.
+ */
 export function getBackgroundLayerStyle(
   settings: PresentationSettings,
   breakpoint: BreakpointKey,
@@ -297,42 +280,36 @@ export function getBackgroundLayerStyle(
 }
 
 /**
- * Convert presentation settings position (0–100) to CSS object-position string.
+ * Compute background CSS style from already-resolved BreakpointSettings.
+ * Use this when settings are already resolved (editor has effectiveSettings).
+ * Avoids double-resolving.
  */
-export function positionToCSS(x: number, y: number): string {
-  return `${x}% ${y}%`
+export function getBackgroundStyleFromResolved(
+  effective: BreakpointSettings,
+): PresentationLayerStyle {
+  const objectPosition = `${effective.position_x}% ${effective.position_y}%`
+  return {
+    objectFit: effective.object_fit,
+    objectPosition,
+    transform: `scale(${effective.scale / 100})`,
+    transformOrigin: objectPosition,
+  }
 }
 
-/**
- * Convert scale % to CSS transform.
- */
-export function scaleToCSS(scale: number): string {
-  return `scale(${scale / 100})`
-}
+// ─── Cutout rendering (shared: Live + Editor) ─────────────────────────────
 
 /**
- * Convert 0–100 Cutout coordinates to CSS transform for LayeredHero and
- * VisualMediaEditor canvas.
+ * Convert 0–100 Cutout coordinates to CSS transform.
+ * Used by BOTH LayeredHero (Live) and VisualMediaEditor (Preview).
  *
  * COORDINATE SYSTEM:
- *   - 50/50 = neutral center (no movement)
- *   - 0/0   = move cutout to top-left corner
- *   - 100/100 = move cutout to bottom-right corner
+ *   50/50 = neutral center (no movement)
+ *   0/0   = move cutout toward top-left
+ *   100/100 = move cutout toward bottom-right
  *
- * IMPLEMENTATION:
- *   We apply scale() first from center (50% 50%), then translate using
- *   percentage units. CSS translate(X%, Y%) references the element's own
- *   size — since the cutout element fills the hero (100vw / 100vh approx),
- *   each 1% ≈ 1% of hero width/height.
- *
- *   Neutral offset = 50 (maps to 0% shift).
- *   Max range: -50% to +50% from center.
- *
- *   translateX = (positionX - 50)%  →  range -50% to +50%
- *   translateY = (positionY - 50)%  →  range -50% to +50%
- *
- *   Scale is applied AFTER translate so the position is scale-independent
- *   (translate first, then scale from center).
+ * translateX = (positionX - 50)%  →  range -50% to +50%
+ * translateY = (positionY - 50)%  →  range -50% to +50%
+ * Scale applied after translate.
  */
 export function cutoutTransformToCSS(
   positionX: number,
@@ -340,9 +317,187 @@ export function cutoutTransformToCSS(
   scale: number,
 ): string {
   const safeScale = scale > 0 ? scale / 100 : 1
-  // Each unit of offset from 50 = 1% of the element's own size (which fills the hero)
-  const tX = positionX - 50  // -50 to +50
-  const tY = positionY - 50  // -50 to +50
-  // Apply translate then scale (not nested) so both are independent
+  const tX = positionX - 50
+  const tY = positionY - 50
   return `translate(${tX}%, ${tY}%) scale(${safeScale})`
+}
+
+/**
+ * Compute cutout CSS style from already-resolved CutoutPlacement.
+ * objectFit:contain + 50%/50% anchor + transform from cutoutTransformToCSS.
+ * Used by BOTH LayeredHero and VisualMediaEditor.
+ */
+export function getCutoutLayerStyle(cutout: CutoutPlacement): PresentationLayerStyle {
+  return {
+    objectFit: 'contain',
+    objectPosition: '50% 50%',
+    transform: cutoutTransformToCSS(cutout.position_x, cutout.position_y, cutout.scale),
+    transformOrigin: '50% 50%',
+  }
+}
+
+// ─── Typography rendering (shared: Live + Editor) ─────────────────────────
+
+export interface TypographyHeadingStyle {
+  fontSize: string
+  fontWeight: number
+  letterSpacing: string
+  lineHeight: number
+}
+
+export interface TypographySubheadingStyle {
+  fontSize: string
+  fontWeight: number
+  letterSpacing?: string
+  lineHeight: number
+}
+
+export interface TypographyContainerStyle {
+  position: 'absolute'
+  left: string
+  top: string
+  width: string
+  textAlign: 'left' | 'center' | 'right'
+}
+
+/**
+ * Compute heading font-size in rem from font_size multiplier.
+ * 100 = TYPOGRAPHY_BASE_REM rem = 4rem = 64px at 16px root.
+ * Used by BOTH Live and Editor.
+ */
+export function getHeadingFontSizeRem(font_size: number): number {
+  return (TYPOGRAPHY_BASE_REM * font_size) / 100
+}
+
+/**
+ * Compute subheading font-size in rem.
+ * subMult is clamped to [70, 130] to keep subheading readable.
+ * Used by BOTH Live and Editor.
+ */
+export function getSubheadingFontSizeRem(font_size: number): number {
+  const subMult = Math.max(70, Math.min(font_size, 130))
+  return (SUBHEADING_BASE_REM * subMult) / 100
+}
+
+/**
+ * Heading CSS style from TypographyPlacement.
+ * fontSize is in rem — identical in Live and Editor (browser resolves rem against root).
+ * Used by LayeredHero (Live). Editor uses px-scaled version via getHeadingStylePx().
+ */
+export function getHeadingStyle(typo: TypographyPlacement): TypographyHeadingStyle {
+  return {
+    fontSize: `${getHeadingFontSizeRem(typo.font_size)}rem`,
+    fontWeight: typo.font_weight,
+    letterSpacing: `${typo.letter_spacing}em`,
+    lineHeight: 1.1,
+  }
+}
+
+/**
+ * Subheading CSS style from TypographyPlacement.
+ * Used by LayeredHero (Live). Editor uses px-scaled version.
+ */
+export function getSubheadingStyle(typo: TypographyPlacement): TypographySubheadingStyle {
+  return {
+    fontSize: `${getSubheadingFontSizeRem(typo.font_size)}rem`,
+    fontWeight: typo.font_weight >= 600 ? Math.max(400, typo.font_weight - 100) : typo.font_weight,
+    letterSpacing: typo.letter_spacing !== 0 ? `${typo.letter_spacing * 0.5}em` : undefined,
+    lineHeight: 1.4,
+  }
+}
+
+/**
+ * Typography container positioning.
+ * Identical for Live and Editor (% values are coordinate-system agnostic).
+ */
+export function getTypographyContainerStyle(typo: TypographyPlacement): TypographyContainerStyle {
+  return {
+    position: 'absolute',
+    left: `${typo.x}%`,
+    top: `${typo.y}%`,
+    width: `${typo.width}%`,
+    textAlign: typo.alignment,
+  }
+}
+
+/**
+ * Compute heading font-size in px for the editor preview canvas.
+ *
+ * The editor canvas is smaller than the live viewport. To make text
+ * LOOK proportionally the same as on Live, we scale the rem value by
+ * the ratio of the canvas width to the live viewport width for that
+ * breakpoint.
+ *
+ * The live viewport width for each breakpoint is derived from
+ * BREAKPOINT_ASPECT_RATIO × a reference height (100svh). Because
+ * 100svh varies by device, we use the canonical aspect ratio instead:
+ * for a given canvas height H, the equivalent live width is:
+ *
+ *   liveEquivWidth = canvasH × BREAKPOINT_ASPECT_RATIO[bp]
+ *
+ * For portrait breakpoints (mobile, small_mobile) the ratio is < 1,
+ * so liveEquivWidth < canvasH. This is correct because on a phone the
+ * hero is tall and narrow — the font is large relative to the narrow
+ * width, which is what we want to replicate in the preview.
+ *
+ * formula:
+ *   liveFontPx  = fontSizeRem × 16   (rem at 16px root)
+ *   previewFontPx = liveFontPx × (canvasW / liveEquivWidth)
+ *               = liveFontPx × (canvasW / (canvasH × aspectRatio))
+ *               = liveFontPx / aspectRatio   (when canvasW = canvasH × aspectRatio, exact)
+ *
+ * This is mathematically identical to rendering at rem in a viewport
+ * that has the same aspect ratio as the canvas, which IS the semantic
+ * we want.
+ */
+export function getHeadingFontSizePxForPreview(
+  typo: TypographyPlacement,
+  canvasW: number,
+  canvasH: number,
+  breakpoint: BreakpointKey,
+): number {
+  const fontRem = getHeadingFontSizeRem(typo.font_size)
+  const liveFontPx = fontRem * 16
+  const liveEquivW = canvasH * BREAKPOINT_ASPECT_RATIO[breakpoint]
+  const scale = canvasW / liveEquivW
+  return liveFontPx * scale
+}
+
+export function getSubheadingFontSizePxForPreview(
+  typo: TypographyPlacement,
+  canvasW: number,
+  canvasH: number,
+  breakpoint: BreakpointKey,
+): number {
+  const fontRem = getSubheadingFontSizeRem(typo.font_size)
+  const liveFontPx = fontRem * 16
+  const liveEquivW = canvasH * BREAKPOINT_ASPECT_RATIO[breakpoint]
+  const scale = canvasW / liveEquivW
+  return liveFontPx * scale
+}
+
+// ─── CTA safe area ────────────────────────────────────────────────────────
+
+/**
+ * CTA safe area height as a fraction of canvas height.
+ * Matches ctaLayer in LayeredHero.module.css:
+ *   padding-bottom: var(--space-10) = 2.5rem = 40px
+ *   + CTA button height ≈ 48px (size="lg")
+ *   + gap = 12px
+ *   Total live ≈ 100px at 16px root
+ *
+ * Expressed as a fraction of hero height for proportional preview scaling.
+ * At 100svh ≈ 700px (typical mobile), 100/700 ≈ 0.143 → we use 0.18
+ * to give a comfortable visual margin.
+ */
+export const CTA_SAFE_AREA_FRACTION = 0.18
+
+// ─── Legacy helpers (kept for compatibility) ──────────────────────────────
+
+export function positionToCSS(x: number, y: number): string {
+  return `${x}% ${y}%`
+}
+
+export function scaleToCSS(scale: number): string {
+  return `scale(${scale / 100})`
 }
