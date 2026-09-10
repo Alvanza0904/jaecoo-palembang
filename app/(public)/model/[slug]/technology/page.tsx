@@ -25,7 +25,6 @@ import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
 import { Reveal } from "@/components/motion/Reveal";
 import { LineReveal } from "@/components/motion/LineReveal";
 import { LayeredHero } from "@/components/hero/LayeredHero";
-import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
