@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { HomeModelSlider } from "@/components/sections/HomeModelSlider";
+import { HomeDealerLocation } from "@/components/sections/HomeDealerLocation";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import {
   HomeExperienceSection,
@@ -20,7 +21,7 @@ import styles from "./page.module.css";
 export const metadata: Metadata = {
   title: "JAECOO Palembang — Dealer Resmi JAECOO",
   description:
-    "Jelajahi JAECOO J5 EV, J7 SHS, dan J8 Ardis SHS di Palembang. Konsultasi, test drive, simulasi kredit, promo dan informasi terbaru bersama Alvan.",
+    "Jelajahi JAECOO J5 EV, J7 SHS, dan J8 Ardis SHS di Palembang. Konsultasi, test drive, simulasi kredit, promo dan informasi terbaru bersama Alvan — Dealer Resmi Omoda Jaecoo Palembang.",
   alternates: { canonical: "/" },
 };
 
@@ -65,7 +66,7 @@ export default async function HomePage() {
         />
       </section>
 
-      {/* ── MODEL SHOWCASE SLIDER ────────────────────────────────── */}
+      {/* ── MODEL SHOWCASE SLIDER (J5 → J7 → J8) ────────────────── */}
       <HomeModelSlider models={models} />
 
       {/* ── EXPERIENCE ───────────────────────────────────────────── */}
@@ -85,6 +86,9 @@ export default async function HomePage() {
 
       {/* ── FINAL CTA ────────────────────────────────────────────── */}
       <HomeFinalCTA />
+
+      {/* ── DEALER LOCATION (Local SEO) ──────────────────────────── */}
+      <HomeDealerLocation />
     </>
   );
 }

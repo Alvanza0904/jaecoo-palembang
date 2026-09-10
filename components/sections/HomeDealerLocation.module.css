@@ -1,0 +1,132 @@
+/* ─── SECTION ───────────────────────────────────────────────────── */
+
+.section {
+  position: relative;
+  width: 100%;
+  background: #111111;
+  color: #ffffff;
+  padding: clamp(64px, 9vw, 120px) clamp(28px, 7vw, 120px);
+}
+
+.topLine {
+  position: absolute;
+  top: 0;
+  left: clamp(28px, 7vw, 120px);
+  right: clamp(28px, 7vw, 120px);
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ─── INNER GRID ─────────────────────────────────────────────────── */
+
+.inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(40px, 8vw, 140px);
+  align-items: start;
+}
+
+/* ─── LEFT: HEADING ─────────────────────────────────────────────── */
+
+.eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: clamp(38px, 5.5vw, 80px);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  color: #ffffff;
+  margin: 0;
+}
+
+/* ─── RIGHT: ADDRESS BODY ────────────────────────────────────────── */
+
+.body {
+  padding-top: 4px;
+}
+
+.address {
+  font-style: normal;
+  margin-bottom: 28px;
+}
+
+.dealerName {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.88);
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+}
+
+.street,
+.city,
+.province {
+  font-size: 15px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.52);
+  line-height: 1.8;
+  margin: 0;
+}
+
+.province {
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.note {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.38);
+  line-height: 1.65;
+  max-width: 480px;
+  margin-bottom: 28px;
+}
+
+.link {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  text-decoration: none;
+  transition: color 240ms ease, letter-spacing 240ms ease;
+}
+
+.link:hover {
+  color: var(--color-gold-light);
+  letter-spacing: 0.18em;
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .inner {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
+  .title {
+    font-size: clamp(40px, 12vw, 68px);
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding-inline: 22px;
+  }
+
+  .topLine {
+    left: 22px;
+    right: 22px;
+  }
+}

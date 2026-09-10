@@ -4,7 +4,7 @@
  * JAECOO Palembang — HomeModelSlider
  *
  * STEP 8: Cinematic horizontal model showcase for the homepage.
- * Replaces the stacked model card pattern with a single full-bleed slider.
+ * STEP 8.1: Sort guarantee J5->J7->J8 regardless of CMS/Supabase order.
  *
  * Features:
  * - Full-width cinematic layout, desktop + mobile
@@ -12,7 +12,7 @@
  * - Previous / next + dot navigation
  * - Smooth crossfade transition
  * - CMS/data-driven: renders from ModelData[]
- * - Lazy loads non-active slide images
+ * - Guaranteed J5->J7->J8 order via slug sort map
  */
 
 import { useState, useRef, useCallback, useEffect } from "react";
@@ -24,7 +24,23 @@ interface HomeModelSliderProps {
   models: ModelData[];
 }
 
-export function HomeModelSlider({ models }: HomeModelSliderProps) {
+/** Guaranteed display order regardless of CMS sort_order or Supabase return order */
+const SLUG_ORDER: Record<string, number> = {
+  "jaecoo-j5-ev":  0,
+  "jaecoo-j7-shs": 1,
+  "jaecoo-j8-shs": 2,
+};
+
+function sortModels(models: ModelData[]): ModelData[] {
+  return [...models].sort((a, b) => {
+    const ao = SLUG_ORDER[a.slug] ?? 99;
+    const bo = SLUG_ORDER[b.slug] ?? 99;
+    return ao - bo;
+  });
+}
+
+export function HomeModelSlider({ models: rawModels }: HomeModelSliderProps) {
+  const models = sortModels(rawModels);
   const [active, setActive] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
   const touchStartX = useRef<number | null>(null);
