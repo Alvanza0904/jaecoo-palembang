@@ -7,12 +7,13 @@ import styles from "./Container.module.css";
 
 interface ContainerProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
-  size?: "default" | "content" | "narrow";
+  size?: "default" | "wide" | "content" | "narrow";
 }
 
 export function Container({ children, size = "default", className = "", ...rest }: ContainerProps) {
   const cls = [
     styles.container,
+    size === "wide" ? styles["container--wide"] : "",
     size === "content" ? styles["container--content"] : "",
     size === "narrow" ? styles["container--narrow"] : "",
     className,
