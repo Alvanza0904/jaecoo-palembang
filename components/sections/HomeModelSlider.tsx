@@ -5,6 +5,11 @@
  *
  * STEP 8: Cinematic horizontal model showcase for the homepage.
  * STEP 8.1: Sort guarantee J5->J7->J8 regardless of CMS/Supabase order.
+ * STEP 8.2: Fix hasImage guard — was excluding local /images/ paths, causing
+ *           backdrop to always fall back to gradient. Now accepts both http
+ *           URLs and absolute /images/ paths.
+ *           Also: show J8 short_name with display label override so it reads
+ *           "J8 SHS ARDIS" instead of falling back to raw short_name.
  *
  * Features:
  * - Full-width cinematic layout, desktop + mobile
@@ -31,12 +36,36 @@ const SLUG_ORDER: Record<string, number> = {
   "jaecoo-j8-shs": 2,
 };
 
+/**
+ * Display label override per slug.
+ * Used when short_name from DB/CMS does not match the desired hero label.
+ * J8: "J8 Ardis" → "J8 SHS ARDIS"
+ * J7: "J7 SHS"   → "J7 SHS" (no change needed)
+ * J5: "J5 EV"    → "J5" (simplified for large hero display)
+ */
+const SLUG_DISPLAY_LABEL: Record<string, string> = {
+  "jaecoo-j5-ev":  "J5",
+  "jaecoo-j7-shs": "J7 SHS",
+  "jaecoo-j8-shs": "J8 SHS ARDIS",
+};
+
 function sortModels(models: ModelData[]): ModelData[] {
   return [...models].sort((a, b) => {
     const ao = SLUG_ORDER[a.slug] ?? 99;
     const bo = SLUG_ORDER[b.slug] ?? 99;
     return ao - bo;
   });
+}
+
+/**
+ * Returns true if the path is usable as an <img> src.
+ * Accepts both absolute HTTP(S) URLs and root-relative /images/ paths.
+ * Previously only accepted http URLs, which caused all local-asset models
+ * to fall back to the gradient backdrop and miss their hero images.
+ */
+function isValidImageSrc(src: string | undefined): boolean {
+  if (!src) return false;
+  return src.startsWith("http") || src.startsWith("/");
 }
 
 export function HomeModelSlider({ models: rawModels }: HomeModelSliderProps) {
@@ -100,7 +129,13 @@ export function HomeModelSlider({ models: rawModels }: HomeModelSliderProps) {
   const model = models[active];
   const desktopSrc = model.hero_media?.image?.desktop;
   const mobileSrc = model.hero_media?.image?.mobile ?? desktopSrc;
-  const hasImage = desktopSrc?.startsWith("http");
+  const hasImage = isValidImageSrc(desktopSrc);
+
+  // Use display label override if available, fall back to short_name
+  const displayLabel = SLUG_DISPLAY_LABEL[model.slug] ?? model.short_name;
+
+  // Tab labels also use the override
+  const getTabLabel = (m: ModelData) => SLUG_DISPLAY_LABEL[m.slug] ?? m.short_name;
 
   return (
     <section
@@ -125,7 +160,7 @@ export function HomeModelSlider({ models: rawModels }: HomeModelSliderProps) {
               loading="eager"
             />
             {/* Mobile override if different */}
-            {mobileSrc && mobileSrc !== desktopSrc && (
+            {isValidImageSrc(mobileSrc) && mobileSrc !== desktopSrc && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 className={[styles.backdropImg, styles.backdropImgMobile].join(" ")}
@@ -149,8 +184,10 @@ export function HomeModelSlider({ models: rawModels }: HomeModelSliderProps) {
         {/* Top — model identity */}
         <div className={styles.identity}>
           <p className={styles.brand}>JAECOO</p>
-          <h2 className={styles.modelName}>{model.short_name}</h2>
-          <p className={styles.tagline}>{model.tagline}</p>
+          <h2 className={styles.modelName}>{displayLabel}</h2>
+          {model.tagline && (
+            <p className={styles.tagline}>{model.tagline}</p>
+          )}
         </div>
 
         {/* Bottom — nav + CTA */}
@@ -165,7 +202,7 @@ export function HomeModelSlider({ models: rawModels }: HomeModelSliderProps) {
                 aria-label={`View ${m.short_name}`}
                 aria-current={i === active ? "true" : undefined}
               >
-                <span className={styles.tabName}>{m.short_name}</span>
+                <span className={styles.tabName}>{getTabLabel(m)}</span>
                 <span className={styles.tabLine} />
               </button>
             ))}
@@ -177,7 +214,7 @@ export function HomeModelSlider({ models: rawModels }: HomeModelSliderProps) {
             className={styles.cta}
             aria-label={`Explore ${model.name}`}
           >
-            EXPLORE {model.short_name}
+            EXPLORE {displayLabel}
             <span className={styles.ctaArrow}>→</span>
           </Link>
         </div>

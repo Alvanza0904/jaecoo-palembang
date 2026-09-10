@@ -2,61 +2,92 @@
  * JAECOO Palembang — HomeDealerLocation
  *
  * STEP 8.1: Local SEO dealer address section.
- * Placed before the main footer.
+ * STEP 8.2: Cinematic full-width background image design.
  *
  * Design principle:
- * - Premium, minimal typographic composition
- * - HTML semantic (<address>) for crawlability
+ * - Full-width cinematic section with background image
+ * - HTML semantic (<address>) for crawlability — address is always HTML text
  * - No Google Maps / iframe / map embed / coordinates
+ * - Image received via backgroundImage prop — ready for CMS integration later
  * - Consistent with site visual language (dark, editorial)
- * - Crawlable plain HTML text — no JS-rendered content
+ *
+ * CMS integration notes (for future step):
+ * - Component accepts `backgroundImage?: string` prop
+ * - When CMS is ready, pass image URL from DB as prop from parent (page.tsx)
+ * - Current fallback: gradient-only backdrop if no image is provided
+ * - This pattern avoids structural refactor when CMS integration is added
  */
 
 import Link from "next/link";
 import styles from "./HomeDealerLocation.module.css";
 
-export function HomeDealerLocation() {
+interface HomeDealerLocationProps {
+  /**
+   * URL of the background image.
+   * Pass from CMS/DB when available.
+   * Falls back to dark gradient if undefined.
+   */
+  backgroundImage?: string;
+}
+
+export function HomeDealerLocation({
+  backgroundImage,
+}: HomeDealerLocationProps) {
   return (
-    <section className={styles.section} aria-labelledby="dealer-location-title">
-      <div className={styles.inner}>
-        {/* Left: label + heading */}
-        <div className={styles.heading}>
-          <p className={styles.eyebrow}>Dealer Resmi</p>
-          <h2 id="dealer-location-title" className={styles.title}>
-            Omoda Jaecoo<br />Palembang
-          </h2>
-        </div>
-
-        {/* Right: address block */}
-        <div className={styles.body}>
-          <address className={styles.address}>
-            <p className={styles.dealerName}>
-              Dealer Resmi Omoda Jaecoo Palembang
-            </p>
-            <p className={styles.street}>
-              Komp. Graha Maju, Jl. Mayor HM. Rasyad Nawawi No.506 - 509
-            </p>
-            <p className={styles.city}>
-              9 Ilir, Kec. Ilir Tim. II, Kota Palembang
-            </p>
-            <p className={styles.province}>
-              Sumatera Selatan 30113
-            </p>
-          </address>
-
-          <p className={styles.note}>
-            Sales Jaecoo Palembang siap membantu konsultasi, test drive,
-            dan simulasi kredit langsung dari dealer.
-          </p>
-
-          <Link href="/sales-jaecoo-palembang" className={styles.link}>
-            Hubungi Sales ↗
-          </Link>
-        </div>
+    <section
+      className={styles.section}
+      aria-labelledby="dealer-location-title"
+    >
+      {/* Background image layer — CMS-ready */}
+      <div className={styles.backdrop} aria-hidden="true">
+        {backgroundImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            className={styles.backdropImg}
+            src={backgroundImage}
+            alt=""
+            loading="lazy"
+          />
+        ) : (
+          /* Fallback: cinematic dark gradient — same visual weight as image */
+          <div className={styles.backdropFallback} />
+        )}
+        <div className={styles.backdropOverlay} />
       </div>
 
-      {/* Decorative gold line */}
-      <div className={styles.topLine} aria-hidden="true" />
+      {/* Content */}
+      <div className={styles.inner}>
+        {/* Top label */}
+        <p className={styles.eyebrow}>Dealer Resmi</p>
+
+        {/* Dealer heading */}
+        <h2 id="dealer-location-title" className={styles.title}>
+          Omoda Jaecoo<br />Palembang
+        </h2>
+
+        {/* Divider */}
+        <div className={styles.divider} aria-hidden="true" />
+
+        {/* Semantic address block — crawlable HTML */}
+        <address className={styles.address}>
+          <p className={styles.dealerName}>
+            Dealer Resmi Omoda Jaecoo Palembang
+          </p>
+          <p className={styles.street}>
+            Komp. Graha Maju, Jl. Mayor HM. Rasyad Nawawi No.506&nbsp;-&nbsp;509
+          </p>
+          <p className={styles.cityLine}>
+            9 Ilir, Kec. Ilir Tim. II, Kota Palembang,<br />
+            Sumatera Selatan 30113
+          </p>
+        </address>
+
+        {/* CTA */}
+        <Link href="/sales-jaecoo-palembang" className={styles.cta}>
+          Hubungi Sales
+          <span className={styles.ctaArrow} aria-hidden="true">↗</span>
+        </Link>
+      </div>
     </section>
   );
 }

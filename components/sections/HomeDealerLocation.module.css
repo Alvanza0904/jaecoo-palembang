@@ -3,130 +3,193 @@
 .section {
   position: relative;
   width: 100%;
-  background: #111111;
-  color: #ffffff;
-  padding: clamp(64px, 9vw, 120px) clamp(28px, 7vw, 120px);
+  min-height: clamp(520px, 70vh, 800px);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background: #0d0d0d;
 }
 
-.topLine {
+/* ─── BACKDROP ──────────────────────────────────────────────────── */
+
+.backdrop {
   position: absolute;
-  top: 0;
-  left: clamp(28px, 7vw, 120px);
-  right: clamp(28px, 7vw, 120px);
-  height: 1px;
-  background: rgba(255, 255, 255, 0.08);
+  inset: 0;
 }
 
-/* ─── INNER GRID ─────────────────────────────────────────────────── */
+.backdropImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+}
+
+.backdropFallback {
+  position: absolute;
+  inset: 0;
+  /* Cinematic dark gradient — indistinguishable in terms of weight from an image overlay */
+  background:
+    radial-gradient(ellipse at 30% 60%, #1a1e28 0%, #0d0d0d 65%),
+    radial-gradient(ellipse at 80% 20%, #1e1a14 0%, transparent 60%);
+}
+
+.backdropOverlay {
+  position: absolute;
+  inset: 0;
+  /* Gradient: heavy at bottom (text area), lighter at top (lets image breathe) */
+  background:
+    linear-gradient(
+      to top,
+      rgba(8, 8, 8, 0.96) 0%,
+      rgba(8, 8, 8, 0.72) 35%,
+      rgba(8, 8, 8, 0.30) 65%,
+      rgba(8, 8, 8, 0.08) 100%
+    );
+}
+
+/* ─── INNER CONTENT ─────────────────────────────────────────────── */
 
 .inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: clamp(40px, 8vw, 140px);
-  align-items: start;
+  padding: clamp(80px, 12vw, 160px) clamp(28px, 6vw, 96px) clamp(64px, 9vw, 120px);
+  color: #ffffff;
 }
 
-/* ─── LEFT: HEADING ─────────────────────────────────────────────── */
+/* ─── EYEBROW ────────────────────────────────────────────────────── */
 
 .eyebrow {
   font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.20em;
+  font-weight: 700;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--color-gold);
   margin-bottom: 20px;
 }
 
+/* ─── HEADING ────────────────────────────────────────────────────── */
+
 .title {
-  font-size: clamp(38px, 5.5vw, 80px);
+  font-size: clamp(44px, 7.5vw, 112px);
   font-weight: 700;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.055em;
   line-height: 0.9;
   color: #ffffff;
-  margin: 0;
+  margin: 0 0 40px;
 }
 
-/* ─── RIGHT: ADDRESS BODY ────────────────────────────────────────── */
+/* ─── DIVIDER ────────────────────────────────────────────────────── */
 
-.body {
-  padding-top: 4px;
+.divider {
+  width: clamp(40px, 6vw, 80px);
+  height: 1px;
+  background: var(--color-gold);
+  margin-bottom: 36px;
+  opacity: 0.7;
 }
+
+/* ─── ADDRESS ────────────────────────────────────────────────────── */
 
 .address {
   font-style: normal;
-  margin-bottom: 28px;
+  margin-bottom: 40px;
+  max-width: 560px;
 }
 
 .dealerName {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: rgba(255, 255, 255, 0.88);
-  margin-bottom: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  letter-spacing: 0.10em;
+  color: rgba(255, 255, 255, 0.90);
+  margin-bottom: 18px;
 }
 
-.street,
-.city,
-.province {
-  font-size: 15px;
+.street {
+  font-size: clamp(15px, 1.8vw, 20px);
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.52);
-  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.70);
+  line-height: 1.65;
+  margin-bottom: 4px;
+}
+
+.cityLine {
+  font-size: clamp(15px, 1.8vw, 20px);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.46);
+  line-height: 1.65;
   margin: 0;
 }
 
-.province {
-  color: rgba(255, 255, 255, 0.38);
-}
+/* ─── CTA ────────────────────────────────────────────────────────── */
 
-.note {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.38);
-  line-height: 1.65;
-  max-width: 480px;
-  margin-bottom: 28px;
-}
-
-.link {
-  display: inline-block;
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--color-gold);
+  color: #ffffff;
   text-decoration: none;
-  transition: color 240ms ease, letter-spacing 240ms ease;
+  padding: 14px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  transition:
+    background 280ms ease,
+    border-color 280ms ease,
+    gap 280ms ease;
 }
 
-.link:hover {
-  color: var(--color-gold-light);
-  letter-spacing: 0.18em;
+.cta:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.50);
+  gap: 16px;
 }
 
-/* ─── RESPONSIVE ─────────────────────────────────────────────────── */
+.ctaArrow {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+/* ─── MOBILE ─────────────────────────────────────────────────────── */
 
 @media (max-width: 768px) {
+  .section {
+    min-height: clamp(480px, 85svh, 680px);
+    align-items: flex-end;
+  }
+
   .inner {
-    grid-template-columns: 1fr;
-    gap: 36px;
+    padding-inline: 22px;
+    padding-bottom: 52px;
   }
 
   .title {
-    font-size: clamp(40px, 12vw, 68px);
+    font-size: clamp(40px, 12vw, 72px);
+  }
+
+  .street,
+  .cityLine {
+    font-size: 15px;
+  }
+
+  .cta {
+    width: 100%;
+    justify-content: center;
+    font-size: 10px;
+    padding: 14px 20px;
   }
 }
 
 @media (max-width: 480px) {
-  .section {
-    padding-inline: 22px;
-  }
-
-  .topLine {
-    left: 22px;
-    right: 22px;
+  .title {
+    font-size: clamp(36px, 11vw, 60px);
   }
 }

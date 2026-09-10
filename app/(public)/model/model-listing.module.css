@@ -1,0 +1,445 @@
+/* ─── PAGE HEADER ──────────────────────────────────────────────── */
+
+.pageHeader {
+  padding: clamp(120px, 14vw, 200px) clamp(28px, 6vw, 96px) clamp(60px, 8vw, 100px);
+  background: #0d0d0d;
+  text-align: left;
+}
+
+.pageEyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin-bottom: 20px;
+}
+
+.pageTitle {
+  font-size: clamp(52px, 8vw, 128px);
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 0.9;
+  color: #ffffff;
+  margin: 0;
+}
+
+.pageTitle em {
+  font-style: normal;
+  color: rgba(255, 255, 255, 0.28);
+}
+
+/* ─── MODEL LIST ───────────────────────────────────────────────── */
+
+.modelList {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── INDIVIDUAL MODEL SECTION ─────────────────────────────────── */
+
+.modelSection {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  min-height: 560px;
+  max-height: 1000px;
+  overflow: hidden;
+  background: #0d0d0d;
+}
+
+/* ─── IMAGE LAYER ──────────────────────────────────────────────── */
+
+.imageLayer {
+  position: absolute;
+  inset: 0;
+}
+
+.modelImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.modelImgMobile {
+  display: none;
+}
+
+.imageFallback {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 65% 45%, #1a1e28, #0d0d0d 70%);
+}
+
+/* Overlay — varies by text position for readability */
+.imageOverlay {
+  position: absolute;
+  inset: 0;
+}
+
+/* J5: text bottom-left → dark on left and bottom */
+.posbottom_left .imageOverlay {
+  background:
+    linear-gradient(
+      105deg,
+      rgba(8, 8, 8, 0.78) 0%,
+      rgba(8, 8, 8, 0.30) 55%,
+      rgba(8, 8, 8, 0.08) 100%
+    ),
+    linear-gradient(
+      to top,
+      rgba(8, 8, 8, 0.80) 0%,
+      rgba(8, 8, 8, 0.20) 38%,
+      transparent 60%
+    );
+}
+
+/* J7: text center-right → dark on right */
+.poscenter_right .imageOverlay {
+  background:
+    linear-gradient(
+      -105deg,
+      rgba(8, 8, 8, 0.82) 0%,
+      rgba(8, 8, 8, 0.35) 52%,
+      rgba(8, 8, 8, 0.08) 100%
+    ),
+    linear-gradient(
+      to top,
+      rgba(8, 8, 8, 0.50) 0%,
+      transparent 45%
+    );
+}
+
+/* J8: text center-left → dark on left */
+.poscenter_left .imageOverlay {
+  background:
+    linear-gradient(
+      105deg,
+      rgba(8, 8, 8, 0.85) 0%,
+      rgba(8, 8, 8, 0.40) 50%,
+      rgba(8, 8, 8, 0.10) 100%
+    ),
+    linear-gradient(
+      to top,
+      rgba(8, 8, 8, 0.55) 0%,
+      transparent 45%
+    );
+}
+
+/* ─── TEXT BLOCK ───────────────────────────────────────────────── */
+
+.textBlock {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  max-width: 600px;
+}
+
+/* J5: bottom-left */
+.bottom_left {
+  left: clamp(32px, 6vw, 96px);
+  bottom: clamp(64px, 9vw, 120px);
+}
+
+/* J7: center-right */
+.center_right {
+  right: clamp(32px, 6vw, 96px);
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: right;
+  align-items: flex-end;
+}
+
+/* J8: center-left */
+.center_left {
+  left: clamp(32px, 6vw, 96px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* ─── TEXT ELEMENTS ────────────────────────────────────────────── */
+
+.modelEyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modelNumber {
+  color: rgba(200, 169, 110, 0.50);
+}
+
+.modelName {
+  font-size: clamp(64px, 10vw, 148px);
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 0.88;
+  color: #ffffff;
+  margin: 0 0 20px;
+  white-space: nowrap;
+}
+
+.modelTagline {
+  font-size: clamp(13px, 1.5vw, 17px);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.58);
+  max-width: 400px;
+  line-height: 1.55;
+  margin-bottom: 32px;
+}
+
+/* ─── ACTIONS ──────────────────────────────────────────────────── */
+
+.modelActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.modelCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 14px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.30);
+  transition:
+    background 280ms ease,
+    border-color 280ms ease,
+    gap 280ms ease;
+  white-space: nowrap;
+}
+
+.modelCta:hover {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.55);
+  gap: 16px;
+}
+
+.ctaArrow {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.modelCtaGhost {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  text-decoration: none;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  transition: color 240ms ease, border-color 240ms ease;
+  white-space: nowrap;
+}
+
+.modelCtaGhost:hover {
+  color: rgba(255, 255, 255, 0.80);
+  border-color: rgba(255, 255, 255, 0.40);
+}
+
+/* ─── BIG BACKGROUND NUMBER ────────────────────────────────────── */
+
+.bgNumber {
+  position: absolute;
+  font-size: clamp(160px, 28vw, 380px);
+  font-weight: 800;
+  letter-spacing: -0.07em;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.03);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* J5: bottom right */
+.posbottom_left .bgNumber {
+  right: -2%;
+  bottom: -6%;
+}
+
+/* J7: top left */
+.poscenter_right .bgNumber {
+  left: -2%;
+  top: -5%;
+}
+
+/* J8: bottom right */
+.poscenter_left .bgNumber {
+  right: -2%;
+  bottom: -6%;
+}
+
+/* ─── BOTTOM CTA ───────────────────────────────────────────────── */
+
+.bottomCta {
+  padding: clamp(90px, 13vw, 180px) clamp(28px, 6vw, 96px);
+  background: #111111;
+  color: #ffffff;
+  text-align: center;
+}
+
+.bottomEyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin-bottom: 20px;
+}
+
+.bottomTitle {
+  font-size: clamp(44px, 7vw, 100px);
+  font-weight: 700;
+  letter-spacing: -0.055em;
+  line-height: 0.92;
+  color: #ffffff;
+  margin: 0 0 40px;
+}
+
+.bottomTitle em {
+  font-style: normal;
+  color: rgba(255, 255, 255, 0.32);
+}
+
+.bottomLink {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-gold);
+  padding-bottom: 8px;
+  transition: color 240ms ease, border-color 240ms ease;
+}
+
+.bottomLink:hover {
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+}
+
+/* ─── MOBILE ───────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .pageHeader {
+    padding-inline: 22px;
+  }
+
+  .modelSection {
+    max-height: 100svh;
+    min-height: 520px;
+  }
+
+  .modelImgMobile {
+    display: block;
+  }
+
+  /* Hide desktop image if mobile override present */
+  .modelImg:first-child:not(:only-child) {
+    display: none;
+  }
+
+  /* Mobile: all text goes bottom-left for consistency and readability */
+  .textBlock {
+    left: 22px !important;
+    right: 22px !important;
+    bottom: 64px !important;
+    top: auto !important;
+    transform: none !important;
+    text-align: left !important;
+    align-items: flex-start !important;
+    max-width: 100%;
+  }
+
+  /* Override center-right J7 for mobile */
+  .center_right {
+    right: unset;
+    top: unset;
+    transform: none;
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  /* Override center-left J8 for mobile */
+  .center_left {
+    top: unset;
+    transform: none;
+  }
+
+  /* Stronger bottom overlay for mobile text readability */
+  .imageOverlay {
+    background:
+      linear-gradient(
+        to top,
+        rgba(8, 8, 8, 0.90) 0%,
+        rgba(8, 8, 8, 0.45) 45%,
+        rgba(8, 8, 8, 0.10) 70%,
+        transparent 100%
+      ) !important;
+  }
+
+  .modelName {
+    font-size: clamp(52px, 16vw, 100px);
+    white-space: normal;
+  }
+
+  .modelTagline {
+    font-size: 13px;
+  }
+
+  .modelActions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .modelCta {
+    width: 100%;
+    justify-content: center;
+    font-size: 10px;
+    padding: 14px 20px;
+  }
+
+  .modelCtaGhost {
+    padding: 8px 0;
+  }
+
+  .bgNumber {
+    display: none;
+  }
+
+  .bottomCta {
+    padding-inline: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modelSection {
+    min-height: 480px;
+  }
+
+  .modelName {
+    font-size: clamp(44px, 14vw, 80px);
+  }
+}
