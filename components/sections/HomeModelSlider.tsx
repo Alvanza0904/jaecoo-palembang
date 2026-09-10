@@ -63,7 +63,7 @@ export function HomeModelSlider({ models }: HomeModelSliderProps) {
     const dx = e.changedTouches[0].clientX - touchStartX.current;
     const dy = e.changedTouches[0].clientY - touchStartY.current;
     if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 44) {
-      dx < 0 ? next() : prev();
+      if (dx < 0) { next(); } else { prev(); }
     }
     touchStartX.current = null;
     touchStartY.current = null;
@@ -101,6 +101,7 @@ export function HomeModelSlider({ models }: HomeModelSliderProps) {
         {hasImage ? (
           <>
             {/* Desktop */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               className={styles.backdropImg}
               src={desktopSrc}
@@ -109,6 +110,7 @@ export function HomeModelSlider({ models }: HomeModelSliderProps) {
             />
             {/* Mobile override if different */}
             {mobileSrc && mobileSrc !== desktopSrc && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 className={[styles.backdropImg, styles.backdropImgMobile].join(" ")}
                 src={mobileSrc}
