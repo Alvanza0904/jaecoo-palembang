@@ -5,6 +5,10 @@
   padding-inline: var(--container-padding);
 }
 
+.container--wide {
+  max-width: var(--container-wide, 1600px);
+}
+
 .container--content {
   max-width: var(--container-content);
 }

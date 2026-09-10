@@ -2,11 +2,24 @@
  * JAECOO Palembang — Model Overview Page
  * Route: /model/[slug]
  *
- * STEP 7B: Complete premium model experience.
- * - LayeredHero jika CMS image tersedia, HeroPlaceholder jika belum
- * - Editorial design section (Exterior, Interior, Key Highlights)
- * - ImagePlaceholder yang jelas untuk setiap area foto
- * - Variants, Colors, Calculator, CTA
+ * STEP 7B: Cinematic Editorial Redesign.
+ * IMAGE-LED. TEXT SUPPORTS IMAGE. NO CARD GRIDS.
+ *
+ * Architecture:
+ *   01 HERO — Full cinematic, layered typography
+ *   02 EXTERIOR — Full-bleed image, editorial text overlay
+ *   03 DESIGN DETAIL — Close-up editorial composition
+ *   04 PROFILE / PRESENCE — Side profile, oversized typography
+ *   05 INTERIOR — Full-width cinematic cabin
+ *   06 COCKPIT DETAIL — Layered overlap composition
+ *   07 PERFORMANCE — Floating numbers over vehicle image
+ *   08 TECHNOLOGY — Image-led with feature overlay
+ *   09 ADAS / SAFETY — Driving image + stat overlay
+ *   10 COLORS — Interactive carousel (single visual area)
+ *   11 SPECS VISUAL — Key numbers + vehicle image
+ *   12 FINAL CTA — Cinematic end scene
+ *
+ *   + Finance Calculator (minimal, integrated)
  */
 
 export const revalidate = 0;
@@ -16,11 +29,8 @@ import { notFound } from "next/navigation";
 import { getModelBySlug, getModelSlugs } from "@/lib/supabase/queries";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
-import { GoldLine } from "@/components/ui/GoldLine";
-import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
 import { Reveal } from "@/components/motion/Reveal";
-import { Stagger } from "@/components/motion/Stagger";
 import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
 import { LayeredHero } from "@/components/hero/LayeredHero";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
@@ -29,6 +39,7 @@ import { PriceDisplay } from "@/components/price/PriceDisplay";
 import { priceStatusAllowsCalculator } from "@/lib/types/model";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
+import { ColorCarousel } from "@/components/model/ColorCarousel";
 import styles from "./page.module.css";
 
 interface ModelPageProps {
@@ -68,13 +79,25 @@ export default async function ModelPage({ params }: ModelPageProps) {
     source_cta: "model_hero_cta",
   });
 
+  const whatsappCtaUrl = buildWhatsAppUrl({
+    source: "model_overview",
+    source_page: `/model/${slug}`,
+    model: model.short_name,
+    source_cta: "model_cta_final",
+  });
+
   const hasHeroImage = !!(model.hero_media?.image?.desktop);
+
+  // Key specs dari model — ambil dari data technology features untuk highlights
+  const keyFeatures = model.technology.features.slice(0, 3);
 
   return (
     <>
       <TransparentHeader />
 
-      {/* ── 1. HERO ─────────────────────────────────────────────────────── */}
+      {/* ══════════════════════════════════════════════════════════════════
+          01 — HERO — Full Cinematic
+      ══════════════════════════════════════════════════════════════════ */}
       {hasHeroImage ? (
         <LayeredHero
           media={model.hero_media}
@@ -85,308 +108,506 @@ export default async function ModelPage({ params }: ModelPageProps) {
           cta={
             <div className={styles.heroCtas}>
               <Button
-                as="link"
-                href={`/model/${slug}/technology`}
+                as="a"
+                href={whatsappUrl}
                 variant="primary"
                 size="lg"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                Explore Technology →
+                Talk to Alvan →
               </Button>
-              <Button as="link" href={`/model/${slug}/specifications`} variant="ghost" size="lg">
+              <Button
+                as="link"
+                href={`/model/${slug}/specifications`}
+                variant="ghost"
+                size="lg"
+              >
                 Specifications
               </Button>
             </div>
           }
         />
       ) : (
-        <>
-          <HeroPlaceholder
-            tagline="OVERVIEW"
-            heading={model.tagline}
-            subheading={model.name}
-            cta={
-              <div className={styles.heroCtas}>
-                <Button
-                  as="link"
-                  href={`/model/${slug}/technology`}
-                  variant="primary"
-                  size="lg"
-                >
-                  Explore Technology →
-                </Button>
-                <Button as="link" href={`/model/${slug}/specifications`} variant="ghost" size="lg">
-                  Specifications
-                </Button>
-              </div>
-            }
-            size="full"
-            accent="cool"
-          />
-          {/* Hero image placeholder — visible di bawah hero teks */}
-          <div className={styles.heroImgPlaceholderRow}>
-            <ImagePlaceholder
-              label="HERO BACKGROUND"
-              device="desktop"
-              ratio="21/9"
-              className={styles.heroImgPlaceholder}
-            />
-            <ImagePlaceholder
-              label="HERO VEHICLE CUTOUT"
-              ratio="4/3"
-              source="Admin → Media Library (set as Cutout)"
-              className={styles.heroImgPlaceholderCutout}
-            />
-          </div>
-        </>
+        <HeroPlaceholder
+          tagline="OVERVIEW"
+          heading={model.tagline}
+          subheading={model.name}
+          cta={
+            <div className={styles.heroCtas}>
+              <Button
+                as="a"
+                href={whatsappUrl}
+                variant="primary"
+                size="lg"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Talk to Alvan →
+              </Button>
+              <Button
+                as="link"
+                href={`/model/${slug}/specifications`}
+                variant="ghost"
+                size="lg"
+              >
+                Specifications
+              </Button>
+            </div>
+          }
+          size="full"
+          accent="cool"
+        />
       )}
 
-      {/* ── 2. MODEL INTRO ───────────────────────────────────────────────── */}
-      <section className={styles.introSection}>
-        <Container>
-          <div className={styles.introGrid}>
-            <Reveal variant="fade-up">
-              <div className={styles.introText}>
-                <GoldLine width="short" className={styles.introGold} />
-                <h2 className={styles.introName}>{model.name}</h2>
-                <p className={styles.introDesc}>{model.description}</p>
-                <div className={styles.introPriceRow}>
-                  <PriceDisplay
-                    price_status={model.default_variant.price_status}
-                    price_idr={model.default_variant.price_idr}
-                    price_display={model.default_variant.price_display}
-                    price_display_override={model.default_variant.price_display_override}
-                    price_region={model.default_variant.price_region}
-                  />
-                </div>
-              </div>
-            </Reveal>
-
-            <Reveal variant="fade-up" delay={120}>
-              <ImagePlaceholder
-                label="MODEL INTRO"
-                ratio="3/2"
-                source="Admin → Media Library"
-                className={styles.introImg}
-              />
-            </Reveal>
-          </div>
-        </Container>
-      </section>
-
-      {/* ── 3. DESIGN / EXTERIOR ──────────────────────────────────────────── */}
-      <section className={styles.editorialSection}>
-        <Container size="wide">
-          <Reveal variant="fade-up">
-            <div className={styles.editorialLabel}>
-              <span className={styles.editorialNumber}>01</span>
-              <span className={styles.editorialCat}>Design</span>
-            </div>
-            <h2 className={styles.editorialHeading}>
-              Designed to Command.
-            </h2>
-            <p className={styles.editorialBody}>
-              Setiap lekukan {model.short_name} adalah perpaduan fungsi dan estetika —
-              desain SUV premium yang menghadirkan kesan kuat di setiap sudut pandang.
-            </p>
-          </Reveal>
-        </Container>
-
-        <div className={styles.editorialMediaRow}>
-          <Reveal variant="fade-up" delay={80}>
+      {/* ══════════════════════════════════════════════════════════════════
+          02 — EXTERIOR — Full-bleed image, editorial text layered inside
+      ══════════════════════════════════════════════════════════════════ */}
+      <section className={styles.cinematicSection} data-theme="dark">
+        {/* Background image — full bleed */}
+        <div className={styles.cinematicBg} aria-hidden="true">
+          <ImagePlaceholder
+            label="EXTERIOR — FULL BLEED"
+            device="desktop"
+            ratio="21/9"
+            source="Admin → Media Library"
+            className={styles.cinematicBgImg}
+          />
+          <div className={styles.cinematicBgImgMobile} aria-hidden="true">
             <ImagePlaceholder
-              label="EXTERIOR"
-              device="desktop"
-              ratio="16/9"
+              label="EXTERIOR — MOBILE"
+              device="mobile"
+              ratio="4/5"
               source="Admin → Media Library"
-              className={styles.editorialMainImg}
+              className={styles.cinematicBgImg}
             />
-          </Reveal>
-          <Reveal variant="fade-up" delay={160}>
-            <div className={styles.editorialSideImgs}>
-              <ImagePlaceholder
-                label="EXTERIOR DETAIL"
-                ratio="4/3"
-                source="Admin → Media Library"
-                className={styles.editorialSideImg}
-              />
-              <ImagePlaceholder
-                label="EXTERIOR REAR"
-                ratio="4/3"
-                source="Admin → Media Library"
-                className={styles.editorialSideImg}
-              />
-            </div>
+          </div>
+          <div className={styles.cinematicOverlay} />
+        </div>
+
+        {/* Editorial text — positioned bottom-left inside image */}
+        <div className={styles.cinematicContent} data-position="bottom-left">
+          <Reveal variant="fade-up">
+            <p className={styles.editorialLabel}>
+              <span className={styles.editorialNum}>01</span>
+              <span className={styles.editorialCat}>Design</span>
+            </p>
+            <h2 className={styles.cinematicHeading}>
+              Designed<br />
+              to Command.
+            </h2>
+            <p className={styles.cinematicBody}>
+              {model.description}
+            </p>
           </Reveal>
         </div>
       </section>
 
-      {/* ── 4. INTERIOR ───────────────────────────────────────────────────── */}
-      <section className={styles.editorialSection + " " + styles.interiorSection}>
-        <Container size="wide">
-          <div className={styles.interiorLayout}>
-            <Reveal variant="fade-up">
-              <div className={styles.interiorText}>
-                <div className={styles.editorialLabel}>
-                  <span className={styles.editorialNumber}>02</span>
-                  <span className={styles.editorialCat}>Interior</span>
-                </div>
-                <h2 className={styles.editorialHeading}>
-                  A Cabin Without Compromise.
-                </h2>
-                <p className={styles.editorialBody}>
-                  Interior {model.short_name} dirancang untuk menghadirkan pengalaman berkendara
-                  yang premium — material pilihan, teknologi terdepan, dan kenyamanan
-                  yang terasa di setiap kilometer.
-                </p>
-              </div>
+      {/* ══════════════════════════════════════════════════════════════════
+          03 — DESIGN DETAIL — Editorial close-up
+      ══════════════════════════════════════════════════════════════════ */}
+      <section className={styles.detailSection}>
+        <div className={styles.detailGrid}>
+          {/* Main detail image — dominan */}
+          <Reveal variant="fade-up" className={styles.detailMainWrap}>
+            <ImagePlaceholder
+              label="DESIGN DETAIL — HEADLIGHT / GRILLE"
+              ratio="3/4"
+              source="Admin → Media Library"
+              className={styles.detailMainImg}
+            />
+          </Reveal>
+
+          {/* Editorial text — right column */}
+          <div className={styles.detailTextWrap}>
+            <Reveal variant="fade-up" delay={120}>
+              <p className={styles.editorialLabel}>
+                <span className={styles.editorialNum}>02</span>
+                <span className={styles.editorialCat}>Detail</span>
+              </p>
+              <h2 className={styles.detailHeading}>
+                Every line<br />
+                has a reason.
+              </h2>
+              <p className={styles.detailBody}>
+                Dari lampu depan LED signature hingga lekukan bodi yang tegas —
+                setiap detail {model.short_name} dirancang dengan presisi.
+              </p>
             </Reveal>
 
-            <Reveal variant="fade-up" delay={100}>
-              <ImagePlaceholder
-                label="INTERIOR"
-                ratio="4/3"
-                source="Admin → Media Library"
-                className={styles.interiorImg}
-              />
-            </Reveal>
+            {/* Secondary detail images stacked */}
+            <div className={styles.detailSecondaryImgs}>
+              <Reveal variant="fade-up" delay={200}>
+                <ImagePlaceholder
+                  label="DETAIL — WHEEL / RIM"
+                  ratio="1/1"
+                  source="Admin → Media Library"
+                  className={styles.detailSecondaryImg}
+                />
+              </Reveal>
+              <Reveal variant="fade-up" delay={280}>
+                <ImagePlaceholder
+                  label="DETAIL — REAR / BADGE"
+                  ratio="1/1"
+                  source="Admin → Media Library"
+                  className={styles.detailSecondaryImg}
+                />
+              </Reveal>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          04 — PROFILE / PRESENCE — Side profile, oversized type
+      ══════════════════════════════════════════════════════════════════ */}
+      <section className={styles.presenceSection} data-theme="dark">
+        <div className={styles.presenceBg} aria-hidden="true">
+          <ImagePlaceholder
+            label="PROFILE — SIDE VIEW FULL"
+            device="desktop"
+            ratio="16/7"
+            source="Admin → Media Library"
+            className={styles.presenceBgImg}
+          />
+          <div className={styles.cinematicOverlay} style={{ opacity: 0.5 }} />
+        </div>
+
+        <div className={styles.presenceContent}>
+          <Reveal variant="fade-up">
+            <p className={styles.presenceLabel}>
+              <span className={styles.editorialNum}>03</span>
+              <span className={styles.editorialCat}>Presence</span>
+            </p>
+            <h2 className={styles.presenceHeading}>
+              Confident<br />
+              from every<br />
+              angle.
+            </h2>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          05 — INTERIOR — Full-width cinematic cabin
+      ══════════════════════════════════════════════════════════════════ */}
+      <section className={styles.cinematicSection} data-theme="dark">
+        <div className={styles.cinematicBg} aria-hidden="true">
+          <ImagePlaceholder
+            label="INTERIOR — CABIN FULL WIDTH"
+            device="desktop"
+            ratio="21/9"
+            source="Admin → Media Library"
+            className={styles.cinematicBgImg}
+          />
+          <div className={styles.cinematicBgImgMobile}>
+            <ImagePlaceholder
+              label="INTERIOR — MOBILE"
+              device="mobile"
+              ratio="4/5"
+              source="Admin → Media Library"
+              className={styles.cinematicBgImg}
+            />
+          </div>
+          <div className={styles.cinematicOverlay} />
+        </div>
+
+        <div className={styles.cinematicContent} data-position="bottom-right">
+          <Reveal variant="fade-up">
+            <p className={styles.editorialLabel}>
+              <span className={styles.editorialNum}>04</span>
+              <span className={styles.editorialCat}>Interior</span>
+            </p>
+            <h2 className={styles.cinematicHeading}>
+              A cabin<br />
+              built for the<br />
+              journey.
+            </h2>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          06 — COCKPIT DETAIL — Layered overlap composition
+      ══════════════════════════════════════════════════════════════════ */}
+      <section className={styles.cockpitSection}>
+        <Container size="wide">
+          <div className={styles.cockpitLayout}>
+            {/* Main cockpit image */}
+            <div className={styles.cockpitMainWrap}>
+              <Reveal variant="fade-up">
+                <ImagePlaceholder
+                  label="COCKPIT — DASHBOARD / SCREEN"
+                  ratio="4/3"
+                  source="Admin → Media Library"
+                  className={styles.cockpitMainImg}
+                />
+              </Reveal>
+
+              {/* Floating detail image — overlaps main */}
+              <Reveal variant="fade-up" delay={150} className={styles.cockpitFloatingWrap}>
+                <ImagePlaceholder
+                  label="COCKPIT — STEERING / DETAIL"
+                  ratio="1/1"
+                  source="Admin → Media Library"
+                  className={styles.cockpitFloatingImg}
+                />
+              </Reveal>
+            </div>
+
+            {/* Editorial text */}
+            <div className={styles.cockpitText}>
+              <Reveal variant="fade-up" delay={80}>
+                <p className={styles.editorialLabel}>
+                  <span className={styles.editorialNum}>05</span>
+                  <span className={styles.editorialCat}>Cockpit</span>
+                </p>
+                <h2 className={styles.cockpitHeading}>
+                  Smart<br />
+                  by design.
+                </h2>
+                <p className={styles.cockpitBody}>
+                  Layar sentuh ganda, panel instrumen digital, dan antarmuka
+                  intuitif — semua dalam jangkauan pengemudi {model.short_name}.
+                </p>
+              </Reveal>
+            </div>
           </div>
         </Container>
       </section>
 
-      {/* ── 5. KEY HIGHLIGHTS ─────────────────────────────────────────────── */}
-      <section className={styles.highlightSection}>
-        <Container>
-          <Reveal variant="fade-up">
-            <SectionHeading
-              eyebrow="Key Highlights"
-              heading={`What sets the ${model.short_name} apart.`}
-            />
-          </Reveal>
+      {/* ══════════════════════════════════════════════════════════════════
+          07 — PERFORMANCE — Floating numbers over vehicle image
+      ══════════════════════════════════════════════════════════════════ */}
+      <section className={styles.performanceSection} data-theme="dark">
+        <div className={styles.performanceBg} aria-hidden="true">
+          <ImagePlaceholder
+            label="PERFORMANCE — VEHICLE / ACTION"
+            device="desktop"
+            ratio="16/9"
+            source="Admin → Media Library"
+            className={styles.performanceBgImg}
+          />
+          <div className={styles.cinematicOverlay} style={{ opacity: 0.6 }} />
+        </div>
 
-          <div className={styles.featureGrid}>
-            <Stagger delay={100} staggerMs={90} variant="fade-up">
-              {model.technology.features.map((feature, i) => (
-                <div key={feature.id} className={styles.featureCard}>
-                  <div className={styles.featureIdx} aria-hidden="true">
-                    {String(i + 1).padStart(2, "0")}
-                  </div>
-                  {feature.tag && (
-                    <p className={styles.featureTag}>{feature.tag}</p>
-                  )}
-                  <h3 className={styles.featureTitle}>{feature.title}</h3>
-                  <p className={styles.featureDesc}>{feature.description}</p>
-                </div>
-              ))}
-            </Stagger>
+        <Container size="wide">
+          <div className={styles.performanceContent}>
+            <Reveal variant="fade-up">
+              <p className={styles.editorialLabel}>
+                <span className={styles.editorialNum}>06</span>
+                <span className={styles.editorialCat}>Performance</span>
+              </p>
+              <h2 className={styles.performanceHeading}>
+                Power<br />
+                without<br />
+                compromise.
+              </h2>
+            </Reveal>
+
+            {/* Floating key numbers */}
+            <div className={styles.performanceStats}>
+              {keyFeatures.length > 0 ? (
+                keyFeatures.map((feature, i) => (
+                  <Reveal key={feature.id} variant="fade-up" delay={i * 100}>
+                    <div className={styles.performanceStat}>
+                      <span className={styles.performanceStatTag}>{feature.tag ?? "—"}</span>
+                      <span className={styles.performanceStatLabel}>{feature.title}</span>
+                    </div>
+                  </Reveal>
+                ))
+              ) : (
+                <>
+                  <Reveal variant="fade-up">
+                    <div className={styles.performanceStat}>
+                      <span className={styles.performanceStatTag}>130 kW</span>
+                      <span className={styles.performanceStatLabel}>Power</span>
+                    </div>
+                  </Reveal>
+                  <Reveal variant="fade-up" delay={100}>
+                    <div className={styles.performanceStat}>
+                      <span className={styles.performanceStatTag}>553 km</span>
+                      <span className={styles.performanceStatLabel}>Range</span>
+                    </div>
+                  </Reveal>
+                  <Reveal variant="fade-up" delay={200}>
+                    <div className={styles.performanceStat}>
+                      <span className={styles.performanceStatTag}>7.1 s</span>
+                      <span className={styles.performanceStatLabel}>0–100 km/h</span>
+                    </div>
+                  </Reveal>
+                </>
+              )}
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          08 — TECHNOLOGY — Image-led with feature overlay
+      ══════════════════════════════════════════════════════════════════ */}
+      <section className={styles.techSection}>
+        <div className={styles.techLayout}>
+          {/* Left: main image */}
+          <div className={styles.techImageWrap}>
+            <Reveal variant="fade-up">
+              <ImagePlaceholder
+                label="TECHNOLOGY — HMI / SCREEN"
+                ratio="3/4"
+                source="Admin → Media Library"
+                className={styles.techMainImg}
+              />
+            </Reveal>
           </div>
 
-          <Reveal variant="fade" delay={200}>
-            <div className={styles.featureLink}>
+          {/* Right: editorial text + features */}
+          <div className={styles.techContent}>
+            <Reveal variant="fade-up">
+              <p className={styles.editorialLabel}>
+                <span className={styles.editorialNum}>07</span>
+                <span className={styles.editorialCat}>Technology</span>
+              </p>
+              <h2 className={styles.techHeading}>
+                {model.technology.headline || "Intelligence built in."}
+              </h2>
+              {model.technology.subheadline && (
+                <p className={styles.techSubheadline}>{model.technology.subheadline}</p>
+              )}
+            </Reveal>
+
+            {model.technology.features.slice(0, 4).map((feature, i) => (
+              <Reveal key={feature.id} variant="fade-up" delay={80 + i * 60}>
+                <div className={styles.techFeature}>
+                  <span className={styles.techFeatureNum}>{String(i + 1).padStart(2, "0")}</span>
+                  <div>
+                    {feature.tag && <p className={styles.techFeatureTag}>{feature.tag}</p>}
+                    <p className={styles.techFeatureTitle}>{feature.title}</p>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+
+            <Reveal variant="fade-up" delay={300}>
               <Button
                 as="link"
                 href={`/model/${slug}/technology`}
                 variant="secondary"
                 size="md"
+                className={styles.techCta}
               >
-                Lihat Teknologi Lengkap →
+                Explore Technology →
               </Button>
-            </div>
-          </Reveal>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          09 — ADAS / SAFETY — Driving image + stat overlay
+      ══════════════════════════════════════════════════════════════════ */}
+      <section className={styles.cinematicSection} data-theme="dark">
+        <div className={styles.cinematicBg} aria-hidden="true">
+          <ImagePlaceholder
+            label="ADAS — DRIVING / SAFETY"
+            device="desktop"
+            ratio="21/9"
+            source="Admin → Media Library"
+            className={styles.cinematicBgImg}
+          />
+          <div className={styles.cinematicOverlay} style={{ opacity: 0.55 }} />
+        </div>
+
+        <Container size="wide">
+          <div className={styles.adasContent}>
+            <Reveal variant="fade-up">
+              <p className={styles.editorialLabel}>
+                <span className={styles.editorialNum}>08</span>
+                <span className={styles.editorialCat}>Safety</span>
+              </p>
+              <div className={styles.adasStat}>
+                <span className={styles.adasStatNumber}>19</span>
+                <span className={styles.adasStatUnit}>ADAS</span>
+              </div>
+              <h2 className={styles.adasHeading}>
+                Intelligence<br />
+                that watches<br />
+                ahead.
+              </h2>
+            </Reveal>
+          </div>
         </Container>
       </section>
 
-      {/* ── 6. COLORS ─────────────────────────────────────────────────────── */}
+      {/* ══════════════════════════════════════════════════════════════════
+          10 — COLORS — Interactive carousel
+      ══════════════════════════════════════════════════════════════════ */}
       {model.colors.length > 0 && (
-        <section className={styles.colorSection}>
-          <Container>
-            <Reveal variant="fade">
-              <SectionHeading eyebrow="Warna Eksterior" heading="Choose Your Color." />
+        <section className={styles.colorsSection}>
+          <div className={styles.colorsSectionHeader}>
+            <Reveal variant="fade-up">
+              <p className={styles.colorsEyebrow}>Colors</p>
+              <h2 className={styles.colorsHeading}>Choose Your JAECOO</h2>
             </Reveal>
+          </div>
 
-            <Stagger delay={80} staggerMs={60} variant="fade-up">
-              {model.colors.map((color) => (
-                <div key={color.id} className={styles.colorItem}>
-                  <div className={styles.colorImgWrap}>
-                    {color.image?.desktop ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={color.image.desktop}
-                        alt={color.image.alt ?? color.name}
-                        className={styles.colorImg}
-                      />
-                    ) : (
-                      <ImagePlaceholder
-                        label={`COLOR IMAGE — ${color.name.toUpperCase()}`}
-                        ratio="16/9"
-                        source="Admin → Media Library"
-                        className={styles.colorImgPlaceholder}
-                      />
-                    )}
-                  </div>
-                  <div className={styles.colorMeta}>
-                    <div
-                      className={styles.colorSwatch}
-                      style={{ backgroundColor: color.hex }}
-                      aria-hidden="true"
-                    />
-                    <p className={styles.colorName}>{color.name}</p>
-                  </div>
-                </div>
-              ))}
-            </Stagger>
-          </Container>
+          <ColorCarousel colors={model.colors} modelName={model.short_name} />
         </section>
       )}
 
-      {/* ── 7. VARIANTS ───────────────────────────────────────────────────── */}
-      {model.variants.length > 1 && (
-        <section className={styles.variantSection}>
-          <Container>
-            <Reveal variant="fade">
-              <SectionHeading eyebrow="Varian" heading="Choose Your Variant." />
-            </Reveal>
-            <div className={styles.variants}>
-              <Stagger delay={100} staggerMs={80} variant="fade-up">
-                {model.variants.map((variant) => (
-                  <div key={variant.id} className={styles.variantCard}>
-                    <div className={styles.variantHeader}>
-                      <h3 className={styles.variantName}>{variant.name}</h3>
-                      {variant.label && (
-                        <span className={styles.variantBadge}>{variant.label}</span>
-                      )}
-                    </div>
-                    <PriceDisplay
-                      price_status={variant.price_status}
-                      price_idr={variant.price_idr}
-                      price_display={variant.price_display}
-                      price_display_override={variant.price_display_override}
-                      price_region={variant.price_region}
-                      className={styles.variantPriceDisplay}
-                    />
-                    <Button
-                      as="a"
-                      href={buildWhatsAppUrl({
-                        source: "model_overview",
-                        source_page: `/model/${slug}`,
-                        model: variant.name,
-                        source_cta: "variant_cta",
-                      })}
-                      variant="primary"
-                      size="sm"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Hubungi Sales
-                    </Button>
-                  </div>
-                ))}
-              </Stagger>
-            </div>
-          </Container>
-        </section>
-      )}
+      {/* ══════════════════════════════════════════════════════════════════
+          11 — SPECS VISUAL — Key numbers + vehicle image
+      ══════════════════════════════════════════════════════════════════ */}
+      <section className={styles.specsSection} data-theme="dark">
+        <div className={styles.specsBg} aria-hidden="true">
+          <ImagePlaceholder
+            label="SPECS — VEHICLE PROFILE"
+            device="desktop"
+            ratio="16/9"
+            source="Admin → Media Library"
+            className={styles.specsBgImg}
+          />
+          <div className={styles.cinematicOverlay} style={{ opacity: 0.7 }} />
+        </div>
 
-      {/* ── 8. FINANCE CALCULATOR ─────────────────────────────────────────── */}
+        <Container size="wide">
+          <div className={styles.specsContent}>
+            <Reveal variant="fade-up">
+              <p className={styles.editorialLabel}>
+                <span className={styles.editorialNum}>09</span>
+                <span className={styles.editorialCat}>Specifications</span>
+              </p>
+              <h2 className={styles.specsHeading}>{model.name}</h2>
+
+              <div className={styles.specsPrice}>
+                <PriceDisplay
+                  price_status={model.default_variant.price_status}
+                  price_idr={model.default_variant.price_idr}
+                  price_display={model.default_variant.price_display}
+                  price_display_override={model.default_variant.price_display_override}
+                  price_region={model.default_variant.price_region}
+                  className={styles.specsPriceDisplay}
+                />
+              </div>
+            </Reveal>
+
+            <Reveal variant="fade-up" delay={100}>
+              <Button
+                as="link"
+                href={`/model/${slug}/specifications`}
+                variant="ghost"
+                size="md"
+                className={styles.specsLink}
+              >
+                View Full Specifications →
+              </Button>
+            </Reveal>
+          </div>
+        </Container>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          FINANCE CALCULATOR — minimal, tucked between specs and CTA
+      ══════════════════════════════════════════════════════════════════ */}
       {priceStatusAllowsCalculator(
         model.default_variant.price_status,
         model.default_variant.price_idr
@@ -394,11 +615,14 @@ export default async function ModelPage({ params }: ModelPageProps) {
         <section className={styles.calcSection}>
           <Container size="narrow">
             <Reveal variant="fade-up" threshold={0}>
-              <SectionHeading
-                eyebrow="Simulasi Kredit"
-                heading="Hitung Cicilan Anda."
-                subheading="Estimasi angsuran dengan bunga flat 10%/tahun. Hubungi kami untuk simulasi resmi."
-              />
+              <div className={styles.calcHeader}>
+                <p className={styles.calcEyebrow}>Simulasi Kredit</p>
+                <h2 className={styles.calcHeading}>Hitung cicilan Anda.</h2>
+                <p className={styles.calcSub}>
+                  Estimasi angsuran dengan bunga flat 10%/tahun.
+                  Hubungi kami untuk simulasi resmi.
+                </p>
+              </div>
             </Reveal>
             <Reveal variant="fade-up" delay={100} threshold={0}>
               <FinanceCalculator
@@ -410,23 +634,40 @@ export default async function ModelPage({ params }: ModelPageProps) {
         </section>
       )}
 
-      {/* ── 9. CTA ────────────────────────────────────────────────────────── */}
-      <section className={styles.ctaSection}>
+      {/* ══════════════════════════════════════════════════════════════════
+          12 — FINAL CTA — Cinematic end scene
+      ══════════════════════════════════════════════════════════════════ */}
+      <section className={styles.ctaSection} data-theme="dark">
+        <div className={styles.ctaBg} aria-hidden="true">
+          <ImagePlaceholder
+            label="FINAL CTA — CINEMATIC VEHICLE"
+            device="desktop"
+            ratio="16/9"
+            source="Admin → Media Library"
+            className={styles.ctaBgImg}
+          />
+          <div className={styles.cinematicOverlay} style={{ opacity: 0.65 }} />
+        </div>
+
         <Container size="narrow">
-          <Reveal variant="fade-up">
-            <div className={styles.ctaBlock}>
-              <GoldLine width="short" />
+          <div className={styles.ctaContent}>
+            <Reveal variant="fade-up">
+              <p className={styles.ctaEyebrow}>Ready to go further?</p>
               <h2 className={styles.ctaHeading}>
-                Tertarik dengan {model.short_name}?
+                Tertarik dengan<br />
+                {model.short_name}?
               </h2>
               <p className={styles.ctaBody}>
-                Hubungi Alvan untuk informasi harga terkini, jadwal test drive,
-                dan penawaran spesial langsung dari dealer resmi JAECOO Palembang.
+                Hubungi Alvan untuk harga terkini, jadwal test drive,
+                dan penawaran langsung dari dealer resmi JAECOO Palembang.
               </p>
+            </Reveal>
+
+            <Reveal variant="fade-up" delay={120}>
               <div className={styles.ctaActions}>
                 <Button
                   as="a"
-                  href={whatsappUrl}
+                  href={whatsappCtaUrl}
                   variant="primary"
                   size="lg"
                   target="_blank"
@@ -436,15 +677,15 @@ export default async function ModelPage({ params }: ModelPageProps) {
                 </Button>
                 <Button
                   as="link"
-                  href={`/model/${slug}/specifications`}
+                  href={`/model/${slug}/technology`}
                   variant="ghost"
                   size="lg"
                 >
-                  Lihat Spesifikasi
+                  Explore Technology
                 </Button>
               </div>
-            </div>
-          </Reveal>
+            </Reveal>
+          </div>
         </Container>
       </section>
     </>
