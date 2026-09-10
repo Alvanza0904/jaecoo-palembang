@@ -4,7 +4,7 @@
  * JAECOO Palembang — HomeModelSlider
  *
  * STEP 8: Cinematic horizontal model showcase for the homepage.
- * STEP 8.1: Sort guarantee J5->J7->J8 regardless of CMS/Supabase order.
+ * STEP 8.1/FINAL: Display order follows ModelData.sort_order from the data layer.
  * STEP 8.2: Fix hasImage guard — was excluding local /images/ paths, causing
  *           backdrop to always fall back to gradient. Now accepts both http
  *           URLs and absolute /images/ paths.
@@ -17,7 +17,7 @@
  * - Previous / next + dot navigation
  * - Smooth crossfade transition
  * - CMS/data-driven: renders from ModelData[]
- * - Guaranteed J5->J7->J8 order via slug sort map
+ * - Display order follows models.sort_order; static fallback preserves source order
  */
 
 import { useState, useRef, useCallback, useEffect } from "react";
@@ -29,12 +29,6 @@ interface HomeModelSliderProps {
   models: ModelData[];
 }
 
-/** Guaranteed display order regardless of CMS sort_order or Supabase return order */
-const SLUG_ORDER: Record<string, number> = {
-  "jaecoo-j5-ev":  0,
-  "jaecoo-j7-shs": 1,
-  "jaecoo-j8-shs": 2,
-};
 
 /**
  * Display label override per slug.
@@ -50,11 +44,7 @@ const SLUG_DISPLAY_LABEL: Record<string, string> = {
 };
 
 function sortModels(models: ModelData[]): ModelData[] {
-  return [...models].sort((a, b) => {
-    const ao = SLUG_ORDER[a.slug] ?? 99;
-    const bo = SLUG_ORDER[b.slug] ?? 99;
-    return ao - bo;
-  });
+  return [...models].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 }
 
 /**

@@ -42,21 +42,8 @@ const MODEL_CONFIG: Record<
   },
 };
 
-/**
- * Guaranteed display order J5 → J7 → J8
- */
-const SLUG_ORDER: Record<string, number> = {
-  "jaecoo-j5-ev": 0,
-  "jaecoo-j7-shs": 1,
-  "jaecoo-j8-shs": 2,
-};
-
 function sortModels(models: ModelData[]): ModelData[] {
-  return [...models].sort((a, b) => {
-    const ao = SLUG_ORDER[a.slug] ?? 99;
-    const bo = SLUG_ORDER[b.slug] ?? 99;
-    return ao - bo;
-  });
+  return [...models].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 }
 
 function isValidImageSrc(src: string | undefined): boolean {

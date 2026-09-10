@@ -112,6 +112,8 @@ export interface ModelImageSlots {
 export interface ModelData {
   /** URL slug — matches route /model/[slug] */
   slug: ModelSlug;
+  /** CMS display order — mirrors models.sort_order. */
+  sort_order?: number;
   /** Full display name e.g. "JAECOO J5 EV" */
   name: string;
   /** Short model identifier e.g. "J5 EV" */

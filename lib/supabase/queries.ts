@@ -313,6 +313,7 @@ function mapModel(
   // This property is hydrated by getModelBySlug/getModels below.
   return {
     slug: row.slug as ModelData["slug"],
+    sort_order: row.sort_order,
     name: row.name,
     short_name: row.short_name,
     tagline: row.tagline,

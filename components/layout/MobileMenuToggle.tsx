@@ -11,6 +11,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "./MobileMenuToggle.module.css";
+import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 
 interface NavLink {
   label: string;
@@ -23,8 +24,7 @@ interface MobileMenuToggleProps {
   inverted?: boolean;
 }
 
-const WHATSAPP_URL =
-  "https://wa.me/6285183145926?text=Halo%20Alvan%2C%20saya%20ingin%20mendapatkan%20informasi%20lebih%20lanjut%20mengenai%20JAECOO%20Palembang.";
+const WHATSAPP_URL = buildWhatsAppUrl({ source: "other", source_cta: "mobile_menu" });
 
 export function MobileMenuToggle({ navLinks, inverted = false }: MobileMenuToggleProps) {
   const [open, setOpen] = useState(false);

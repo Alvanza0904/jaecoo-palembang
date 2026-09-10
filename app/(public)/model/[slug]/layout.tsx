@@ -8,7 +8,7 @@
  */
 
 import { notFound } from "next/navigation";
-import { getModelBySlug, getModelSlugs } from "@/lib/data/models";
+import { getModelBySlug, getModelSlugs } from "@/lib/supabase/queries";
 import { ModelNavigation } from "@/components/model/ModelNavigation";
 import { SectionObserver } from "@/components/motion/SectionObserver";
 
@@ -23,7 +23,7 @@ export async function generateStaticParams() {
 
 export default async function ModelLayout({ children, params }: ModelLayoutProps) {
   const { slug } = await params;
-  const model = getModelBySlug(slug);
+  const model = await getModelBySlug(slug);
 
   if (!model) notFound();
 

@@ -20,6 +20,7 @@
 
 import Link from "next/link";
 import styles from "./HomeDealerLocation.module.css";
+import { SITE_SETTINGS } from "@/lib/data/site";
 
 interface HomeDealerLocationProps {
   /**
@@ -71,14 +72,14 @@ export function HomeDealerLocation({
         {/* Semantic address block — crawlable HTML */}
         <address className={styles.address}>
           <p className={styles.dealerName}>
-            Dealer Resmi Omoda Jaecoo Palembang
+            {SITE_SETTINGS.dealerName}
           </p>
           <p className={styles.street}>
-            Komp. Graha Maju, Jl. Mayor HM. Rasyad Nawawi No.506&nbsp;-&nbsp;509
+            {SITE_SETTINGS.dealerAddress.street}
           </p>
           <p className={styles.cityLine}>
-            9 Ilir, Kec. Ilir Tim. II, Kota Palembang,<br />
-            Sumatera Selatan 30113
+            {SITE_SETTINGS.dealerAddress.locality},<br />
+            {SITE_SETTINGS.dealerAddress.region} {SITE_SETTINGS.dealerAddress.postalCode}
           </p>
         </address>
 

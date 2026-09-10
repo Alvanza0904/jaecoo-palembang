@@ -3,11 +3,11 @@
  */
 
 import type { MetadataRoute } from "next";
-import { getModelSlugs } from "@/lib/data/models";
+import { getModelSlugs } from "@/lib/supabase/queries";
 import { SITE_URL } from "@/lib/utils/seo";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const modelSlugs = getModelSlugs();
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const modelSlugs = await getModelSlugs();
   const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = [

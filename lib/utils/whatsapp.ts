@@ -6,9 +6,10 @@
  */
 
 import type { LeadContext } from "@/lib/types/lead";
+import { SITE_SETTINGS } from "@/lib/data/site";
 
-export const WHATSAPP_NUMBER = "6285183145926";
-export const SALES_NAME = "Alvan";
+export const WHATSAPP_NUMBER = SITE_SETTINGS.whatsappNumber;
+export const SALES_NAME = SITE_SETTINGS.salesName;
 
 /**
  * Build a WhatsApp URL with pre-filled message context.

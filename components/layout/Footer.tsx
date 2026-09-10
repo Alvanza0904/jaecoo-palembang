@@ -7,6 +7,7 @@
 
 import Link from "next/link";
 import { WHATSAPP_NUMBER } from "@/lib/utils/whatsapp";
+import { SITE_SETTINGS } from "@/lib/data/site";
 import styles from "./Footer.module.css";
 import type { SiteBrandAssets } from "@/lib/supabase/media";
 import Image from "next/image";
@@ -14,17 +15,17 @@ import Image from "next/image";
 const SOCIAL_LINKS = [
   {
     label: "Instagram",
-    href: "https://instagram.com/jaecoopalembang",
+    href: SITE_SETTINGS.instagram,
     external: true,
   },
   {
     label: "TikTok",
-    href: "https://tiktok.com/@jaecoopalembang",
+    href: SITE_SETTINGS.tiktok,
     external: true,
   },
   {
     label: "Facebook",
-    href: "https://facebook.com/jaecoopalembang",
+    href: SITE_SETTINGS.facebook,
     external: true,
   },
   {
@@ -87,7 +88,7 @@ export function Footer({ brand }: { brand: SiteBrandAssets }) {
         {/* Bottom bar */}
         <div className={styles.bottom}>
           <p className={styles.copy}>
-            © {year} JAECOO Palembang
+            © {year} {SITE_SETTINGS.brandName}
           </p>
           <div className={styles.legal}>
             {LEGAL_LINKS.map((link) => (

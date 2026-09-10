@@ -11,6 +11,7 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import "@/styles/globals.css";
+import { SITE_NAME, SITE_URL, SITE_DESCRIPTION } from "@/lib/utils/seo";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -21,13 +22,12 @@ const manrope = Manrope({
 
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://jaecoopalembang.web.id"),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "JAECOO Palembang — Dealer Resmi JAECOO",
-    template: "%s | JAECOO Palembang",
+    default: `${SITE_NAME} — Dealer Resmi JAECOO`,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "Dealer resmi JAECOO di Palembang. Temukan JAECOO J5 EV, J7 SHS, dan J8 Ardis SHS. Hubungi Sales JAECOO Palembang untuk test drive dan penawaran terbaik.",
+  description: SITE_DESCRIPTION,
   keywords: [
     "JAECOO Palembang",
     "sales JAECOO Palembang",
@@ -41,8 +41,8 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "id_ID",
-    url: "https://jaecoopalembang.web.id",
-    siteName: "JAECOO Palembang",
+    url: SITE_URL,
+    siteName: SITE_NAME,
     title: "JAECOO Palembang — Dealer Resmi JAECOO",
     description:
       "Dealer resmi JAECOO di Palembang. SUV premium pilihan — J5 EV, J7 SHS, J8 Ardis SHS.",
