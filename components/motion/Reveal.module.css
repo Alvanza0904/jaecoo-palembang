@@ -6,6 +6,7 @@
 
 /* Transform-based variants — use transition */
 .reveal--fade-up,
+.reveal--fade-down,
 .reveal--fade,
 .reveal--blur,
 .reveal--scale,
@@ -19,23 +20,25 @@
 
 /* ─── Hidden states ─────────────────────────────────────── */
 
-.reveal--fade-up[data-visible="false"]    { opacity: 0; transform: translateY(28px); }
-.reveal--fade[data-visible="false"]       { opacity: 0; }
-.reveal--blur[data-visible="false"]       { opacity: 0; filter: blur(10px); }
-.reveal--scale[data-visible="false"]      { opacity: 0; transform: scale(0.96); }
-.reveal--slide-left[data-visible="false"] { opacity: 0; transform: translateX(-28px); }
-.reveal--slide-right[data-visible="false"]{ opacity: 0; transform: translateX(28px); }
+.reveal--fade-up[data-visible="false"]     { opacity: 0; transform: translateY(28px); }
+.reveal--fade-down[data-visible="false"]   { opacity: 0; transform: translateY(-24px); }
+.reveal--fade[data-visible="false"]        { opacity: 0; }
+.reveal--blur[data-visible="false"]        { opacity: 0; filter: blur(8px); }
+.reveal--scale[data-visible="false"]       { opacity: 0; transform: scale(0.96); }
+.reveal--slide-left[data-visible="false"]  { opacity: 0; transform: translateX(-35px); }
+.reveal--slide-right[data-visible="false"] { opacity: 0; transform: translateX(35px); }
 
-/* Mask reveal — clip-path animation */
-.reveal--mask[data-visible="false"] {
-  clip-path: inset(0 100% 0 0);
-  opacity: 0;
-}
-
+/* Mask / clip-path wipe */
 .reveal--mask {
   transition:
     clip-path var(--duration-cinematic) var(--ease-cinema),
-    opacity var(--duration-slow) var(--ease-out);
+    opacity calc(var(--duration-cinematic) * 0.5) var(--ease-out);
+  overflow: hidden;
+}
+
+.reveal--mask[data-visible="false"] {
+  clip-path: inset(0 100% 0 0);
+  opacity: 0;
 }
 
 /* ─── Visible states ────────────────────────────────────── */

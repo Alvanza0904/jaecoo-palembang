@@ -1,0 +1,46 @@
+/* ─── LineReveal ─────────────────────────────────────────── */
+
+.lineRevealContainer {
+  display: block;
+}
+
+/* Each line sits in an overflow:hidden clip so the rise happens inside */
+.lineClip {
+  overflow: hidden;
+  display: block;
+  /* Small breathing room between lines */
+  padding-bottom: 0.04em;
+}
+
+.line {
+  display: block;
+  /* Hidden: below clip boundary */
+  transform: translateY(105%);
+  opacity: 0;
+  transition:
+    transform var(--duration-slower) var(--ease-cinema),
+    opacity calc(var(--duration-slower) * 0.6) var(--ease-out);
+  will-change: transform, opacity;
+}
+
+.line[data-visible="true"] {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ─── Reduced motion ─────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .line {
+    transition: opacity var(--duration-base) linear !important;
+    transform: none !important;
+  }
+
+  .line[data-visible="false"] {
+    opacity: 0;
+  }
+
+  .line[data-visible="true"] {
+    opacity: 1;
+  }
+}

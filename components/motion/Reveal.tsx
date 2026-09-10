@@ -1,10 +1,19 @@
 /**
  * JAECOO Palembang — Reveal Motion Component
+ * STEP 7C: Extended animation variant pool.
  *
- * Scroll-triggered entrance animations.
- * Variants: fade-up, fade, blur, scale, slide-left, slide-right, mask
+ * Variants:
+ *   fade-up       — rise from below (standard)
+ *   fade-down     — settle from above
+ *   fade          — opacity only
+ *   blur          — soft blur to sharp
+ *   scale         — slight grow + fade
+ *   slide-left    — enter from left
+ *   slide-right   — enter from right
+ *   mask          — clip-path wipe reveal
+ *   line-reveal   — for use with LineReveal component (wrapper)
+ *
  * Respects prefers-reduced-motion via CSS.
- *
  * "use client" — requires IntersectionObserver.
  */
 
@@ -15,6 +24,7 @@ import styles from "./Reveal.module.css";
 
 export type RevealVariant =
   | "fade-up"
+  | "fade-down"
   | "fade"
   | "blur"
   | "scale"
@@ -43,7 +53,6 @@ export function Reveal({
     const el = ref.current;
     if (!el) return;
 
-    // If threshold is 0, element is immediately observable — show right away.
     if (threshold === 0) {
       el.style.transitionDelay = `${delay}ms`;
       el.style.animationDelay = `${delay}ms`;
@@ -63,7 +72,6 @@ export function Reveal({
       { threshold }
     );
 
-    // Fallback: if observer never fires within 3s, show element anyway.
     const fallback = setTimeout(() => {
       el.setAttribute("data-visible", "true");
       observer.disconnect();
@@ -85,11 +93,7 @@ export function Reveal({
     .join(" ");
 
   return (
-    <div
-      ref={ref}
-      className={cls}
-      data-visible="false"
-    >
+    <div ref={ref} className={cls} data-visible="false">
       {children}
     </div>
   );
