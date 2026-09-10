@@ -110,24 +110,19 @@ export default async function ModelIndexPage() {
               {/* Background image */}
               <div className={styles.imageLayer} aria-hidden="true">
                 {hasImage ? (
-                  <>
+                  <picture className={styles.modelPicture}>
+                    {isValidImageSrc(mobileSrc) && mobileSrc !== desktopSrc && (
+                      <source media="(max-width: 767px)" srcSet={mobileSrc} />
+                    )}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       className={styles.modelImg}
                       src={desktopSrc}
                       alt=""
                       loading={idx === 0 ? "eager" : "lazy"}
+                      decoding="async"
                     />
-                    {isValidImageSrc(mobileSrc) && mobileSrc !== desktopSrc && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        className={[styles.modelImg, styles.modelImgMobile].join(" ")}
-                        src={mobileSrc}
-                        alt=""
-                        loading={idx === 0 ? "eager" : "lazy"}
-                      />
-                    )}
-                  </>
+                  </picture>
                 ) : (
                   <div className={styles.imageFallback} />
                 )}

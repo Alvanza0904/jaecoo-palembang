@@ -358,3 +358,9 @@
     margin-bottom: 0;
   }
 }
+
+.backdropPicture {
+  position: absolute;
+  inset: 0;
+  display: block;
+}

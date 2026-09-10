@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getModels } from "@/lib/supabase/queries";
+import { getHomeMedia, contentMediaKey } from "@/lib/supabase/media";
 import { getActivePromos } from "@/lib/data/promos";
 import { getPublishedNews } from "@/lib/data/news";
 import { Button } from "@/components/ui/Button";
@@ -26,9 +27,12 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const models = await getModels();
-  const promos = getActivePromos();
-  const news = getPublishedNews(4);
+  const [models, promos, news, homeMedia] = await Promise.all([
+    getModels(),
+    getActivePromos(),
+    getPublishedNews(4),
+    getHomeMedia(),
+  ]);
 
   const heroUrl = buildWhatsAppUrl({
     source: "homepage_hero",
@@ -62,6 +66,7 @@ export default async function HomePage() {
               </Button>
             </div>
           }
+          backgroundImage={homeMedia[contentMediaKey("home", "home", "hero")]?.desktop}
           accent="default"
         />
       </section>
@@ -70,25 +75,25 @@ export default async function HomePage() {
       <HomeModelSlider models={models} />
 
       {/* ── EXPERIENCE ───────────────────────────────────────────── */}
-      <HomeExperienceSection />
+      <HomeExperienceSection image={homeMedia[contentMediaKey("home", "home", "experience")]} />
 
       {/* ── TECHNOLOGY ───────────────────────────────────────────── */}
-      <HomeTechnologySection />
+      <HomeTechnologySection image={homeMedia[contentMediaKey("home", "home", "technology")]} />
 
       {/* ── PROMO ────────────────────────────────────────────────── */}
       <HomePromoSection promos={promos} />
 
       {/* ── ABOUT ────────────────────────────────────────────────── */}
-      <HomeAboutSection />
+      <HomeAboutSection image={homeMedia[contentMediaKey("home", "home", "about")]} />
 
       {/* ── JOURNAL ──────────────────────────────────────────────── */}
       <HomeJournalSection news={news} />
 
       {/* ── FINAL CTA ────────────────────────────────────────────── */}
-      <HomeFinalCTA />
+      <HomeFinalCTA image={homeMedia[contentMediaKey("home", "home", "final_cta")]} />
 
       {/* ── DEALER LOCATION (Local SEO) ──────────────────────────── */}
-      <HomeDealerLocation />
+      <HomeDealerLocation backgroundImage={homeMedia[contentMediaKey("home", "home", "dealer_location")]?.desktop} />
     </>
   );
 }

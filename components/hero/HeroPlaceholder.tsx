@@ -6,6 +6,7 @@
  * Drop-in replacement for LayeredHero bg.
  */
 
+import Image from "next/image";
 import styles from "./HeroPlaceholder.module.css";
 
 interface HeroPlaceholderProps {
@@ -14,6 +15,8 @@ interface HeroPlaceholderProps {
   tagline?: string;
   cta?: React.ReactNode;
   size?: "full" | "large" | "medium";
+  /** Optional CMS-managed content image. Gradient remains the fallback. */
+  backgroundImage?: string | null;
   /** Subtle accent color variation */
   accent?: "default" | "warm" | "cool";
 }
@@ -24,6 +27,7 @@ export function HeroPlaceholder({
   tagline,
   cta,
   size = "full",
+  backgroundImage,
   accent = "default",
 }: HeroPlaceholderProps) {
   return (
@@ -35,7 +39,17 @@ export function HeroPlaceholder({
       ].join(" ")}
     >
       {/* Background gradient */}
-      <div className={styles.bg} aria-hidden="true">
+      <div className={[styles.bg, backgroundImage ? styles.bgHasImage : ""].filter(Boolean).join(" ")} aria-hidden="true">
+        {backgroundImage && (
+          <Image
+            src={backgroundImage}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className={styles.bgImage}
+          />
+        )}
         <div className={styles.gradient} />
         {/* Subtle grid lines */}
         <div className={styles.grid} />

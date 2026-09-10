@@ -150,26 +150,19 @@ export function HomeModelSlider({ models: rawModels }: HomeModelSliderProps) {
         aria-hidden="true"
       >
         {hasImage ? (
-          <>
-            {/* Desktop */}
+          <picture className={styles.backdropPicture}>
+            {isValidImageSrc(mobileSrc) && mobileSrc !== desktopSrc && (
+              <source media="(max-width: 767px)" srcSet={mobileSrc} />
+            )}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               className={styles.backdropImg}
               src={desktopSrc}
               alt=""
               loading="eager"
+              decoding="async"
             />
-            {/* Mobile override if different */}
-            {isValidImageSrc(mobileSrc) && mobileSrc !== desktopSrc && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                className={[styles.backdropImg, styles.backdropImgMobile].join(" ")}
-                src={mobileSrc}
-                alt=""
-                loading="eager"
-              />
-            )}
-          </>
+          </picture>
         ) : (
           <div className={styles.backdropFallback} />
         )}

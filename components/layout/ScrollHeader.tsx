@@ -13,6 +13,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { MobileMenuToggle } from "./MobileMenuToggle";
 import styles from "./ScrollHeader.module.css";
+import Image from "next/image";
+import type { ResponsiveImage as ResponsiveImageData } from "@/lib/types/media";
 
 interface NavLink {
   label: string;
@@ -22,9 +24,11 @@ interface NavLink {
 interface ScrollHeaderProps {
   navLinks: NavLink[];
   whatsappUrl: string;
+  logo?: ResponsiveImageData;
+  logoLight?: ResponsiveImageData;
 }
 
-export function ScrollHeader({ navLinks, whatsappUrl }: ScrollHeaderProps) {
+export function ScrollHeader({ navLinks, whatsappUrl, logo, logoLight }: ScrollHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [isHeroPage, setIsHeroPage] = useState(false);
 
@@ -66,10 +70,24 @@ export function ScrollHeader({ navLinks, whatsappUrl }: ScrollHeaderProps) {
           className={styles.logo}
           aria-label="JAECOO Palembang — Beranda"
         >
-          <span className={[styles.logoText, isTransparent ? styles.logoTextLight : ""].join(" ")}>
-            JAECOO
-          </span>
-          <span className={styles.logoSub}>Palembang</span>
+          {logo ? (
+            <Image
+              src={(isTransparent ? (logoLight?.desktop ?? logoLight?.mobile) : undefined) ?? logo.desktop ?? logo.tablet ?? logo.mobile ?? logo.small_mobile ?? ""}
+              alt={logo.alt || "JAECOO Palembang"}
+              width={logo.width ?? 180}
+              height={logo.height ?? 48}
+              className={styles.logoImage}
+              priority
+              sizes="180px"
+            />
+          ) : (
+            <>
+              <span className={[styles.logoText, isTransparent ? styles.logoTextLight : ""].join(" ")}>
+                JAECOO
+              </span>
+              <span className={styles.logoSub}>Palembang</span>
+            </>
+          )}
         </Link>
 
         {/* Desktop Navigation */}

@@ -25,6 +25,7 @@
 export const revalidate = 0;
 
 import type { Metadata } from "next";
+import type { ResponsiveImage } from "@/lib/types/media";
 import { notFound } from "next/navigation";
 import { getModelBySlug, getModelSlugs } from "@/lib/supabase/queries";
 import { Container } from "@/components/ui/Container";
@@ -41,6 +42,54 @@ import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import { ColorCarousel } from "@/components/model/ColorCarousel";
 import styles from "./page.module.css";
+
+function CmsModelImage({
+  image,
+  label,
+  ratio = "16/9",
+  className,
+}: {
+  image?: ResponsiveImage;
+  label: string;
+  ratio?: string;
+  className?: string;
+}) {
+  const src = image?.desktop ?? image?.tablet ?? image?.mobile ?? image?.small_mobile;
+  if (!image || !src) {
+    return (
+      <ImagePlaceholder
+        label={label}
+        ratio={ratio}
+        source="Supabase → Media Library"
+        className={className}
+      />
+    );
+  }
+
+  return (
+    // Keep the existing section classes so the visual composition is unchanged.
+    // The image source is resolved from Supabase media assignments.
+    <picture>
+      {image.small_mobile && (
+        <source media="(max-width: 389px)" srcSet={image.small_mobile} />
+      )}
+      {image.mobile && (
+        <source media="(max-width: 767px)" srcSet={image.mobile} />
+      )}
+      {image.tablet && (
+        <source media="(max-width: 1023px)" srcSet={image.tablet} />
+      )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt={image.alt}
+        className={className}
+        loading="lazy"
+        decoding="async"
+      />
+    </picture>
+  );
+}
 
 interface ModelPageProps {
   params: Promise<{ slug: string }>;
@@ -166,21 +215,9 @@ export default async function ModelPage({ params }: ModelPageProps) {
       <section className={styles.cinematicSection} data-theme="dark">
         {/* Background image — full bleed */}
         <div className={styles.cinematicBg} aria-hidden="true">
-          <ImagePlaceholder
-            label="EXTERIOR — FULL BLEED"
-            device="desktop"
-            ratio="21/9"
-            source="Admin → Media Library"
-            className={styles.cinematicBgImg}
-          />
+          <CmsModelImage image={model.image_slots?.exterior} label="EXTERIOR — FULL BLEED" ratio="21/9" className={styles.cinematicBgImg} />
           <div className={styles.cinematicBgImgMobile} aria-hidden="true">
-            <ImagePlaceholder
-              label="EXTERIOR — MOBILE"
-              device="mobile"
-              ratio="4/5"
-              source="Admin → Media Library"
-              className={styles.cinematicBgImg}
-            />
+            <CmsModelImage image={model.image_slots?.exterior_mobile ?? model.image_slots?.exterior} label="EXTERIOR — MOBILE" ratio="4/5" className={styles.cinematicBgImg} />
           </div>
           <div className={styles.cinematicOverlay} />
         </div>
@@ -210,12 +247,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
         <div className={styles.detailGrid}>
           {/* Main detail image — dominan */}
           <Reveal variant="fade-up" className={styles.detailMainWrap}>
-            <ImagePlaceholder
-              label="DESIGN DETAIL — HEADLIGHT / GRILLE"
-              ratio="3/4"
-              source="Admin → Media Library"
-              className={styles.detailMainImg}
-            />
+            <CmsModelImage image={model.image_slots?.design_detail_main} label="DESIGN DETAIL — HEADLIGHT / GRILLE" ratio="3/4" className={styles.detailMainImg} />
           </Reveal>
 
           {/* Editorial text — right column */}
@@ -238,20 +270,10 @@ export default async function ModelPage({ params }: ModelPageProps) {
             {/* Secondary detail images stacked */}
             <div className={styles.detailSecondaryImgs}>
               <Reveal variant="fade-up" delay={200}>
-                <ImagePlaceholder
-                  label="DETAIL — WHEEL / RIM"
-                  ratio="1/1"
-                  source="Admin → Media Library"
-                  className={styles.detailSecondaryImg}
-                />
+                <CmsModelImage image={model.image_slots?.design_detail_wheel} label="DETAIL — WHEEL / RIM" ratio="1/1" className={styles.detailSecondaryImg} />
               </Reveal>
               <Reveal variant="fade-up" delay={280}>
-                <ImagePlaceholder
-                  label="DETAIL — REAR / BADGE"
-                  ratio="1/1"
-                  source="Admin → Media Library"
-                  className={styles.detailSecondaryImg}
-                />
+                <CmsModelImage image={model.image_slots?.design_detail_rear} label="DETAIL — REAR / BADGE" ratio="1/1" className={styles.detailSecondaryImg} />
               </Reveal>
             </div>
           </div>
@@ -263,13 +285,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
       ══════════════════════════════════════════════════════════════════ */}
       <section className={styles.presenceSection} data-theme="dark">
         <div className={styles.presenceBg} aria-hidden="true">
-          <ImagePlaceholder
-            label="PROFILE — SIDE VIEW FULL"
-            device="desktop"
-            ratio="16/7"
-            source="Admin → Media Library"
-            className={styles.presenceBgImg}
-          />
+          <CmsModelImage image={model.image_slots?.profile} label="PROFILE — SIDE VIEW FULL" ratio="16/7" className={styles.presenceBgImg} />
           <div className={styles.cinematicOverlay} style={{ opacity: 0.5 }} />
         </div>
 
@@ -293,21 +309,9 @@ export default async function ModelPage({ params }: ModelPageProps) {
       ══════════════════════════════════════════════════════════════════ */}
       <section className={styles.cinematicSection} data-theme="dark">
         <div className={styles.cinematicBg} aria-hidden="true">
-          <ImagePlaceholder
-            label="INTERIOR — CABIN FULL WIDTH"
-            device="desktop"
-            ratio="21/9"
-            source="Admin → Media Library"
-            className={styles.cinematicBgImg}
-          />
+          <CmsModelImage image={model.image_slots?.interior} label="INTERIOR — CABIN FULL WIDTH" ratio="21/9" className={styles.cinematicBgImg} />
           <div className={styles.cinematicBgImgMobile}>
-            <ImagePlaceholder
-              label="INTERIOR — MOBILE"
-              device="mobile"
-              ratio="4/5"
-              source="Admin → Media Library"
-              className={styles.cinematicBgImg}
-            />
+            <CmsModelImage image={model.image_slots?.interior_mobile ?? model.image_slots?.interior} label="INTERIOR — MOBILE" ratio="4/5" className={styles.cinematicBgImg} />
           </div>
           <div className={styles.cinematicOverlay} />
         </div>
@@ -336,22 +340,12 @@ export default async function ModelPage({ params }: ModelPageProps) {
             {/* Main cockpit image */}
             <div className={styles.cockpitMainWrap}>
               <Reveal variant="fade-up">
-                <ImagePlaceholder
-                  label="COCKPIT — DASHBOARD / SCREEN"
-                  ratio="4/3"
-                  source="Admin → Media Library"
-                  className={styles.cockpitMainImg}
-                />
+                <CmsModelImage image={model.image_slots?.cockpit_main} label="COCKPIT — DASHBOARD / SCREEN" ratio="4/3" className={styles.cockpitMainImg} />
               </Reveal>
 
               {/* Floating detail image — overlaps main */}
               <Reveal variant="fade-up" delay={150} className={styles.cockpitFloatingWrap}>
-                <ImagePlaceholder
-                  label="COCKPIT — STEERING / DETAIL"
-                  ratio="1/1"
-                  source="Admin → Media Library"
-                  className={styles.cockpitFloatingImg}
-                />
+                <CmsModelImage image={model.image_slots?.cockpit_detail} label="COCKPIT — STEERING / DETAIL" ratio="1/1" className={styles.cockpitFloatingImg} />
               </Reveal>
             </div>
 
@@ -381,13 +375,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
       ══════════════════════════════════════════════════════════════════ */}
       <section className={styles.performanceSection} data-theme="dark">
         <div className={styles.performanceBg} aria-hidden="true">
-          <ImagePlaceholder
-            label="PERFORMANCE — VEHICLE / ACTION"
-            device="desktop"
-            ratio="16/9"
-            source="Admin → Media Library"
-            className={styles.performanceBgImg}
-          />
+          <CmsModelImage image={model.image_slots?.performance} label="PERFORMANCE — VEHICLE / ACTION" ratio="16/9" className={styles.performanceBgImg} />
           <div className={styles.cinematicOverlay} style={{ opacity: 0.6 }} />
         </div>
 
@@ -451,12 +439,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
           {/* Left: main image */}
           <div className={styles.techImageWrap}>
             <Reveal variant="fade-up">
-              <ImagePlaceholder
-                label="TECHNOLOGY — HMI / SCREEN"
-                ratio="3/4"
-                source="Admin → Media Library"
-                className={styles.techMainImg}
-              />
+              <CmsModelImage image={model.image_slots?.technology} label="TECHNOLOGY — HMI / SCREEN" ratio="3/4" className={styles.techMainImg} />
             </Reveal>
           </div>
 
@@ -507,13 +490,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
       ══════════════════════════════════════════════════════════════════ */}
       <section className={styles.cinematicSection} data-theme="dark">
         <div className={styles.cinematicBg} aria-hidden="true">
-          <ImagePlaceholder
-            label="ADAS — DRIVING / SAFETY"
-            device="desktop"
-            ratio="21/9"
-            source="Admin → Media Library"
-            className={styles.cinematicBgImg}
-          />
+          <CmsModelImage image={model.image_slots?.adas} label="ADAS — DRIVING / SAFETY" ratio="21/9" className={styles.cinematicBgImg} />
           <div className={styles.cinematicOverlay} style={{ opacity: 0.55 }} />
         </div>
 
@@ -559,13 +536,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
       ══════════════════════════════════════════════════════════════════ */}
       <section className={styles.specsSection} data-theme="dark">
         <div className={styles.specsBg} aria-hidden="true">
-          <ImagePlaceholder
-            label="SPECS — VEHICLE PROFILE"
-            device="desktop"
-            ratio="16/9"
-            source="Admin → Media Library"
-            className={styles.specsBgImg}
-          />
+          <CmsModelImage image={model.image_slots?.specs_visual} label="SPECS — VEHICLE PROFILE" ratio="16/9" className={styles.specsBgImg} />
           <div className={styles.cinematicOverlay} style={{ opacity: 0.7 }} />
         </div>
 
@@ -639,13 +610,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
       ══════════════════════════════════════════════════════════════════ */}
       <section className={styles.ctaSection} data-theme="dark">
         <div className={styles.ctaBg} aria-hidden="true">
-          <ImagePlaceholder
-            label="FINAL CTA — CINEMATIC VEHICLE"
-            device="desktop"
-            ratio="16/9"
-            source="Admin → Media Library"
-            className={styles.ctaBgImg}
-          />
+          <CmsModelImage image={model.image_slots?.final_cta} label="FINAL CTA — CINEMATIC VEHICLE" ratio="16/9" className={styles.ctaBgImg} />
           <div className={styles.cinematicOverlay} style={{ opacity: 0.65 }} />
         </div>
 

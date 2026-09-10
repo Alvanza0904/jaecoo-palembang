@@ -366,3 +366,25 @@
   .technology { min-height: auto; }
   .finalCta { min-height: 520px; }
 }
+
+/* CMS image layer — visual composition unchanged; gradient remains fallback. */
+.experienceBg img,
+.techBg > img,
+.aboutPortrait > img,
+.finalCtaBg > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.experienceBg img,
+.techBg > img,
+.finalCtaBg > img { z-index: 0; }
+.experienceBg::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
+.techBgFallback,
+.finalCtaFallback { z-index: 0; }
+.techBg > img + .techBgFallback,
+.finalCtaBg > img + .finalCtaFallback { opacity: 0; }
+.aboutPortrait > img { z-index: 0; }
+.aboutPortrait span { position: relative; z-index: 1; }

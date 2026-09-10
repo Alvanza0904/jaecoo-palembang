@@ -83,7 +83,7 @@ create table if not exists model_colors (
   color_key    text not null,
   name         text not null,   -- 'Crystal White'
   hex          char(7) not null,-- '#f0f0f0'
-  image_path   text,            -- '/images/models/j5-ev/color-white.jpg'
+  image_path   text,            -- 'models/j5-ev/color-white.jpg' (Supabase Storage path)
   sort_order   int default 0,
   unique(model_id, color_key)
 );
@@ -96,7 +96,7 @@ create table if not exists model_media (
   model_id     uuid not null references models(id) on delete cascade,
   media_type   text not null,   -- 'hero' | 'gallery' | 'cutout'
   breakpoint   text,            -- 'desktop' | 'tablet' | 'mobile' | null (universal)
-  path         text not null,   -- '/images/models/j5-ev/hero-desktop.jpg'
+  path         text not null,   -- 'models/j5-ev/hero-desktop.jpg' (Supabase Storage path)
   alt          text,
   focal_x      int default 50,  -- focal point for art direction
   focal_y      int default 50,

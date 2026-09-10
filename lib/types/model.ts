@@ -105,6 +105,10 @@ export interface ModelTechnologySection {
   features: ModelFeature[];
 }
 
+export interface ModelImageSlots {
+  [slot: string]: ResponsiveImage | undefined;
+}
+
 export interface ModelData {
   /** URL slug — matches route /model/[slug] */
   slug: ModelSlug;
@@ -119,6 +123,9 @@ export interface ModelData {
 
   /** Hero media */
   hero_media: MediaWithArtDirection;
+
+  /** CMS-managed image slots for the cinematic model page. */
+  image_slots?: ModelImageSlots;
 
   /** Default / base variant */
   default_variant: ModelVariant;

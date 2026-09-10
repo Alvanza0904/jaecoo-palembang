@@ -17,6 +17,7 @@ import type { NewsData } from "@/lib/types/news";
 import { PriceDisplay } from "@/components/price/PriceDisplay";
 import { Button } from "@/components/ui/Button";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
+import type { ResponsiveImage } from "@/lib/types/media";
 import styles from "./HomeExperience.module.css";
 
 function Media({ src, alt, className = "" }: { src?: string | null; alt: string; className?: string }) {
@@ -75,10 +76,15 @@ export function HomeRange({ models }: { models: ModelData[] }) {
 
 // ─── HomeExperienceSection ───────────────────────────────────────────────────
 // Full-bleed dark section — editorial typographic composition
-export function HomeExperienceSection() {
+export function HomeExperienceSection({ image }: { image?: ResponsiveImage }) {
   return (
     <section className={styles.experience} aria-labelledby="experience-title">
-      <div className={styles.experienceBg} aria-hidden="true" />
+      <div className={styles.experienceBg} aria-hidden="true">
+        {image?.desktop && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={image.desktop} alt="" loading="lazy" />
+        )}
+      </div>
       <div className={styles.experienceInner}>
         <div className={styles.experienceHead}>
           <p className={styles.eyebrow}>THE JAECOO EXPERIENCE</p>
@@ -107,11 +113,15 @@ export function HomeExperienceSection() {
 
 // ─── HomeTechnologySection ───────────────────────────────────────────────────
 // Image-led: full-bleed dark with text overlay composition
-export function HomeTechnologySection() {
+export function HomeTechnologySection({ image }: { image?: ResponsiveImage }) {
   return (
     <section className={styles.technology} aria-labelledby="technology-title">
       {/* Background — placeholder for CMS tech image */}
       <div className={styles.techBg} aria-hidden="true">
+        {image?.desktop && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={image.desktop} alt="" loading="lazy" />
+        )}
         <div className={styles.techBgFallback} />
         <div className={styles.techOverlay} />
       </div>
@@ -202,7 +212,7 @@ export function HomeJournalSection({ news }: { news: NewsData[] }) {
 
 // ─── HomeAboutSection ────────────────────────────────────────────────────────
 // Cinematic full-bleed dark layout
-export function HomeAboutSection() {
+export function HomeAboutSection({ image }: { image?: ResponsiveImage }) {
   return (
     <section className={styles.about} aria-labelledby="about-title">
       <div className={styles.aboutInner}>
@@ -216,7 +226,12 @@ export function HomeAboutSection() {
           <Link className={styles.aboutLink} href="/sales-jaecoo-palembang">Meet Alvan ↗</Link>
         </div>
         <div className={styles.aboutPortrait} aria-hidden="true">
-          <span>ALVAN</span>
+          {image?.desktop ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={image.desktop} alt="" loading="lazy" />
+          ) : (
+            <span>ALVAN</span>
+          )}
         </div>
       </div>
     </section>
@@ -225,7 +240,7 @@ export function HomeAboutSection() {
 
 // ─── HomeFinalCTA ────────────────────────────────────────────────────────────
 // Full-bleed cinematic dark CTA
-export function HomeFinalCTA() {
+export function HomeFinalCTA({ image }: { image?: ResponsiveImage }) {
   const url = buildWhatsAppUrl({
     source: "homepage_global",
     source_cta: "global_cta",
@@ -233,6 +248,10 @@ export function HomeFinalCTA() {
   return (
     <section className={styles.finalCta}>
       <div className={styles.finalCtaBg} aria-hidden="true">
+        {image?.desktop && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={image.desktop} alt="" loading="lazy" />
+        )}
         <div className={styles.finalCtaFallback} />
         <div className={styles.finalCtaOverlay} />
       </div>

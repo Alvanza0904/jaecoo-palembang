@@ -3,6 +3,7 @@
  */
 
 import type { PromoData } from "@/lib/types/promo";
+import { getEntityMedia } from "@/lib/supabase/media";
 
 export const PROMOS: PromoData[] = [
   {
@@ -14,8 +15,8 @@ export const PROMOS: PromoData[] = [
     valid_until: "2025-03-31",
     expired_at: null,
     image: {
-      desktop: "/images/promo/j5-promo-desktop.jpg",
-      mobile: "/images/promo/j5-promo-mobile.jpg",
+      desktop: undefined,
+      mobile: undefined,
       alt: "Promo Spesial JAECOO J5 EV",
     },
     cta_label: "Tanya Sekarang",
@@ -26,15 +27,29 @@ export const PROMOS: PromoData[] = [
   },
 ];
 
-export function getActivePromos(): PromoData[] {
+export async function getActivePromos(): Promise<PromoData[]> {
   const now = new Date();
-  return PROMOS.filter((p) => {
+  const active = PROMOS.filter((p) => {
     if (!p.published) return false;
     if (p.expired_at && new Date(p.expired_at) < now) return false;
     return true;
   });
+
+  return Promise.all(
+    active.map(async (promo) => ({
+      ...promo,
+      image:
+        (await getEntityMedia("promo", promo.id, "cover")) ??
+        { alt: promo.title },
+    })),
+  );
 }
 
-export function getPromoBySlug(slug: string): PromoData | undefined {
-  return PROMOS.find((p) => p.slug === slug && p.published);
+export async function getPromoBySlug(slug: string): Promise<PromoData | undefined> {
+  const promo = PROMOS.find((p) => p.slug === slug && p.published);
+  if (!promo) return undefined;
+  return {
+    ...promo,
+    image: (await getEntityMedia("promo", promo.id, "cover")) ?? { alt: promo.title },
+  };
 }

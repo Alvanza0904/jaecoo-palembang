@@ -17,12 +17,12 @@ import styles from "./berita-detail.module.css";
 interface Props { params: Promise<{ slug: string }> }
 
 export async function generateStaticParams() {
-  return getPublishedNews().map((n) => ({ slug: n.slug }));
+  return (await getPublishedNews()).map((n) => ({ slug: n.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const article = getNewsBySlug(slug);
+  const article = await getNewsBySlug(slug);
   if (!article) return {};
   return {
     title: article.title,
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BeritaDetailPage({ params }: Props) {
   const { slug } = await params;
-  const article = getNewsBySlug(slug);
+  const article = await getNewsBySlug(slug);
   if (!article) notFound();
 
   return (

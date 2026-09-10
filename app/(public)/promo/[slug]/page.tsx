@@ -17,12 +17,12 @@ import styles from "./promo-detail.module.css";
 interface Props { params: Promise<{ slug: string }> }
 
 export async function generateStaticParams() {
-  return getActivePromos().map((p) => ({ slug: p.slug }));
+  return (await getActivePromos()).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const promo = getPromoBySlug(slug);
+  const promo = await getPromoBySlug(slug);
   if (!promo) return {};
   return {
     title: promo.title,
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PromoDetailPage({ params }: Props) {
   const { slug } = await params;
-  const promo = getPromoBySlug(slug);
+  const promo = await getPromoBySlug(slug);
   if (!promo) notFound();
 
   const whatsappUrl = buildWhatsAppUrl({

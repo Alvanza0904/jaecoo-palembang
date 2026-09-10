@@ -134,3 +134,9 @@
     padding-bottom: var(--space-20);
   }
 }
+
+.bgImage { object-fit: cover; z-index: 0; }
+.bg { isolation: isolate; }
+.gradient, .grid { position: relative; z-index: 1; }
+
+.bgHasImage .gradient { opacity: 0.28; }

@@ -35,10 +35,10 @@ export const MODELS: ModelData[] = [
       "JAECOO J5 EV hadir sebagai SUV elektrik yang menggabungkan performa modern dengan desain premium — siap mengubah cara Anda berkendara di Palembang dan sekitarnya.",
     hero_media: {
       image: {
-        desktop: "/images/models/j5-ev/hero-desktop.jpg",
-        tablet: "/images/models/j5-ev/hero-tablet.jpg",
-        mobile: "/images/models/j5-ev/hero-mobile.jpg",
-        cutout: "/images/models/j5-ev/cutout.png",
+        desktop: undefined,
+        tablet: undefined,
+        mobile: undefined,
+        cutout: undefined,
         alt: "JAECOO J5 EV — tampak depan tiga perempat",
       },
       art_direction: {
@@ -70,7 +70,7 @@ export const MODELS: ModelData[] = [
         name: "Crystal White",
         hex: "#f0f0f0",
         image: {
-          desktop: "/images/models/j5-ev/color-white.jpg",
+          desktop: undefined,
           alt: "JAECOO J5 EV Crystal White",
         },
       },
@@ -79,7 +79,7 @@ export const MODELS: ModelData[] = [
         name: "Midnight Black",
         hex: "#1a1a1a",
         image: {
-          desktop: "/images/models/j5-ev/color-black.jpg",
+          desktop: undefined,
           alt: "JAECOO J5 EV Midnight Black",
         },
       },
@@ -88,7 +88,7 @@ export const MODELS: ModelData[] = [
         name: "Ocean Blue",
         hex: "#1e3a5f",
         image: {
-          desktop: "/images/models/j5-ev/color-blue.jpg",
+          desktop: undefined,
           alt: "JAECOO J5 EV Ocean Blue",
         },
       },
@@ -97,7 +97,7 @@ export const MODELS: ModelData[] = [
         name: "Stellar Silver",
         hex: "#c0c0c0",
         image: {
-          desktop: "/images/models/j5-ev/color-silver.jpg",
+          desktop: undefined,
           alt: "JAECOO J5 EV Stellar Silver",
         },
       },
@@ -186,10 +186,10 @@ export const MODELS: ModelData[] = [
       "JAECOO J7 SHS menggabungkan keiritan hybrid dengan performa SUV sejati dan kemampuan AWD — pilihan sempurna untuk jiwa petualang yang tidak mau kompromi antara efisiensi dan tenaga.",
     hero_media: {
       image: {
-        desktop: "/images/models/j7-shs/hero-desktop.jpg",
-        tablet: "/images/models/j7-shs/hero-tablet.jpg",
-        mobile: "/images/models/j7-shs/hero-mobile.jpg",
-        cutout: "/images/models/j7-shs/cutout.png",
+        desktop: undefined,
+        tablet: undefined,
+        mobile: undefined,
+        cutout: undefined,
         alt: "JAECOO J7 SHS — tampak samping dinamis",
       },
       art_direction: {
@@ -231,7 +231,7 @@ export const MODELS: ModelData[] = [
         name: "Pearl White",
         hex: "#f5f5f5",
         image: {
-          desktop: "/images/models/j7-shs/color-white.jpg",
+          desktop: undefined,
           alt: "JAECOO J7 SHS Pearl White",
         },
       },
@@ -240,7 +240,7 @@ export const MODELS: ModelData[] = [
         name: "Titanium Silver",
         hex: "#9ca3af",
         image: {
-          desktop: "/images/models/j7-shs/color-silver.jpg",
+          desktop: undefined,
           alt: "JAECOO J7 SHS Titanium Silver",
         },
       },
@@ -249,7 +249,7 @@ export const MODELS: ModelData[] = [
         name: "Cosmic Black",
         hex: "#1a1a1a",
         image: {
-          desktop: "/images/models/j7-shs/color-black.jpg",
+          desktop: undefined,
           alt: "JAECOO J7 SHS Cosmic Black",
         },
       },
@@ -258,7 +258,7 @@ export const MODELS: ModelData[] = [
         name: "Forest Green",
         hex: "#2d4a3e",
         image: {
-          desktop: "/images/models/j7-shs/color-green.jpg",
+          desktop: undefined,
           alt: "JAECOO J7 SHS Forest Green",
         },
       },
@@ -348,10 +348,10 @@ export const MODELS: ModelData[] = [
       "JAECOO J8 Ardis SHS mendefinisikan ulang standar SUV flagship — kemewahan tanpa kompromi, teknologi hybrid terdepan, dan performa AWD yang menghadirkan sensasi berkendara di level yang berbeda.",
     hero_media: {
       image: {
-        desktop: "/images/models/j8-ardis/hero-desktop.jpg",
-        tablet: "/images/models/j8-ardis/hero-tablet.jpg",
-        mobile: "/images/models/j8-ardis/hero-mobile.jpg",
-        cutout: "/images/models/j8-ardis/cutout.png",
+        desktop: undefined,
+        tablet: undefined,
+        mobile: undefined,
+        cutout: undefined,
         alt: "JAECOO J8 Ardis SHS — tampak depan premium",
       },
       art_direction: {
@@ -383,7 +383,7 @@ export const MODELS: ModelData[] = [
         name: "Obsidian Black",
         hex: "#111111",
         image: {
-          desktop: "/images/models/j8-ardis/color-black.jpg",
+          desktop: undefined,
           alt: "JAECOO J8 Ardis SHS Obsidian Black",
         },
       },
@@ -392,7 +392,7 @@ export const MODELS: ModelData[] = [
         name: "Champagne Gold",
         hex: "#c8a96e",
         image: {
-          desktop: "/images/models/j8-ardis/color-gold.jpg",
+          desktop: undefined,
           alt: "JAECOO J8 Ardis SHS Champagne Gold",
         },
       },
@@ -401,7 +401,7 @@ export const MODELS: ModelData[] = [
         name: "Alpine White",
         hex: "#f8f8f6",
         image: {
-          desktop: "/images/models/j8-ardis/color-white.jpg",
+          desktop: undefined,
           alt: "JAECOO J8 Ardis SHS Alpine White",
         },
       },
@@ -410,7 +410,7 @@ export const MODELS: ModelData[] = [
         name: "Platinum Silver",
         hex: "#d4d4d4",
         image: {
-          desktop: "/images/models/j8-ardis/color-silver.jpg",
+          desktop: undefined,
           alt: "JAECOO J8 Ardis SHS Platinum Silver",
         },
       },

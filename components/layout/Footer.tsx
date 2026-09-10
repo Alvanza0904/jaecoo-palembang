@@ -8,6 +8,8 @@
 import Link from "next/link";
 import { WHATSAPP_NUMBER } from "@/lib/utils/whatsapp";
 import styles from "./Footer.module.css";
+import { getEntityMedia } from "@/lib/supabase/media";
+import Image from "next/image";
 
 const SOCIAL_LINKS = [
   {
@@ -37,7 +39,8 @@ const LEGAL_LINKS = [
   { label: "Terms", href: "/terms" },
 ];
 
-export function Footer() {
+export async function Footer() {
+  const logo = await getEntityMedia("global", "site", "logo_dark");
   const year = new Date().getFullYear();
 
   return (
@@ -45,8 +48,21 @@ export function Footer() {
       <div className={styles.inner}>
         {/* Brand */}
         <div className={styles.brand}>
-          <p className={styles.brandName}>JAECOO</p>
-          <p className={styles.brandSub}>Palembang</p>
+          {logo ? (
+            <Image
+              src={logo.desktop ?? logo.tablet ?? logo.mobile ?? logo.small_mobile ?? ""}
+              alt={logo.alt || "JAECOO Palembang"}
+              width={logo.width ?? 180}
+              height={logo.height ?? 48}
+              className={styles.brandLogo}
+              sizes="180px"
+            />
+          ) : (
+            <>
+              <p className={styles.brandName}>JAECOO</p>
+              <p className={styles.brandSub}>Palembang</p>
+            </>
+          )}
         </div>
 
         {/* Gold divider */}

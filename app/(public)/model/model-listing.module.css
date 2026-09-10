@@ -443,3 +443,11 @@
     font-size: clamp(44px, 14vw, 80px);
   }
 }
+
+.imagePicture {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.modelPicture { position: absolute; inset: 0; display: block; }

@@ -20,6 +20,14 @@
   gap: var(--space-2);
 }
 
+.brandLogo {
+  display: block;
+  width: auto;
+  height: 32px;
+  max-width: 190px;
+  object-fit: contain;
+}
+
 .brandName {
   font-size: var(--text-md);
   font-weight: var(--weight-bold);

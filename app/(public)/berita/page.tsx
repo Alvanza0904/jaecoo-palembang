@@ -11,8 +11,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/berita" },
 };
 
-export default function BeritaPage() {
-  const news = getPublishedNews();
+export default async function BeritaPage() {
+  const news = await getPublishedNews();
   const featured = news[0];
   return (
     <>

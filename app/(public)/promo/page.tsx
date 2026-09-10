@@ -13,8 +13,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/promo" },
 };
 
-export default function PromoPage() {
-  const promos = getActivePromos();
+export default async function PromoPage() {
+  const promos = await getActivePromos();
   const whatsappUrl = buildWhatsAppUrl({ source: "promo_page", source_cta: "promo_cta" });
   return (
     <>

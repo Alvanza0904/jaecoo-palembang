@@ -3,6 +3,7 @@
  */
 
 import type { NewsData } from "@/lib/types/news";
+import { getEntityMedia } from "@/lib/supabase/media";
 
 export const NEWS: NewsData[] = [
   {
@@ -11,8 +12,8 @@ export const NEWS: NewsData[] = [
     title: "JAECOO Resmi Hadir di Palembang",
     excerpt: "JAECOO membawa lineup SUV premium ke Palembang, menghadirkan pilihan kendaraan modern yang belum pernah ada sebelumnya di Sumatera Selatan.",
     cover: {
-      desktop: "/images/news/hadir-desktop.jpg",
-      mobile: "/images/news/hadir-mobile.jpg",
+      desktop: undefined,
+      mobile: undefined,
       alt: "JAECOO resmi hadir di Palembang",
     },
     category: "Brand",
@@ -22,13 +23,27 @@ export const NEWS: NewsData[] = [
   },
 ];
 
-export function getPublishedNews(limit?: number): NewsData[] {
+export async function getPublishedNews(limit?: number): Promise<NewsData[]> {
   const sorted = NEWS.filter((n) => n.published).sort(
-    (a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+    (a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime(),
   );
-  return limit ? sorted.slice(0, limit) : sorted;
+  const selected = limit ? sorted.slice(0, limit) : sorted;
+
+  return Promise.all(
+    selected.map(async (news) => ({
+      ...news,
+      cover:
+        (await getEntityMedia("news", news.id, "cover")) ??
+        { alt: news.title },
+    })),
+  );
 }
 
-export function getNewsBySlug(slug: string): NewsData | undefined {
-  return NEWS.find((n) => n.slug === slug && n.published);
+export async function getNewsBySlug(slug: string): Promise<NewsData | undefined> {
+  const news = NEWS.find((n) => n.slug === slug && n.published);
+  if (!news) return undefined;
+  return {
+    ...news,
+    cover: (await getEntityMedia("news", news.id, "cover")) ?? { alt: news.title },
+  };
 }

@@ -89,10 +89,10 @@ insert into model_colors (model_id, color_key, name, hex, image_path, sort_order
 select m.id, v.color_key, v.name, v.hex, v.image_path, v.sort_order
 from models m,
   (values
-    ('j5-white',  'Crystal White',  '#f0f0f0', '/images/models/j5-ev/color-white.jpg',  1),
-    ('j5-black',  'Midnight Black', '#1a1a1a', '/images/models/j5-ev/color-black.jpg',  2),
-    ('j5-blue',   'Ocean Blue',     '#1e3a5f', '/images/models/j5-ev/color-blue.jpg',   3),
-    ('j5-silver', 'Stellar Silver', '#c0c0c0', '/images/models/j5-ev/color-silver.jpg', 4)
+    ('j5-white',  'Crystal White',  '#f0f0f0', null,  1),
+    ('j5-black',  'Midnight Black', '#1a1a1a', null,  2),
+    ('j5-blue',   'Ocean Blue',     '#1e3a5f', null,   3),
+    ('j5-silver', 'Stellar Silver', '#c0c0c0', null, 4)
   ) as v(color_key, name, hex, image_path, sort_order)
 where m.slug = 'jaecoo-j5-ev'
 on conflict (model_id, color_key) do update set
@@ -103,10 +103,10 @@ insert into model_colors (model_id, color_key, name, hex, image_path, sort_order
 select m.id, v.color_key, v.name, v.hex, v.image_path, v.sort_order
 from models m,
   (values
-    ('j7-white',  'Pearl White',     '#f5f5f5', '/images/models/j7-shs/color-white.jpg',  1),
-    ('j7-silver', 'Titanium Silver', '#9ca3af', '/images/models/j7-shs/color-silver.jpg', 2),
-    ('j7-black',  'Cosmic Black',    '#1a1a1a', '/images/models/j7-shs/color-black.jpg',  3),
-    ('j7-green',  'Forest Green',    '#2d4a3e', '/images/models/j7-shs/color-green.jpg',  4)
+    ('j7-white',  'Pearl White',     '#f5f5f5', null,  1),
+    ('j7-silver', 'Titanium Silver', '#9ca3af', null, 2),
+    ('j7-black',  'Cosmic Black',    '#1a1a1a', null,  3),
+    ('j7-green',  'Forest Green',    '#2d4a3e', null,  4)
   ) as v(color_key, name, hex, image_path, sort_order)
 where m.slug = 'jaecoo-j7-shs'
 on conflict (model_id, color_key) do update set
@@ -117,10 +117,10 @@ insert into model_colors (model_id, color_key, name, hex, image_path, sort_order
 select m.id, v.color_key, v.name, v.hex, v.image_path, v.sort_order
 from models m,
   (values
-    ('j8-obsidian', 'Obsidian Black',  '#111111', '/images/models/j8-ardis/color-black.jpg',  1),
-    ('j8-gold',     'Champagne Gold',  '#c8a96e', '/images/models/j8-ardis/color-gold.jpg',   2),
-    ('j8-white',    'Alpine White',    '#f8f8f6', '/images/models/j8-ardis/color-white.jpg',  3),
-    ('j8-silver',   'Platinum Silver', '#d4d4d4', '/images/models/j8-ardis/color-silver.jpg', 4)
+    ('j8-obsidian', 'Obsidian Black',  '#111111', null,  1),
+    ('j8-gold',     'Champagne Gold',  '#c8a96e', null,   2),
+    ('j8-white',    'Alpine White',    '#f8f8f6', null,  3),
+    ('j8-silver',   'Platinum Silver', '#d4d4d4', null, 4)
   ) as v(color_key, name, hex, image_path, sort_order)
 where m.slug = 'jaecoo-j8-shs'
 on conflict (model_id, color_key) do update set
