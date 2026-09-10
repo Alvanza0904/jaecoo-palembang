@@ -1,1 +1,3 @@
 node_modules
+/app/(public)/ColorCarousel.module
+/app/(public)/ColorCarousel.tsx
