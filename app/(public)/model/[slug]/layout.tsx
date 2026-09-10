@@ -18,8 +18,7 @@ interface ModelLayoutProps {
 }
 
 export async function generateStaticParams() {
-  const slugs = await getModelSlugs();
-  return slugs.map((slug) => ({ slug }));
+  return getModelSlugs().map((slug) => ({ slug }));
 }
 
 export default async function ModelLayout({ children, params }: ModelLayoutProps) {

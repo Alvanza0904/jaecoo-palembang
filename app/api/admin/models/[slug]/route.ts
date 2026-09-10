@@ -6,6 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 interface RouteParams {
@@ -81,7 +82,8 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
     if (error) throw error
     if (!data) return NextResponse.json({ error: 'Model not found' }, { status: 404 })
-
+    revalidatePath(`/model/${slug}`, 'page')
+    revalidatePath('/model', 'page')
     return NextResponse.json({ model: data })
   } catch (err) {
     console.error('[API] PATCH /api/admin/models/[slug] error:', err)

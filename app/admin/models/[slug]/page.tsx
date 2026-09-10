@@ -20,7 +20,7 @@ async function getAdminModel(slug: string) {
     .select(`
       *,
       model_variants(id, variant_key, name, label, price_status, price_idr, price_display, price_display_override, price_region, is_default),
-      model_colors(id, color_key, name, hex, image_path, sort_order),
+      model_colors(id, color_key, name, hex, image_path, media_asset_id, sort_order),
       model_content(section, content)
     `)
     .eq('slug', slug)

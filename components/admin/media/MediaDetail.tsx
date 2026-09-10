@@ -45,6 +45,25 @@ export function MediaDetail({ asset: initialAsset, onClose, onUpdated }: Props) 
   const [reprocessing, setReprocessing] = useState(false)
   const [reprocessError, setReprocessError] = useState<string | null>(null)
   const [showVisualEditor, setShowVisualEditor] = useState(false)
+  const [altText, setAltText] = useState(initialAsset.alt_text ?? '')
+  const [focalX, setFocalX] = useState(initialAsset.focal_x ?? 50)
+  const [focalY, setFocalY] = useState(initialAsset.focal_y ?? 50)
+  const [metaSaving, setMetaSaving] = useState(false)
+  const [metaMessage, setMetaMessage] = useState<string | null>(null)
+
+  async function saveMetadata() {
+    setMetaSaving(true); setMetaMessage(null)
+    try {
+      const res = await fetch(`/api/admin/media/${asset.id}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ alt_text: altText, focal_x: focalX, focal_y: focalY }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Gagal menyimpan metadata.')
+      setAsset(json.asset); onUpdated(json.asset); setMetaMessage('Metadata tersimpan ✓')
+    } catch (e) { setMetaMessage(e instanceof Error ? e.message : 'Gagal menyimpan metadata.') }
+    finally { setMetaSaving(false) }
+  }
 
   function handleCutoutComplete(updatedAsset: MediaAsset) {
     setAsset(updatedAsset)
@@ -153,6 +172,19 @@ export function MediaDetail({ asset: initialAsset, onClose, onUpdated }: Props) 
                 <span className={styles.metaVal}>{formatDate(asset.created_at)}</span>
               </div>
             </div>
+          </div>
+
+          <div className={styles.metaSection}>
+            <div className={styles.sectionTitle}>Accessibility & Focal Point</div>
+            <label className={styles.metaKey} htmlFor="media-alt">Alt text</label>
+            <input id="media-alt" value={altText} onChange={e => setAltText(e.target.value)} className={styles.metaInput} placeholder="Deskripsi singkat image" />
+            <div className={styles.focalGrid}>
+              <label className={styles.metaKey}>Focal X <input type="number" min="0" max="100" value={focalX} onChange={e=>setFocalX(Number(e.target.value))} /></label>
+              <label className={styles.metaKey}>Focal Y <input type="number" min="0" max="100" value={focalY} onChange={e=>setFocalY(Number(e.target.value))} /></label>
+            </div>
+            <button className={styles.reprocessBtn} onClick={saveMetadata} disabled={metaSaving}>{metaSaving ? 'Menyimpan…' : 'Save metadata'}</button>
+            {metaMessage && <div className={styles.reprocessError}>{metaMessage}</div>}
+            <div className={styles.fieldNote}>Description belum tersedia di schema media_assets saat ini; tidak dibuat kolom paralel pada Step 8.6.</div>
           </div>
 
           {/* Variants */}

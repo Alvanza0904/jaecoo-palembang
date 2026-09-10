@@ -82,7 +82,7 @@ export function HomeExperienceSection({ image }: { image?: ResponsiveImage }) {
       <div className={styles.experienceBg} aria-hidden="true">
         {image?.desktop && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={image.desktop} alt="" loading="lazy" />
+          <picture>{image.mobile && <source media="(max-width: 767px)" srcSet={image.mobile} />}<img src={image.desktop} alt="" loading="lazy" /></picture>
         )}
       </div>
       <div className={styles.experienceInner}>
@@ -120,7 +120,7 @@ export function HomeTechnologySection({ image }: { image?: ResponsiveImage }) {
       <div className={styles.techBg} aria-hidden="true">
         {image?.desktop && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={image.desktop} alt="" loading="lazy" />
+          <picture>{image.mobile && <source media="(max-width: 767px)" srcSet={image.mobile} />}<img src={image.desktop} alt="" loading="lazy" /></picture>
         )}
         <div className={styles.techBgFallback} />
         <div className={styles.techOverlay} />
@@ -228,7 +228,7 @@ export function HomeAboutSection({ image }: { image?: ResponsiveImage }) {
         <div className={styles.aboutPortrait} aria-hidden="true">
           {image?.desktop ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={image.desktop} alt="" loading="lazy" />
+            <picture>{image.mobile && <source media="(max-width: 767px)" srcSet={image.mobile} />}<img src={image.desktop} alt="" loading="lazy" /></picture>
           ) : (
             <span>ALVAN</span>
           )}
@@ -250,7 +250,7 @@ export function HomeFinalCTA({ image }: { image?: ResponsiveImage }) {
       <div className={styles.finalCtaBg} aria-hidden="true">
         {image?.desktop && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={image.desktop} alt="" loading="lazy" />
+          <picture>{image.mobile && <source media="(max-width: 767px)" srcSet={image.mobile} />}<img src={image.desktop} alt="" loading="lazy" /></picture>
         )}
         <div className={styles.finalCtaFallback} />
         <div className={styles.finalCtaOverlay} />

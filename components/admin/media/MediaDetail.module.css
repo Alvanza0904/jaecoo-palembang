@@ -278,3 +278,5 @@
 .copyBtn:hover {
   color: #c9a84c;
 }
+
+.metaInput,.focalGrid input{width:100%;min-height:44px;border:1px solid var(--color-border);border-radius:8px;padding:8px;margin:6px 0 10px;font:inherit}.focalGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fieldNote{font-size:.68rem;color:var(--color-ink-subtle);line-height:1.4;margin-top:8px}

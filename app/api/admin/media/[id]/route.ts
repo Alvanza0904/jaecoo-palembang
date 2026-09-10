@@ -37,7 +37,9 @@ export async function GET(
   if (error || !data) {
     return NextResponse.json({ error: 'Media tidak ditemukan' }, { status: 404 })
   }
-  return NextResponse.json({ asset: data })
+  const { count: usageCount } = await supabase
+    .from('content_media').select('id', { count: 'exact', head: true }).eq('media_asset_id', id)
+  return NextResponse.json({ asset: data, usage_count: usageCount ?? 0 })
 }
 
 export async function PATCH(
@@ -94,6 +96,24 @@ export async function DELETE(
   const supabase = await createSupabaseServerClient()
   const user = await requireAdmin(supabase)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Protect referenced assets before touching Storage. content_media is the
+  // shared assignment layer for homepage, models and brand assets.
+  const { count: usageCount, error: usageError } = await supabase
+    .from('content_media')
+    .select('id', { count: 'exact', head: true })
+    .eq('media_asset_id', id)
+
+  if (usageError) {
+    console.error('[Media DELETE] usage lookup error:', usageError)
+    return NextResponse.json({ error: 'Tidak dapat memeriksa penggunaan media. Penghapusan dibatalkan.' }, { status: 500 })
+  }
+  if ((usageCount ?? 0) > 0) {
+    return NextResponse.json({
+      error: `Media masih digunakan di ${usageCount} content slot. Lepaskan assignment terlebih dahulu sebelum menghapus.`,
+      usage_count: usageCount,
+    }, { status: 409 })
+  }
 
   // Get asset first to find all storage paths
   const { data: asset, error: fetchErr } = await supabase

@@ -21,6 +21,7 @@
 import Link from "next/link";
 import styles from "./HomeDealerLocation.module.css";
 import { SITE_SETTINGS } from "@/lib/data/site";
+import type { ResponsiveImage } from "@/lib/types/media";
 
 interface HomeDealerLocationProps {
   /**
@@ -28,7 +29,7 @@ interface HomeDealerLocationProps {
    * Pass from CMS/DB when available.
    * Falls back to dark gradient if undefined.
    */
-  backgroundImage?: string;
+  backgroundImage?: ResponsiveImage;
 }
 
 export function HomeDealerLocation({
@@ -41,14 +42,12 @@ export function HomeDealerLocation({
     >
       {/* Background image layer — CMS-ready */}
       <div className={styles.backdrop} aria-hidden="true">
-        {backgroundImage ? (
+        {backgroundImage?.desktop ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            className={styles.backdropImg}
-            src={backgroundImage}
-            alt=""
-            loading="lazy"
-          />
+          <picture>
+            {backgroundImage.mobile && <source media="(max-width: 767px)" srcSet={backgroundImage.mobile} />}
+            <img className={styles.backdropImg} src={backgroundImage.desktop} alt="" loading="lazy" />
+          </picture>
         ) : (
           /* Fallback: cinematic dark gradient — same visual weight as image */
           <div className={styles.backdropFallback} />

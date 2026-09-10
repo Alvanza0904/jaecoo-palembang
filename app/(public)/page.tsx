@@ -67,6 +67,7 @@ export default async function HomePage() {
             </div>
           }
           backgroundImage={homeMedia[contentMediaKey("home", "home", "hero")]?.desktop}
+          backgroundImageMobile={homeMedia[contentMediaKey("home", "home", "hero")]?.mobile}
           accent="default"
         />
       </section>
@@ -93,7 +94,7 @@ export default async function HomePage() {
       <HomeFinalCTA image={homeMedia[contentMediaKey("home", "home", "final_cta")]} />
 
       {/* ── DEALER LOCATION (Local SEO) ──────────────────────────── */}
-      <HomeDealerLocation backgroundImage={homeMedia[contentMediaKey("home", "home", "dealer_location")]?.desktop} />
+      <HomeDealerLocation backgroundImage={homeMedia[contentMediaKey("home", "home", "dealer_location")]} />
     </>
   );
 }

@@ -17,6 +17,7 @@ interface HeroPlaceholderProps {
   size?: "full" | "large" | "medium";
   /** Optional CMS-managed content image. Gradient remains the fallback. */
   backgroundImage?: string | null;
+  backgroundImageMobile?: string | null;
   /** Subtle accent color variation */
   accent?: "default" | "warm" | "cool";
 }
@@ -28,6 +29,7 @@ export function HeroPlaceholder({
   cta,
   size = "full",
   backgroundImage,
+  backgroundImageMobile,
   accent = "default",
 }: HeroPlaceholderProps) {
   return (
@@ -41,14 +43,10 @@ export function HeroPlaceholder({
       {/* Background gradient */}
       <div className={[styles.bg, backgroundImage ? styles.bgHasImage : ""].filter(Boolean).join(" ")} aria-hidden="true">
         {backgroundImage && (
-          <Image
-            src={backgroundImage}
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className={styles.bgImage}
-          />
+          <picture>
+            {backgroundImageMobile && <source media="(max-width: 767px)" srcSet={backgroundImageMobile} />}
+            <Image src={backgroundImage} alt="" fill priority sizes="100vw" className={styles.bgImage} />
+          </picture>
         )}
         <div className={styles.gradient} />
         {/* Subtle grid lines */}

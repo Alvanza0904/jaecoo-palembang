@@ -9,7 +9,7 @@
  * Semua save langsung ke Supabase via API routes (authenticated).
  */
 
-import { useState, useTransition, useCallback } from 'react'
+import { useState, useTransition, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import styles from './editor.module.css'
 import { MediaPicker } from '@/components/admin/media/MediaPicker'
@@ -84,7 +84,7 @@ interface ModelEditorProps {
   slug: string
 }
 
-type TabId = 'basic' | 'variants' | 'colors' | 'content'
+type TabId = 'basic' | 'variants' | 'colors' | 'imageSlots' | 'content'
 
 /* ─── Helpers ──────────────────────────────────────────── */
 
@@ -1122,6 +1122,50 @@ function ColorsTab({ model, slug }: { model: AdminModel; slug: string }) {
   )
 }
 
+/* ─── Image Slots Tab ─────────────────────────────────── */
+function ImageSlotsTab({ slug }: { slug: string }) {
+  const slots = [
+    ['hero','Hero'],['exterior','Exterior'],['design_detail_main','Design Detail'],
+    ['profile','Profile'],['interior','Interior'],['cockpit_main','Cockpit'],
+    ['performance','Electric Performance'],['technology','Intelligent Technology'],
+    ['adas','ADAS'],['specs_visual','Specifications Visual'],['final_cta','Final CTA'],
+  ] as const
+  const [assignments,setAssignments]=useState<Array<{slot_key:string;breakpoint:string|null;media_assets?:{id:string;public_url:string|null;alt_text:string|null;focal_x:number|null;focal_y:number|null}}>>([])
+  useEffect(()=>{fetch(`/api/admin/content-media?content_type=model&content_key=${encodeURIComponent(slug)}`).then(r=>r.json()).then(j=>setAssignments(j.assignments??[]))},[slug])
+  return <div className={styles.section}>
+    <div className={styles.sectionHeader}><div><h2 className={styles.sectionTitle}>Image Slots</h2><p className={styles.sectionNote}>Shared content_media source. Mobile override optional; jika kosong frontend fallback ke desktop.</p></div></div>
+    <div className={styles.contentSectionGrid}>
+      {slots.map(([slot,label])=><div key={slot} className={styles.contentBlock}>
+        <div className={styles.contentBlockHeader}><h3 className={styles.contentBlockTitle}>{label}</h3><span className={styles.contentSectionStatus}>CMS image</span></div>
+        <div className={styles.field}><MediaAssignmentField slug={slug} slot={slot} breakpoint="desktop" assignments={assignments}/></div>
+        <div className={styles.field}><MediaAssignmentField slug={slug} slot={slot} breakpoint="mobile" assignments={assignments}/></div>
+      </div>)}
+    </div>
+    <div className={styles.contentBlock}><h3 className={styles.contentBlockTitle}>Colors</h3><p className={styles.sectionNote}>Warna tetap dikelola dari model_colors.media_asset_id pada tab Colors; tidak ada color table kedua.</p></div>
+  </div>
+}
+
+function MediaAssignmentField({slug,slot,breakpoint,assignments}:{slug:string;slot:string;breakpoint:'desktop'|'mobile';assignments:Array<{slot_key:string;breakpoint:string|null;media_assets?:{id:string;public_url:string|null;alt_text:string|null;focal_x:number|null;focal_y:number|null}}>}) {
+  const a=assignments.find(x=>x.slot_key===slot&&x.breakpoint===breakpoint)?.media_assets
+  const [open,setOpen]=useState(false); const [message,setMessage]=useState('')
+  async function choose(asset:MediaAsset){
+    setOpen(false); setMessage('')
+    const r=await fetch('/api/admin/content-media',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({content_type:'model',content_key:slug,slot_key:slot,breakpoint,media_asset_id:asset.id})})
+    setMessage(r.ok?'Tersimpan ✓':(await r.json()).error||'Gagal')
+  }
+  async function remove(){
+    const p=new URLSearchParams({content_type:'model',content_key:slug,slot_key:slot,breakpoint})
+    const r=await fetch(`/api/admin/content-media?${p}`,{method:'DELETE'}); setMessage(r.ok?'Dilepas — fallback aktif ✓':'Gagal')
+  }
+  return <div>
+    <div className={styles.label}>{breakpoint} image</div>
+    {a?.public_url&&<img src={a.public_url} alt={a.alt_text??slot} style={{width:'100%',aspectRatio:'16/7',objectFit:'cover',borderRadius:8,display:'block',margin:'8px 0'}}/>}
+    <div className={styles.rowActions}><button className={styles.btnSecondary} onClick={()=>setOpen(true)}>Choose from Media Library</button>{a&&<button className={styles.btnSecondary} onClick={remove}>Remove</button>}</div>
+    {message&&<div className={styles.fieldNote}>{message}</div>}
+    <MediaPicker open={open} onClose={()=>setOpen(false)} onSelect={choose} title={`Pilih ${breakpoint} — ${slot}`}/>
+  </div>
+}
+
 /* ─── Content Tab ──────────────────────────────────────── */
 
 function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
@@ -1282,6 +1326,7 @@ export function ModelEditor({ initialModel, slug }: ModelEditorProps) {
     { id: 'basic', label: 'Basic Info' },
     { id: 'variants', label: `Variants (${initialModel.model_variants?.length ?? 0})` },
     { id: 'colors', label: `Colors (${initialModel.model_colors?.length ?? 0})` },
+    { id: 'imageSlots', label: 'Image Slots' },
     { id: 'content', label: 'Content' },
   ]
 
@@ -1330,6 +1375,7 @@ export function ModelEditor({ initialModel, slug }: ModelEditorProps) {
         {activeTab === 'basic' && <BasicTab model={initialModel} slug={slug} />}
         {activeTab === 'variants' && <VariantsTab model={initialModel} slug={slug} />}
         {activeTab === 'colors' && <ColorsTab model={initialModel} slug={slug} />}
+        {activeTab === 'imageSlots' && <ImageSlotsTab slug={slug} />}
         {activeTab === 'content' && <ContentTab model={initialModel} slug={slug} />}
       </div>
     </div>
