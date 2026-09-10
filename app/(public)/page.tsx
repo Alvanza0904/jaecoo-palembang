@@ -5,9 +5,9 @@ import { getPublishedNews } from "@/lib/data/news";
 import { Button } from "@/components/ui/Button";
 import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
+import { HomeModelSlider } from "@/components/sections/HomeModelSlider";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import {
-  HomeRange,
   HomeExperienceSection,
   HomeTechnologySection,
   HomePromoSection,
@@ -39,6 +39,7 @@ export default async function HomePage() {
     <>
       <TransparentHeader />
 
+      {/* ── HERO ─────────────────────────────────────────────────── */}
       <section className={styles.heroWrap}>
         <HeroPlaceholder
           tagline="JAECOO PALEMBANG"
@@ -64,12 +65,25 @@ export default async function HomePage() {
         />
       </section>
 
-      <HomeRange models={models} />
+      {/* ── MODEL SHOWCASE SLIDER ────────────────────────────────── */}
+      <HomeModelSlider models={models} />
+
+      {/* ── EXPERIENCE ───────────────────────────────────────────── */}
       <HomeExperienceSection />
+
+      {/* ── TECHNOLOGY ───────────────────────────────────────────── */}
       <HomeTechnologySection />
+
+      {/* ── PROMO ────────────────────────────────────────────────── */}
       <HomePromoSection promos={promos} />
+
+      {/* ── ABOUT ────────────────────────────────────────────────── */}
       <HomeAboutSection />
+
+      {/* ── JOURNAL ──────────────────────────────────────────────── */}
       <HomeJournalSection news={news} />
+
+      {/* ── FINAL CTA ────────────────────────────────────────────── */}
       <HomeFinalCTA />
     </>
   );

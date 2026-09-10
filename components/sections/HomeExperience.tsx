@@ -1,3 +1,15 @@
+/**
+ * JAECOO Palembang — HomeExperience Sections
+ *
+ * STEP 8: Image-led visual language throughout.
+ * - HomeRange removed — replaced by HomeModelSlider (separate component)
+ * - HomeExperienceSection: full-bleed dark editorial layout
+ * - HomeTechnologySection: image-first with text overlay
+ * - HomePromoSection: retains split layout (already image-dominant)
+ * - HomeAboutSection: full-bleed cinematic section
+ * - HomeFinalCTA: full-bleed dark with integrated CTA
+ */
+
 import Link from "next/link";
 import type { ModelData } from "@/lib/types/model";
 import type { PromoData } from "@/lib/types/promo";
@@ -13,13 +25,15 @@ function Media({ src, alt, className = "" }: { src?: string | null; alt: string;
   }
   return (
     <div className={`${styles.media} ${className}`}>
-      {/* Remote media is managed by Supabase; local paths remain safe placeholders until assets exist. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt={alt} loading="lazy" />
     </div>
   );
 }
 
+// ─── HomeRange — kept as fallback but hidden when slider is shown ────────────
+// This component is still exported for backward compatibility but not used
+// in the homepage when HomeModelSlider is rendered.
 export function HomeRange({ models }: { models: ModelData[] }) {
   return (
     <section className={styles.range} id="range" aria-labelledby="range-title">
@@ -59,63 +73,80 @@ export function HomeRange({ models }: { models: ModelData[] }) {
   );
 }
 
+// ─── HomeExperienceSection ───────────────────────────────────────────────────
+// Full-bleed dark section — editorial typographic composition
 export function HomeExperienceSection() {
-  const items = [
-    ["01", "GO FURTHER", "Confidence for the road ahead."],
-    ["02", "STAY CONNECTED", "Technology that fits naturally into your journey."],
-    ["03", "ARRIVE DIFFERENT", "A space that feels as considered as the journey itself."],
-  ];
   return (
     <section className={styles.experience} aria-labelledby="experience-title">
-      <div className={styles.experienceHead}>
-        <p className={styles.eyebrow}>THE JAECOO EXPERIENCE</p>
-        <h2 id="experience-title">Designed around<br /><em>the way you move.</em></h2>
-      </div>
-      <div className={styles.experienceList}>
-        {items.map(([no, title, copy]) => (
-          <article key={no} className={styles.experienceItem}>
-            <span>{no}</span>
-            <div>
-              <h3>{title}</h3>
-              <p>{copy}</p>
-            </div>
-          </article>
-        ))}
+      <div className={styles.experienceBg} aria-hidden="true" />
+      <div className={styles.experienceInner}>
+        <div className={styles.experienceHead}>
+          <p className={styles.eyebrow}>THE JAECOO EXPERIENCE</p>
+          <h2 id="experience-title">Designed around<br /><em>the way you move.</em></h2>
+        </div>
+        <div className={styles.experiencePillars}>
+          <div className={styles.pillar}>
+            <span className={styles.pillarLabel}>GO FURTHER</span>
+            <p>Confidence for every road ahead — wherever it leads.</p>
+          </div>
+          <div className={styles.pillarDivider} />
+          <div className={styles.pillar}>
+            <span className={styles.pillarLabel}>STAY CONNECTED</span>
+            <p>Technology that fits naturally into your journey.</p>
+          </div>
+          <div className={styles.pillarDivider} />
+          <div className={styles.pillar}>
+            <span className={styles.pillarLabel}>ARRIVE DIFFERENT</span>
+            <p>A space as considered as the journey itself.</p>
+          </div>
+        </div>
       </div>
     </section>
   );
 }
 
+// ─── HomeTechnologySection ───────────────────────────────────────────────────
+// Image-led: full-bleed dark with text overlay composition
 export function HomeTechnologySection() {
-  const items = [
-    ["01", "SUPER HYBRID", "J7 SHS · J8 SHS", "Efficiency meets performance."],
-    ["02", "ELECTRIC PERFORMANCE", "J5 EV", "Electric power, made effortless."],
-    ["03", "INTELLIGENT DRIVING", "J5 · J7 · J8", "Technology that watches the road with you."],
-    ["04", "SMART COCKPIT", "J5 · J7 · J8", "Everything within reach."],
-  ];
   return (
     <section className={styles.technology} aria-labelledby="technology-title">
-      <div className={styles.techIntro}>
-        <p className={styles.eyebrow}>INTELLIGENCE IN MOTION</p>
-        <h2 id="technology-title">Technology<br /><em>with purpose.</em></h2>
-        <p>Technology designed to make every journey smarter.</p>
+      {/* Background — placeholder for CMS tech image */}
+      <div className={styles.techBg} aria-hidden="true">
+        <div className={styles.techBgFallback} />
+        <div className={styles.techOverlay} />
       </div>
-      <div className={styles.techGrid}>
-        {items.map(([no, title, models, copy]) => (
-          <article key={no} className={styles.techCard}>
-            <span>{no}</span>
-            <div>
-              <p className={styles.techModels}>{models}</p>
-              <h3>{title}</h3>
-              <p>{copy}</p>
-            </div>
-          </article>
-        ))}
+
+      <div className={styles.techContent}>
+        <div className={styles.techIntro}>
+          <p className={styles.eyebrow}>INTELLIGENCE IN MOTION</p>
+          <h2 id="technology-title">Technology<br /><em>with purpose.</em></h2>
+          <p>Every journey, made smarter.</p>
+        </div>
+
+        <div className={styles.techPillars}>
+          <div className={styles.techPillar}>
+            <p className={styles.techLabel}>J7 SHS · J8 SHS</p>
+            <h3>Super Hybrid</h3>
+          </div>
+          <div className={styles.techPillar}>
+            <p className={styles.techLabel}>J5 EV</p>
+            <h3>Electric Performance</h3>
+          </div>
+          <div className={styles.techPillar}>
+            <p className={styles.techLabel}>J5 · J7 · J8</p>
+            <h3>Intelligent Drive</h3>
+          </div>
+          <div className={styles.techPillar}>
+            <p className={styles.techLabel}>J5 · J7 · J8</p>
+            <h3>Smart Cockpit</h3>
+          </div>
+        </div>
       </div>
     </section>
   );
 }
 
+// ─── HomePromoSection ────────────────────────────────────────────────────────
 export function HomePromoSection({ promos }: { promos: PromoData[] }) {
   if (!promos.length) return null;
   const promo = promos[0];
@@ -135,6 +166,7 @@ export function HomePromoSection({ promos }: { promos: PromoData[] }) {
   );
 }
 
+// ─── HomeJournalSection ──────────────────────────────────────────────────────
 export function HomeJournalSection({ news }: { news: NewsData[] }) {
   if (!news.length) return null;
   const featured = news[0];
@@ -143,7 +175,7 @@ export function HomeJournalSection({ news }: { news: NewsData[] }) {
       <div className={styles.journalHead}>
         <div>
           <p className={styles.eyebrow}>JAECOO JOURNAL</p>
-          <h2 id="journal-title">Stories, insights<br /><em>& latest updates.</em></h2>
+          <h2 id="journal-title">Stories, insights<br /><em>&amp; latest updates.</em></h2>
         </div>
         <Link className={styles.textLink} href="/berita">View all stories ↗</Link>
       </div>
@@ -168,24 +200,31 @@ export function HomeJournalSection({ news }: { news: NewsData[] }) {
   );
 }
 
+// ─── HomeAboutSection ────────────────────────────────────────────────────────
+// Cinematic full-bleed dark layout
 export function HomeAboutSection() {
   return (
     <section className={styles.about} aria-labelledby="about-title">
-      <div className={styles.aboutIndex}>06</div>
-      <div className={styles.aboutCopy}>
-        <p className={styles.eyebrow}>YOUR JAECOO CONSULTANT</p>
-        <h2 id="about-title">ALVAN</h2>
-        <p className={styles.aboutRole}>JAECOO Sales Consultant · Palembang</p>
-        <p className={styles.aboutBody}>
-          Dari memilih model, memahami teknologi, menghitung skema pembiayaan, hingga test drive — saya membantu Anda mendapatkan informasi JAECOO dengan cara yang jelas dan personal.
-        </p>
-        <Link className={styles.textLink} href="/sales-jaecoo-palembang">Meet Alvan ↗</Link>
+      <div className={styles.aboutInner}>
+        <div className={styles.aboutCopy}>
+          <p className={styles.eyebrow}>YOUR JAECOO CONSULTANT</p>
+          <h2 id="about-title">ALVAN</h2>
+          <p className={styles.aboutRole}>Sales Consultant · Palembang</p>
+          <p className={styles.aboutBody}>
+            Dari memilih model, memahami teknologi, menghitung skema pembiayaan, hingga test drive — saya membantu Anda mendapatkan informasi JAECOO dengan cara yang jelas dan personal.
+          </p>
+          <Link className={styles.aboutLink} href="/sales-jaecoo-palembang">Meet Alvan ↗</Link>
+        </div>
+        <div className={styles.aboutPortrait} aria-hidden="true">
+          <span>ALVAN</span>
+        </div>
       </div>
-      <div className={styles.aboutPortrait} aria-hidden="true"><span>ALVAN</span></div>
     </section>
   );
 }
 
+// ─── HomeFinalCTA ────────────────────────────────────────────────────────────
+// Full-bleed cinematic dark CTA
 export function HomeFinalCTA() {
   const url = buildWhatsAppUrl({
     source: "homepage_global",
@@ -193,12 +232,18 @@ export function HomeFinalCTA() {
   });
   return (
     <section className={styles.finalCta}>
-      <p className={styles.eyebrow}>YOUR NEXT JOURNEY STARTS HERE</p>
-      <h2>Ready to experience<br /><em>JAECOO?</em></h2>
-      <p>Diskusikan model, test drive, atau simulasi kredit bersama Alvan.</p>
-      <Button as="a" href={url} variant="primary" size="lg" target="_blank" rel="noopener noreferrer">
-        TALK TO ALVAN →
-      </Button>
+      <div className={styles.finalCtaBg} aria-hidden="true">
+        <div className={styles.finalCtaFallback} />
+        <div className={styles.finalCtaOverlay} />
+      </div>
+      <div className={styles.finalCtaContent}>
+        <p className={styles.eyebrow}>YOUR NEXT JOURNEY STARTS HERE</p>
+        <h2>Find your<br /><em>JAECOO.</em></h2>
+        <p>Konsultasi model, test drive, atau simulasi kredit bersama Alvan — langsung dari Palembang.</p>
+        <Button as="a" href={url} variant="primary" size="lg" target="_blank" rel="noopener noreferrer">
+          TALK TO ALVAN →
+        </Button>
+      </div>
     </section>
   );
 }
