@@ -39,7 +39,7 @@ function Section({ id,title,description, assignments }:{id:string;title:string;d
         <ContentImageField label="Mobile image (optional)" contentType={namespace} contentKey={key} slotKey={slot} breakpoint="mobile" initial={find('mobile')} />
       </div>
       <div className={styles.dependency}>
-        <strong>Text editing:</strong> belum tersedia tanpa membuat source CMS kedua. Dependency: <code>{id==='journal'?'Step 8.7 article CMS':id==='dealer_location'?'site settings CMS berikutnya':'Step 8.7 homepage content schema'}</code>.
+        <strong>Text editing:</strong> belum tersedia tanpa membuat source CMS kedua. Dependency: <code className={styles.code}>{id==='journal'?'Step 8.7 article CMS':id==='dealer_location'?'site settings CMS berikutnya':'Step 8.7 homepage content schema'}</code>.
       </div>
     </div>
   </details>
@@ -72,7 +72,7 @@ export function HomepageEditor({ initialModels, loadError }:{initialModels:Model
     <div className={styles.header}><div><span className={styles.eyebrow}>Admin / Homepage</span><h1>Homepage</h1><p>Kelola section yang benar-benar digunakan homepage saat ini. Image memakai Media Library bersama.</p></div></div>
     {loadError&&<div className={styles.error}>Gagal memuat models: {loadError}</div>}
     <div className={styles.modelCard}>
-      <div><span className={styles.eyebrow}>Existing source</span><h2>Model Slider</h2><p>Tanpa tabel homepage_models. Urutan memakai <code>models.sort_order</code>.</p></div>
+      <div><span className={styles.eyebrow}>Existing source</span><h2>Model Slider</h2><p>Tanpa tabel homepage_models. Urutan memakai <code className={styles.code}>models.sort_order</code>.</p></div>
       <div className={styles.modelList}>{models.filter(m=>m.published).map((m,i)=><div className={styles.modelRow} key={m.id}><span className={styles.order}>{i+1}</span><strong>{m.name}</strong><span className={styles.slug}>{m.slug}</span><button onClick={()=>move(i,-1)} disabled={i===0||savingOrder}>↑</button><button onClick={()=>move(i,1)} disabled={i===models.length-1||savingOrder}>↓</button></div>)}</div>
       {orderMessage&&<div className={styles.success}>{orderMessage}</div>}
     </div>
