@@ -6,17 +6,20 @@
 
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { getSiteBrandAssets } from "@/lib/supabase/media";
 
-export default function PublicLayout({
+export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const brand = await getSiteBrandAssets();
+
   return (
     <>
-      <Header />
+      <Header brand={brand} />
       <main id="main-content">{children}</main>
-      <Footer />
+      <Footer brand={brand} />
     </>
   );
 }

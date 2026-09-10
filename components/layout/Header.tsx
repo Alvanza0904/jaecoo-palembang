@@ -7,7 +7,7 @@
  */
 
 import { ScrollHeader } from "./ScrollHeader";
-import { getEntityMedia } from "@/lib/supabase/media";
+import type { SiteBrandAssets } from "@/lib/supabase/media";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 
 export const NAV_LINKS = [
@@ -18,11 +18,8 @@ export const NAV_LINKS = [
   { label: "SALES ALVAN", href: "/sales-jaecoo-palembang" },
 ];
 
-export async function Header() {
-  const [logo, logoLight] = await Promise.all([
-    getEntityMedia("global", "site", "logo"),
-    getEntityMedia("global", "site", "logo_light"),
-  ]);
+export function Header({ brand }: { brand: SiteBrandAssets }) {
+  const { logo, logoLight } = brand;
 
   const whatsappUrl = buildWhatsAppUrl({
     source: "other",

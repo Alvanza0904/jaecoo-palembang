@@ -8,7 +8,7 @@
 import Link from "next/link";
 import { WHATSAPP_NUMBER } from "@/lib/utils/whatsapp";
 import styles from "./Footer.module.css";
-import { getEntityMedia } from "@/lib/supabase/media";
+import type { SiteBrandAssets } from "@/lib/supabase/media";
 import Image from "next/image";
 
 const SOCIAL_LINKS = [
@@ -39,8 +39,8 @@ const LEGAL_LINKS = [
   { label: "Terms", href: "/terms" },
 ];
 
-export async function Footer() {
-  const logo = await getEntityMedia("global", "site", "logo_dark");
+export function Footer({ brand }: { brand: SiteBrandAssets }) {
+  const logo = brand.logoDark ?? brand.logo;
   const year = new Date().getFullYear();
 
   return (

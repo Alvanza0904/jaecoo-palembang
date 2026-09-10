@@ -164,6 +164,33 @@ export async function getHomeMedia(): Promise<Record<string, ResponsiveImage>> {
   return getContentMedia(requests);
 }
 
+export interface SiteBrandAssets {
+  logo?: ResponsiveImage;
+  logoLight?: ResponsiveImage;
+  logoDark?: ResponsiveImage;
+}
+
+/**
+ * Single source of truth for public website brand imagery.
+ * Header and Footer consume the same resolved object so logo assignment is
+ * controlled from one Supabase/data-layer namespace.
+ */
+export async function getSiteBrandAssets(): Promise<SiteBrandAssets> {
+  const result = await getContentMedia(
+    GLOBAL_MEDIA_SLOTS.map((slot) => ({
+      content_type: "global",
+      content_key: "site",
+      slot_key: slot,
+    })),
+  );
+
+  return {
+    logo: result[contentMediaKey("global", "site", "logo")],
+    logoLight: result[contentMediaKey("global", "site", "logo_light")],
+    logoDark: result[contentMediaKey("global", "site", "logo_dark")],
+  };
+}
+
 export async function getEntityMedia(
   contentType: "promo" | "news" | "global",
   contentKey: string,
