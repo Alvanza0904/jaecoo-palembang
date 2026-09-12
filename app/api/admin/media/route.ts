@@ -1,60 +1,22 @@
-/**
- * JAECOO Palembang — Media API
- * STEP 5C: GET /api/admin/media — list media assets
- *
- * Protected: requires authenticated admin session.
- * Supports ?category=models&search=foo query params.
- */
+import { NextResponse } from "next/server";
+import { createSupabaseServerClient, getServerUser } from "@/lib/supabase/server";
 
-import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+export async function GET(request: Request) {
+  const user = await getServerUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-export async function GET(req: NextRequest) {
-  try {
-    const supabase = await createSupabaseServerClient()
+  const url = new URL(request.url);
+  const category = url.searchParams.get("category");
+  const search = url.searchParams.get("search");
 
-    // Auth check
-    const { data: { user }, error: authErr } = await supabase.auth.getUser()
-    if (authErr || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized — login required' },
-        { status: 401 }
-      )
-    }
+  const supabase = await createSupabaseServerClient();
+  let query = supabase.from("media_assets").select("*").order("created_at", { ascending: false });
 
-    const { searchParams } = new URL(req.url)
-    const category = searchParams.get('category')
-    const search   = searchParams.get('search')
+  if (category && category !== "all") query = query.eq("category", category);
+  if (search) query = query.ilike("filename", `%${search}%`);
 
-    let query = supabase
-      .from('media_assets')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(200)
+  const { data, error } = await query;
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-    if (category && category !== 'all') {
-      query = query.eq('category', category)
-    }
-    if (search && search.trim()) {
-      query = query.ilike('filename', `%${search.trim()}%`)
-    }
-
-    const { data, error } = await query
-
-    if (error) {
-      console.error('[Media API] list error:', error)
-      return NextResponse.json(
-        { error: 'Gagal memuat media: ' + error.message },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json({ assets: data ?? [] })
-  } catch (err) {
-    console.error('[Media API] unexpected error:', err)
-    return NextResponse.json(
-      { error: 'Server error' },
-      { status: 500 }
-    )
-  }
+  return NextResponse.json({ assets: data ?? [] });
 }
