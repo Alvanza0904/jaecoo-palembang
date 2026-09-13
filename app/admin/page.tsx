@@ -1,118 +1,158 @@
 /**
- * JAECOO Palembang — Admin Dashboard
- * STEP 5A: Foundation
- *
- * Protected by middleware + AdminLayout server-side auth check.
- * Shows overview tiles — content will be populated in later steps.
+ * JAECOO Palembang — Admin Control Center
+ * Step 8.7+: Central hub dengan live stats dan route map lengkap.
  */
 
-import { getServerUser } from '@/lib/supabase/server'
-import styles from './dashboard.module.css'
+import { createSupabaseServerClient, getServerUser } from '@/lib/supabase/server';
+import Link from 'next/link';
+import styles from './dashboard.module.css';
 
-const TILES = [
-  { label: 'Models', value: '3', sub: 'J5 EV, J7 SHS, J8 Ardis', href: '/admin/models', status: 'active' },
-  { label: 'Promo', value: '—', sub: 'Promo aktif', href: '/admin/promo', status: 'soon' },
-  { label: 'News', value: '—', sub: 'Artikel dipublish', href: '/admin/news', status: 'soon' },
-  { label: 'Gallery', value: '—', sub: 'Foto dipublish', href: '/admin/gallery', status: 'soon' },
-  { label: 'Leads', value: '—', sub: 'Leads masuk', href: '/admin/leads', status: 'soon' },
-]
+export const metadata = {
+  title: 'Control Center | JAECOO Admin',
+};
+
+async function getDashboardStats() {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { count, error } = await supabase
+      .from('models')
+      .select('*', { count: 'exact', head: true });
+    return {
+      modelsCount: error ? 0 : (count ?? 0),
+      isSupabaseConnected: !error,
+    };
+  } catch {
+    return { modelsCount: 0, isSupabaseConnected: false };
+  }
+}
 
 export default async function AdminDashboardPage() {
-  const user = await getServerUser()
+  const [stats, user] = await Promise.all([getDashboardStats(), getServerUser()]);
 
-  const greeting = () => {
-    const h = new Date().getHours()
-    if (h < 12) return 'Selamat pagi'
-    if (h < 17) return 'Selamat siang'
-    return 'Selamat malam'
-  }
+  const MODULES = [
+    {
+      category: 'CONTENT & WEBSITE',
+      items: [
+        {
+          title: 'Homepage Content',
+          description: 'Kelola teks, headline, dan SEO homepage',
+          href: '/admin/homepage-content',
+          live: true,
+          actionText: 'Edit Content',
+          stat: null,
+        },
+        {
+          title: 'Models',
+          description: 'Data spesifikasi J5 EV, J7 SHS & J8 ARDIS',
+          href: '/admin/models',
+          live: true,
+          actionText: 'Manage Models',
+          stat: `${stats.modelsCount} model`,
+        },
+        {
+          title: 'Media Library',
+          description: 'Kelola aset gambar dan media hero',
+          href: '/admin/media',
+          live: true,
+          actionText: 'Open Library',
+          stat: null,
+        },
+      ],
+    },
+    {
+      category: 'MARKETING & LEADS',
+      items: [
+        {
+          title: 'Promotions',
+          description: 'Banner dan penawaran spesial',
+          href: '#',
+          live: false,
+          actionText: 'Coming Soon',
+          stat: null,
+        },
+        {
+          title: 'News & Journal',
+          description: 'Artikel, event, dan rilis pers',
+          href: '#',
+          live: false,
+          actionText: 'Coming Soon',
+          stat: null,
+        },
+        {
+          title: 'Leads',
+          description: 'Data kontak prospek dan test drive',
+          href: '#',
+          live: false,
+          actionText: 'Coming Soon',
+          stat: null,
+        },
+      ],
+    },
+  ];
 
   return (
     <div className={styles.page}>
       {/* Header */}
       <div className={styles.header}>
         <div>
-          <p className={styles.greeting}>{greeting()}</p>
-          <h1 className={styles.title}>Dashboard</h1>
+          <p className={styles.greeting}>Control Center</p>
+          <h1 className={styles.title}>JAECOO Palembang Admin</h1>
         </div>
-        <div className={styles.meta}>
-          <span className={styles.metaLabel}>Logged in as</span>
-          <span className={styles.metaValue}>{user?.email}</span>
+        <div className={styles.statusBar}>
+          <div className={styles.statusItem}>
+            <span
+              className={styles.statusDot}
+              style={{ background: stats.isSupabaseConnected ? '#22c55e' : '#ef4444' }}
+            />
+            <span>Database</span>
+          </div>
+          <div className={styles.statusDivider} />
+          <div className={styles.statusItem}>
+            <span className={styles.statusDot} style={{ background: '#22c55e' }} />
+            <span>Auth · {user?.email?.split('@')[0]}</span>
+          </div>
         </div>
       </div>
 
       <div className={styles.goldLine} />
 
-      {/* Status Banner */}
-      <div className={styles.banner}>
-        <div className={styles.bannerDot} />
-        <span>Supabase terhubung — STEP 4B ✓ &nbsp;·&nbsp; Admin Auth aktif — STEP 5A ✓ &nbsp;·&nbsp; Model Editor aktif — STEP 5B ✓</span>
-      </div>
-
-      {/* Tiles */}
-      <div className={styles.tiles}>
-        {TILES.map((tile) => (
-          <a key={tile.href} href={tile.href} className={styles.tile}>
-            <div className={styles.tileLabel}>{tile.label}</div>
-            <div className={styles.tileValue}>{tile.value}</div>
-            <div className={styles.tileSub}>{tile.sub}</div>
-            {tile.status === 'soon' && (
-              <span className={styles.tileBadge}>Coming soon</span>
-            )}
-            {tile.status === 'active' && (
-              <span className={styles.tileBadge} style={{ color: '#166534', borderColor: 'rgba(34,197,94,0.25)', background: 'rgba(34,197,94,0.08)' }}>Live</span>
-            )}
-          </a>
+      {/* Modules */}
+      <div className={styles.modules}>
+        {MODULES.map((section) => (
+          <div key={section.category} className={styles.moduleSection}>
+            <p className={styles.moduleCategory}>{section.category}</p>
+            <div className={styles.moduleList}>
+              {section.items.map((item) => (
+                <div key={item.title} className={styles.moduleRow}>
+                  <div className={styles.moduleInfo}>
+                    <div className={styles.moduleMeta}>
+                      <span className={item.live ? styles.moduleTitle : styles.moduleTitleMuted}>
+                        {item.title}
+                      </span>
+                      <span className={item.live ? styles.badgeLive : styles.badgeSoon}>
+                        {item.live ? 'LIVE' : 'SOON'}
+                      </span>
+                    </div>
+                    <p className={styles.moduleDesc}>{item.description}</p>
+                  </div>
+                  <div className={styles.moduleAction}>
+                    {item.stat && (
+                      <span className={styles.moduleStat}>{item.stat}</span>
+                    )}
+                    {item.live ? (
+                      <Link href={item.href} className={styles.actionBtn}>
+                        {item.actionText}
+                      </Link>
+                    ) : (
+                      <span className={styles.actionBtnDisabled}>{item.actionText}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
-
-      {/* Global site structure — visual controls intentionally deferred to final pass */}
-      <section className={styles.siteStructure}>
-        <div>
-          <p className={styles.sectionKicker}>GLOBAL DESIGN SYSTEM</p>
-          <h2 className={styles.structureTitle}>Website Structure</h2>
-          <p className={styles.structureIntro}>
-            Semua section utama sudah dipetakan. Detail visual, responsive tuning, typography,
-            animation, dan live preview akan diselesaikan pada final visual pass.
-          </p>
-        </div>
-        <div className={styles.structureGrid}>
-          {[
-            ['01', 'Hero', 'Cinematic J5 EV'],
-            ['02', 'JAECOO Range', 'J5 EV · J7 SHS · J8 SHS'],
-            ['03', 'Experience', 'Go Further · Stay Connected · Arrive Different'],
-            ['04', 'Technology', 'SHS · EV · Intelligent Driving · Smart Cockpit'],
-            ['05', 'Promo', 'Current Offers'],
-            ['06', 'About Alvan', 'Sales Consultant'],
-            ['07', 'Journal', 'News · Tips · Review · Promo'],
-            ['08', 'Global CTA', 'Talk to Alvan'],
-          ].map(([no, title, desc]) => (
-            <div className={styles.structureCard} key={no}>
-              <span>{no}</span>
-              <div>
-                <strong>{title}</strong>
-                <p>{desc}</p>
-              </div>
-              <small>STRUCTURE READY</small>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Architecture note */}
-      <div className={styles.note}>
-        <h2 className={styles.noteTitle}>Architecture Status</h2>
-        <ul className={styles.noteList}>
-          <li>✅ Supabase Auth — email/password</li>
-          <li>✅ Middleware route protection — /admin/*</li>
-          <li>✅ Server-side session verification</li>
-          <li>✅ Cookie-based session (persist on refresh)</li>
-          <li>✅ Logout bersih</li>
-          <li>✅ Role foundation siap (admin / alvan)</li>
-          <li>✅ Model Editor /admin/models — STEP 5B</li>
-          <li>⏳ Promo / News / Gallery editor — berikutnya</li>
-        </ul>
-      </div>
     </div>
-  )
+  );
 }
