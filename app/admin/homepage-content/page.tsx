@@ -1,22 +1,23 @@
 import { getHomepageContent } from '@/lib/data/homepage-content';
 import HomepageContentEditor from './ContentEditor';
+import styles from './homepage-content.module.css';
 
 export const metadata = {
-  title: 'Edit Homepage Content | JAECOO Admin',
+  title: 'Homepage Content | JAECOO Admin',
 };
 
 export default async function AdminHomepageContentPage() {
   const initialData = await getHomepageContent();
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Homepage Content</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Kelola teks homepage. (Gambar tetap dikelola via Media Management / Model Data).
+    <div className={styles.page}>
+      <div className={styles.pageHeader}>
+        <h1 className={styles.pageTitle}>Homepage Content</h1>
+        <p className={styles.pageSubtitle}>
+          Kelola teks homepage. Gambar tetap dikelola via Media Management / Model Data.
         </p>
       </div>
-      
+      <div className={styles.goldLine} />
       <HomepageContentEditor initialData={initialData} />
     </div>
   );

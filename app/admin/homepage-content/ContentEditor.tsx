@@ -3,11 +3,10 @@
 import { useState, useTransition } from 'react';
 import { HomepageContent } from '@/types/homepage-content';
 import { updateHomepageContent } from './actions';
+import styles from './homepage-content.module.css';
 
-// Type helper: extract only the object-valued sections (exclude id, updated_at)
 type ContentSection = Omit<HomepageContent, 'id' | 'updated_at'>;
 type SectionKey = keyof ContentSection;
-type SectionValue = ContentSection[SectionKey];
 
 interface Props {
   initialData: HomepageContent;
@@ -22,16 +21,18 @@ export default function HomepageContentEditor({ initialData }: Props) {
     setFormData((prev) => ({
       ...prev,
       [section]: {
-        ...(prev[section] as SectionValue),
+        ...(prev[section] as Record<string, string>),
         [field]: value,
       },
     }));
   };
 
+  const getVal = (section: SectionKey, field: string): string =>
+    ((formData[section] as Record<string, string>)[field]) || '';
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus({ type: null, message: '' });
-
     startTransition(async () => {
       const result = await updateHomepageContent(formData);
       if (result.success) {
@@ -42,134 +43,118 @@ export default function HomepageContentEditor({ initialData }: Props) {
     });
   };
 
-  const getFieldValue = (section: SectionKey, field: string): string => {
-    const sec = formData[section] as Record<string, string>;
-    return sec[field] || '';
-  };
-
-  const InputField = ({
+  const Field = ({
     label,
     section,
     field,
-    isTextArea = false,
+    textarea = false,
   }: {
     label: string;
     section: SectionKey;
     field: string;
-    isTextArea?: boolean;
+    textarea?: boolean;
   }) => (
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</label>
-      {isTextArea ? (
+    <div className={styles.field}>
+      <label className={styles.label}>{label}</label>
+      {textarea ? (
         <textarea
+          className={styles.textarea}
           rows={3}
-          className="w-full px-3 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition"
-          value={getFieldValue(section, field)}
+          value={getVal(section, field)}
           onChange={(e) => handleChange(section, field, e.target.value)}
         />
       ) : (
         <input
           type="text"
-          className="w-full px-3 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition"
-          value={getFieldValue(section, field)}
+          className={styles.input}
+          value={getVal(section, field)}
           onChange={(e) => handleChange(section, field, e.target.value)}
         />
       )}
     </div>
   );
 
-  const SectionCard = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <div className="bg-white dark:bg-gray-900 border dark:border-gray-800 rounded-lg shadow-sm mb-6 overflow-hidden">
-      <div className="bg-gray-50 dark:bg-gray-800/50 px-4 py-3 border-b dark:border-gray-800">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h2>
+  const Card = ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <div className={styles.card}>
+      <div className={styles.cardHeader}>
+        <h2 className={styles.cardTitle}>{title}</h2>
       </div>
-      <div className="p-4 sm:p-6">{children}</div>
+      <div className={styles.cardBody}>{children}</div>
     </div>
   );
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 pb-24">
+    <form onSubmit={handleSubmit} className={styles.form}>
+
       {status.message && (
-        <div
-          className={`p-4 rounded-md ${
-            status.type === 'success'
-              ? 'bg-green-50 text-green-800 border border-green-200'
-              : 'bg-red-50 text-red-800 border border-red-200'
-          }`}
-        >
+        <div className={status.type === 'success' ? styles.bannerSuccess : styles.bannerError}>
+          <span className={styles.bannerDot} />
           {status.message}
         </div>
       )}
 
-      <SectionCard title="1. Homepage Hero">
-        <InputField label="Eyebrow (Teks Kecil di Atas)" section="hero" field="eyebrow" />
-        <InputField label="Headline" section="hero" field="headline" />
-        <InputField label="Description" section="hero" field="description" isTextArea />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <InputField label="CTA Text" section="hero" field="ctaText" />
-          <InputField label="CTA URL" section="hero" field="ctaUrl" />
+      <Card title="1. Homepage Hero">
+        <Field label="Eyebrow (Teks Kecil di Atas)" section="hero" field="eyebrow" />
+        <Field label="Headline" section="hero" field="headline" />
+        <Field label="Description" section="hero" field="description" textarea />
+        <div className={styles.row}>
+          <Field label="CTA Text" section="hero" field="ctaText" />
+          <Field label="CTA URL" section="hero" field="ctaUrl" />
         </div>
-      </SectionCard>
+      </Card>
 
-      <SectionCard title="2. Experience Section">
-        <InputField label="Title" section="experience" field="title" />
-        <InputField label="Description" section="experience" field="description" isTextArea />
-      </SectionCard>
+      <Card title="2. Experience Section">
+        <Field label="Title" section="experience" field="title" />
+        <Field label="Description" section="experience" field="description" textarea />
+      </Card>
 
-      <SectionCard title="3. Technology Section">
-        <InputField label="Title" section="technology" field="title" />
-        <InputField label="Description" section="technology" field="description" isTextArea />
-      </SectionCard>
+      <Card title="3. Technology Section">
+        <Field label="Title" section="technology" field="title" />
+        <Field label="Description" section="technology" field="description" textarea />
+      </Card>
 
-      <SectionCard title="4. About Section">
-        <InputField label="Title" section="about" field="title" />
-        <InputField label="Description" section="about" field="description" isTextArea />
-      </SectionCard>
+      <Card title="4. About Section">
+        <Field label="Title" section="about" field="title" />
+        <Field label="Description" section="about" field="description" textarea />
+      </Card>
 
-      <SectionCard title="5. Promo Section">
-        <InputField label="Title" section="promo" field="title" />
-        <InputField label="Description" section="promo" field="description" isTextArea />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <InputField label="CTA Text" section="promo" field="ctaText" />
-          <InputField label="CTA URL" section="promo" field="ctaUrl" />
+      <Card title="5. Promo Section">
+        <Field label="Title" section="promo" field="title" />
+        <Field label="Description" section="promo" field="description" textarea />
+        <div className={styles.row}>
+          <Field label="CTA Text" section="promo" field="ctaText" />
+          <Field label="CTA URL" section="promo" field="ctaUrl" />
         </div>
-      </SectionCard>
+      </Card>
 
-      <SectionCard title="6. Journal Section">
-        <InputField label="Title" section="journal" field="title" />
-        <InputField label="Description" section="journal" field="description" isTextArea />
-      </SectionCard>
+      <Card title="6. Journal Section">
+        <Field label="Title" section="journal" field="title" />
+        <Field label="Description" section="journal" field="description" textarea />
+      </Card>
 
-      <SectionCard title="7. Dealer Location">
-        <InputField label="Title" section="dealer_location" field="title" />
-        <InputField label="Description" section="dealer_location" field="description" isTextArea />
-        <InputField label="Address / Text" section="dealer_location" field="address" isTextArea />
-      </SectionCard>
+      <Card title="7. Dealer Location">
+        <Field label="Title" section="dealer_location" field="title" />
+        <Field label="Description" section="dealer_location" field="description" textarea />
+        <Field label="Address" section="dealer_location" field="address" textarea />
+      </Card>
 
-      <SectionCard title="8. Final CTA">
-        <InputField label="Title" section="final_cta" field="title" />
-        <InputField label="Description" section="final_cta" field="description" isTextArea />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <InputField label="CTA Text" section="final_cta" field="ctaText" />
-          <InputField label="CTA URL" section="final_cta" field="ctaUrl" />
+      <Card title="8. Final CTA">
+        <Field label="Title" section="final_cta" field="title" />
+        <Field label="Description" section="final_cta" field="description" textarea />
+        <div className={styles.row}>
+          <Field label="CTA Text" section="final_cta" field="ctaText" />
+          <Field label="CTA URL" section="final_cta" field="ctaUrl" />
         </div>
-      </SectionCard>
+      </Card>
 
-      <SectionCard title="9. SEO Metadata">
-        <InputField label="Meta Title" section="seo" field="metaTitle" />
-        <InputField label="Meta Description" section="seo" field="metaDescription" isTextArea />
-      </SectionCard>
+      <Card title="9. SEO Metadata">
+        <Field label="Meta Title" section="seo" field="metaTitle" />
+        <Field label="Meta Description" section="seo" field="metaDescription" textarea />
+      </Card>
 
-      {/* Floating Save Bar (Mobile Friendly) */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t dark:border-gray-800 p-4 flex justify-between items-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50">
-        <div className="text-sm text-gray-500 hidden sm:block">
-          Pastikan Anda mengecek ulang teks sebelum menyimpan.
-        </div>
-        <button
-          type="submit"
-          disabled={isPending}
-          className="w-full sm:w-auto px-8 py-2.5 bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 dark:text-black text-white font-medium rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+      <div className={styles.saveBar}>
+        <span className={styles.saveHint}>Cek ulang teks sebelum menyimpan.</span>
+        <button type="submit" disabled={isPending} className={styles.saveBtn}>
           {isPending ? 'Menyimpan...' : 'Save Changes'}
         </button>
       </div>
