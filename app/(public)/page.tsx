@@ -3,6 +3,7 @@ import { getModels } from "@/lib/supabase/queries";
 import { getHomeMedia, contentMediaKey } from "@/lib/supabase/media";
 import { getActivePromos } from "@/lib/data/promos";
 import { getPublishedNews } from "@/lib/data/news";
+import { getHomepageContent } from "@/lib/data/homepage-content";
 import { Button } from "@/components/ui/Button";
 import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
@@ -27,11 +28,12 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [models, promos, news, homeMedia] = await Promise.all([
+  const [models, promos, news, homeMedia, cms] = await Promise.all([
     getModels(),
     getActivePromos(),
     getPublishedNews(4),
     getHomeMedia(),
+    getHomepageContent(),
   ]);
 
   const heroUrl = buildWhatsAppUrl({
@@ -47,7 +49,7 @@ export default async function HomePage() {
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section className={styles.heroWrap}>
         <HeroPlaceholder
-          tagline="JAECOO PALEMBANG"
+          tagline={cms.hero.eyebrow || "JAECOO PALEMBANG"}
           heading={
             <>
               <span className={styles.heroKicker}>JAECOO</span>
@@ -55,7 +57,7 @@ export default async function HomePage() {
               <span className={styles.heroElectric}>ELECTRIC SUV</span>
             </>
           }
-          subheading="THIS IS THE REAL SUV."
+          subheading={cms.hero.description || "THIS IS THE REAL SUV."}
           cta={
             <div className={styles.heroCtas}>
               <Button as="link" href="/model/jaecoo-j5-ev" variant="primary" size="lg">
@@ -76,22 +78,34 @@ export default async function HomePage() {
       <HomeModelSlider models={models} />
 
       {/* ── EXPERIENCE ───────────────────────────────────────────── */}
-      <HomeExperienceSection image={homeMedia[contentMediaKey("home", "home", "experience")]} />
+      <HomeExperienceSection
+        image={homeMedia[contentMediaKey("home", "home", "experience")]}
+        cms={cms.experience}
+      />
 
       {/* ── TECHNOLOGY ───────────────────────────────────────────── */}
-      <HomeTechnologySection image={homeMedia[contentMediaKey("home", "home", "technology")]} />
+      <HomeTechnologySection
+        image={homeMedia[contentMediaKey("home", "home", "technology")]}
+        cms={cms.technology}
+      />
 
       {/* ── PROMO ────────────────────────────────────────────────── */}
       <HomePromoSection promos={promos} />
 
       {/* ── ABOUT ────────────────────────────────────────────────── */}
-      <HomeAboutSection image={homeMedia[contentMediaKey("home", "home", "about")]} />
+      <HomeAboutSection
+        image={homeMedia[contentMediaKey("home", "home", "about")]}
+        cms={cms.about}
+      />
 
       {/* ── JOURNAL ──────────────────────────────────────────────── */}
       <HomeJournalSection news={news} />
 
       {/* ── FINAL CTA ────────────────────────────────────────────── */}
-      <HomeFinalCTA image={homeMedia[contentMediaKey("home", "home", "final_cta")]} />
+      <HomeFinalCTA
+        image={homeMedia[contentMediaKey("home", "home", "final_cta")]}
+        cms={cms.final_cta}
+      />
 
       {/* ── DEALER LOCATION (Local SEO) ──────────────────────────── */}
       <HomeDealerLocation backgroundImage={homeMedia[contentMediaKey("home", "home", "dealer_location")]} />

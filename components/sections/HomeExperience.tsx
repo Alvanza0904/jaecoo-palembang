@@ -2,12 +2,8 @@
  * JAECOO Palembang — HomeExperience Sections
  *
  * STEP 8: Image-led visual language throughout.
- * - HomeRange removed — replaced by HomeModelSlider (separate component)
- * - HomeExperienceSection: full-bleed dark editorial layout
- * - HomeTechnologySection: image-first with text overlay
- * - HomePromoSection: retains split layout (already image-dominant)
- * - HomeAboutSection: full-bleed cinematic section
- * - HomeFinalCTA: full-bleed dark with integrated CTA
+ * STEP 8.7: CMS optional props added — all fallback to existing hardcoded text.
+ *           No breaking changes. Pass `cms` prop from page.tsx to enable CMS text.
  */
 
 import Link from "next/link";
@@ -33,8 +29,6 @@ function Media({ src, alt, className = "" }: { src?: string | null; alt: string;
 }
 
 // ─── HomeRange — kept as fallback but hidden when slider is shown ────────────
-// This component is still exported for backward compatibility but not used
-// in the homepage when HomeModelSlider is rendered.
 export function HomeRange({ models }: { models: ModelData[] }) {
   return (
     <section className={styles.range} id="range" aria-labelledby="range-title">
@@ -75,8 +69,13 @@ export function HomeRange({ models }: { models: ModelData[] }) {
 }
 
 // ─── HomeExperienceSection ───────────────────────────────────────────────────
-// Full-bleed dark section — editorial typographic composition
-export function HomeExperienceSection({ image }: { image?: ResponsiveImage }) {
+export function HomeExperienceSection({
+  image,
+  cms,
+}: {
+  image?: ResponsiveImage;
+  cms?: { title?: string; description?: string };
+}) {
   return (
     <section className={styles.experience} aria-labelledby="experience-title">
       <div className={styles.experienceBg} aria-hidden="true">
@@ -88,7 +87,12 @@ export function HomeExperienceSection({ image }: { image?: ResponsiveImage }) {
       <div className={styles.experienceInner}>
         <div className={styles.experienceHead}>
           <p className={styles.eyebrow}>THE JAECOO EXPERIENCE</p>
-          <h2 id="experience-title">Designed around<br /><em>the way you move.</em></h2>
+          {cms?.title ? (
+            <h2 id="experience-title">{cms.title}</h2>
+          ) : (
+            <h2 id="experience-title">Designed around<br /><em>the way you move.</em></h2>
+          )}
+          {cms?.description && <p>{cms.description}</p>}
         </div>
         <div className={styles.experiencePillars}>
           <div className={styles.pillar}>
@@ -112,11 +116,15 @@ export function HomeExperienceSection({ image }: { image?: ResponsiveImage }) {
 }
 
 // ─── HomeTechnologySection ───────────────────────────────────────────────────
-// Image-led: full-bleed dark with text overlay composition
-export function HomeTechnologySection({ image }: { image?: ResponsiveImage }) {
+export function HomeTechnologySection({
+  image,
+  cms,
+}: {
+  image?: ResponsiveImage;
+  cms?: { title?: string; description?: string };
+}) {
   return (
     <section className={styles.technology} aria-labelledby="technology-title">
-      {/* Background — placeholder for CMS tech image */}
       <div className={styles.techBg} aria-hidden="true">
         {image?.desktop && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -129,8 +137,16 @@ export function HomeTechnologySection({ image }: { image?: ResponsiveImage }) {
       <div className={styles.techContent}>
         <div className={styles.techIntro}>
           <p className={styles.eyebrow}>INTELLIGENCE IN MOTION</p>
-          <h2 id="technology-title">Technology<br /><em>with purpose.</em></h2>
-          <p>Every journey, made smarter.</p>
+          {cms?.title ? (
+            <h2 id="technology-title">{cms.title}</h2>
+          ) : (
+            <h2 id="technology-title">Technology<br /><em>with purpose.</em></h2>
+          )}
+          {cms?.description ? (
+            <p>{cms.description}</p>
+          ) : (
+            <p>Every journey, made smarter.</p>
+          )}
         </div>
 
         <div className={styles.techPillars}>
@@ -211,17 +227,22 @@ export function HomeJournalSection({ news }: { news: NewsData[] }) {
 }
 
 // ─── HomeAboutSection ────────────────────────────────────────────────────────
-// Cinematic full-bleed dark layout
-export function HomeAboutSection({ image }: { image?: ResponsiveImage }) {
+export function HomeAboutSection({
+  image,
+  cms,
+}: {
+  image?: ResponsiveImage;
+  cms?: { title?: string; description?: string };
+}) {
   return (
     <section className={styles.about} aria-labelledby="about-title">
       <div className={styles.aboutInner}>
         <div className={styles.aboutCopy}>
           <p className={styles.eyebrow}>YOUR JAECOO CONSULTANT</p>
-          <h2 id="about-title">ALVAN</h2>
+          <h2 id="about-title">{cms?.title ?? "ALVAN"}</h2>
           <p className={styles.aboutRole}>Sales Consultant · Palembang</p>
           <p className={styles.aboutBody}>
-            Dari memilih model, memahami teknologi, menghitung skema pembiayaan, hingga test drive — saya membantu Anda mendapatkan informasi JAECOO dengan cara yang jelas dan personal.
+            {cms?.description ?? "Dari memilih model, memahami teknologi, menghitung skema pembiayaan, hingga test drive — saya membantu Anda mendapatkan informasi JAECOO dengan cara yang jelas dan personal."}
           </p>
           <Link className={styles.aboutLink} href="/sales-jaecoo-palembang">Meet Alvan ↗</Link>
         </div>
@@ -239,12 +260,19 @@ export function HomeAboutSection({ image }: { image?: ResponsiveImage }) {
 }
 
 // ─── HomeFinalCTA ────────────────────────────────────────────────────────────
-// Full-bleed cinematic dark CTA
-export function HomeFinalCTA({ image }: { image?: ResponsiveImage }) {
-  const url = buildWhatsAppUrl({
+export function HomeFinalCTA({
+  image,
+  cms,
+}: {
+  image?: ResponsiveImage;
+  cms?: { title?: string; description?: string; ctaText?: string; ctaUrl?: string };
+}) {
+  const waUrl = buildWhatsAppUrl({
     source: "homepage_global",
     source_cta: "global_cta",
   });
+  const href = cms?.ctaUrl ?? waUrl;
+  const isExternal = href.startsWith("http");
   return (
     <section className={styles.finalCta}>
       <div className={styles.finalCtaBg} aria-hidden="true">
@@ -257,10 +285,20 @@ export function HomeFinalCTA({ image }: { image?: ResponsiveImage }) {
       </div>
       <div className={styles.finalCtaContent}>
         <p className={styles.eyebrow}>YOUR NEXT JOURNEY STARTS HERE</p>
-        <h2>Find your<br /><em>JAECOO.</em></h2>
-        <p>Konsultasi model, test drive, atau simulasi kredit bersama Alvan — langsung dari Palembang.</p>
-        <Button as="a" href={url} variant="primary" size="lg" target="_blank" rel="noopener noreferrer">
-          TALK TO ALVAN →
+        {cms?.title ? (
+          <h2>{cms.title}</h2>
+        ) : (
+          <h2>Find your<br /><em>JAECOO.</em></h2>
+        )}
+        <p>{cms?.description ?? "Konsultasi model, test drive, atau simulasi kredit bersama Alvan — langsung dari Palembang."}</p>
+        <Button
+          as="a"
+          href={href}
+          variant="primary"
+          size="lg"
+          {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+        >
+          {cms?.ctaText ?? "TALK TO ALVAN →"}
         </Button>
       </div>
     </section>

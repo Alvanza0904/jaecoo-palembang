@@ -26,6 +26,7 @@ interface AdminShellProps {
 const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard', icon: '◈' },
   { href: '/admin/homepage', label: 'Homepage', icon: '⌂' },
+  { href: '/admin/homepage-content', label: 'Homepage Content', icon: '✎' },
   { href: '/admin/models', label: 'Models', icon: '◉' },
   { href: '/admin/media', label: 'Media Library', icon: '▧' },
   { href: '/admin/brand-assets', label: 'Brand Assets', icon: '◇' },
