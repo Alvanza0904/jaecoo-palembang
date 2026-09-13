@@ -34,6 +34,14 @@ export default async function AdminDashboardPage() {
       category: 'CONTENT & WEBSITE',
       items: [
         {
+          title: 'Homepage',
+          description: 'Urutan model dan tampilan di halaman utama',
+          href: '/admin/homepage',
+          live: true,
+          actionText: 'Edit Layout',
+          stat: null,
+        },
+        {
           title: 'Homepage Content',
           description: 'Kelola teks, headline, dan SEO homepage',
           href: '/admin/homepage-content',
