@@ -7,14 +7,14 @@ import { HomepageContent } from '@/types/homepage-content';
 export async function updateHomepageContent(data: HomepageContent) {
   try {
     const supabase = await createSupabaseServerClient();
-    
+
     // Authorization Check
     const { data: sessionData, error: authError } = await supabase.auth.getUser();
     if (authError || !sessionData.user) {
       return { success: false, error: "Unauthorized access." };
     }
 
-    const { id, updated_at, ...updateData } = data;
+    const { id, ...updateData } = data; // exclude id from update payload; updated_at is set below
 
     const { error } = await supabase
       .from('homepage_content')
@@ -29,7 +29,6 @@ export async function updateHomepageContent(data: HomepageContent) {
       return { success: false, error: error.message };
     }
 
-    // Revalidate the frontend homepage and admin page
     revalidatePath('/');
     revalidatePath('/admin/homepage-content');
 
