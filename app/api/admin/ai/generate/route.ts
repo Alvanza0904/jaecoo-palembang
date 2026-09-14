@@ -8,8 +8,19 @@ export async function POST(request: Request) {
     // 1. Cek status aktif fitur AI
     if (process.env.AI_ENGINE_ENABLED !== 'true') {
       return NextResponse.json(
-        { error: 'Fitur AI saat ini sedang dinonaktifkan.' },
+        {
+          error:
+            'Fitur AI belum diaktifkan. Tambahkan AI_ENGINE_ENABLED=true dan AI_PROVIDER_KEY di Vercel Environment Variables.',
+        },
         { status: 403 }
+      );
+    }
+
+    // Validasi API Key tersedia sebelum lanjut
+    if (!process.env.AI_PROVIDER_KEY) {
+      return NextResponse.json(
+        { error: 'AI_PROVIDER_KEY belum dikonfigurasi di server. Hubungi administrator.' },
+        { status: 503 }
       );
     }
 

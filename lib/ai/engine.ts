@@ -1,5 +1,6 @@
 import { AIGenerateRequest, AIProvider } from './types';
 import { GeminiProvider } from './providers/gemini';
+import { AnthropicProvider } from './providers/anthropic';
 
 // ─── BRAND VOICE CENTRALIZATION ──────────────────────────────────────────────
 const BRAND_VOICE = `
@@ -31,14 +32,16 @@ export class AIContentEngine {
   private provider: AIProvider;
 
   constructor() {
-    // Switcher Provider: Di masa depan, ubah kondisi ini ke OpenAIProvider / AnthropicProvider
-    const activeProvider = process.env.AI_PROVIDER || 'gemini';
+    // Switcher Provider: Set AI_PROVIDER=anthropic atau AI_PROVIDER=gemini di env
+    const activeProvider = process.env.AI_PROVIDER || 'anthropic';
 
-    if (activeProvider === 'gemini') {
+    if (activeProvider === 'anthropic') {
+      this.provider = new AnthropicProvider();
+    } else if (activeProvider === 'gemini') {
       this.provider = new GeminiProvider();
     } else {
-      // Fallback sementara ke Gemini
-      this.provider = new GeminiProvider();
+      // Fallback ke Anthropic
+      this.provider = new AnthropicProvider();
     }
   }
 
