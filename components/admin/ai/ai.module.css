@@ -1,0 +1,206 @@
+/* ─── Trigger Button ─────────────────────────────────────── */
+.container {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.triggerBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  height: 22px;
+  background: transparent;
+  border: 1px solid var(--color-gold, #c8a96e);
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-family: var(--font-sans, system-ui);
+  color: var(--color-gold, #c8a96e);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.triggerBtn:hover:not(:disabled) {
+  background: var(--color-gold-subtle, rgba(200, 169, 110, 0.12));
+}
+
+.triggerBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.icon {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+}
+
+/* ─── Popover Panel ──────────────────────────────────────── */
+.popover {
+  position: absolute;
+  z-index: 100;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 300px;
+  max-width: 85vw;
+  background: var(--color-white, #ffffff);
+  border: 1px solid var(--color-border-mid, rgba(0, 0, 0, 0.14));
+  border-radius: 8px;
+  padding: 14px;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.12), 0 2px 8px -2px rgba(0, 0, 0, 0.08);
+}
+
+.popoverHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.popoverTitle {
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: 700;
+  color: var(--color-ink, #111111);
+  letter-spacing: 0.03em;
+}
+
+.popoverBadge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--color-gold, #c8a96e);
+  background: var(--color-gold-subtle, rgba(200, 169, 110, 0.12));
+  border-radius: 3px;
+  padding: 1px 5px;
+  letter-spacing: 0.06em;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: var(--color-ink-subtle, #888888);
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 1rem;
+  line-height: 1;
+  border-radius: 3px;
+  transition: color 0.15s;
+}
+
+.closeBtn:hover {
+  color: var(--color-ink, #111111);
+}
+
+/* ─── Loading State ──────────────────────────────────────── */
+.loadingState {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--color-ink-subtle, #888888);
+}
+
+.loadingDots {
+  display: flex;
+  gap: 3px;
+}
+
+.loadingDots span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-gold, #c8a96e);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.loadingDots span:nth-child(2) { animation-delay: 0.2s; }
+.loadingDots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes pulse {
+  0%, 80%, 100% { opacity: 0.25; transform: scale(0.85); }
+  40%           { opacity: 1;    transform: scale(1); }
+}
+
+/* ─── Draft Content ──────────────────────────────────────── */
+.draftContent {
+  font-size: var(--text-sm, 0.875rem);
+  line-height: 1.55;
+  color: var(--color-ink, #111111);
+  background: var(--color-surface, #f9f8f7);
+  border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+/* ─── Action Buttons ─────────────────────────────────────── */
+.actionGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.btnPrimary {
+  grid-column: span 2;
+  background: var(--color-ink, #111111);
+  color: var(--color-white, #ffffff);
+  border: none;
+  border-radius: 5px;
+  padding: 7px 12px;
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: 600;
+  font-family: var(--font-sans, system-ui);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: #333333;
+}
+
+.btnSecondary {
+  background: transparent;
+  border: 1px solid var(--color-border-mid, rgba(0, 0, 0, 0.14));
+  color: var(--color-ink-muted, #555555);
+  border-radius: 5px;
+  padding: 6px 12px;
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: 500;
+  font-family: var(--font-sans, system-ui);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.btnSecondary:hover:not(:disabled) {
+  border-color: var(--color-gold, #c8a96e);
+  color: var(--color-ink, #111111);
+}
+
+.btnSecondary:disabled,
+.btnPrimary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── Error State ────────────────────────────────────────── */
+.errorText {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: var(--text-xs, 0.75rem);
+  color: #991b1b;
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  border-radius: 5px;
+  padding: 8px 10px;
+  line-height: 1.4;
+}

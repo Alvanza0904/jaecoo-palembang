@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { HomepageContent } from '@/types/homepage-content';
 import { updateHomepageContent } from './actions';
 import styles from './homepage-content.module.css';
+import AIAssistant from '@/components/admin/ai/AIAssistant';
 
 type ContentSection = Omit<HomepageContent, 'id' | 'updated_at'>;
 type SectionKey = keyof ContentSection;
@@ -53,26 +54,53 @@ export default function HomepageContentEditor({ initialData }: Props) {
     section: SectionKey;
     field: string;
     textarea?: boolean;
-  }) => (
-    <div className={styles.field}>
-      <label className={styles.label}>{label}</label>
-      {textarea ? (
-        <textarea
-          className={styles.textarea}
-          rows={3}
-          value={getVal(section, field)}
-          onChange={(e) => handleChange(section, field, e.target.value)}
-        />
-      ) : (
-        <input
-          type="text"
-          className={styles.input}
-          value={getVal(section, field)}
-          onChange={(e) => handleChange(section, field, e.target.value)}
-        />
-      )}
-    </div>
-  );
+  }) => {
+    const isUrlField = field.toLowerCase().includes('url');
+
+    // Injeksi fakta kontekstual untuk section tertentu
+    const relevantFacts =
+      section === 'dealer_location'
+        ? 'Alamat Dealer: Jl. R. Sukamto, Palembang. Konsultan: Alvan (085183145926)'
+        : undefined;
+
+    const aiContext = {
+      pageType: 'Homepage',
+      sectionType: section,
+      field,
+      relevantFacts,
+    };
+
+    return (
+      <div className={styles.field}>
+        {/* Label row: label + AI button side-by-side */}
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 0 }}>
+          <label className={styles.label}>{label}</label>
+          {!isUrlField && (
+            <AIAssistant
+              context={aiContext}
+              currentContent={getVal(section, field)}
+              onApply={(newText) => handleChange(section, field, newText)}
+            />
+          )}
+        </div>
+        {textarea ? (
+          <textarea
+            className={styles.textarea}
+            rows={3}
+            value={getVal(section, field)}
+            onChange={(e) => handleChange(section, field, e.target.value)}
+          />
+        ) : (
+          <input
+            type="text"
+            className={styles.input}
+            value={getVal(section, field)}
+            onChange={(e) => handleChange(section, field, e.target.value)}
+          />
+        )}
+      </div>
+    );
+  };
 
   const Card = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <div className={styles.card}>
