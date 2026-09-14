@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { AIContentEngine } from '@/lib/ai/engine';
 import { AIGenerateRequest } from '@/lib/ai/types';
 
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     }
 
     // 2. Auth Check — hanya admin terautentikasi yang bisa request
-    const supabase = createClient();
+    const supabase = await createSupabaseServerClient();
     const {
       data: { user },
       error: authError,
