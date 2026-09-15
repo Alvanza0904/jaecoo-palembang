@@ -92,7 +92,7 @@ function PromoImagePicker({ value, onChange }: PromoImagePickerProps) {
         open={isOpen}
         onClose={() => setIsOpen(false)}
         onSelect={handleSelect}
-        defaultCategory="general"
+        defaultCategory="promos"
         title="Pilih Gambar Promo"
       />
     </div>
