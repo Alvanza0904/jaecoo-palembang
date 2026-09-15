@@ -60,12 +60,12 @@ export async function getHomepageContent(): Promise<HomepageContent> {
 
     if (error || !data) {
       console.warn("Supabase fetch failed or empty, using Fallback Homepage Content.");
-      return { id: 'fallback-id', ...FALLBACK_CONTENT };
+      return { id: '11111111-1111-1111-1111-111111111111', ...FALLBACK_CONTENT };
     }
 
     return data as HomepageContent;
   } catch (error) {
     console.error("Error fetching homepage content:", error);
-    return { id: 'fallback-id', ...FALLBACK_CONTENT };
+    return { id: '11111111-1111-1111-1111-111111111111', ...FALLBACK_CONTENT };
   }
 }
