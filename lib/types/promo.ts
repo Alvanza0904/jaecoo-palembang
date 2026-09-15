@@ -1,22 +1,43 @@
 /**
- * JAECOO Palembang — Promo Types
+ * JAECOO Palembang — Promo Types (Step 8.10)
+ * Aligned with Supabase promos table schema
  */
 
-import type { ResponsiveImage } from "./media";
+export type PromoType =
+  | 'general'
+  | 'cashback'
+  | 'dp'
+  | 'leasing'
+  | 'trade_in'
+  | 'event'
+  | 'special_offer';
 
-export interface PromoData {
+export type PromoStatus = 'draft' | 'published' | 'expired';
+
+export interface Promo {
   id: string;
-  slug: string;
   title: string;
-  description: string;
-  badge?: string;
-  valid_until?: string;
-  /** null = still active */
-  expired_at?: string | null;
-  image: ResponsiveImage;
-  cta_label: string;
-  cta_whatsapp_context?: string;
-  model_slug?: string;
-  published: boolean;
-  updated_at: string;
+  slug: string;
+  short_description: string | null;
+  description: string | null;
+  promo_type: PromoType;
+  model_id: string | null;
+  image_url: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  status: PromoStatus;
+  featured: boolean;
+  sort_order: number;
+  cta_label: string | null;
+  cta_action: string | null;
+  created_at?: string;
+  updated_at?: string;
+  // Joined data from models table
+  models?: {
+    id: string;
+    name: string;
+    slug: string;
+  } | null;
 }
+
+export type PromoFormData = Omit<Promo, 'id' | 'created_at' | 'updated_at' | 'models'>;
