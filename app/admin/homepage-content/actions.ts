@@ -24,6 +24,7 @@ export async function updateHomepageContent(data: HomepageContent) {
         ? SINGLETON_UUID
         : data.id;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id: _id, ...updateData } = data;
 
     // FIX: Gunakan UPSERT agar aman baik row sudah ada maupun belum

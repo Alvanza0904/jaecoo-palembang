@@ -23,10 +23,9 @@ interface FieldProps {
   textarea?: boolean;
   value: string;
   onChange: (section: SectionKey, field: string, value: string) => void;
-  formData: HomepageContent;
 }
 
-function Field({ label, section, field, textarea = false, value, onChange, formData }: FieldProps) {
+function Field({ label, section, field, textarea = false, value, onChange }: FieldProps) {
   const isUrlField = field.toLowerCase().includes('url');
 
   const relevantFacts =
@@ -142,87 +141,87 @@ export default function HomepageContentEditor({ initialData }: Props) {
 
       <Card title="1. Homepage Hero">
         <Field label="Eyebrow (Teks Kecil di Atas)" section="hero" field="eyebrow"
-          value={getVal('hero', 'eyebrow')} onChange={handleChange} formData={formData} />
+          value={getVal('hero', 'eyebrow')} onChange={handleChange} />
         <Field label="Headline" section="hero" field="headline"
-          value={getVal('hero', 'headline')} onChange={handleChange} formData={formData} />
+          value={getVal('hero', 'headline')} onChange={handleChange} />
         <Field label="Description" section="hero" field="description" textarea
-          value={getVal('hero', 'description')} onChange={handleChange} formData={formData} />
+          value={getVal('hero', 'description')} onChange={handleChange} />
         <div className={styles.row}>
           <Field label="CTA Text" section="hero" field="ctaText"
-            value={getVal('hero', 'ctaText')} onChange={handleChange} formData={formData} />
+            value={getVal('hero', 'ctaText')} onChange={handleChange} />
           <Field label="CTA URL" section="hero" field="ctaUrl"
-            value={getVal('hero', 'ctaUrl')} onChange={handleChange} formData={formData} />
+            value={getVal('hero', 'ctaUrl')} onChange={handleChange} />
         </div>
       </Card>
 
       <Card title="2. Experience Section">
         <Field label="Title" section="experience" field="title"
-          value={getVal('experience', 'title')} onChange={handleChange} formData={formData} />
+          value={getVal('experience', 'title')} onChange={handleChange} />
         <Field label="Description" section="experience" field="description" textarea
-          value={getVal('experience', 'description')} onChange={handleChange} formData={formData} />
+          value={getVal('experience', 'description')} onChange={handleChange} />
       </Card>
 
       <Card title="3. Technology Section">
         <Field label="Title" section="technology" field="title"
-          value={getVal('technology', 'title')} onChange={handleChange} formData={formData} />
+          value={getVal('technology', 'title')} onChange={handleChange} />
         <Field label="Description" section="technology" field="description" textarea
-          value={getVal('technology', 'description')} onChange={handleChange} formData={formData} />
+          value={getVal('technology', 'description')} onChange={handleChange} />
       </Card>
 
       <Card title="4. About Section">
         <Field label="Title" section="about" field="title"
-          value={getVal('about', 'title')} onChange={handleChange} formData={formData} />
+          value={getVal('about', 'title')} onChange={handleChange} />
         <Field label="Description" section="about" field="description" textarea
-          value={getVal('about', 'description')} onChange={handleChange} formData={formData} />
+          value={getVal('about', 'description')} onChange={handleChange} />
       </Card>
 
       <Card title="5. Promo Section">
         <Field label="Title" section="promo" field="title"
-          value={getVal('promo', 'title')} onChange={handleChange} formData={formData} />
+          value={getVal('promo', 'title')} onChange={handleChange} />
         <Field label="Description" section="promo" field="description" textarea
-          value={getVal('promo', 'description')} onChange={handleChange} formData={formData} />
+          value={getVal('promo', 'description')} onChange={handleChange} />
         <div className={styles.row}>
           <Field label="CTA Text" section="promo" field="ctaText"
-            value={getVal('promo', 'ctaText')} onChange={handleChange} formData={formData} />
+            value={getVal('promo', 'ctaText')} onChange={handleChange} />
           <Field label="CTA URL" section="promo" field="ctaUrl"
-            value={getVal('promo', 'ctaUrl')} onChange={handleChange} formData={formData} />
+            value={getVal('promo', 'ctaUrl')} onChange={handleChange} />
         </div>
       </Card>
 
       <Card title="6. Journal Section">
         <Field label="Title" section="journal" field="title"
-          value={getVal('journal', 'title')} onChange={handleChange} formData={formData} />
+          value={getVal('journal', 'title')} onChange={handleChange} />
         <Field label="Description" section="journal" field="description" textarea
-          value={getVal('journal', 'description')} onChange={handleChange} formData={formData} />
+          value={getVal('journal', 'description')} onChange={handleChange} />
       </Card>
 
       <Card title="7. Dealer Location">
         <Field label="Title" section="dealer_location" field="title"
-          value={getVal('dealer_location', 'title')} onChange={handleChange} formData={formData} />
+          value={getVal('dealer_location', 'title')} onChange={handleChange} />
         <Field label="Description" section="dealer_location" field="description" textarea
-          value={getVal('dealer_location', 'description')} onChange={handleChange} formData={formData} />
+          value={getVal('dealer_location', 'description')} onChange={handleChange} />
         <Field label="Address" section="dealer_location" field="address" textarea
-          value={getVal('dealer_location', 'address')} onChange={handleChange} formData={formData} />
+          value={getVal('dealer_location', 'address')} onChange={handleChange} />
       </Card>
 
       <Card title="8. Final CTA">
         <Field label="Title" section="final_cta" field="title"
-          value={getVal('final_cta', 'title')} onChange={handleChange} formData={formData} />
+          value={getVal('final_cta', 'title')} onChange={handleChange} />
         <Field label="Description" section="final_cta" field="description" textarea
-          value={getVal('final_cta', 'description')} onChange={handleChange} formData={formData} />
+          value={getVal('final_cta', 'description')} onChange={handleChange} />
         <div className={styles.row}>
           <Field label="CTA Text" section="final_cta" field="ctaText"
-            value={getVal('final_cta', 'ctaText')} onChange={handleChange} formData={formData} />
+            value={getVal('final_cta', 'ctaText')} onChange={handleChange} />
           <Field label="CTA URL" section="final_cta" field="ctaUrl"
-            value={getVal('final_cta', 'ctaUrl')} onChange={handleChange} formData={formData} />
+            value={getVal('final_cta', 'ctaUrl')} onChange={handleChange} />
         </div>
       </Card>
 
       <Card title="9. SEO Metadata">
         <Field label="Meta Title" section="seo" field="metaTitle"
-          value={getVal('seo', 'metaTitle')} onChange={handleChange} formData={formData} />
+          value={getVal('seo', 'metaTitle')} onChange={handleChange} />
         <Field label="Meta Description" section="seo" field="metaDescription" textarea
-          value={getVal('seo', 'metaDescription')} onChange={handleChange} formData={formData} />
+          value={getVal('seo', 'metaDescription')} onChange={handleChange} />
       </Card>
 
       <div className={styles.saveBar}>
