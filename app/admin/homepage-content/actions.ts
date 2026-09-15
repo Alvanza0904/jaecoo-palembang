@@ -19,7 +19,10 @@ export async function updateHomepageContent(data: HomepageContent) {
 // Mendukung: desktop_image, mobile_image, text_position_mode,
 //            desktop_position, mobile_position per section
 // ─────────────────────────────────────────────────────────────
-export async function saveHomepageContent(id: string | null | undefined, data: any) {
+export async function saveHomepageContent(
+  id: string | null | undefined,
+  data: Record<string, unknown>
+) {
   try {
     const supabase = await createSupabaseServerClient();
 
@@ -60,8 +63,9 @@ export async function saveHomepageContent(id: string | null | undefined, data: a
     revalidatePath('/admin/homepage-content');
     return { success: true };
 
-  } catch (err: any) {
+  } catch (err) {
     console.error('Error saving homepage content:', err);
-    return { success: false, error: err.message || 'Internal server error' };
+    const message = err instanceof Error ? err.message : 'Internal server error';
+    return { success: false, error: message };
   }
 }

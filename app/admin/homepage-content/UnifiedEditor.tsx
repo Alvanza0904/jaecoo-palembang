@@ -195,13 +195,15 @@ function HomepageSectionPreview({ data, section, device }: HomepageSectionPrevie
 // ─────────────────────────────────────────────────────────────
 
 interface UnifiedEditorProps {
-  initialData: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  initialData: Record<string, any>;
 }
 
 export default function UnifiedEditor({ initialData }: UnifiedEditorProps) {
   const router = useRouter();
 
-  const [data, setData] = useState<any>(initialData || {});
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [data, setData] = useState<Record<string, any>>(initialData || {});
   const [activeSection, setActiveSection] = useState<SectionId>('hero');
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
   const [isDirty, setIsDirty] = useState(false);
@@ -227,11 +229,11 @@ export default function UnifiedEditor({ initialData }: UnifiedEditorProps) {
   }, [isDirty]);
 
   // Update field di dalam section
-  const updateField = useCallback((section: string, field: string, value: any) => {
-    setData((prev: any) => ({
+  const updateField = useCallback((section: string, field: string, value: unknown) => {
+    setData((prev) => ({
       ...prev,
       [section]: {
-        ...(prev[section] || {}),
+        ...(prev[section] as Record<string, unknown> || {}),
         [field]: value,
       },
     }));
