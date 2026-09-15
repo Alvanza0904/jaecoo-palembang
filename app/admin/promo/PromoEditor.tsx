@@ -28,7 +28,7 @@ function PromoImagePicker({ value, onChange }: PromoImagePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   function handleSelect(asset: MediaAsset) {
-    onChange(asset.url);
+    onChange(asset.public_url ?? '');
     setIsOpen(false);
   }
 
