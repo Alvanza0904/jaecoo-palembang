@@ -1,23 +1,23 @@
 /**
- * JAECOO Palembang — Promo Detail Page
- * Route: /promo/[slug]
- * Phase 2: Visual foundation.
+ * JAECOO Palembang — Promo Detail Page (Step 8.10)
+ * Data: Supabase promos table via getPromoBySlug
  */
 
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { getPromoBySlug, getActivePromos } from "@/lib/data/promos";
-import { Container } from "@/components/ui/Container";
-import { Button } from "@/components/ui/Button";
-import { GoldLine } from "@/components/ui/GoldLine";
-import { Reveal } from "@/components/motion/Reveal";
-import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
-import styles from "./promo-detail.module.css";
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { getPromoBySlug, getAllPromoSlugs } from '@/lib/data/promos';
+import { Container } from '@/components/ui/Container';
+import { Button } from '@/components/ui/Button';
+import { GoldLine } from '@/components/ui/GoldLine';
+import { Reveal } from '@/components/motion/Reveal';
+import { buildWhatsAppUrl } from '@/lib/utils/whatsapp';
+import styles from './promo-detail.module.css';
 
 interface Props { params: Promise<{ slug: string }> }
 
 export async function generateStaticParams() {
-  return (await getActivePromos()).map((p) => ({ slug: p.slug }));
+  const slugs = await getAllPromoSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!promo) return {};
   return {
     title: promo.title,
-    description: promo.description,
+    description: promo.short_description ?? promo.description ?? '',
     alternates: { canonical: `/promo/${slug}` },
   };
 }
@@ -36,11 +36,13 @@ export default async function PromoDetailPage({ params }: Props) {
   const promo = await getPromoBySlug(slug);
   if (!promo) notFound();
 
-  const whatsappUrl = buildWhatsAppUrl({
-    source: "promo_detail",
-    source_cta: promo.cta_whatsapp_context ?? "promo_detail_cta",
-    model: promo.model_slug ?? undefined,
-  });
+  const whatsappUrl =
+    promo.cta_action ??
+    buildWhatsAppUrl({
+      source: 'promo_detail',
+      source_cta: promo.title,
+      model: promo.models?.slug ?? undefined,
+    });
 
   return (
     <section className={styles.section}>
@@ -48,16 +50,16 @@ export default async function PromoDetailPage({ params }: Props) {
         <Reveal variant="fade-up">
           <div className={styles.content}>
             <div className={styles.meta}>
-              {promo.badge && (
-                <span className={styles.badge}>{promo.badge}</span>
+              {promo.models && (
+                <span className={styles.badge}>{promo.models.name}</span>
               )}
-              {promo.valid_until && (
+              {promo.end_date && (
                 <span className={styles.validity}>
-                  Berlaku hingga{" "}
-                  {new Date(promo.valid_until).toLocaleDateString("id-ID", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
+                  Berlaku hingga{' '}
+                  {new Date(promo.end_date).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
                   })}
                 </span>
               )}
@@ -65,7 +67,9 @@ export default async function PromoDetailPage({ params }: Props) {
 
             <GoldLine width="short" className={styles.gold} />
             <h1 className={styles.title}>{promo.title}</h1>
-            <p className={styles.description}>{promo.description}</p>
+            <p className={styles.description}>
+              {promo.description ?? promo.short_description}
+            </p>
 
             <Button
               as="a"
@@ -75,7 +79,7 @@ export default async function PromoDetailPage({ params }: Props) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              {promo.cta_label} →
+              {promo.cta_label ?? 'Klaim Promo'} →
             </Button>
           </div>
         </Reveal>
