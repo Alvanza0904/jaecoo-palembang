@@ -176,16 +176,23 @@ export function HomeTechnologySection({
 export function HomePromoSection({ promos }: { promos: PromoData[] }) {
   if (!promos.length) return null;
   const promo = promos[0];
+  // Support both legacy PromoData fields and new Promo (Step 8.10) fields
+  const imageUrl = (promo as any).image_url ?? (promo as any).image?.desktop;
+  const imageAlt = (promo as any).image?.alt ?? promo.title;
+  const modelLabel = (promo as any).models?.name
+    ?? (promo as any).model_slug?.replace("jaecoo-", "").toUpperCase()
+    ?? "";
+  const bodyText = (promo as any).short_description ?? (promo as any).description ?? "";
   return (
     <section className={styles.promo} aria-labelledby="promo-title">
       <div className={styles.promoMedia}>
-        <Media src={promo.image?.desktop} alt={promo.image?.alt ?? promo.title} />
+        <Media src={imageUrl} alt={imageAlt} />
       </div>
       <div className={styles.promoCopy}>
         <p className={styles.eyebrow}>CURRENT OFFERS</p>
-        <p className={styles.promoModel}>{promo.model_slug?.replace("jaecoo-", "").toUpperCase()}</p>
+        <p className={styles.promoModel}>{modelLabel}</p>
         <h2 id="promo-title">{promo.title}</h2>
-        <p>{promo.description}</p>
+        <p>{bodyText}</p>
         <Link className={styles.textLink} href={`/promo/${promo.slug}`}>Discover offer ↗</Link>
       </div>
     </section>
