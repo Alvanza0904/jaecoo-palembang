@@ -11,7 +11,7 @@ const SINGLETON_UUID = '11111111-1111-1111-1111-111111111111';
 // LEGACY: Digunakan oleh ContentEditor.tsx (backward compat)
 // ─────────────────────────────────────────────────────────────
 export async function updateHomepageContent(data: HomepageContent) {
-  return saveHomepageContent(data.id, data);
+  return saveHomepageContent(data.id, data as unknown as Record<string, unknown>);
 }
 
 // ─────────────────────────────────────────────────────────────
