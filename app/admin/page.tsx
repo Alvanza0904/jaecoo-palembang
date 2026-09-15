@@ -72,10 +72,10 @@ export default async function AdminDashboardPage() {
       items: [
         {
           title: 'Promotions',
-          description: 'Banner dan penawaran spesial',
-          href: '#',
-          live: false,
-          actionText: 'Coming Soon',
+          description: 'Kelola banner dan penawaran spesial',
+          href: '/admin/promo',
+          live: true,
+          actionText: 'Manage Promo',
           stat: null,
         },
         {
