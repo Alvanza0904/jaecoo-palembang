@@ -476,13 +476,38 @@ export default function UnifiedEditor({ initialData }: UnifiedEditorProps) {
               />
 
               {hasCta && (
-                <AIReadyField
-                  label="CTA Label (Tombol)"
-                  field="ctaText"
-                  value={currentData.ctaText || ''}
-                  onChange={(val) => updateField(activeSection, 'ctaText', val)}
-                  context={{ ...aiCtx, purpose: 'Call-to-action button label' }}
-                />
+                <>
+                  <AIReadyField
+                    label="CTA Label (Tombol)"
+                    field="ctaText"
+                    value={currentData.ctaText || ''}
+                    onChange={(val) => updateField(activeSection, 'ctaText', val)}
+                    context={{ ...aiCtx, purpose: 'Call-to-action button label' }}
+                  />
+                  <div style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.375rem' }}>
+                      CTA URL (Link Tombol)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: /model/j7 atau https://wa.me/..."
+                      value={currentData.ctaUrl || ''}
+                      onChange={(e) => updateField(activeSection, 'ctaUrl', e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '0.5rem 0.75rem',
+                        borderRadius: '6px',
+                        border: '1px solid var(--color-border, #d1d5db)',
+                        background: 'var(--color-surface, #ffffff)',
+                        color: 'var(--color-ink, #111827)',
+                        outline: 'none',
+                        fontFamily: 'inherit',
+                        fontSize: '0.875rem',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+                </>
               )}
             </div>
 
