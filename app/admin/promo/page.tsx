@@ -1,21 +1,29 @@
-import styles from '../dashboard.module.css'
+import { createSupabaseServerClient } from '@/lib/supabase/server';
+import PromoClientPage from './PromoClientPage';
 
-export default function AdminPage() {
+export const metadata = {
+  title: 'Kelola Promo | JAECOO Admin',
+};
+
+export default async function AdminPromoPage() {
+  const supabase = await createSupabaseServerClient();
+
+  const [{ data: promos }, { data: models }] = await Promise.all([
+    supabase
+      .from('promos')
+      .select('*, models(id, name, slug)')
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('models')
+      .select('id, name')
+      .order('name', { ascending: true }),
+  ]);
+
   return (
-    <div className={styles.page}>
-      <div className={styles.header}>
-        <div>
-          <p className={styles.greeting}>Admin</p>
-          <h1 className={styles.title}>promo</h1>
-        </div>
-      </div>
-      <div className={styles.goldLine} />
-      <div className={styles.note}>
-        <h2 className={styles.noteTitle}>Coming Soon</h2>
-        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-ink-muted)', margin: 0 }}>
-          Halaman ini akan dibuat pada step berikutnya.
-        </p>
-      </div>
-    </div>
-  )
+    <PromoClientPage
+      initialPromos={promos ?? []}
+      modelsList={models ?? []}
+    />
+  );
 }
