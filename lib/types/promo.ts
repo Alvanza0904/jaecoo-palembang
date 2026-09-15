@@ -41,3 +41,9 @@ export interface Promo {
 }
 
 export type PromoFormData = Omit<Promo, 'id' | 'created_at' | 'updated_at' | 'models'>;
+
+/**
+ * @deprecated Gunakan `Promo` (Step 8.10).
+ * Alias ini dipertahankan agar komponen legacy (HomeExperience) tidak broken.
+ */
+export type PromoData = Promo;
