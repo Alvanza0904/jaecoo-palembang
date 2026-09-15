@@ -1,0 +1,499 @@
+/* ═══════════════════════════════════════════════════════════════
+   UNIFIED VISUAL EDITOR — Module CSS
+   Mobile-first. 100dvh. Split-screen layout.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Root Layout ─────────────────────────────────────────── */
+.unifiedLayout {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  width: 100vw;
+  background: var(--color-bg, #ffffff);
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+@media (min-width: 1024px) {
+  .unifiedLayout {
+    flex-direction: row;
+  }
+}
+
+/* ─── Controls Panel (kiri / atas) ───────────────────────── */
+.controlsPanel {
+  width: 100%;
+  height: 52dvh;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--color-border, #e5e7eb);
+  background: var(--color-surface-raised, #f9fafb);
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .controlsPanel {
+    width: 460px;
+    min-width: 380px;
+    height: 100dvh;
+    flex-shrink: 0;
+  }
+}
+
+/* ─── Panel Header ────────────────────────────────────────── */
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.875rem 1rem;
+  background: var(--color-bg, #ffffff);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  flex-shrink: 0;
+  gap: 0.5rem;
+}
+
+.panelTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-ink, #111827);
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Buttons ─────────────────────────────────────────────── */
+.btnBack {
+  padding: 0.4375rem 0.875rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  border: 1px solid var(--color-border, #e5e7eb);
+  background: transparent;
+  color: var(--color-ink-subtle, #4b5563);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.btnBack:hover {
+  background: var(--color-surface-raised, #f3f4f6);
+}
+
+.btnSave {
+  padding: 0.4375rem 0.875rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: var(--color-ink, #111827);
+  color: #ffffff;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.btnSave:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.btnSave:not(:disabled):hover {
+  opacity: 0.85;
+}
+
+/* ─── Section Nav Tabs ────────────────────────────────────── */
+.sectionNav {
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  background: var(--color-bg, #ffffff);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  flex-shrink: 0;
+}
+.sectionNav::-webkit-scrollbar {
+  display: none;
+}
+
+.navTab {
+  padding: 0.75rem 1rem;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-ink-subtle, #6b7280);
+  transition: color 0.15s;
+}
+.navTab:hover {
+  color: var(--color-ink, #111827);
+}
+
+.navTabActive {
+  padding: 0.75rem 1rem;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  border-bottom: 2px solid var(--color-gold, #c9a84c);
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-ink, #111827);
+}
+
+/* ─── Form Content Scroll Area ────────────────────────────── */
+.formContent {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 1.25rem;
+  padding-bottom: max(env(safe-area-inset-bottom, 1rem), 2rem);
+}
+
+/* ─── Control Groups ──────────────────────────────────────── */
+.controlGroup {
+  margin-bottom: 1.25rem;
+  background: var(--color-bg, #ffffff);
+  padding: 1.125rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #e5e7eb);
+}
+
+.groupTitle {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.075em;
+  color: var(--color-ink-subtle, #6b7280);
+  margin: 0 0 0.875rem;
+  font-weight: 600;
+}
+
+/* ─── Media Grid ──────────────────────────────────────────── */
+.mediaGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 480px) {
+  .mediaGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mediaField label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-ink, #111827);
+  margin-bottom: 0.375rem;
+}
+
+/* ─── Media Thumb ─────────────────────────────────────────── */
+.mediaTrigger {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 6px;
+  border: 1.5px dashed var(--color-border, #d1d5db);
+  background: var(--color-surface-raised, #f9fafb);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  transition: border-color 0.15s;
+}
+.mediaTrigger:hover {
+  border-color: var(--color-gold, #c9a84c);
+}
+
+.mediaThumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+}
+
+.mediaEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--color-ink-subtle, #9ca3af);
+}
+
+.mediaEmptyIcon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.mediaEmptyLabel {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.mediaOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+  border-radius: 4px;
+}
+.mediaTrigger:hover .mediaOverlay {
+  opacity: 1;
+}
+
+.mediaOverlayLabel {
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ─── Position Controls ───────────────────────────────────── */
+.fieldRow {
+  margin-bottom: 0.75rem;
+}
+.fieldRow label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-ink, #111827);
+  margin-bottom: 0.3125rem;
+}
+.fieldRow select {
+  width: 100%;
+  padding: 0.4375rem 0.625rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-border, #d1d5db);
+  background: var(--color-bg, #ffffff);
+  color: var(--color-ink, #111827);
+  font-size: 0.8125rem;
+  appearance: auto;
+}
+
+.manualControls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 0.875rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--color-border, #f3f4f6);
+}
+
+.manualDevice h4 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-ink-subtle, #6b7280);
+  margin: 0 0 0.375rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.manualDevice select {
+  width: 100%;
+  margin-bottom: 0.375rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-border, #d1d5db);
+  background: var(--color-bg, #ffffff);
+  font-size: 0.75rem;
+  color: var(--color-ink, #111827);
+}
+
+/* ─── Preview Canvas (kanan / bawah) ─────────────────────── */
+.previewCanvas {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #1a1a1a;
+  height: 48dvh;
+  min-height: 0;
+}
+
+@media (min-width: 1024px) {
+  .previewCanvas {
+    height: 100dvh;
+  }
+}
+
+/* ─── Preview Toolbar ─────────────────────────────────────── */
+.previewToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.625rem 0.875rem;
+  background: #0f0f0f;
+  flex-shrink: 0;
+}
+
+.previewTitle {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.deviceToggle {
+  display: flex;
+  background: #262626;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #333;
+}
+
+.deviceBtn {
+  padding: 0.3125rem 0.6875rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.deviceBtn:hover {
+  color: #d1d5db;
+}
+
+.deviceBtnActive {
+  padding: 0.3125rem 0.6875rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  border: none;
+  background: #374151;
+  color: #f9fafb;
+  cursor: pointer;
+}
+
+/* ─── Preview Wrapper & Screen ────────────────────────────── */
+.previewWrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.previewScreen {
+  border: 3px solid #2d2d2d;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+}
+
+.screenDesktop {
+  width: 100%;
+  height: 100%;
+  max-width: 1200px;
+  border-radius: 6px;
+}
+
+.screenMobile {
+  width: min(375px, 90%);
+  height: min(667px, calc(100% - 0.5rem));
+  border-radius: 28px;
+}
+
+/* ─── Preview Renderer ────────────────────────────────────── */
+.previewSection {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  padding: 3rem;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.premiumOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.previewContent {
+  position: relative;
+  z-index: 2;
+  color: white;
+  max-width: 560px;
+}
+
+.pEyebrow {
+  display: block;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.85;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.pHeadline {
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  font-weight: 700;
+  margin: 0 0 0.875rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.pDesc {
+  font-size: clamp(0.8125rem, 1.5vw, 1.0625rem);
+  opacity: 0.8;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.pBtn {
+  display: inline-block;
+  background: white;
+  color: black;
+  padding: 0.625rem 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: none;
+  cursor: default;
+}
+
+.pEmptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #4b5563;
+  gap: 0.5rem;
+}
+
+.pEmptyIcon {
+  font-size: 2rem;
+}
+
+.pEmptyLabel {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.pEmptyHint {
+  font-size: 0.6875rem;
+  color: #374151;
+}

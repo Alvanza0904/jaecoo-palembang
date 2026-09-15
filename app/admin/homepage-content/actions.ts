@@ -7,49 +7,61 @@ import { HomepageContent } from '@/types/homepage-content';
 // Singleton UUID untuk homepage content (selalu satu baris di tabel)
 const SINGLETON_UUID = '11111111-1111-1111-1111-111111111111';
 
+// ─────────────────────────────────────────────────────────────
+// LEGACY: Digunakan oleh ContentEditor.tsx (backward compat)
+// ─────────────────────────────────────────────────────────────
 export async function updateHomepageContent(data: HomepageContent) {
+  return saveHomepageContent(data.id, data);
+}
+
+// ─────────────────────────────────────────────────────────────
+// UNIFIED EDITOR: Action utama yang mendukung struktur JSONB baru
+// Mendukung: desktop_image, mobile_image, text_position_mode,
+//            desktop_position, mobile_position per section
+// ─────────────────────────────────────────────────────────────
+export async function saveHomepageContent(id: string | null | undefined, data: any) {
   try {
     const supabase = await createSupabaseServerClient();
 
-    // Authorization Check
     const { data: sessionData, error: authError } = await supabase.auth.getUser();
     if (authError || !sessionData.user) {
-      return { success: false, error: "Unauthorized access." };
+      return { success: false, error: 'Unauthorized access.' };
     }
 
-    // FIX UUID: Pastikan id selalu berupa UUID valid
-    // 'fallback-id' atau string kosong → pakai Singleton UUID
+    // FIX UUID: 'fallback-id' atau falsy → Singleton UUID
     const validId =
-      !data.id || data.id === 'fallback-id'
+      !id || id === 'fallback-id'
         ? SINGLETON_UUID
-        : data.id;
+        : id;
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id: _id, ...updateData } = data;
+    // Bersihkan metadata form lokal sebelum masuk ke DB
+    const payload = { ...data };
+    delete payload.id;
+    delete payload.updated_at;
 
-    // FIX: Gunakan UPSERT agar aman baik row sudah ada maupun belum
+    // UPSERT: Aman baik row sudah ada maupun belum
     const { error } = await supabase
       .from('homepage_content')
       .upsert(
         {
           id: validId,
-          ...updateData,
+          ...payload,
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'id' }
       );
 
     if (error) {
-      console.error("Supabase upsert error:", error);
+      console.error('Supabase upsert error:', error);
       return { success: false, error: error.message };
     }
 
     revalidatePath('/');
     revalidatePath('/admin/homepage-content');
-
     return { success: true };
-  } catch (error) {
-    console.error("Action updateHomepageContent failed:", error);
-    return { success: false, error: "Internal server error" };
+
+  } catch (err: any) {
+    console.error('Error saving homepage content:', err);
+    return { success: false, error: err.message || 'Internal server error' };
   }
 }
