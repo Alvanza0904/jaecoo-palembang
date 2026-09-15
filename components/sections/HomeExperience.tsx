@@ -173,16 +173,24 @@ export function HomeTechnologySection({
 }
 
 // ─── HomePromoSection ────────────────────────────────────────────────────────
+// Compat type: covers new Promo (Step 8.10) + legacy PromoData shape
+type PromoCompat = PromoData & {
+  image_url?: string | null;
+  short_description?: string | null;
+  image?: { desktop?: string; alt?: string };
+  model_slug?: string;
+};
+
 export function HomePromoSection({ promos }: { promos: PromoData[] }) {
   if (!promos.length) return null;
-  const promo = promos[0];
-  // Support both legacy PromoData fields and new Promo (Step 8.10) fields
-  const imageUrl = (promo as any).image_url ?? (promo as any).image?.desktop;
-  const imageAlt = (promo as any).image?.alt ?? promo.title;
-  const modelLabel = (promo as any).models?.name
-    ?? (promo as any).model_slug?.replace("jaecoo-", "").toUpperCase()
-    ?? "";
-  const bodyText = (promo as any).short_description ?? (promo as any).description ?? "";
+  const promo = promos[0] as PromoCompat;
+  const imageUrl = promo.image_url ?? promo.image?.desktop;
+  const imageAlt = promo.image?.alt ?? promo.title;
+  const modelLabel =
+    promo.models?.name ??
+    promo.model_slug?.replace("jaecoo-", "").toUpperCase() ??
+    "";
+  const bodyText = promo.short_description ?? promo.description ?? "";
   return (
     <section className={styles.promo} aria-labelledby="promo-title">
       <div className={styles.promoMedia}>
