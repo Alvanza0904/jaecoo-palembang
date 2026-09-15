@@ -1,6 +1,6 @@
 /**
  * JAECOO Admin — Media Picker Modal Styles
- * Mobile-first, no hover-only interactions
+ * FIX: 100dvh untuk iPhone (address bar Safari), z-index tinggi, scroll lock
  */
 
 /* ─── Overlay ───────────────────────────────────────── */
@@ -8,13 +8,17 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  z-index: 1000;
+  width: 100vw;
+  height: 100dvh; /* FIX: dvh menghitung address bar Safari secara dinamis */
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(2px);
+  z-index: 9999; /* FIX: Pastikan di atas semua elemen admin */
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 1rem;
-  overflow-y: auto;
+  padding: 0;
+  overflow: hidden;
+  overscroll-behavior: none; /* FIX: Cegah body scroll di belakang modal */
 }
 
 @media (min-width: 768px) {
@@ -28,14 +32,21 @@
 
 .modal {
   background: white;
-  border-radius: 12px;
   width: 100%;
+  height: 100dvh; /* FIX: Fullscreen di mobile */
   max-width: 900px;
-  max-height: calc(100dvh - 2rem);
   display: flex;
   flex-direction: column;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
   overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .modal {
+    height: auto;
+    max-height: calc(100dvh - 4rem);
+    border-radius: 12px;
+  }
 }
 
 /* ─── Modal Header ──────────────────────────────────── */
@@ -47,6 +58,10 @@
   padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--color-border, #e0ddd6);
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
 }
 
 .modalTitle {
@@ -57,9 +72,10 @@
   letter-spacing: -0.01em;
 }
 
+/* FIX CLOSE BUTTON: Tap target 44px minimum untuk iOS */
 .closeBtn {
-  width: 36px;
-  height: 36px;
+  min-width: 44px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -67,7 +83,7 @@
   background: none;
   border: 1px solid var(--color-border, #e0ddd6);
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 1rem;
   color: var(--color-ink-subtle);
   transition: all 0.12s;
   flex-shrink: 0;
@@ -85,4 +101,5 @@
   overflow-y: auto;
   padding: 1.25rem;
   -webkit-overflow-scrolling: touch;
+  padding-bottom: env(safe-area-inset-bottom, 1.25rem);
 }

@@ -74,8 +74,13 @@ export function MediaPicker({ open, onClose, onSelect, defaultCategory, title }:
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>{title ?? 'Pilih Media'}</h2>
           <button
+            type="button" // FIX: Wajib agar tidak memicu submit form parent
             className={styles.closeBtn}
-            onClick={onClose}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation(); // FIX: Cegah event bocor ke overlay
+              onClose();
+            }}
             aria-label="Tutup"
           >
             ✕
