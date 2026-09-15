@@ -1,6 +1,6 @@
 'use server'
 
-import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { createSupabaseServerClient, createSupabaseAdminClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { HomepageContent } from '@/types/homepage-content';
 
@@ -24,9 +24,9 @@ export async function saveHomepageContent(
   data: Record<string, unknown>
 ) {
   try {
-    const supabase = await createSupabaseServerClient();
-
-    const { data: sessionData, error: authError } = await supabase.auth.getUser();
+    // Cek auth dulu dengan regular client
+    const authClient = await createSupabaseServerClient();
+    const { data: sessionData, error: authError } = await authClient.auth.getUser();
     if (authError || !sessionData.user) {
       return { success: false, error: 'Unauthorized access.' };
     }
@@ -42,8 +42,9 @@ export async function saveHomepageContent(
     delete payload.id;
     delete payload.updated_at;
 
-    // UPSERT: Aman baik row sudah ada maupun belum
-    const { error } = await supabase
+    // Pakai Admin Client (service role) untuk bypass RLS pada write
+    const adminClient = createSupabaseAdminClient();
+    const { error } = await adminClient
       .from('homepage_content')
       .upsert(
         {
