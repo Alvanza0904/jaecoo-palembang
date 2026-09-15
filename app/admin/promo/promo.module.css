@@ -108,24 +108,42 @@
 .editorOverlay {
   position: fixed;
   inset: 0;
+  width: 100vw;
+  height: 100dvh; /* FIX: dvh untuk iPhone Safari address bar */
   background: rgba(0, 0, 0, 0.55);
   display: flex;
   justify-content: center;
-  align-items: center;
-  z-index: 100;
-  padding: 1rem;
+  align-items: flex-start; /* Mobile: mulai dari atas */
+  z-index: 9000; /* FIX: Di bawah MediaPicker (9999) tapi di atas konten admin */
+  padding: 0;
+  overscroll-behavior: none;
+}
+
+@media (min-width: 768px) {
+  .editorOverlay {
+    align-items: center;
+    padding: 1rem;
+  }
 }
 
 .editorModal {
   background: #ffffff;
   width: 100%;
+  height: 100dvh; /* FIX: Fullscreen di mobile */
   max-width: 700px;
-  max-height: 90vh;
-  border-radius: 12px;
+  border-radius: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+@media (min-width: 768px) {
+  .editorModal {
+    height: auto;
+    max-height: calc(100dvh - 2rem);
+    border-radius: 12px;
+  }
 }
 
 @media (prefers-color-scheme: dark) {

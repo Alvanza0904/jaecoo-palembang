@@ -14,10 +14,98 @@ interface Props {
   onClose: () => void;
 }
 
+// ─────────────────────────────────────────────────────────────
+// FIX INTERFACE MISMATCH: MediaPicker menggunakan API modal
+// (open/onClose/onSelect), BUKAN controlled value (value/onChange).
+// PromoImagePicker adalah adapter yang menjembatani keduanya.
+// ─────────────────────────────────────────────────────────────
+interface PromoImagePickerProps {
+  value: string;
+  onChange: (url: string) => void;
+}
+
+function PromoImagePicker({ value, onChange }: PromoImagePickerProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  function handleSelect(asset: MediaAsset) {
+    onChange(asset.url);
+    setIsOpen(false);
+  }
+
+  return (
+    <div>
+      {/* Preview gambar yang sudah dipilih */}
+      {value && (
+        <div style={{ marginBottom: '0.5rem' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={value}
+            alt="Preview gambar promo"
+            style={{
+              width: '100%',
+              maxHeight: '160px',
+              objectFit: 'cover',
+              borderRadius: '6px',
+              border: '1px solid var(--color-border, #e5e7eb)',
+            }}
+          />
+        </div>
+      )}
+      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          style={{
+            padding: '0.5rem 1rem',
+            borderRadius: '6px',
+            border: '1px solid var(--color-border, #d1d5db)',
+            background: 'transparent',
+            cursor: 'pointer',
+            fontSize: '0.875rem',
+            fontFamily: 'inherit',
+          }}
+        >
+          {value ? '🖼 Ganti Gambar' : '📁 Pilih Gambar dari Media Library'}
+        </button>
+        {value && (
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            style={{
+              padding: '0.5rem 0.75rem',
+              borderRadius: '6px',
+              border: '1px solid #fca5a5',
+              color: '#ef4444',
+              background: 'transparent',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontFamily: 'inherit',
+            }}
+          >
+            Hapus
+          </button>
+        )}
+      </div>
+
+      {/* Modal MediaPicker yang sesungguhnya */}
+      <MediaPicker
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        onSelect={handleSelect}
+        defaultCategory="general"
+        title="Pilih Gambar Promo"
+      />
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Main PromoEditor Component
+// ─────────────────────────────────────────────────────────────
+
 export default function PromoEditor({ initialData, modelsList, onClose }: Props) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState('');
-  const [mediaOpen, setMediaOpen] = useState(false);
 
   const [formData, setFormData] = useState<PromoFormData>({
     title: initialData?.title ?? '',
@@ -56,7 +144,6 @@ export default function PromoEditor({ initialData, modelsList, onClose }: Props)
     });
   };
 
-  // Konteks dasar untuk AI Content Engine (Step 8.9)
   const baseAIContext = {
     pageType: 'promo',
     sectionType: 'promo_details',
@@ -70,7 +157,12 @@ export default function PromoEditor({ initialData, modelsList, onClose }: Props)
         {/* Header */}
         <div className={styles.modalHeader}>
           <h2>{initialData ? 'Edit Promo' : 'Tambah Promo Baru'}</h2>
-          <button type="button" onClick={onClose} className={styles.closeBtn} aria-label="Tutup">
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClose(); }}
+            className={styles.closeBtn}
+            aria-label="Tutup"
+          >
             &times;
           </button>
         </div>
@@ -175,50 +267,10 @@ export default function PromoEditor({ initialData, modelsList, onClose }: Props)
 
             <div className={styles.fieldGroup}>
               <label>Gambar Promo / Banner Header</label>
-              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                {formData.image_url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={formData.image_url}
-                    alt="Preview"
-                    style={{ width: 80, height: 56, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--color-border, #e5e7eb)' }}
-                  />
-                )}
-                <button
-                  type="button"
-                  onClick={() => setMediaOpen(true)}
-                  style={{
-                    padding: '0.4rem 0.9rem',
-                    borderRadius: 6,
-                    border: '1px solid var(--color-border, #d1d5db)',
-                    background: 'transparent',
-                    cursor: 'pointer',
-                    fontSize: '0.8rem',
-                    fontFamily: 'inherit',
-                  }}
-                >
-                  {formData.image_url ? 'Ganti Gambar' : 'Pilih Gambar'}
-                </button>
-                {formData.image_url && (
-                  <button
-                    type="button"
-                    onClick={() => set('image_url', '')}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: '0.8rem' }}
-                  >
-                    Hapus
-                  </button>
-                )}
-              </div>
-
-              <MediaPicker
-                open={mediaOpen}
-                onClose={() => setMediaOpen(false)}
-                onSelect={(asset: MediaAsset) => {
-                  set('image_url', asset.public_url ?? '');
-                  setMediaOpen(false);
-                }}
-                defaultCategory="promos"
-                title="Pilih Gambar Promo"
+              {/* FIX: Menggunakan PromoImagePicker adapter, bukan MediaPicker langsung */}
+              <PromoImagePicker
+                value={formData.image_url ?? ''}
+                onChange={(url) => set('image_url', url)}
               />
             </div>
 
