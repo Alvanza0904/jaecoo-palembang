@@ -3,7 +3,8 @@
 import React, { useState, useTransition } from 'react';
 import { Promo, PromoFormData, PromoType, PromoStatus } from '@/lib/types/promo';
 import AIReadyField from '@/components/admin/ai/AIReadyField';
-import MediaPicker from '@/components/admin/media/MediaPicker';
+import { MediaPicker } from '@/components/admin/media/MediaPicker';
+import type { MediaAsset } from '@/lib/types/media-asset';
 import { savePromo } from './actions';
 import styles from './promo.module.css';
 
@@ -16,6 +17,7 @@ interface Props {
 export default function PromoEditor({ initialData, modelsList, onClose }: Props) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState('');
+  const [mediaOpen, setMediaOpen] = useState(false);
 
   const [formData, setFormData] = useState<PromoFormData>({
     title: initialData?.title ?? '',
@@ -173,9 +175,50 @@ export default function PromoEditor({ initialData, modelsList, onClose }: Props)
 
             <div className={styles.fieldGroup}>
               <label>Gambar Promo / Banner Header</label>
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                {formData.image_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={formData.image_url}
+                    alt="Preview"
+                    style={{ width: 80, height: 56, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--color-border, #e5e7eb)' }}
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => setMediaOpen(true)}
+                  style={{
+                    padding: '0.4rem 0.9rem',
+                    borderRadius: 6,
+                    border: '1px solid var(--color-border, #d1d5db)',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    fontSize: '0.8rem',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  {formData.image_url ? 'Ganti Gambar' : 'Pilih Gambar'}
+                </button>
+                {formData.image_url && (
+                  <button
+                    type="button"
+                    onClick={() => set('image_url', '')}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: '0.8rem' }}
+                  >
+                    Hapus
+                  </button>
+                )}
+              </div>
+
               <MediaPicker
-                value={formData.image_url ?? ''}
-                onChange={(url) => set('image_url', url)}
+                open={mediaOpen}
+                onClose={() => setMediaOpen(false)}
+                onSelect={(asset: MediaAsset) => {
+                  set('image_url', asset.public_url ?? '');
+                  setMediaOpen(false);
+                }}
+                defaultCategory="promos"
+                title="Pilih Gambar Promo"
               />
             </div>
 
