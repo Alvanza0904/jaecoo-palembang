@@ -1,11 +1,14 @@
-import { getHomepageContent } from '@/lib/data/homepage-content';
-import UnifiedEditor from './UnifiedEditor';
+/**
+ * JAECOO Palembang — Admin: Homepage Content (Legacy Route)
+ *
+ * Step 8.7: Route ini di-keep agar tidak breaking change,
+ * namun sekarang redirect ke unified editor di /admin/homepage.
+ *
+ * File UnifiedEditor.tsx, ContentEditor.tsx, actions.ts, module CSS
+ * di folder ini dibiarkan di filesystem tapi tidak diimpor lagi.
+ */
+import { redirect } from 'next/navigation'
 
-export const metadata = {
-  title: 'Homepage Visual Editor | JAECOO Admin',
-};
-
-export default async function AdminHomepageContentPage() {
-  const content = await getHomepageContent();
-  return <UnifiedEditor initialData={content} />;
+export default function AdminHomepageContentPage() {
+  redirect('/admin/homepage')
 }
