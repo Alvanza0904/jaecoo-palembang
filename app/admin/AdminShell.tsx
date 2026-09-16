@@ -1,6 +1,7 @@
 /**
  * JAECOO Palembang — Admin Shell (Client Component)
  * STEP 5A: Dashboard navigation + logout
+ * STEP 8.7: Gabungkan "Homepage" dan "Homepage Content" menjadi satu nav item
  *
  * Renders sidebar nav + top bar.
  * Logout handled client-side via Supabase auth.signOut().
@@ -25,8 +26,9 @@ interface AdminShellProps {
 
 const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard', icon: '◈' },
+  // "Homepage" kini single-page editor (step 8.7).
+  // Route /admin/homepage-content masih ada di filesystem tapi tidak perlu di nav.
   { href: '/admin/homepage', label: 'Homepage', icon: '⌂' },
-  { href: '/admin/homepage-content', label: 'Homepage Content', icon: '✎' },
   { href: '/admin/models', label: 'Models', icon: '◉' },
   { href: '/admin/media', label: 'Media Library', icon: '▧' },
   { href: '/admin/brand-assets', label: 'Brand Assets', icon: '◇' },
@@ -79,10 +81,13 @@ export function AdminShell({ user, children }: AdminShellProps) {
         <nav className={styles.nav} aria-label="Admin navigation">
           <ul className={styles.navList}>
             {NAV_ITEMS.map((item) => {
+              // /admin/homepage juga aktif saat user ada di /admin/homepage-content
+              // (backward compat: jika seseorang bookmark /admin/homepage-content)
               const isActive =
                 item.href === '/admin'
                   ? pathname === '/admin'
-                  : pathname.startsWith(item.href)
+                  : pathname.startsWith(item.href) ||
+                    (item.href === '/admin/homepage' && pathname.startsWith('/admin/homepage-content'))
 
               return (
                 <li key={item.href}>
@@ -93,7 +98,6 @@ export function AdminShell({ user, children }: AdminShellProps) {
                   >
                     <span className={styles.navIcon}>{item.icon}</span>
                     <span>{item.label}</span>
-
                   </a>
                 </li>
               )
