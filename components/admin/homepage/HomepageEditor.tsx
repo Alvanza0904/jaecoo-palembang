@@ -309,7 +309,7 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
   const posMode        = (data.text_position_mode as string) || 'auto'
   const desktopPos     = (data.desktop_position as Record<string,string> | undefined) ?? {}
   const mobilePos      = (data.mobile_position  as Record<string,string> | undefined) ?? {}
-  const aiCtx          = { contentType: 'homepage', contentKey: activeSection, purpose: '' }
+  const aiCtx          = { pageType: 'homepage', sectionType: activeSection, purpose: '' }
 
   const saveBtnLabel =
     status === 'saving' ? 'Menyimpan…'
