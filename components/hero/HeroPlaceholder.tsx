@@ -13,7 +13,7 @@ interface HeroPlaceholderProps {
   cta?: ReactNode;
   backgroundImage?: string;
   backgroundImageMobile?: string;
-  size?: "large" | "medium" | "small";
+  size?: "full" | "large" | "medium" | "small";
   accent?: "default" | "none";
 }
 
