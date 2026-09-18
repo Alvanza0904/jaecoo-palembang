@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default async function GalleryPage() {
   const models = await getModels();
-  const wa = buildWhatsAppUrl({ source: "gallery", source_cta: "gallery_cta" });
+  const wa = buildWhatsAppUrl({ source: "gallery_page", source_cta: "gallery_cta" });
 
   return (
     <>
