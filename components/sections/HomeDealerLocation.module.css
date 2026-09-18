@@ -22,9 +22,6 @@
   max-width: var(--container-max);
   margin-inline: auto;
   padding-inline: var(--container-padding);
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-10);
 }
 
 .eyebrow {
@@ -52,12 +49,21 @@
   margin-bottom: var(--space-8);
 }
 
-.mapFrame {
-  border: 0;
-  width: 100%;
-  height: 280px;
-  background: var(--color-border);
+.ctaWa {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: #ffffff;
+  background-color: #25D366;
+  text-decoration: none;
+  padding: var(--space-3) var(--space-6);
+  border-radius: 4px;
+  margin-bottom: var(--space-4);
+  transition: opacity 0.2s ease;
 }
+.ctaWa:hover { opacity: 0.85; }
 
 .cta {
   display: inline-flex;
@@ -72,10 +78,14 @@
   border-bottom: 1px solid var(--color-ink);
   padding-bottom: 2px;
   transition: opacity var(--duration-fast) var(--ease-out);
+  margin-left: var(--space-6);
 }
 .cta:hover { opacity: 0.55; }
 
-@media (min-width: 768px) {
-  .inner { grid-template-columns: 1fr 1fr; align-items: center; }
-  .mapFrame { height: 360px; }
+.phoneLink {
+  color: var(--color-gold, #c9a84c);
+  text-decoration: underline;
+  font-weight: var(--weight-medium);
+  transition: opacity 0.2s ease;
 }
+.phoneLink:hover { opacity: 0.7; }
