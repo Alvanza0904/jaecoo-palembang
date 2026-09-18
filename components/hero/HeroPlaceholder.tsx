@@ -25,8 +25,9 @@ export function HeroPlaceholder({
   backgroundImage,
   backgroundImageMobile,
   size = "large",
-  accent: _accent = "default",
+  accent = "default",
 }: HeroPlaceholderProps) {
+  void accent; // prop accepted for API consistency; not used in rendering
   const sizeClass =
     size === "medium" ? styles["hero--medium"] :
     size === "small"  ? styles["hero--small"] : "";

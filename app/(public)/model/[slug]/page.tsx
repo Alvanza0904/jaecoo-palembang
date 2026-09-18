@@ -79,7 +79,6 @@ function CmsModelImage({
       {image.tablet && (
         <source media="(max-width: 1023px)" srcSet={image.tablet} />
       )}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
         alt={image.alt}

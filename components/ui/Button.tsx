@@ -35,10 +35,12 @@ export function Button(props: LinkProps | AnchorProps | ButtonProps) {
   }
 
   if (props.as === "a") {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { as: _as, variant: _v, size: _s, className: _c, children: _ch, ...rest } = props as AnchorProps;
     return <a className={cls} {...rest}>{children}</a>;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { as: _as, variant: _v, size: _s, className: _c, children: _ch, ...rest } = props as ButtonProps;
   return <button className={cls} {...rest}>{children}</button>;
 }

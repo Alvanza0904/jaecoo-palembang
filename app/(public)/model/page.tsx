@@ -101,7 +101,6 @@ export default async function ModelIndexPage() {
                     {isValidImageSrc(mobileSrc) && mobileSrc !== desktopSrc && (
                       <source media="(max-width: 767px)" srcSet={mobileSrc} />
                     )}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       className={styles.modelImg}
                       src={desktopSrc}

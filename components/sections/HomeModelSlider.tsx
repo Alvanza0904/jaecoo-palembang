@@ -61,7 +61,7 @@ export function HomeModelSlider({ models }: Props) {
       onTouchEnd={(e) => {
         if (touchStart.current === null) return;
         const diff = touchStart.current - e.changedTouches[0].clientX;
-        if (Math.abs(diff) > 44) { diff > 0 ? next() : prev(); }
+        if (Math.abs(diff) > 44) { if (diff > 0) { next(); } else { prev(); } }
         touchStart.current = null;
       }}
     >
