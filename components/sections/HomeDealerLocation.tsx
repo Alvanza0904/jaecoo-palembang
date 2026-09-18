@@ -1,92 +1,55 @@
 /**
  * JAECOO Palembang — HomeDealerLocation
- *
- * STEP 8.1: Local SEO dealer address section.
- * STEP 8.2: Cinematic full-width background image design.
- *
- * Design principle:
- * - Full-width cinematic section with background image
- * - HTML semantic (<address>) for crawlability — address is always HTML text
- * - No Google Maps / iframe / map embed / coordinates
- * - Image received via backgroundImage prop — ready for CMS integration later
- * - Consistent with site visual language (dark, editorial)
- *
- * CMS integration notes (for future step):
- * - Component accepts `backgroundImage?: string` prop
- * - When CMS is ready, pass image URL from DB as prop from parent (page.tsx)
- * - Current fallback: gradient-only backdrop if no image is provided
- * - This pattern avoids structural refactor when CMS integration is added
+ * Local SEO + dealer address section.
  */
 
 import Link from "next/link";
-import styles from "./HomeDealerLocation.module.css";
 import { SITE_SETTINGS } from "@/lib/data/site";
+import styles from "./HomeDealerLocation.module.css";
 import type { ResponsiveImage } from "@/lib/types/media";
 
-interface HomeDealerLocationProps {
-  /**
-   * URL of the background image.
-   * Pass from CMS/DB when available.
-   * Falls back to dark gradient if undefined.
-   */
-  backgroundImage?: ResponsiveImage;
-}
+export function HomeDealerLocation({ backgroundImage }: { backgroundImage?: ResponsiveImage }) {
+  const { dealerAddress } = SITE_SETTINGS;
+  const mapQuery = encodeURIComponent(
+    `${dealerAddress.street}, ${dealerAddress.locality}, ${dealerAddress.region}`
+  );
 
-export function HomeDealerLocation({
-  backgroundImage,
-}: HomeDealerLocationProps) {
   return (
-    <section
-      className={styles.section}
-      aria-labelledby="dealer-location-title"
-    >
-      {/* Background image layer — CMS-ready */}
-      <div className={styles.backdrop} aria-hidden="true">
-        {backgroundImage?.desktop ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <picture>
-            {backgroundImage.mobile && <source media="(max-width: 767px)" srcSet={backgroundImage.mobile} />}
-            <img className={styles.backdropImg} src={backgroundImage.desktop} alt="" loading="lazy" />
-          </picture>
-        ) : (
-          /* Fallback: cinematic dark gradient — same visual weight as image */
-          <div className={styles.backdropFallback} />
-        )}
-        <div className={styles.backdropOverlay} />
-      </div>
+    <section className={styles.section} aria-labelledby="dealer-title">
+      {backgroundImage?.desktop && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={backgroundImage.desktop}
+          alt=""
+          className={styles.bgImg}
+          aria-hidden="true"
+          loading="lazy"
+        />
+      )}
 
-      {/* Content */}
       <div className={styles.inner}>
-        {/* Top label */}
-        <p className={styles.eyebrow}>Dealer Resmi</p>
+        <div>
+          <span className={styles.eyebrow}>Dealer Resmi</span>
+          <h2 id="dealer-title" className={styles.title}>
+            OMODA JAECOO<br />Palembang
+          </h2>
+          <address className={styles.address} style={{ fontStyle: "normal" }}>
+            {dealerAddress.street}<br />
+            {dealerAddress.locality}<br />
+            {dealerAddress.region} {dealerAddress.postalCode}
+          </address>
+          <Link href="/sales-jaecoo-palembang" className={styles.cta}>
+            Konsultasi dengan Alvan →
+          </Link>
+        </div>
 
-        {/* Dealer heading */}
-        <h2 id="dealer-location-title" className={styles.title}>
-          Omoda Jaecoo<br />Palembang
-        </h2>
-
-        {/* Divider */}
-        <div className={styles.divider} aria-hidden="true" />
-
-        {/* Semantic address block — crawlable HTML */}
-        <address className={styles.address}>
-          <p className={styles.dealerName}>
-            {SITE_SETTINGS.dealerName}
-          </p>
-          <p className={styles.street}>
-            {SITE_SETTINGS.dealerAddress.street}
-          </p>
-          <p className={styles.cityLine}>
-            {SITE_SETTINGS.dealerAddress.locality},<br />
-            {SITE_SETTINGS.dealerAddress.region} {SITE_SETTINGS.dealerAddress.postalCode}
-          </p>
-        </address>
-
-        {/* CTA */}
-        <Link href="/sales-jaecoo-palembang" className={styles.cta}>
-          Hubungi Sales
-          <span className={styles.ctaArrow} aria-hidden="true">↗</span>
-        </Link>
+        <iframe
+          className={styles.mapFrame}
+          src={`https://www.google.com/maps?q=${mapQuery}&output=embed`}
+          title="Lokasi Dealer OMODA JAECOO Palembang"
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+        />
       </div>
     </section>
   );

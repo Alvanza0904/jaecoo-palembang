@@ -2,109 +2,41 @@
 
 /**
  * JAECOO Palembang — HomeModelSlider
- *
- * STEP 8: Cinematic horizontal model showcase for the homepage.
- * STEP 8.1/FINAL: Display order follows ModelData.sort_order from the data layer.
- * STEP 8.2: Fix hasImage guard — was excluding local /images/ paths, causing
- *           backdrop to always fall back to gradient. Now accepts both http
- *           URLs and absolute /images/ paths.
- *           Also: show J8 short_name with display label override so it reads
- *           "J8 SHS ARDIS" instead of falling back to raw short_name.
- *
- * Features:
- * - Full-width cinematic layout, desktop + mobile
- * - Swipe/drag on mobile (touch events)
- * - Previous / next + dot navigation
- * - Smooth crossfade transition
- * - CMS/data-driven: renders from ModelData[]
- * - Display order follows models.sort_order; static fallback preserves source order
+ * Cinematic full-screen model showcase. Touch/swipe + keyboard nav.
  */
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
 import type { ModelData } from "@/lib/types/model";
+import { PriceDisplay } from "@/components/price/PriceDisplay";
 import styles from "./HomeModelSlider.module.css";
 
-interface HomeModelSliderProps {
-  models: ModelData[];
-}
+interface Props { models: ModelData[]; }
 
-
-/**
- * Display label override per slug.
- * Used when short_name from DB/CMS does not match the desired hero label.
- * J8: "J8 Ardis" → "J8 SHS ARDIS"
- * J7: "J7 SHS"   → "J7 SHS" (no change needed)
- * J5: "J5 EV"    → "J5" (simplified for large hero display)
- */
-const SLUG_DISPLAY_LABEL: Record<string, string> = {
+const SLUG_LABEL: Record<string, string> = {
   "jaecoo-j5-ev":  "J5",
   "jaecoo-j7-shs": "J7 SHS",
-  "jaecoo-j8-shs": "J8 SHS ARDIS",
+  "jaecoo-j8-shs": "J8 SHS",
 };
 
-function sortModels(models: ModelData[]): ModelData[] {
+function sorted(models: ModelData[]) {
   return [...models].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 }
 
-/**
- * Returns true if the path is usable as an <img> src.
- * Accepts both absolute HTTP(S) URLs and root-relative /images/ paths.
- * Previously only accepted http URLs, which caused all local-asset models
- * to fall back to the gradient backdrop and miss their hero images.
- */
-function isValidImageSrc(src: string | undefined): boolean {
+function validSrc(src?: string | null): boolean {
   if (!src) return false;
   return src.startsWith("http") || src.startsWith("/");
 }
 
-export function HomeModelSlider({ models: rawModels }: HomeModelSliderProps) {
-  const models = sortModels(rawModels);
-  const [active, setActive] = useState(0);
-  const [transitioning, setTransitioning] = useState(false);
-  const touchStartX = useRef<number | null>(null);
-  const touchStartY = useRef<number | null>(null);
+export function HomeModelSlider({ models }: Props) {
+  const list = sorted(models);
+  const [current, setCurrent] = useState(0);
+  const touchStart = useRef<number | null>(null);
 
-  const total = models.length;
+  const prev = useCallback(() => setCurrent((c) => (c - 1 + list.length) % list.length), [list.length]);
+  const next = useCallback(() => setCurrent((c) => (c + 1) % list.length), [list.length]);
 
-  const goTo = useCallback(
-    (index: number) => {
-      if (transitioning || index === active) return;
-      setTransitioning(true);
-      setTimeout(() => {
-        setActive(index);
-        setTransitioning(false);
-      }, 420);
-    },
-    [active, transitioning]
-  );
-
-  const prev = useCallback(() => {
-    goTo((active - 1 + total) % total);
-  }, [active, total, goTo]);
-
-  const next = useCallback(() => {
-    goTo((active + 1) % total);
-  }, [active, total, goTo]);
-
-  // Touch / swipe
-  const onTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-  };
-
-  const onTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null || touchStartY.current === null) return;
-    const dx = e.changedTouches[0].clientX - touchStartX.current;
-    const dy = e.changedTouches[0].clientY - touchStartY.current;
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 44) {
-      if (dx < 0) { next(); } else { prev(); }
-    }
-    touchStartX.current = null;
-    touchStartY.current = null;
-  };
-
-  // Keyboard
+  // Keyboard nav
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") prev();
@@ -114,144 +46,93 @@ export function HomeModelSlider({ models: rawModels }: HomeModelSliderProps) {
     return () => window.removeEventListener("keydown", handler);
   }, [prev, next]);
 
-  if (!models.length) return null;
+  // Auto-advance
+  useEffect(() => {
+    const timer = setInterval(next, 7000);
+    return () => clearInterval(timer);
+  }, [next]);
 
-  const model = models[active];
-  const desktopSrc = model.hero_media?.image?.desktop;
-  const mobileSrc = model.hero_media?.image?.mobile ?? desktopSrc;
-  const hasImage = isValidImageSrc(desktopSrc);
-
-  // Use display label override if available, fall back to short_name
-  const displayLabel = SLUG_DISPLAY_LABEL[model.slug] ?? model.short_name;
-
-  // Tab labels also use the override
-  const getTabLabel = (m: ModelData) => SLUG_DISPLAY_LABEL[m.slug] ?? m.short_name;
+  if (!list.length) return null;
 
   return (
     <section
-      className={styles.slider}
-      aria-label="JAECOO Model Range"
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
+      className={styles.section}
+      onTouchStart={(e) => { touchStart.current = e.touches[0].clientX; }}
+      onTouchEnd={(e) => {
+        if (touchStart.current === null) return;
+        const diff = touchStart.current - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 44) { diff > 0 ? next() : prev(); }
+        touchStart.current = null;
+      }}
     >
-      {/* Background image layer */}
-      <div
-        className={[styles.backdrop, transitioning ? styles.backdropFade : ""].join(" ")}
-        aria-hidden="true"
-      >
-        {hasImage ? (
-          <picture className={styles.backdropPicture}>
-            {isValidImageSrc(mobileSrc) && mobileSrc !== desktopSrc && (
-              <source media="(max-width: 767px)" srcSet={mobileSrc} />
-            )}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              className={styles.backdropImg}
-              src={desktopSrc}
-              alt=""
-              loading="eager"
-              decoding="async"
+      <div className={styles.track}>
+        {list.map((model, i) => {
+          const src = model.hero_media?.image?.desktop;
+          const isActive = i === current;
+          return (
+            <div
+              key={model.slug}
+              className={[styles.slide, isActive ? styles.slideActive : ""].join(" ")}
+              aria-hidden={!isActive}
+            >
+              {validSrc(src) ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={src!}
+                  alt={model.name}
+                  className={styles.slideImg}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                />
+              ) : (
+                <div className={styles.slideFallback} aria-hidden="true" />
+              )}
+              <div className={styles.slideOverlay} aria-hidden="true" />
+
+              <div className={styles.slideContent}>
+                <span className={styles.slideIndex}>
+                  {String(i + 1).padStart(2, "0")} / {String(list.length).padStart(2, "0")}
+                </span>
+                <span className={styles.slideName}>
+                  {SLUG_LABEL[model.slug] ?? model.short_name}
+                </span>
+                <span className={styles.slideTagline}>{model.tagline}</span>
+
+                <div className={styles.slideActions}>
+                  <Link href={`/model/${model.slug}`} className={styles.slideLink}>
+                    Explore {SLUG_LABEL[model.slug] ?? model.short_name} →
+                  </Link>
+                  <span className={styles.slidePrice}>
+                    <PriceDisplay
+                      price_status={model.default_variant.price_status}
+                      price_idr={model.default_variant.price_idr}
+                      price_display={model.default_variant.price_display}
+                      price_display_override={model.default_variant.price_display_override}
+                      price_region={model.default_variant.price_region}
+                    />
+                  </span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Controls */}
+      <div className={styles.nav}>
+        <div className={styles.dots}>
+          {list.map((m, i) => (
+            <button
+              key={m.slug}
+              className={[styles.dot, i === current ? styles.dotActive : ""].join(" ")}
+              onClick={() => setCurrent(i)}
+              aria-label={`Model ${i + 1}`}
             />
-          </picture>
-        ) : (
-          <div className={styles.backdropFallback} />
-        )}
-        {/* Gradient overlay — left side for text, bottom for mobile */}
-        <div className={styles.overlay} />
-      </div>
-
-      {/* Content */}
-      <div
-        className={[styles.content, transitioning ? styles.contentFade : ""].join(" ")}
-      >
-        {/* Top — model identity */}
-        <div className={styles.identity}>
-          <p className={styles.brand}>JAECOO</p>
-          <h2 className={styles.modelName}>{displayLabel}</h2>
-          {model.tagline && (
-            <p className={styles.tagline}>{model.tagline}</p>
-          )}
+          ))}
         </div>
-
-        {/* Bottom — nav + CTA */}
-        <div className={styles.footer}>
-          {/* Model tabs */}
-          <nav className={styles.tabs} aria-label="Select model">
-            {models.map((m, i) => (
-              <button
-                key={m.slug}
-                className={[styles.tab, i === active ? styles.tabActive : ""].join(" ")}
-                onClick={() => goTo(i)}
-                aria-label={`View ${m.short_name}`}
-                aria-current={i === active ? "true" : undefined}
-              >
-                <span className={styles.tabName}>{getTabLabel(m)}</span>
-                <span className={styles.tabLine} />
-              </button>
-            ))}
-          </nav>
-
-          {/* CTA */}
-          <Link
-            href={`/model/${model.slug}`}
-            className={styles.cta}
-            aria-label={`Explore ${model.name}`}
-          >
-            EXPLORE {displayLabel}
-            <span className={styles.ctaArrow}>→</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* Prev / next arrows */}
-      <button
-        className={[styles.arrow, styles.arrowPrev].join(" ")}
-        onClick={prev}
-        aria-label="Previous model"
-        disabled={transitioning}
-      >
-        <ArrowIcon dir="left" />
-      </button>
-      <button
-        className={[styles.arrow, styles.arrowNext].join(" ")}
-        onClick={next}
-        aria-label="Next model"
-        disabled={transitioning}
-      >
-        <ArrowIcon dir="right" />
-      </button>
-
-      {/* Dot indicator */}
-      <div className={styles.dots} aria-hidden="true">
-        {models.map((_, i) => (
-          <button
-            key={i}
-            className={[styles.dot, i === active ? styles.dotActive : ""].join(" ")}
-            onClick={() => goTo(i)}
-            tabIndex={-1}
-          />
-        ))}
-      </div>
-
-      {/* Progress bar */}
-      <div className={styles.progress} aria-hidden="true">
-        <div
-          className={styles.progressBar}
-          style={{ width: `${((active + 1) / total) * 100}%` }}
-        />
+        <button className={styles.navBtn} onClick={prev} aria-label="Previous">←</button>
+        <button className={styles.navBtn} onClick={next} aria-label="Next">→</button>
       </div>
     </section>
-  );
-}
-
-function ArrowIcon({ dir }: { dir: "left" | "right" }) {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      {dir === "left" ? (
-        <path d="M12 4L6 10L12 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      ) : (
-        <path d="M8 4L14 10L8 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      )}
-    </svg>
   );
 }

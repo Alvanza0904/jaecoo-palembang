@@ -1,19 +1,17 @@
 /**
  * JAECOO Palembang — HomeExperience Sections
- *
- * STEP 8: Image-led visual language throughout.
- * STEP 8.7: CMS optional props added — all fallback to existing hardcoded text.
- *           No breaking changes. Pass `cms` prop from page.tsx to enable CMS text.
+ * Image-led editorial homepage sections.
  */
 
 import Link from "next/link";
 import type { ModelData } from "@/lib/types/model";
-import type { PromoData } from "@/lib/types/promo";
+import type { Promo } from "@/lib/types/promo";
 import type { NewsData } from "@/lib/types/news";
 import { PriceDisplay } from "@/components/price/PriceDisplay";
 import { Button } from "@/components/ui/Button";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import type { ResponsiveImage } from "@/lib/types/media";
+import { formatDate } from "@/lib/utils/format";
 import styles from "./HomeExperience.module.css";
 
 function Media({ src, alt, className = "" }: { src?: string | null; alt: string; className?: string }) {
@@ -23,44 +21,26 @@ function Media({ src, alt, className = "" }: { src?: string | null; alt: string;
   return (
     <div className={`${styles.media} ${className}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={alt} loading="lazy" />
+      <img src={src} alt={alt} loading="lazy" decoding="async" />
     </div>
   );
 }
 
-// ─── HomeRange — kept as fallback but hidden when slider is shown ────────────
+// Kept for fallback
 export function HomeRange({ models }: { models: ModelData[] }) {
   return (
     <section className={styles.range} id="range" aria-labelledby="range-title">
-      <div className={styles.rangeIntro}>
-        <p className={styles.eyebrow}>JAECOO RANGE</p>
-        <h2 id="range-title">Three models.<br /><em>One philosophy.</em></h2>
-        <p>Performance, technology, and design — expressed through three distinct SUV experiences.</p>
-      </div>
-
-      <div className={styles.rangeList}>
-        {models.map((model, index) => (
-          <Link href={`/model/${model.slug}`} className={styles.rangeItem} key={model.slug}>
-            <div className={styles.rangeIndex}>0{index + 1}</div>
-            <div className={styles.rangeVisual}>
-              <Media src={model.hero_media.image.desktop} alt={model.name} />
-              <span className={styles.rangeModel}>{model.short_name}</span>
-            </div>
-            <div className={styles.rangeCopy}>
-              <p className={styles.rangeTagline}>{model.tagline}</p>
-              <h3>{model.name}</h3>
-              <p>{model.description}</p>
-              <div className={styles.rangeBottom}>
-                <PriceDisplay
-                  price_status={model.default_variant.price_status}
-                  price_idr={model.default_variant.price_idr}
-                  price_display={model.default_variant.price_display}
-                  price_display_override={model.default_variant.price_display_override}
-                  price_region={model.default_variant.price_region}
-                />
-                <span className={styles.arrow}>Explore ↗</span>
-              </div>
-            </div>
+      <div>
+        {models.map((model) => (
+          <Link href={`/model/${model.slug}`} key={model.slug}>
+            <h3>{model.name}</h3>
+            <PriceDisplay
+              price_status={model.default_variant.price_status}
+              price_idr={model.default_variant.price_idr}
+              price_display={model.default_variant.price_display}
+              price_display_override={model.default_variant.price_display_override}
+              price_region={model.default_variant.price_region}
+            />
           </Link>
         ))}
       </div>
@@ -68,7 +48,7 @@ export function HomeRange({ models }: { models: ModelData[] }) {
   );
 }
 
-// ─── HomeExperienceSection ───────────────────────────────────────────────────
+// ── Experience ──────────────────────────────────────────────
 export function HomeExperienceSection({
   image,
   cms,
@@ -78,44 +58,26 @@ export function HomeExperienceSection({
 }) {
   return (
     <section className={styles.experience} aria-labelledby="experience-title">
-      <div className={styles.experienceBg} aria-hidden="true">
-        {image?.desktop && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <picture>{image.mobile && <source media="(max-width: 767px)" srcSet={image.mobile} />}<img src={image.desktop} alt="" loading="lazy" /></picture>
-        )}
-      </div>
-      <div className={styles.experienceInner}>
-        <div className={styles.experienceHead}>
-          <p className={styles.eyebrow}>THE JAECOO EXPERIENCE</p>
-          {cms?.title ? (
-            <h2 id="experience-title">{cms.title}</h2>
-          ) : (
-            <h2 id="experience-title">Designed around<br /><em>the way you move.</em></h2>
-          )}
-          {cms?.description && <p>{cms.description}</p>}
-        </div>
-        <div className={styles.experiencePillars}>
-          <div className={styles.pillar}>
-            <span className={styles.pillarLabel}>GO FURTHER</span>
-            <p>Confidence for every road ahead — wherever it leads.</p>
-          </div>
-          <div className={styles.pillarDivider} />
-          <div className={styles.pillar}>
-            <span className={styles.pillarLabel}>STAY CONNECTED</span>
-            <p>Technology that fits naturally into your journey.</p>
-          </div>
-          <div className={styles.pillarDivider} />
-          <div className={styles.pillar}>
-            <span className={styles.pillarLabel}>ARRIVE DIFFERENT</span>
-            <p>A space as considered as the journey itself.</p>
-          </div>
-        </div>
+      <Media
+        src={image?.desktop}
+        alt="JAECOO — Premium SUV Experience"
+        className={styles.experienceMedia}
+      />
+      <div className={styles.experienceCopy}>
+        <span className={styles.eyebrow}>The Experience</span>
+        <h2 id="experience-title" className={styles.experienceTitle}>
+          {cms?.title || "Unrivaled\nExperience."}
+        </h2>
+        <p className={styles.experienceDesc}>
+          {cms?.description || "Kenyamanan premium di setiap medan. Dirancang untuk mereka yang berani menjelajah batas."}
+        </p>
+        <Link className={styles.textLink} href="/berita">Explore the Journal →</Link>
       </div>
     </section>
   );
 }
 
-// ─── HomeTechnologySection ───────────────────────────────────────────────────
+// ── Technology ──────────────────────────────────────────────
 export function HomeTechnologySection({
   image,
   cms,
@@ -125,123 +87,58 @@ export function HomeTechnologySection({
 }) {
   return (
     <section className={styles.technology} aria-labelledby="technology-title">
-      <div className={styles.techBg} aria-hidden="true">
-        {image?.desktop && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <picture>{image.mobile && <source media="(max-width: 767px)" srcSet={image.mobile} />}<img src={image.desktop} alt="" loading="lazy" /></picture>
-        )}
-        <div className={styles.techBgFallback} />
-        <div className={styles.techOverlay} />
-      </div>
-
-      <div className={styles.techContent}>
-        <div className={styles.techIntro}>
-          <p className={styles.eyebrow}>INTELLIGENCE IN MOTION</p>
-          {cms?.title ? (
-            <h2 id="technology-title">{cms.title}</h2>
-          ) : (
-            <h2 id="technology-title">Technology<br /><em>with purpose.</em></h2>
-          )}
-          {cms?.description ? (
-            <p>{cms.description}</p>
-          ) : (
-            <p>Every journey, made smarter.</p>
-          )}
-        </div>
-
-        <div className={styles.techPillars}>
-          <div className={styles.techPillar}>
-            <p className={styles.techLabel}>J7 SHS · J8 SHS</p>
-            <h3>Super Hybrid</h3>
-          </div>
-          <div className={styles.techPillar}>
-            <p className={styles.techLabel}>J5 EV</p>
-            <h3>Electric Performance</h3>
-          </div>
-          <div className={styles.techPillar}>
-            <p className={styles.techLabel}>J5 · J7 · J8</p>
-            <h3>Intelligent Drive</h3>
-          </div>
-          <div className={styles.techPillar}>
-            <p className={styles.techLabel}>J5 · J7 · J8</p>
-            <h3>Smart Cockpit</h3>
-          </div>
-        </div>
+      <Media
+        src={image?.desktop}
+        alt="JAECOO — Advanced Technology"
+        className={styles.technologyMedia}
+      />
+      <div className={styles.technologyCopy}>
+        <span className={styles.eyebrow}>Technology</span>
+        <h2 id="technology-title" className={styles.technologyTitle}>
+          {cms?.title || "Advanced\nTechnology."}
+        </h2>
+        <p className={styles.technologyDesc}>
+          {cms?.description || "Sistem SHS dan ARDIS terdepan di kelasnya — merevolusi pengalaman berkendara off-road dan EV range."}
+        </p>
       </div>
     </section>
   );
 }
 
-// ─── HomePromoSection ────────────────────────────────────────────────────────
-// Compat type: covers new Promo (Step 8.10) + legacy PromoData shape
-type PromoCompat = PromoData & {
-  image_url?: string | null;
-  short_description?: string | null;
-  image?: { desktop?: string; alt?: string };
-  model_slug?: string;
-};
-
-export function HomePromoSection({ promos }: { promos: PromoData[] }) {
+// ── Promo ───────────────────────────────────────────────────
+export function HomePromoSection({ promos }: { promos: Promo[] }) {
   if (!promos.length) return null;
-  const promo = promos[0] as PromoCompat;
-  const imageUrl = promo.image_url ?? promo.image?.desktop;
-  const imageAlt = promo.image?.alt ?? promo.title;
-  const modelLabel =
-    promo.models?.name ??
-    promo.model_slug?.replace("jaecoo-", "").toUpperCase() ??
-    "";
-  const bodyText = promo.short_description ?? promo.description ?? "";
   return (
     <section className={styles.promo} aria-labelledby="promo-title">
-      <div className={styles.promoMedia}>
-        <Media src={imageUrl} alt={imageAlt} />
-      </div>
-      <div className={styles.promoCopy}>
-        <p className={styles.eyebrow}>CURRENT OFFERS</p>
-        <p className={styles.promoModel}>{modelLabel}</p>
-        <h2 id="promo-title">{promo.title}</h2>
-        <p>{bodyText}</p>
-        <Link className={styles.textLink} href={`/promo/${promo.slug}`}>Discover offer ↗</Link>
-      </div>
-    </section>
-  );
-}
-
-// ─── HomeJournalSection ──────────────────────────────────────────────────────
-export function HomeJournalSection({ news }: { news: NewsData[] }) {
-  if (!news.length) return null;
-  const featured = news[0];
-  return (
-    <section className={styles.journal} aria-labelledby="journal-title">
-      <div className={styles.journalHead}>
-        <div>
-          <p className={styles.eyebrow}>JAECOO JOURNAL</p>
-          <h2 id="journal-title">Stories, insights<br /><em>&amp; latest updates.</em></h2>
+      <div className={styles.promoInner}>
+        <div className={styles.promoHeader}>
+          <span className={styles.eyebrow}>Penawaran</span>
+          <h2 id="promo-title" className={styles.promoTitle}>Promo Eksklusif</h2>
         </div>
-        <Link className={styles.textLink} href="/berita">View all stories ↗</Link>
-      </div>
-      <div className={styles.journalGrid}>
-        <Link href={`/berita/${featured.slug}`} className={styles.featuredArticle}>
-          <Media src={featured.cover?.desktop} alt={featured.cover?.alt ?? featured.title} />
-          <div>
-            <p>{featured.category}</p>
-            <h3>{featured.title}</h3>
-            <span>Read story ↗</span>
-          </div>
-        </Link>
-        {news.slice(1, 4).map((item) => (
-          <Link href={`/berita/${item.slug}`} className={styles.article} key={item.id}>
-            <p>{item.category}</p>
-            <h3>{item.title}</h3>
-            <span>Read story ↗</span>
-          </Link>
-        ))}
+        <div className={styles.promoGrid}>
+          {promos.slice(0, 3).map((promo) => (
+            <Link key={promo.id} href={`/promo/${promo.slug}`} className={styles.promoCard}>
+              {promo.image_url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={promo.image_url}
+                  alt={promo.title}
+                  className={styles.promoCardImg}
+                  loading="lazy"
+                />
+              )}
+              <p className={styles.promoCardEyebrow}>{promo.promo_type || "Promo"}</p>
+              <h3 className={styles.promoCardTitle}>{promo.title}</h3>
+              <p className={styles.promoCardDesc}>{promo.short_description ?? ""}</p>
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
-// ─── HomeAboutSection ────────────────────────────────────────────────────────
+// ── About ───────────────────────────────────────────────────
 export function HomeAboutSection({
   image,
   cms,
@@ -252,29 +149,67 @@ export function HomeAboutSection({
   return (
     <section className={styles.about} aria-labelledby="about-title">
       <div className={styles.aboutInner}>
+        <Media
+          src={image?.desktop}
+          alt="OMODA JAECOO Palembang — Dealer Resmi"
+          className={styles.aboutMedia}
+        />
         <div className={styles.aboutCopy}>
-          <p className={styles.eyebrow}>YOUR JAECOO CONSULTANT</p>
-          <h2 id="about-title">{cms?.title ?? "ALVAN"}</h2>
-          <p className={styles.aboutRole}>Sales Consultant · Palembang</p>
-          <p className={styles.aboutBody}>
-            {cms?.description ?? "Dari memilih model, memahami teknologi, menghitung skema pembiayaan, hingga test drive — saya membantu Anda mendapatkan informasi JAECOO dengan cara yang jelas dan personal."}
+          <span className={styles.eyebrow}>Dealer Resmi</span>
+          <h2 id="about-title" className={styles.aboutTitle}>
+            {cms?.title || "OMODA JAECOO\nPalembang."}
+          </h2>
+          <p className={styles.aboutDesc}>
+            {cms?.description || "Dealer resmi OMODA JAECOO Palembang — menghadirkan lineup SUV premium terbaru. Dari konsultasi hingga test drive, kami hadir untuk Anda."}
           </p>
-          <Link className={styles.aboutLink} href="/sales-jaecoo-palembang">Meet Alvan ↗</Link>
-        </div>
-        <div className={styles.aboutPortrait} aria-hidden="true">
-          {image?.desktop ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <picture>{image.mobile && <source media="(max-width: 767px)" srcSet={image.mobile} />}<img src={image.desktop} alt="" loading="lazy" /></picture>
-          ) : (
-            <span>ALVAN</span>
-          )}
+          <Link href="/sales-jaecoo-palembang" className={styles.aboutLink}>Meet Alvan →</Link>
         </div>
       </div>
     </section>
   );
 }
 
-// ─── HomeFinalCTA ────────────────────────────────────────────────────────────
+// ── Journal ─────────────────────────────────────────────────
+export function HomeJournalSection({ news }: { news: NewsData[] }) {
+  return (
+    <section className={styles.journal} aria-labelledby="journal-title">
+      <div className={styles.journalInner}>
+        <div className={styles.journalHeader}>
+          <h2 id="journal-title" className={styles.journalTitle}>JAECOO Journal</h2>
+          <Link href="/berita" className={styles.textLink}>View all →</Link>
+        </div>
+
+        {!news.length ? (
+          <p className={styles.journalEmpty}>Belum ada artikel.</p>
+        ) : (
+          <div className={styles.journalGrid}>
+            {news.map((item) => (
+              <Link key={item.id} href={`/berita/${item.slug}`} className={styles.newsCard}>
+                {item.cover?.desktop && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={item.cover.desktop}
+                    alt={item.cover.alt ?? item.title}
+                    className={styles.newsCardImg}
+                    loading="lazy"
+                  />
+                )}
+                <div className={styles.newsCardMeta}>
+                  <span className={styles.newsCardCat}>{item.category}</span>
+                  <span className={styles.newsCardDate}>{formatDate(item.published_at)}</span>
+                </div>
+                <h3 className={styles.newsCardTitle}>{item.title}</h3>
+                <p className={styles.newsCardExcerpt}>{item.excerpt}</p>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// ── Final CTA ───────────────────────────────────────────────
 export function HomeFinalCTA({
   image,
   cms,
@@ -282,38 +217,30 @@ export function HomeFinalCTA({
   image?: ResponsiveImage;
   cms?: { title?: string; description?: string; ctaText?: string; ctaUrl?: string };
 }) {
-  const waUrl = buildWhatsAppUrl({
-    source: "homepage_global",
-    source_cta: "global_cta",
-  });
-  const href = cms?.ctaUrl ?? waUrl;
-  const isExternal = href.startsWith("http");
+  const wa = buildWhatsAppUrl({ source: "homepage_final_cta", source_cta: "final_cta" });
   return (
-    <section className={styles.finalCta}>
-      <div className={styles.finalCtaBg} aria-hidden="true">
-        {image?.desktop && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <picture>{image.mobile && <source media="(max-width: 767px)" srcSet={image.mobile} />}<img src={image.desktop} alt="" loading="lazy" /></picture>
-        )}
-        <div className={styles.finalCtaFallback} />
-        <div className={styles.finalCtaOverlay} />
-      </div>
-      <div className={styles.finalCtaContent}>
-        <p className={styles.eyebrow}>YOUR NEXT JOURNEY STARTS HERE</p>
-        {cms?.title ? (
-          <h2>{cms.title}</h2>
-        ) : (
-          <h2>Find your<br /><em>JAECOO.</em></h2>
-        )}
-        <p>{cms?.description ?? "Konsultasi model, test drive, atau simulasi kredit bersama Alvan — langsung dari Palembang."}</p>
-        <Button
-          as="a"
-          href={href}
-          variant="primary"
-          size="lg"
-          {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-        >
-          {cms?.ctaText ?? "TALK TO ALVAN →"}
+    <section className={styles.finalCta} aria-labelledby="final-cta-title">
+      {image?.desktop && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={image.desktop}
+          alt=""
+          className={styles.finalCtaImg}
+          aria-hidden="true"
+          loading="lazy"
+        />
+      )}
+      <div className={styles.finalCtaOverlay} aria-hidden="true" />
+      <div className={styles.finalCtaInner}>
+        <span className={styles.finalCtaEyebrow}>JAECOO Palembang</span>
+        <h2 id="final-cta-title" className={styles.finalCtaTitle}>
+          {cms?.title || "Siap memulai perjalanan Anda?"}
+        </h2>
+        <p className={styles.finalCtaDesc}>
+          {cms?.description || "Hubungi Alvan sekarang untuk konsultasi gratis, test drive, dan penawaran eksklusif."}
+        </p>
+        <Button as="a" href={wa} variant="primary" size="lg" target="_blank" rel="noopener noreferrer">
+          Talk to Alvan →
         </Button>
       </div>
     </section>

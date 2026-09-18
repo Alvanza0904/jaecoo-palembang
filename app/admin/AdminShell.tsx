@@ -25,15 +25,16 @@ interface AdminShellProps {
 }
 
 const NAV_ITEMS = [
-  { href: '/admin', label: 'Dashboard', icon: '◈' },
-  // "Homepage" kini single-page editor (step 8.7).
-  // Route /admin/homepage-content masih ada di filesystem tapi tidak perlu di nav.
-  { href: '/admin/homepage', label: 'Homepage', icon: '⌂' },
-  { href: '/admin/models', label: 'Models', icon: '◉' },
-  { href: '/admin/media', label: 'Media Library', icon: '▧' },
-  { href: '/admin/brand-assets', label: 'Brand Assets', icon: '◇' },
-  { href: '/admin/leads', label: 'Leads', icon: '◈' },
-  { href: '/admin/settings', label: 'Settings', icon: '◈' },
+  { href: '/admin',               label: 'Dashboard',    icon: '◈' },
+  { href: '/admin/homepage',      label: 'Homepage',     icon: '⌂' },
+  { href: '/admin/models',        label: 'Models',       icon: '◉' },
+  { href: '/admin/news',          label: 'News',         icon: '◎' },
+  { href: '/admin/promo',         label: 'Promo',        icon: '◆' },
+  { href: '/admin/media',         label: 'Media',        icon: '▧' },
+  { href: '/admin/gallery',       label: 'Gallery',      icon: '▨' },
+  { href: '/admin/brand-assets',  label: 'Brand Assets', icon: '◇' },
+  { href: '/admin/leads',         label: 'Leads',        icon: '◌' },
+  { href: '/admin/settings',      label: 'Settings',     icon: '⚙' },
 ]
 
 export function AdminShell({ user, children }: AdminShellProps) {

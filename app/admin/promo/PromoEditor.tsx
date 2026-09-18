@@ -1,4 +1,6 @@
-'use client';
+'use client'
+
+import { WHATSAPP_NUMBER } from '@/lib/utils/whatsapp';;
 
 import React, { useState, useTransition } from 'react';
 import { Promo, PromoFormData, PromoType, PromoStatus } from '@/lib/types/promo';
@@ -121,7 +123,7 @@ export default function PromoEditor({ initialData, modelsList, onClose }: Props)
     featured: initialData?.featured ?? false,
     sort_order: initialData?.sort_order ?? 0,
     cta_label: initialData?.cta_label ?? 'Dapatkan Promo',
-    cta_action: initialData?.cta_action ?? 'https://wa.me/6285183145926',
+    cta_action: initialData?.cta_action ?? `https://wa.me/${WHATSAPP_NUMBER}`,
   });
 
   const set = <K extends keyof PromoFormData>(key: K, val: PromoFormData[K]) =>
@@ -326,7 +328,7 @@ export default function PromoEditor({ initialData, modelsList, onClose }: Props)
                 type="text"
                 value={formData.cta_action ?? ''}
                 onChange={(e) => set('cta_action', e.target.value)}
-                placeholder="https://wa.me/6285183145926"
+                placeholder={`https://wa.me/${WHATSAPP_NUMBER}`}
               />
             </div>
           </div>

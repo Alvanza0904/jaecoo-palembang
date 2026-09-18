@@ -1,172 +1,113 @@
 /**
- * JAECOO Palembang — Mobile Menu Toggle
- *
- * Premium full-panel mobile menu.
- * Hamburger → X with stagger reveal.
- * "use client" — manages open/close state.
+ * JAECOO Palembang — MobileMenuToggle
+ * Stable hamburger → fullscreen menu overlay.
+ * Body lock + iOS scroll fix included.
  */
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import styles from "./MobileMenuToggle.module.css";
-import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
+import { WHATSAPP_NUMBER } from "@/lib/utils/whatsapp";
 
-interface NavLink {
-  label: string;
-  href: string;
-}
+interface NavLink { label: string; href: string; }
+interface Props { navLinks: NavLink[]; inverted?: boolean; }
 
-interface MobileMenuToggleProps {
-  navLinks: NavLink[];
-  /** When true (transparent header), bars are white */
-  inverted?: boolean;
-}
-
-const WHATSAPP_URL = buildWhatsAppUrl({ source: "other", source_cta: "mobile_menu" });
-
-export function MobileMenuToggle({ navLinks, inverted = false }: MobileMenuToggleProps) {
+export function MobileMenuToggle({ navLinks, inverted = false }: Props) {
   const [open, setOpen] = useState(false);
 
-  // Lock body scroll when open
+  const close = useCallback(() => setOpen(false), []);
+
+  // Body lock — prevents background scroll on iOS
   useEffect(() => {
     if (open) {
-      document.body.style.overflow = "hidden";
+      const y = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${y}px`;
+      document.body.style.width = "100%";
     } else {
-      document.body.style.overflow = "";
+      const y = parseInt(document.body.style.top || "0") * -1;
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      window.scrollTo(0, y);
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
   }, [open]);
 
-  // Close on escape
+  // Close on Escape
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && open) setOpen(false);
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
     };
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [open]);
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [close]);
 
   return (
     <>
       {/* Hamburger button */}
       <button
-        className={[
-          styles.toggle,
-          inverted && !open ? styles.toggleInverted : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-        onClick={() => setOpen((prev) => !prev)}
+        className={[styles.toggle, inverted && !open ? styles.toggleLight : ""].join(" ")}
+        onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Tutup menu" : "Buka menu"}
         aria-expanded={open}
         aria-controls="mobile-menu"
       >
-        <span
-          aria-hidden="true"
-          className={[styles.icon, open ? styles.iconOpen : ""].join(" ")}
-        >
-          <span className={styles.bar} />
-          <span className={styles.bar} />
-          <span className={styles.bar} />
-        </span>
+        <span className={[styles.bar, open ? styles.barTop : ""].join(" ")} />
+        <span className={[styles.bar, open ? styles.barHide : ""].join(" ")} />
+        <span className={[styles.bar, open ? styles.barBottom : ""].join(" ")} />
       </button>
 
-      {/* Backdrop */}
+      {/* Fullscreen overlay */}
       <div
-        className={[
-          styles.backdrop,
-          open ? styles.backdropVisible : "",
-        ].join(" ")}
-        onClick={() => setOpen(false)}
-        aria-hidden="true"
-      />
-
-      {/* Full-panel menu */}
-      <nav
         id="mobile-menu"
-        className={[styles.panel, open ? styles.panelOpen : ""].join(" ")}
-        aria-label="Navigasi mobile"
+        className={[styles.overlay, open ? styles.overlayOpen : ""].join(" ")}
         aria-hidden={!open}
+        role="dialog"
+        aria-label="Navigasi utama"
       >
-        {/* Close button inside panel */}
-        <button
-          className={styles.closeBtn}
-          onClick={() => setOpen(false)}
-          aria-label="Tutup menu"
-          tabIndex={open ? 0 : -1}
-        >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
+        <div className={styles.overlayInner}>
+          {/* Close button */}
+          <button
+            className={styles.closeBtn}
+            onClick={close}
+            aria-label="Tutup menu"
           >
-            <line
-              x1="4"
-              y1="4"
-              x2="20"
-              y2="20"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-            <line
-              x1="20"
-              y1="4"
-              x2="4"
-              y2="20"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
+            <span className={[styles.bar, styles.barTop].join(" ")} />
+            <span className={[styles.bar, styles.barBottom].join(" ")} />
+          </button>
 
-        {/* Gold accent line */}
-        <div className={styles.accentLine} aria-hidden="true" />
-
-        {/* Nav links with stagger */}
-        <ul className={styles.links} role="list">
-          {navLinks.map((link, i) => (
-            <li
-              key={link.href}
-              className={styles.linkItem}
-              style={{ "--stagger-i": i } as React.CSSProperties}
-            >
+          <nav className={styles.nav}>
+            {navLinks.map((link, i) => (
               <Link
+                key={link.href}
                 href={link.href}
-                className={styles.link}
-                onClick={() => setOpen(false)}
+                className={styles.navItem}
+                onClick={close}
+                style={{ animationDelay: open ? `${i * 60 + 100}ms` : "0ms" }}
                 tabIndex={open ? 0 : -1}
               >
-                <span className={styles.linkLabel}>{link.label}</span>
-                <span className={styles.linkArrow} aria-hidden="true">
-                  →
-                </span>
+                <span className={styles.navIndex}>0{i + 1}</span>
+                {link.label}
               </Link>
-            </li>
-          ))}
-        </ul>
+            ))}
+          </nav>
 
-        {/* CTA — last element */}
-        <div className={styles.cta}>
-          <a
-            href={WHATSAPP_URL}
-            className={styles.ctaLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            tabIndex={open ? 0 : -1}
-            onClick={() => setOpen(false)}
-          >
-            Talk to Alvan <span aria-hidden="true">→</span>
-          </a>
+          <div className={styles.footer}>
+            <a
+              href={`https://wa.me/${WHATSAPP_NUMBER}`}
+              className={styles.footerCta}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={close}
+              tabIndex={open ? 0 : -1}
+            >
+              Talk to Alvan →
+            </a>
+          </div>
         </div>
-      </nav>
+      </div>
     </>
   );
 }

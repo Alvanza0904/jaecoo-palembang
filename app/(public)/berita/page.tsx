@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getPublishedNews } from "@/lib/data/news";
 import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
+import { formatDate } from "@/lib/utils/format";
 import styles from "./berita.module.css";
 
 export const metadata: Metadata = {
@@ -13,51 +14,79 @@ export const metadata: Metadata = {
 
 export default async function BeritaPage() {
   const news = await getPublishedNews();
-  const featured = news[0];
+  const [featured, ...rest] = news;
+
   return (
     <>
       <TransparentHeader />
       <HeroPlaceholder
         tagline="JAECOO JOURNAL"
-        heading={<>Stories from<br /><strong>the road.</strong></>}
+        heading="Stories from the Road."
         subheading="News, insights, tips, review dan update JAECOO Palembang."
         size="medium"
-        accent="default"
       />
+
       <section className={styles.section}>
-        <div className={styles.intro}>
-          <p className={styles.eyebrow}>THE JOURNAL</p>
-          <h2>Stories, insights<br /><em>& latest updates.</em></h2>
-          <div className={styles.filters}><span>ALL</span><span>NEWS</span><span>PROMO</span><span>REVIEW</span><span>TIPS & INFO</span></div>
-        </div>
-        {!featured ? (
-          <div className={styles.empty}><p>Belum ada artikel yang dipublikasikan.</p></div>
-        ) : (
-          <div className={styles.grid}>
-            <Link href={`/berita/${featured.slug}`} className={styles.featured}>
-              <div className={styles.cover}>
-                {featured.cover?.desktop?.startsWith("http") && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={featured.cover.desktop} alt={featured.cover.alt ?? featured.title} />
-                )}
-              </div>
-              <div className={styles.featuredCopy}>
-                <p>{featured.category}</p><h3>{featured.title}</h3><span>{featured.excerpt}</span><b>Read story ↗</b>
-              </div>
-            </Link>
-            {news.slice(1).map((item) => (
-              <Link href={`/berita/${item.slug}`} className={styles.article} key={item.id}>
-                <div className={styles.articleCover}>
-                  {item.cover?.desktop?.startsWith("http") && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={item.cover.desktop} alt={item.cover.alt ?? item.title} />
-                  )}
-                </div>
-                <p>{item.category}</p><h3>{item.title}</h3><span>{item.excerpt}</span><b>Read story ↗</b>
-              </Link>
-            ))}
+        <div className={styles.container}>
+          <div className={styles.header}>
+            <span className={styles.eyebrow}>The Journal</span>
+            <h1 className={styles.heading}>Berita &amp; Artikel</h1>
           </div>
-        )}
+
+          {!featured ? (
+            <div className={styles.empty}><p>Belum ada artikel yang dipublikasikan.</p></div>
+          ) : (
+            <>
+              {/* Featured */}
+              <Link href={`/berita/${featured.slug}`} className={styles.featured}>
+                {featured.cover?.desktop ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={featured.cover.desktop}
+                    alt={featured.cover.alt ?? featured.title}
+                    className={styles.featuredImg}
+                  />
+                ) : (
+                  <div className={styles.featuredImgPlaceholder} aria-hidden="true" />
+                )}
+                <div>
+                  <div className={styles.featuredMeta}>
+                    <span className={styles.cat}>{featured.category}</span>
+                    <span className={styles.date}>{formatDate(featured.published_at)}</span>
+                  </div>
+                  <h2 className={styles.featuredTitle}>{featured.title}</h2>
+                  <p className={styles.featuredExcerpt}>{featured.excerpt}</p>
+                  <span className={styles.readMore}>Read story →</span>
+                </div>
+              </Link>
+
+              {/* Grid */}
+              {rest.length > 0 && (
+                <div className={styles.grid}>
+                  {rest.map((item) => (
+                    <Link key={item.id} href={`/berita/${item.slug}`} className={styles.article}>
+                      {item.cover?.desktop && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={item.cover.desktop}
+                          alt={item.cover.alt ?? item.title}
+                          className={styles.articleImg}
+                          loading="lazy"
+                        />
+                      )}
+                      <div className={styles.featuredMeta}>
+                        <span className={styles.cat}>{item.category}</span>
+                        <span className={styles.date}>{formatDate(item.published_at)}</span>
+                      </div>
+                      <h3 className={styles.articleTitle}>{item.title}</h3>
+                      <p className={styles.articleExcerpt}>{item.excerpt}</p>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </section>
     </>
   );

@@ -1,263 +1,165 @@
-/* ─── Toggle Button ───────────────────────────────────── */
+/* JAECOO Palembang — MobileMenuToggle */
 
+/* ── Hamburger Button ── */
 .toggle {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  background: transparent;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  background: none;
   border: none;
   cursor: pointer;
-  color: var(--color-ink);
-  transition: color var(--duration-slow) var(--ease-out);
-  position: relative;
-  z-index: calc(var(--z-menu) + 3);
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
 }
 
-.toggleInverted {
-  color: var(--color-white);
+@media (min-width: 1024px) {
+  .toggle { display: none; }
 }
 
-/* Icon container */
-.icon {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  width: 22px;
-  transition: transform var(--duration-base) var(--ease-out);
+.toggleLight .bar {
+  background-color: rgba(255,255,255,0.88);
 }
 
 .bar {
   display: block;
-  width: 100%;
+  width: 22px;
   height: 1.5px;
-  background-color: currentColor;
-  border-radius: 1px;
+  background-color: var(--color-ink-on-dark);
   transition:
     transform var(--duration-base) var(--ease-out),
-    opacity var(--duration-base) var(--ease-out),
-    width var(--duration-base) var(--ease-out);
+    opacity var(--duration-base) var(--ease-out);
   transform-origin: center;
 }
 
-/* X state */
-.iconOpen .bar:nth-child(1) {
-  transform: rotate(45deg) translate(4.5px, 4.5px);
-}
-.iconOpen .bar:nth-child(2) {
-  opacity: 0;
-  width: 0;
-}
-.iconOpen .bar:nth-child(3) {
-  transform: rotate(-45deg) translate(4.5px, -4.5px);
-}
+.barTop    { transform: translateY(3.5px) rotate(45deg); }
+.barHide   { opacity: 0; transform: scaleX(0); }
+.barBottom { transform: translateY(-3.5px) rotate(-45deg); }
 
-/* ─── Backdrop ────────────────────────────────────────── */
-
-.backdrop {
+/* ── Overlay ── */
+.overlay {
   position: fixed;
   inset: 0;
-  z-index: calc(var(--z-menu) + 1);
-  background-color: rgba(0, 0, 0, 0.6);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--duration-slow) var(--ease-out);
-}
-
-.backdropVisible {
-  opacity: 1;
-  pointer-events: auto;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-
-/* ─── Full Panel ──────────────────────────────────────── */
-
-.panel {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  z-index: calc(var(--z-menu) + 2);
-  width: min(420px, 100vw);
-  background-color: var(--color-off-white);
+  background-color: var(--color-charcoal);
+  z-index: var(--z-modal);
   display: flex;
   flex-direction: column;
-  padding: var(--space-6) var(--space-6) var(--space-8);
-  transform: translateX(100%);
-  transition: transform var(--duration-slower) var(--ease-out);
-  overflow-y: auto;
-  overflow-x: hidden;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity var(--duration-slow) var(--ease-cinema),
+    visibility 0s var(--duration-slow);
 }
 
-.panelOpen {
-  transform: translateX(0);
+.overlayOpen {
+  pointer-events: auto;
+  visibility: visible;
+  opacity: 1;
+  transition:
+    opacity var(--duration-slow) var(--ease-cinema),
+    visibility 0s 0s;
 }
 
-/* ─── Close Button ────────────────────────────────────── */
-
-.closeBtn {
-  align-self: flex-end;
+.overlayInner {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--space-6) var(--container-padding);
+  padding-top: 80px;
+}
+
+/* Close button (X) inside overlay */
+.closeBtn {
+  position: absolute;
+  top: var(--space-5);
+  right: var(--space-5);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  align-items: center;
+  gap: 0;
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--color-ink-muted);
-  margin-bottom: var(--space-6);
-  transition: color var(--duration-fast) var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
 }
 
-.closeBtn:hover {
-  color: var(--color-ink);
+.closeBtn .bar {
+  background-color: rgba(255,255,255,0.72);
+  position: absolute;
 }
 
-/* ─── Gold Accent ─────────────────────────────────────── */
-
-.accentLine {
-  width: 32px;
-  height: 1px;
-  background-color: var(--color-gold);
-  margin-bottom: var(--space-8);
-  transform-origin: left;
-}
-
-/* ─── Links ───────────────────────────────────────────── */
-
-.links {
-  list-style: none;
-  flex: 1;
+/* ── Nav ── */
+.nav {
   display: flex;
   flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+  justify-content: center;
 }
 
-.linkItem {
-  overflow: hidden;
-  border-bottom: 1px solid var(--color-border);
-
-  /* Stagger entrance */
-  opacity: 0;
-  transform: translateY(16px);
-  transition:
-    opacity var(--duration-slow) var(--ease-out),
-    transform var(--duration-slow) var(--ease-out);
-  transition-delay: calc(var(--stagger-i, 0) * 60ms + 100ms);
-}
-
-.panelOpen .linkItem {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.link {
+.navItem {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-5) 0;
-  color: var(--color-ink);
-  transition: color var(--duration-fast) var(--ease-out);
-}
-
-.link:hover {
-  color: var(--color-gold);
-}
-
-.linkLabel {
-  font-size: var(--text-xl);
-  font-weight: var(--weight-semibold);
+  align-items: baseline;
+  gap: var(--space-4);
+  font-size: clamp(2.25rem, 8vw, 3.5rem);
+  font-weight: var(--weight-bold);
   letter-spacing: var(--tracking-snug);
-  line-height: var(--leading-tight);
-}
+  color: rgba(255,255,255,0.92);
+  text-decoration: none;
+  padding-block: var(--space-2);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: color var(--duration-fast) var(--ease-out);
 
-.linkArrow {
-  font-size: var(--text-base);
-  color: var(--color-ink-subtle);
-  transition:
-    transform var(--duration-fast) var(--ease-out),
-    color var(--duration-fast) var(--ease-out);
-}
-
-.link:hover .linkArrow {
-  transform: translateX(4px);
-  color: var(--color-gold);
-}
-
-/* ─── CTA ─────────────────────────────────────────────── */
-
-.cta {
-  margin-top: var(--space-8);
+  /* Stagger animation */
   opacity: 0;
   transform: translateY(16px);
-  transition:
-    opacity var(--duration-slow) var(--ease-out),
-    transform var(--duration-slow) var(--ease-out);
-  transition-delay: 400ms;
+  animation: none;
 }
 
-.panelOpen .cta {
-  opacity: 1;
-  transform: translateY(0);
+.overlayOpen .navItem {
+  animation: menuItemIn var(--duration-slow) var(--ease-cinema) forwards;
 }
 
-.ctaLink {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-4) var(--space-6);
-  background-color: var(--color-ink);
-  color: var(--color-white);
+@keyframes menuItemIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.navItem:hover { color: var(--color-white); }
+.navItem:last-child { border-bottom: none; }
+
+.navIndex {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-widest);
+  color: rgba(255,255,255,0.28);
+  width: 20px;
+  flex-shrink: 0;
+}
+
+/* ── Footer CTA ── */
+.footer {
+  padding-bottom: var(--space-8);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: var(--space-6);
+}
+
+.footerCta {
+  display: inline-block;
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
   letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  border-radius: var(--radius-sm);
-  transition: opacity var(--duration-fast) var(--ease-out);
+  color: var(--color-gold);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-out);
 }
+.footerCta:hover { color: var(--color-gold-light); }
 
-.ctaLink:hover {
-  opacity: 0.85;
-}
-
-/* ─── Desktop — hide toggle ───────────────────────────── */
-
-@media (min-width: 1024px) {
-  .toggle {
-    display: none;
-  }
-
-  .panel {
-    display: none;
-  }
-
-  .backdrop {
-    display: none;
-  }
-}
-
-/* ─── Reduced motion ──────────────────────────────────── */
-
-@media (prefers-reduced-motion: reduce) {
-  .panel {
-    transition: none;
-  }
-
-  .backdrop {
-    transition: none;
-  }
-
-  .linkItem {
-    transition: none;
-    opacity: 1;
-    transform: none;
-  }
-
-  .cta {
-    transition: none;
-    opacity: 1;
-    transform: none;
-  }
-}
+/* Root modifier — required for CSS Modules class binding */
+.toggleLight { /* light-on-transparent header mode */ }

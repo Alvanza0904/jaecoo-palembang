@@ -1,76 +1,44 @@
 /**
- * JAECOO Palembang — Button Component
- *
- * Primary CTA: black/charcoal bg, white text.
- * Gold is a subtle accent only — never used as primary CTA bg.
+ * JAECOO Palembang — Button
  */
-
+import type { ReactNode, AnchorHTMLAttributes, ButtonHTMLAttributes } from "react";
 import Link from "next/link";
-import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
 import styles from "./Button.module.css";
 
-type ButtonVariant = "primary" | "secondary" | "ghost" | "whatsapp";
-type ButtonSize = "sm" | "md" | "lg";
+type Variant = "primary" | "secondary" | "outline" | "ghost" | "darkPrimary";
+type Size = "sm" | "md" | "lg";
 
 interface BaseProps {
-  variant?: ButtonVariant;
-  size?: ButtonSize;
-  fullWidth?: boolean;
+  variant?: Variant;
+  size?: Size;
   children: ReactNode;
+  className?: string;
 }
 
-interface ButtonAsButton extends BaseProps, Omit<ButtonHTMLAttributes<HTMLButtonElement>, keyof BaseProps> {
-  as?: "button";
-  href?: never;
-}
+type LinkProps = BaseProps & { as: "link"; href: string };
+type AnchorProps = BaseProps & { as: "a" } & AnchorHTMLAttributes<HTMLAnchorElement>;
+type ButtonProps = BaseProps & { as?: "button" } & ButtonHTMLAttributes<HTMLButtonElement>;
 
-interface ButtonAsLink extends BaseProps, Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof BaseProps> {
-  as: "link";
-  href: string;
-}
+export function Button(props: LinkProps | AnchorProps | ButtonProps) {
+  const { variant = "primary", size = "md", children, className = "" } = props;
 
-interface ButtonAsAnchor extends BaseProps, Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof BaseProps> {
-  as: "a";
-  href: string;
-}
-
-type ButtonProps = ButtonAsButton | ButtonAsLink | ButtonAsAnchor;
-
-export function Button({ variant = "primary", size = "md", fullWidth = false, children, ...rest }: ButtonProps) {
-  const className = [
+  const cls = [
     styles.btn,
-    styles[`btn--${variant}`],
-    styles[`btn--${size}`],
-    fullWidth ? styles["btn--full"] : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
+    styles[variant],
+    styles[size],
+    className,
+  ].filter(Boolean).join(" ");
 
-  if (rest.as === "link") {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { as: _as, href, ...linkRest } = rest as ButtonAsLink;
-    return (
-      <Link href={href} className={className} {...(linkRest as object)}>
-        {children}
-      </Link>
-    );
+  if (props.as === "link") {
+    const { href } = props as LinkProps;
+    return <Link href={href} className={cls}>{children}</Link>;
   }
 
-  if (rest.as === "a") {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { as: _as, href, ...anchorRest } = rest as ButtonAsAnchor;
-    return (
-      <a href={href} className={className} {...anchorRest}>
-        {children}
-      </a>
-    );
+  if (props.as === "a") {
+    const { as: _as, variant: _v, size: _s, className: _c, children: _ch, ...rest } = props as AnchorProps;
+    return <a className={cls} {...rest}>{children}</a>;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { as: _as, ...btnRest } = rest as ButtonAsButton;
-  return (
-    <button className={className} {...btnRest}>
-      {children}
-    </button>
-  );
+  const { as: _as, variant: _v, size: _s, className: _c, children: _ch, ...rest } = props as ButtonProps;
+  return <button className={cls} {...rest}>{children}</button>;
 }

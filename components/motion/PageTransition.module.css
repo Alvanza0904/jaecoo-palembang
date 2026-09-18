@@ -22,3 +22,6 @@
     transition: opacity 0.15s linear;
   }
 }
+
+/* Root class — required for CSS Modules binding */
+.transition { display: block; }

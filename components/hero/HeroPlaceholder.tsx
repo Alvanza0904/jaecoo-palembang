@@ -1,72 +1,85 @@
 /**
- * JAECOO Palembang — Hero Placeholder
- *
- * Used when real hero images are not yet available.
- * Cinematic dark gradient with editorial typography.
- * Drop-in replacement for LayeredHero bg.
+ * JAECOO Palembang — HeroPlaceholder
+ * Cinematic hero with full-bleed background image.
  */
 
-import Image from "next/image";
+import type { ReactNode } from "react";
 import styles from "./HeroPlaceholder.module.css";
 
 interface HeroPlaceholderProps {
-  heading: React.ReactNode;
-  subheading?: React.ReactNode;
   tagline?: string;
-  cta?: React.ReactNode;
-  size?: "full" | "large" | "medium";
-  /** Optional CMS-managed content image. Gradient remains the fallback. */
-  backgroundImage?: string | null;
-  backgroundImageMobile?: string | null;
-  /** Subtle accent color variation */
-  accent?: "default" | "warm" | "cool";
+  heading?: ReactNode;
+  subheading?: string;
+  cta?: ReactNode;
+  backgroundImage?: string;
+  backgroundImageMobile?: string;
+  size?: "large" | "medium" | "small";
+  accent?: "default" | "none";
 }
 
 export function HeroPlaceholder({
+  tagline,
   heading,
   subheading,
-  tagline,
   cta,
-  size = "full",
   backgroundImage,
   backgroundImageMobile,
-  accent = "default",
+  size = "large",
+  accent: _accent = "default",
 }: HeroPlaceholderProps) {
+  const sizeClass =
+    size === "medium" ? styles["hero--medium"] :
+    size === "small"  ? styles["hero--small"] : "";
+
   return (
-    <section
-      className={[
-        styles.hero,
-        styles[`hero--${size}`],
-        styles[`hero--${accent}`],
-      ].join(" ")}
-    >
-      {/* Background gradient */}
-      <div className={[styles.bg, backgroundImage ? styles.bgHasImage : ""].filter(Boolean).join(" ")} aria-hidden="true">
-        {backgroundImage && (
-          <picture>
-            {backgroundImageMobile && <source media="(max-width: 767px)" srcSet={backgroundImageMobile} />}
-            <Image src={backgroundImage} alt="" fill priority sizes="100vw" className={styles.bgImage} />
-          </picture>
+    <section className={[styles.hero, sizeClass].filter(Boolean).join(" ")}>
+      {/* Background */}
+      <div className={styles.bg}>
+        {backgroundImage ? (
+          <>
+            {backgroundImageMobile && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={backgroundImageMobile}
+                alt=""
+                className={styles.bgImg}
+                style={{ display: "none" }}
+                aria-hidden="true"
+              />
+            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={backgroundImage}
+              alt=""
+              className={styles.bgImg}
+              aria-hidden="true"
+              fetchPriority="high"
+              decoding="async"
+            />
+          </>
+        ) : (
+          <div
+            className={styles.bgImg}
+            style={{
+              background: "linear-gradient(135deg, #141414 0%, #1e1e1e 50%, #141414 100%)",
+            }}
+            aria-hidden="true"
+          />
         )}
-        <div className={styles.gradient} />
-        {/* Subtle grid lines */}
-        <div className={styles.grid} />
+        <div className={styles.overlay} aria-hidden="true" />
       </div>
 
       {/* Content */}
       <div className={styles.content}>
-        <div className={styles.inner}>
-          {tagline && (
-            <p className={styles.tagline}>{tagline}</p>
-          )}
-          <div className={styles.headingWrap}>
-            <h1 className={styles.heading}>{heading}</h1>
-            {subheading && (
-              <p className={styles.subheading}>{subheading}</p>
-            )}
-          </div>
-          {cta && <div className={styles.cta}>{cta}</div>}
-        </div>
+        {tagline && <span className={styles.tagline}>{tagline}</span>}
+        {heading  && <h1 className={styles.heading}>{heading}</h1>}
+        {subheading && <p className={styles.subheading}>{subheading}</p>}
+        {cta && <div className={styles.cta}>{cta}</div>}
+      </div>
+
+      {/* Scroll indicator */}
+      <div className={styles.scrollHint} aria-hidden="true">
+        <div className={styles.scrollLine} />
       </div>
     </section>
   );

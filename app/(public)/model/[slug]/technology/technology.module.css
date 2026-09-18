@@ -623,3 +623,8 @@
     margin-left: 0;
   }
 }
+
+/* featureLayoutImgLeft = default layout (image col-1, text col-2) */
+.featureLayoutImgLeft {
+  /* default — image is already in column 1 */
+}

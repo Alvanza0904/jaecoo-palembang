@@ -1,6 +1,5 @@
 /**
  * JAECOO Palembang — Admin Control Center
- * Step 8.7+: Central hub dengan live stats dan route map lengkap.
  */
 
 import { createSupabaseServerClient, getServerUser } from '@/lib/supabase/server';
@@ -14,15 +13,19 @@ export const metadata = {
 async function getDashboardStats() {
   try {
     const supabase = await createSupabaseServerClient();
-    const { count, error } = await supabase
-      .from('models')
-      .select('*', { count: 'exact', head: true });
+    const [models, news, promos] = await Promise.all([
+      supabase.from('models').select('*', { count: 'exact', head: true }),
+      supabase.from('news').select('*', { count: 'exact', head: true }),
+      supabase.from('promos').select('*', { count: 'exact', head: true }),
+    ]);
     return {
-      modelsCount: error ? 0 : (count ?? 0),
-      isSupabaseConnected: !error,
+      modelsCount: models.count ?? 0,
+      newsCount: news.count ?? 0,
+      promosCount: promos.count ?? 0,
+      isConnected: !models.error,
     };
   } catch {
-    return { modelsCount: 0, isSupabaseConnected: false };
+    return { modelsCount: 0, newsCount: 0, promosCount: 0, isConnected: false };
   }
 }
 
@@ -33,74 +36,32 @@ export default async function AdminDashboardPage() {
     {
       category: 'CONTENT & WEBSITE',
       items: [
-        {
-          title: 'Homepage',
-          description: 'Urutan model dan tampilan di halaman utama',
-          href: '/admin/homepage',
-          live: true,
-          actionText: 'Edit Layout',
-          stat: null,
-        },
-        {
-          title: 'Homepage Content',
-          description: 'Kelola teks, headline, dan SEO homepage',
-          href: '/admin/homepage-content',
-          live: true,
-          actionText: 'Edit Content',
-          stat: null,
-        },
-        {
-          title: 'Models',
-          description: 'Data spesifikasi J5 EV, J7 SHS & J8 ARDIS',
-          href: '/admin/models',
-          live: true,
-          actionText: 'Manage Models',
-          stat: `${stats.modelsCount} model`,
-        },
-        {
-          title: 'Media Library',
-          description: 'Kelola aset gambar dan media hero',
-          href: '/admin/media',
-          live: true,
-          actionText: 'Open Library',
-          stat: null,
-        },
+        { title: 'Homepage', description: 'Hero, sections, dan layout halaman utama', href: '/admin/homepage', live: true, stat: null },
+        { title: 'Homepage Content', description: 'Teks, headline, dan SEO homepage', href: '/admin/homepage-content', live: true, stat: null },
+        { title: 'Models', description: 'Spesifikasi J5 EV, J7 SHS, J8 ARDIS SHS', href: '/admin/models', live: true, stat: `${stats.modelsCount}` },
+        { title: 'News & Journal', description: 'Artikel, berita, dan rilis pers', href: '/admin/news', live: true, stat: `${stats.newsCount}` },
+        { title: 'Promotions', description: 'Banner, penawaran, dan promo eksklusif', href: '/admin/promo', live: true, stat: `${stats.promosCount}` },
+        { title: 'Gallery', description: 'Foto event dan galeri JAECOO Palembang', href: '/admin/gallery', live: true, stat: null },
       ],
     },
     {
-      category: 'MARKETING & LEADS',
+      category: 'MEDIA & ASSETS',
       items: [
-        {
-          title: 'Promotions',
-          description: 'Kelola banner dan penawaran spesial',
-          href: '/admin/promo',
-          live: true,
-          actionText: 'Manage Promo',
-          stat: null,
-        },
-        {
-          title: 'News & Journal',
-          description: 'Artikel, event, dan rilis pers',
-          href: '#',
-          live: false,
-          actionText: 'Coming Soon',
-          stat: null,
-        },
-        {
-          title: 'Leads',
-          description: 'Data kontak prospek dan test drive',
-          href: '#',
-          live: false,
-          actionText: 'Coming Soon',
-          stat: null,
-        },
+        { title: 'Media Library', description: 'Kelola aset gambar, hero, dan logo', href: '/admin/media', live: true, stat: null },
+        { title: 'Brand Assets', description: 'Logo, warna, tipografi brand', href: '/admin/brand-assets', live: true, stat: null },
+      ],
+    },
+    {
+      category: 'SYSTEM',
+      items: [
+        { title: 'Settings', description: 'Konfigurasi website dan SEO global', href: '/admin/settings', live: true, stat: null },
+        { title: 'Leads', description: 'Data kontak prospek dan test drive', href: '/admin/leads', live: true, stat: null },
       ],
     },
   ];
 
   return (
     <div className={styles.page}>
-      {/* Header */}
       <div className={styles.header}>
         <div>
           <p className={styles.greeting}>Control Center</p>
@@ -108,10 +69,7 @@ export default async function AdminDashboardPage() {
         </div>
         <div className={styles.statusBar}>
           <div className={styles.statusItem}>
-            <span
-              className={styles.statusDot}
-              style={{ background: stats.isSupabaseConnected ? '#22c55e' : '#ef4444' }}
-            />
+            <span className={styles.statusDot} style={{ background: stats.isConnected ? '#22c55e' : '#ef4444' }} />
             <span>Database</span>
           </div>
           <div className={styles.statusDivider} />
@@ -124,7 +82,6 @@ export default async function AdminDashboardPage() {
 
       <div className={styles.goldLine} />
 
-      {/* Modules */}
       <div className={styles.modules}>
         {MODULES.map((section) => (
           <div key={section.category} className={styles.moduleSection}>
@@ -134,25 +91,17 @@ export default async function AdminDashboardPage() {
                 <div key={item.title} className={styles.moduleRow}>
                   <div className={styles.moduleInfo}>
                     <div className={styles.moduleMeta}>
-                      <span className={item.live ? styles.moduleTitle : styles.moduleTitleMuted}>
-                        {item.title}
-                      </span>
-                      <span className={item.live ? styles.badgeLive : styles.badgeSoon}>
-                        {item.live ? 'LIVE' : 'SOON'}
-                      </span>
+                      <span className={item.live ? styles.moduleTitle : styles.moduleTitleMuted}>{item.title}</span>
+                      <span className={item.live ? styles.badgeLive : styles.badgeSoon}>{item.live ? 'LIVE' : 'SOON'}</span>
                     </div>
                     <p className={styles.moduleDesc}>{item.description}</p>
                   </div>
                   <div className={styles.moduleAction}>
-                    {item.stat && (
-                      <span className={styles.moduleStat}>{item.stat}</span>
-                    )}
+                    {item.stat !== null && <span className={styles.moduleStat}>{item.stat}</span>}
                     {item.live ? (
-                      <Link href={item.href} className={styles.actionBtn}>
-                        {item.actionText}
-                      </Link>
+                      <Link href={item.href} className={styles.actionBtn}>{item.title === 'Leads' ? 'View' : 'Edit'}</Link>
                     ) : (
-                      <span className={styles.actionBtnDisabled}>{item.actionText}</span>
+                      <span className={styles.actionBtnDisabled}>Coming Soon</span>
                     )}
                   </div>
                 </div>

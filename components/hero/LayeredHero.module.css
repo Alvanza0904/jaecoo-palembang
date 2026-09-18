@@ -335,3 +335,7 @@
     transition: none;
   }
 }
+
+/* Root modifier classes — required for CSS Modules class binding */
+.heroDark { /* dark background mode — see compound selectors above */ }
+.heroLight { /* light background mode — see compound selectors above */ }

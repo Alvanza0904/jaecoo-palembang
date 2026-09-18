@@ -1,121 +1,85 @@
 /**
- * JAECOO Palembang — Public Promo Listing Page (Step 8.10)
- * Data: Supabase promos table (status = 'published')
+ * JAECOO Palembang — Promo Listing Page
+ * Data: Supabase promos table
  */
 
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { getActivePromos } from '@/lib/data/promos';
 import { Button } from '@/components/ui/Button';
 import { HeroPlaceholder } from '@/components/hero/HeroPlaceholder';
 import { TransparentHeader } from '@/components/layout/TransparentHeader';
 import { buildWhatsAppUrl } from '@/lib/utils/whatsapp';
-import Link from 'next/link';
+import { formatDate } from '@/lib/utils/format';
 import styles from './promo.module.css';
 
 export const metadata: Metadata = {
   title: 'Promo JAECOO Palembang — Penawaran Terkini',
-  description:
-    'Cashback, DP murah, bunga 0%, dan penawaran eksklusif untuk JAECOO J5, J7, dan J8 di Palembang.',
+  description: 'Cashback, DP murah, bunga 0%, dan penawaran eksklusif untuk JAECOO J5, J7, dan J8 di Palembang.',
   alternates: { canonical: '/promo' },
 };
 
 export default async function PromoPage() {
   const promos = await getActivePromos();
-  const whatsappUrl = buildWhatsAppUrl({ source: 'promo_page', source_cta: 'promo_cta' });
+  const wa = buildWhatsAppUrl({ source: 'promo_page', source_cta: 'promo_cta' });
 
   return (
     <>
       <TransparentHeader />
       <HeroPlaceholder
-        tagline="CURRENT OFFERS"
-        heading={
-          <>
-            Offers worth
-            <br />
-            <strong>exploring.</strong>
-          </>
-        }
-        subheading="Temukan penawaran terbaru JAECOO Palembang."
+        tagline="PENAWARAN EKSKLUSIF"
+        heading="Offers worth exploring."
+        subheading="Promo terbaru JAECOO Palembang — cashback, DP ringan, bunga spesial."
         size="medium"
-        accent="warm"
       />
 
       <section className={styles.section}>
-        <div className={styles.intro}>
-          <p className={styles.eyebrow}>CURRENT OFFERS</p>
-          <h2>Make your move.</h2>
-        </div>
-
-        {promos.length === 0 ? (
-          <div className={styles.empty}>
-            <p className={styles.emptyKicker}>NO ACTIVE PROMO</p>
-            <h3>Belum ada penawaran aktif.</h3>
-            <p>Hubungi Alvan untuk mendapatkan informasi harga dan program terbaru.</p>
-            <Button
-              as="a"
-              href={whatsappUrl}
-              variant="primary"
-              size="lg"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Talk to Alvan →
-            </Button>
+        <div className={styles.inner}>
+          <div className={styles.header}>
+            <span className={styles.eyebrow}>Current Offers</span>
+            <h1 className={styles.heading}>Promo Terkini</h1>
           </div>
-        ) : (
-          <div className={styles.list}>
-            {promos.map((promo) => (
-              <article className={styles.card} key={promo.id}>
-                <div className={styles.media}>
-                  {promo.image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={promo.image_url} alt={promo.title} />
-                  ) : (
-                    <span>
-                      {promo.models?.name?.replace('JAECOO ', '').toUpperCase() ?? 'JAECOO'}
-                    </span>
-                  )}
-                </div>
 
-                <div className={styles.copy}>
-                  <p className={styles.badge}>
-                    {promo.models ? promo.models.name : 'JAECOO OFFER'}
-                  </p>
-                  <h3>{promo.title}</h3>
-                  <p>{promo.short_description}</p>
-
-                  {promo.end_date && (
-                    <small>
-                      Berlaku hingga{' '}
-                      {new Date(promo.end_date).toLocaleDateString('id-ID', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                      })}
-                    </small>
-                  )}
-
-                  <div className={styles.actions}>
-                    <Link href={`/promo/${promo.slug}`}>View offer ↗</Link>
-                    <Button
-                      as="a"
-                      href={
-                        promo.cta_action ??
-                        buildWhatsAppUrl({ source: 'promo_page', source_cta: promo.title })
-                      }
-                      variant="primary"
-                      size="sm"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {promo.cta_label ?? 'Klaim Promo'}
-                    </Button>
+          {!promos.length ? (
+            <div className={styles.empty}>
+              <h2 className={styles.emptyHeading}>Promo akan segera hadir</h2>
+              <p className={styles.emptyText}>Hubungi Alvan untuk penawaran eksklusif yang belum dipublikasikan.</p>
+              <Button as="a" href={wa} variant="darkPrimary" size="md" target="_blank" rel="noopener noreferrer">
+                Tanya Promo ke Alvan →
+              </Button>
+            </div>
+          ) : (
+            <div className={styles.list}>
+              {promos.map((promo) => (
+                <Link key={promo.id} href={`/promo/${promo.slug}`} className={styles.card}>
+                  <div className={styles.cardMedia}>
+                    {promo.image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={promo.image_url} alt={promo.title} className={styles.cardImg} loading="lazy" />
+                    ) : (
+                      <div className={styles.cardMediaFallback} aria-hidden="true">
+                        {promo.title.substring(0, 2).toUpperCase()}
+                      </div>
+                    )}
                   </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
+                  <div className={styles.cardCopy}>
+                    <span className={styles.cardBadge}>
+                      {promo.models?.name ?? promo.promo_type}
+                    </span>
+                    <h2 className={styles.cardTitle}>{promo.title}</h2>
+                    <p className={styles.cardDesc}>{promo.short_description}</p>
+                    {promo.end_date && (
+                      <p className={styles.cardValidity}>
+                        Berlaku hingga {formatDate(promo.end_date)}
+                      </p>
+                    )}
+                    <span className={styles.cardCta}>Lihat Penawaran →</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       </section>
     </>
   );

@@ -205,7 +205,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
             </div>
           }
           size="full"
-          accent="cool"
+          
         />
       )}
 

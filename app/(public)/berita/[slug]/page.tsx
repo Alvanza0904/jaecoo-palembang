@@ -1,23 +1,21 @@
 /**
  * JAECOO Palembang — Berita Detail Page
  * Route: /berita/[slug]
- * Phase 2: Editorial article layout.
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getNewsBySlug, getPublishedNews } from "@/lib/data/news";
+import { getNewsBySlug, getAllNewsSlugs } from "@/lib/data/news";
 import { Container } from "@/components/ui/Container";
-import { GoldLine } from "@/components/ui/GoldLine";
-import { Reveal } from "@/components/motion/Reveal";
 import { formatDate } from "@/lib/utils/format";
 import styles from "./berita-detail.module.css";
 
 interface Props { params: Promise<{ slug: string }> }
 
 export async function generateStaticParams() {
-  return (await getPublishedNews()).map((n) => ({ slug: n.slug }));
+  const slugs = await getAllNewsSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -25,13 +23,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const article = await getNewsBySlug(slug);
   if (!article) return {};
   return {
-    title: article.title,
-    description: article.excerpt,
+    title: article.meta_title ?? `${article.title} — JAECOO Journal`,
+    description: article.meta_description ?? article.excerpt,
     alternates: { canonical: `/berita/${slug}` },
     openGraph: {
       url: `/berita/${slug}`,
       title: article.title,
       description: article.excerpt,
+      images: article.cover?.desktop ? [{ url: article.cover.desktop }] : [],
     },
   };
 }
@@ -44,37 +43,55 @@ export default async function BeritaDetailPage({ params }: Props) {
   return (
     <section className={styles.section}>
       <Container size="narrow">
-
         {/* Breadcrumb */}
-        <Reveal variant="fade">
-          <nav className={styles.breadcrumb} aria-label="Breadcrumb">
-            <Link href="/berita" className={styles.breadcrumbLink}>
-              ← JAECOO Journal
-            </Link>
-          </nav>
-        </Reveal>
+        <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+          <Link href="/berita" className={styles.breadcrumbLink}>← JAECOO Journal</Link>
+        </nav>
 
-        <Reveal variant="fade-up" delay={80}>
-          <div className={styles.header}>
-            <div className={styles.meta}>
-              <span className={styles.category}>{article.category}</span>
-              <span className={styles.date}>{formatDate(article.published_at)}</span>
-            </div>
-            <GoldLine width="short" className={styles.gold} />
-            <h1 className={styles.title}>{article.title}</h1>
-            <p className={styles.excerpt}>{article.excerpt}</p>
+        {/* Cover */}
+        {article.cover?.desktop && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={article.cover.desktop}
+            alt={article.cover.alt ?? article.title}
+            style={{
+              width: "100%",
+              aspectRatio: "16/9",
+              objectFit: "cover",
+              display: "block",
+              marginBottom: "var(--space-10)",
+              background: "var(--color-border)"
+            }}
+          />
+        )}
+
+        <header className={styles.header}>
+          <div className={styles.meta}>
+            <span className={styles.category}>{article.category}</span>
+            <span className={styles.date}>{formatDate(article.published_at)}</span>
           </div>
-        </Reveal>
+          <hr className={styles.gold} />
+          <h1 className={styles.title}>{article.title}</h1>
+          <p className={styles.excerpt}>{article.excerpt}</p>
+        </header>
 
-        {/* Article body — Phase 3+ will render rich content */}
-        <Reveal variant="fade-up" delay={150}>
-          <div className={styles.body}>
+        {/* Body */}
+        <div className={styles.body}>
+          {article.body_html ? (
+            <div dangerouslySetInnerHTML={{ __html: article.body_html }} />
+          ) : (
             <p className={styles.bodyPlaceholder}>
               Konten artikel lengkap akan tersedia segera.
             </p>
-          </div>
-        </Reveal>
+          )}
+        </div>
 
+        {/* Back */}
+        <div style={{ marginTop: "var(--space-16)", paddingTop: "var(--space-8)", borderTop: "1px solid var(--color-border)" }}>
+          <Link href="/berita" className={styles.breadcrumbLink}>
+            ← Semua Artikel
+          </Link>
+        </div>
       </Container>
     </section>
   );
