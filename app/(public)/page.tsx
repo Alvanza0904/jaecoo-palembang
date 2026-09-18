@@ -66,15 +66,14 @@ export default async function HomePage() {
           tagline={cms.hero.eyebrow || "DEALER RESMI JAECOO PALEMBANG"}
           heading={
             <>
-              <span className={styles.heroModel}>J5</span>
-              <span className={styles.heroSub}>ELECTRIC SUV.</span>
+              <span className={styles.heroModel}>{cms.hero.headline || "J5"}</span>
             </>
           }
           subheading={cms.hero.description || "THIS IS THE REAL SUV."}
           cta={
             <div className={styles.heroCtas}>
-              <Button as="link" href="/model/jaecoo-j5-ev" variant="primary" size="lg">
-                Explore J5
+              <Button as="link" href={cms.hero.ctaUrl || "/model/jaecoo-j5-ev"} variant="primary" size="lg">
+                {cms.hero.ctaText || "Explore J5"}
               </Button>
               <Button
                 as="a"
