@@ -1,27 +1,41 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
-import "./globals.css";
-import PremiumHeader from "@/components/layout/PremiumHeader";
-import PremiumFooter from "@/components/layout/PremiumFooter";
+import { Manrope } from "next/font/google";
+import "@/styles/globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
-const playfair = Playfair_Display({ subsets: ["latin"], variable: '--font-playfair' });
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "JAECOO Palembang | Premium Automotive",
-  description: "Dealer Resmi OMODA JAECOO Palembang. Discover the J5, J7, and flagship J8.",
+  metadataBase: new URL("https://jaecoopalembang.web.id"),
+  title: {
+    default: "JAECOO Palembang — Dealer Resmi JAECOO",
+    template: "%s — JAECOO Palembang",
+  },
+  description:
+    "Dealer Resmi OMODA JAECOO Palembang. Temukan JAECOO J5 EV, J7 SHS, dan J8 SHS. Konsultasi, test drive, dan promo eksklusif bersama Alvan.",
+  keywords: ["JAECOO", "OMODA JAECOO Palembang", "dealer JAECOO Palembang", "SUV Palembang"],
+  openGraph: {
+    siteName: "JAECOO Palembang",
+    locale: "id_ID",
+    type: "website",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="id" className="scroll-smooth">
-      <body className={`${inter.variable} ${playfair.variable} font-sans bg-offwhite text-charcoal antialiased selection:bg-charcoal selection:text-white`}>
-        <PremiumHeader />
-        <main className="min-h-screen">
-          {children}
-        </main>
-        <PremiumFooter />
-      </body>
+    <html lang="id" className={manrope.variable}>
+      <body>{children}</body>
     </html>
   );
 }

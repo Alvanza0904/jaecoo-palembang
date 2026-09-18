@@ -4,10 +4,16 @@
 
 import type { MetadataRoute } from "next";
 import { getModelSlugs } from "@/lib/supabase/queries";
+import { getAllNewsSlugs } from "@/lib/data/news";
+import { getAllPromoSlugs } from "@/lib/data/promos";
 import { SITE_URL } from "@/lib/utils/seo";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const modelSlugs = await getModelSlugs();
+  const [modelSlugs, newsSlugs, promoSlugs] = await Promise.all([
+    getModelSlugs(),
+    getAllNewsSlugs(),
+    getAllPromoSlugs(),
+  ]);
   const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -24,5 +30,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/model/${slug}/specifications`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.7 },
   ]);
 
-  return [...staticRoutes, ...modelRoutes];
+  const newsRoutes: MetadataRoute.Sitemap = newsSlugs.map((slug) => ({
+    url: `${SITE_URL}/berita/${slug}`,
+    lastModified: now,
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
+
+  const promoRoutes: MetadataRoute.Sitemap = promoSlugs.map((slug) => ({
+    url: `${SITE_URL}/promo/${slug}`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
+  }));
+
+  return [...staticRoutes, ...modelRoutes, ...newsRoutes, ...promoRoutes];
 }

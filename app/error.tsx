@@ -1,40 +1,43 @@
-/**
- * JAECOO Palembang — Error Boundary
- * "use client" required by Next.js
- */
-
 "use client";
 
-import { useEffect } from "react";
-import { Container } from "@/components/ui/Container";
-import { Button } from "@/components/ui/Button";
-import styles from "./error.module.css";
-
-export default function Error({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
-  useEffect(() => {
-    console.error(error);
-  }, [error]);
-
+export default function Error({ reset }: { error: Error; reset: () => void }) {
   return (
-    <section className={styles.section}>
-      <Container size="narrow">
-        <div className={styles.content}>
-          <p className={styles.label}>Terjadi Kesalahan</p>
-          <h1 className={styles.heading}>Sesuatu tidak berjalan dengan benar.</h1>
-          <p className={styles.body}>
-            Silakan coba lagi. Jika masalah berlanjut, hubungi Sales kami via WhatsApp.
-          </p>
-          <Button variant="primary" size="md" onClick={reset}>
-            Coba Lagi
-          </Button>
-        </div>
-      </Container>
-    </section>
+    <div style={{
+      minHeight: "100svh",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      background: "var(--color-off-white)",
+      padding: "var(--space-8)",
+      textAlign: "center",
+      gap: "var(--space-6)"
+    }}>
+      <p style={{ fontSize: "var(--text-xs)", letterSpacing: "var(--tracking-widest)", textTransform: "uppercase", color: "var(--color-gold)" }}>
+        Error
+      </p>
+      <h2 style={{ fontSize: "clamp(var(--text-xl), 4vw, var(--text-2xl))", fontWeight: "var(--weight-bold)", letterSpacing: "var(--tracking-tight)", color: "var(--color-ink)" }}>
+        Terjadi Kesalahan
+      </h2>
+      <p style={{ color: "var(--color-ink-muted)", maxWidth: "40ch" }}>
+        Mohon maaf, ada yang tidak beres. Silakan coba lagi.
+      </p>
+      <button
+        onClick={reset}
+        style={{
+          padding: "13px 26px",
+          background: "var(--color-charcoal)",
+          color: "var(--color-white)",
+          fontSize: "var(--text-xs)",
+          fontWeight: "var(--weight-medium)",
+          letterSpacing: "var(--tracking-wider)",
+          textTransform: "uppercase",
+          cursor: "pointer",
+          border: "none"
+        }}
+      >
+        Coba Lagi
+      </button>
+    </div>
   );
 }
