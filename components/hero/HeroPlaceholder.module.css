@@ -89,6 +89,19 @@
   animation: fadeUp var(--duration-slow) var(--ease-cinema) 420ms forwards;
 }
 
+/* Fallback: jika animasi tidak jalan (reduce motion, dll) */
+@media (prefers-reduced-motion: reduce) {
+  .tagline,
+  .heading,
+  .subheading,
+  .cta,
+  .scrollHint {
+    opacity: 1 !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
 /* Scroll indicator */
 .scrollHint {
   position: absolute;
