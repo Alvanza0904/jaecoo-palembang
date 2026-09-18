@@ -1,3 +1,9 @@
+/**
+ * JAECOO Palembang — Homepage
+ * Route: /
+ * Premium automotive editorial experience.
+ */
+
 import type { Metadata } from "next";
 import { getModels } from "@/lib/supabase/queries";
 import { getHomeMedia, contentMediaKey } from "@/lib/supabase/media";
@@ -25,6 +31,14 @@ export const metadata: Metadata = {
   description:
     "Jelajahi JAECOO J5 EV, J7 SHS, dan J8 Ardis SHS di Palembang. Konsultasi, test drive, simulasi kredit, promo dan informasi terbaru bersama Alvan — Dealer Resmi Omoda Jaecoo Palembang.",
   alternates: { canonical: "/" },
+  openGraph: {
+    title: "JAECOO Palembang — Dealer Resmi JAECOO",
+    description: "JAECOO J5 EV, J7 SHS, J8 Ardis SHS di Palembang. Test drive & promo eksklusif bersama Alvan.",
+    url: "https://jaecoopalembang.web.id/",
+    siteName: "JAECOO Palembang",
+    locale: "id_ID",
+    type: "website",
+  },
 };
 
 export default async function HomePage() {
@@ -46,69 +60,76 @@ export default async function HomePage() {
     <>
       <TransparentHeader />
 
-      {/* ── HERO ─────────────────────────────────────────────────── */}
+      {/* ── HERO ────────────────────────────────────── */}
       <section className={styles.heroWrap}>
         <HeroPlaceholder
-          tagline={cms.hero.eyebrow || "JAECOO PALEMBANG"}
+          tagline={cms.hero.eyebrow || "DEALER RESMI JAECOO PALEMBANG"}
           heading={
             <>
-              <span className={styles.heroKicker}>JAECOO</span>
               <span className={styles.heroModel}>J5</span>
-              <span className={styles.heroElectric}>ELECTRIC SUV</span>
+              <span className={styles.heroSub}>ELECTRIC SUV.</span>
             </>
           }
           subheading={cms.hero.description || "THIS IS THE REAL SUV."}
           cta={
             <div className={styles.heroCtas}>
               <Button as="link" href="/model/jaecoo-j5-ev" variant="primary" size="lg">
-                EXPLORE J5
+                Explore J5
               </Button>
-              <Button as="a" href={heroUrl} variant="secondary" size="lg" target="_blank" rel="noopener noreferrer">
-                TALK TO ALVAN →
+              <Button
+                as="a"
+                href={heroUrl}
+                variant="secondary"
+                size="lg"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Talk to Alvan →
               </Button>
             </div>
           }
           backgroundImage={homeMedia[contentMediaKey("home", "home", "hero")]?.desktop}
           backgroundImageMobile={homeMedia[contentMediaKey("home", "home", "hero")]?.mobile}
-          accent="default"
         />
       </section>
 
-      {/* ── MODEL SHOWCASE SLIDER (J5 → J7 → J8) ────────────────── */}
+      {/* ── MODEL SHOWCASE (J5 → J7 → J8) ──────────── */}
       <HomeModelSlider models={models} />
 
-      {/* ── EXPERIENCE ───────────────────────────────────────────── */}
+      {/* ── EXPERIENCE ──────────────────────────────── */}
       <HomeExperienceSection
         image={homeMedia[contentMediaKey("home", "home", "experience")]}
         cms={cms.experience}
       />
 
-      {/* ── TECHNOLOGY ───────────────────────────────────────────── */}
+      {/* ── TECHNOLOGY ──────────────────────────────── */}
       <HomeTechnologySection
         image={homeMedia[contentMediaKey("home", "home", "technology")]}
         cms={cms.technology}
       />
 
-      {/* ── PROMO ────────────────────────────────────────────────── */}
+      {/* ── PROMO ───────────────────────────────────── */}
       <HomePromoSection promos={promos} />
 
-      {/* ── ABOUT ────────────────────────────────────────────────── */}
+      {/* ── ABOUT ───────────────────────────────────── */}
       <HomeAboutSection
         image={homeMedia[contentMediaKey("home", "home", "about")]}
         cms={cms.about}
       />
 
-      {/* ── JOURNAL ──────────────────────────────────────────────── */}
+      {/* ── JOURNAL ─────────────────────────────────── */}
       <HomeJournalSection news={news} />
 
-      {/* ── FINAL CTA ────────────────────────────────────────────── */}
+      {/* ── FINAL CTA ───────────────────────────────── */}
       <HomeFinalCTA
         image={homeMedia[contentMediaKey("home", "home", "final_cta")]}
         cms={cms.final_cta}
       />
 
-      {/* ── DEALER LOCATION (Local SEO) ──────────────────────────── */}
-      <HomeDealerLocation backgroundImage={homeMedia[contentMediaKey("home", "home", "dealer_location")]} />
+      {/* ── DEALER LOCATION ─────────────────────────── */}
+      <HomeDealerLocation
+        backgroundImage={homeMedia[contentMediaKey("home", "home", "dealer_location")]}
+      />
     </>
   );
 }

@@ -1,13 +1,30 @@
-.heroWrap{position:relative}
-.heroKicker,.heroModel,.heroElectric{display:block}
-.heroKicker{font-size:.32em;letter-spacing:.16em;font-weight:500;opacity:.72;margin-bottom:4px}
-.heroModel{font-size:1.05em;letter-spacing:-.07em;line-height:.8}
-.heroElectric{font-size:.16em;letter-spacing:.18em;font-weight:500;margin-top:16px}
-.heroCtas{display:flex;gap:12px;flex-wrap:wrap}
-.heroWrap :global(.hero){min-height:100svh}
-@media(max-width:640px){
- .heroWrap :global(.hero){min-height:92svh}
- .heroKicker{font-size:.28em}
- .heroElectric{font-size:.13em;margin-top:12px}
- .heroCtas{flex-direction:column;align-items:stretch}
+/* JAECOO Palembang — Homepage */
+
+.heroWrap {
+  /* Full viewport height hero */
+}
+
+.heroModel {
+  display: block;
+  font-size: clamp(5.5rem, 18vw, 12rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  line-height: 0.9;
+  color: var(--color-white);
+}
+
+.heroSub {
+  display: block;
+  font-size: clamp(var(--text-xl), 4vw, var(--text-4xl));
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-snug);
+  color: rgba(255,255,255,0.70);
+  margin-top: var(--space-3);
+}
+
+.heroCtas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
 }
