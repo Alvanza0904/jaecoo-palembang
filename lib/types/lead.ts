@@ -5,6 +5,7 @@
 export type LeadSource =
   | "homepage_hero"
   | "homepage_global"
+  | "homepage_final_cta"
   | "model_overview"
   | "model_index"
   | "model_technology"
