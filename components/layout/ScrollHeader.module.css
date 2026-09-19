@@ -47,7 +47,7 @@
 }
 
 .logoText {
-  font-size: var(--text-sm);
+  font-size: var(--text-lg);
   font-weight: var(--weight-bold);
   letter-spacing: var(--tracking-widest);
   color: var(--color-charcoal);
@@ -71,7 +71,7 @@
 }
 
 .logoImage {
-  height: 32px;
+  height: 48px;
   width: auto;
   object-fit: contain;
 }
