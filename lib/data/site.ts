@@ -8,11 +8,11 @@
 
 export const SITE_SETTINGS = {
   brandName: "JAECOO Palembang",
-  dealerName: "Dealer Resmi Omoda Jaecoo Palembang",
+  dealerName: "Dealer Resmi Jaecoo Palembang",
   salesName: "Alvan",
   whatsappNumber: "6285183145926",
-  instagram: "https://instagram.com/jaecoopalembang",
-  tiktok: "https://tiktok.com/@jaecoopalembang",
+  instagram: "https://instagram.com/omodajaecoopalembang_alvan",
+  tiktok: "https://tiktok.com/@omodajaecoopalembang",
   facebook: "https://facebook.com/jaecoopalembang",
   dealerAddress: {
     street: "Komp. Graha Maju, Jl. Mayor HM. Rasyad Nawawi No.506 - 509",
