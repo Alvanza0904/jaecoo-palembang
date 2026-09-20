@@ -1,6 +1,6 @@
 'use server';
 
-import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { createSupabaseServerClient, createSupabaseAdminClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 function generateSlug(title: string): string {
@@ -31,6 +31,8 @@ export async function saveNews(id: string | null, formData: NewsFormData) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return { success: false, error: 'Unauthorized.' };
 
+    const admin = createSupabaseAdminClient();
+
     const slug = formData.slug?.trim()
       ? formData.slug.trim().toLowerCase()
       : generateSlug(formData.title);
@@ -43,10 +45,10 @@ export async function saveNews(id: string | null, formData: NewsFormData) {
     };
 
     if (id) {
-      const { error } = await supabase.from('news').update(payload).eq('id', id);
+      const { error } = await admin.from('news').update(payload).eq('id', id);
       if (error) throw error;
     } else {
-      const { error } = await supabase.from('news').insert([payload]);
+      const { error } = await admin.from('news').insert([payload]);
       if (error) throw error;
     }
 
@@ -65,7 +67,8 @@ export async function deleteNews(id: string) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return { success: false, error: 'Unauthorized.' };
 
-    const { error } = await supabase.from('news').delete().eq('id', id);
+    const admin = createSupabaseAdminClient();
+    const { error } = await admin.from('news').delete().eq('id', id);
     if (error) throw error;
 
     revalidatePath('/admin/news');
