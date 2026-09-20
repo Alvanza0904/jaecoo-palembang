@@ -27,7 +27,7 @@ function Media({ src, alt, className = "" }: { src?: string | null; alt: string;
 }
 
 // Kept for fallback
-export function HomeJarak Tempuh({ models }: { models: ModelData[] }) {
+export function HomeJarakTempuh({ models }: { models: ModelData[] }) {
   return (
     <section className={styles.range} id="range" aria-labelledby="range-title">
       <div>
