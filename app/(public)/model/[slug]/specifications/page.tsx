@@ -1,5 +1,5 @@
 /**
- * JAECOO Palembang — Model Specifications Page
+ * JAECOO Palembang — Model Spesifikasi Page
  * Route: /model/[slug]/specifications
  *
  * STEP 7B: Premium spec experience.
@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function SpecificationsPage({ params }: Props) {
+export default async function SpesifikasiPage({ params }: Props) {
   const { slug } = await params;
   const model = await getModelBySlug(slug);
   if (!model) notFound();
@@ -81,7 +81,7 @@ export default async function SpecificationsPage({ params }: Props) {
             <Reveal variant="fade-up">
               <GoldLine width="short" className={styles.gold} />
               <h1 className={styles.pageTitle}>{model.name}</h1>
-              <p className={styles.pageSubtitle}>Specifications</p>
+              <p className={styles.pageSubtitle}>Spesifikasi</p>
             </Reveal>
 
             {v.price_status !== "hidden" && (
@@ -144,7 +144,7 @@ export default async function SpecificationsPage({ params }: Props) {
               <Reveal variant="fade-up">
                 <SectionHeading
                   eyebrow="Warna Eksterior"
-                  heading="Available Colors."
+                  heading="Pilihan Warna"
                 />
               </Reveal>
 
@@ -190,7 +190,7 @@ export default async function SpecificationsPage({ params }: Props) {
           <section className={styles.variantsSection}>
             <Container size="content">
               <Reveal variant="fade-up">
-                <SectionHeading eyebrow="Varian" heading="Choose Your Variant." />
+                <SectionHeading eyebrow="Varian" heading="Pilih Varian" />
               </Reveal>
 
               <div className={styles.variantList}>
@@ -267,7 +267,7 @@ export default async function SpecificationsPage({ params }: Props) {
                   ← {model.short_name} Overview
                 </Button>
                 <Button as="link" href={`/model/${slug}/technology`} variant="ghost" size="md">
-                  Technology →
+                  Teknologi →
                 </Button>
               </div>
             </Reveal>
@@ -295,7 +295,7 @@ export default async function SpecificationsPage({ params }: Props) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Talk to Alvan →
+                  Chat dengan Alvan →
                 </Button>
               </div>
             </Reveal>

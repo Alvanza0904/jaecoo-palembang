@@ -41,7 +41,6 @@ import { priceStatusAllowsCalculator } from "@/lib/types/model";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import { ColorCarousel } from "@/components/model/ColorCarousel";
-import { getModelEditorial } from "@/lib/data/editorial";
 import styles from "./page.module.css";
 
 function CmsModelImage({
@@ -139,25 +138,6 @@ export default async function ModelPage({ params }: ModelPageProps) {
 
   // Key specs dari model — ambil dari data technology features untuk highlights
   const keyFeatures = model.technology.features.slice(0, 3);
-  const editorial = getModelEditorial(slug);
-  const performanceFallback: Record<string, Array<{ tag: string; label: string }>> = {
-    "jaecoo-j5-ev": [
-      { tag: "130 kW / 210 PS", label: "Peak motor output" },
-      { tag: "461 km NEDC", label: "Electric range" },
-      { tag: "28 min", label: "DC charging" },
-    ],
-    "jaecoo-j7-shs": [
-      { tag: "201 hp", label: "Electric power" },
-      { tag: "1.300 km", label: "Combined range" },
-      { tag: "100+ km", label: "Pure EV range" },
-    ],
-    "jaecoo-j8-shs": [
-      { tag: "530 PS", label: "Combined output" },
-      { tag: "650 Nm", label: "Maximum torque" },
-      { tag: "5,4 detik", label: "0–100 km/h" },
-    ],
-  };
-  const fallbackStats = performanceFallback[slug] ?? [];
 
   return (
     <>
@@ -191,7 +171,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
                 variant="ghost"
                 size="lg"
               >
-                Specifications
+                Spesifikasi
               </Button>
             </div>
           }
@@ -219,7 +199,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
                 variant="ghost"
                 size="lg"
               >
-                Specifications
+                Spesifikasi
               </Button>
             </div>
           }
@@ -246,13 +226,14 @@ export default async function ModelPage({ params }: ModelPageProps) {
           <Reveal variant="fade-up">
             <p className={styles.editorialLabel}>
               <span className={styles.editorialNum}>01</span>
-              <span className={styles.editorialCat}>Design</span>
+              <span className={styles.editorialCat}>Desain</span>
             </p>
             <h2 className={styles.cinematicHeading}>
-              {editorial.exterior.heading}
+              Desained<br />
+              untuk tampil berkarakter.
             </h2>
             <p className={styles.cinematicBody}>
-              {editorial.exterior.body}
+              {model.description}
             </p>
           </Reveal>
         </div>
@@ -264,19 +245,25 @@ export default async function ModelPage({ params }: ModelPageProps) {
       <section className={styles.detailSection}>
         <div className={styles.detailGrid}>
           {/* Main detail image — dominan */}
-          <Reveal variant="mask" className={styles.detailMainWrap}>
+          <Reveal variant="fade-up" className={styles.detailMainWrap}>
             <CmsModelImage image={model.image_slots?.design_detail_main} label="DESIGN DETAIL — HEADLIGHT / GRILLE" ratio="3/4" className={styles.detailMainImg} />
           </Reveal>
 
           {/* Editorial text — right column */}
           <div className={styles.detailTextWrap}>
-            <Reveal variant="slide-right" delay={120}>
+            <Reveal variant="fade-up" delay={120}>
               <p className={styles.editorialLabel}>
                 <span className={styles.editorialNum}>02</span>
                 <span className={styles.editorialCat}>Detail</span>
               </p>
-              <h2 className={styles.detailHeading}>{editorial.detail.heading}</h2>
-              <p className={styles.detailBody}>{editorial.detail.body}</p>
+              <h2 className={styles.detailHeading}>
+                Setiap garis<br />
+                memiliki tujuan.
+              </h2>
+              <p className={styles.detailBody}>
+                Dari lampu depan LED signature hingga lekukan bodi yang tegas —
+                setiap detail {model.short_name} dirancang dengan presisi.
+              </p>
             </Reveal>
 
             {/* Secondary detail images stacked */}
@@ -302,12 +289,16 @@ export default async function ModelPage({ params }: ModelPageProps) {
         </div>
 
         <div className={styles.presenceContent}>
-          <Reveal variant="scale">
+          <Reveal variant="fade-up">
             <p className={styles.presenceLabel}>
               <span className={styles.editorialNum}>03</span>
-              <span className={styles.editorialCat}>Presence</span>
+              <span className={styles.editorialCat}>Karakter</span>
             </p>
-            <h2 className={styles.presenceHeading}>{editorial.presence.heading}</h2>
+            <h2 className={styles.presenceHeading}>
+              Percaya Diri<br />
+              dari setiap<br />
+              sudut.
+            </h2>
           </Reveal>
         </div>
       </section>
@@ -330,8 +321,11 @@ export default async function ModelPage({ params }: ModelPageProps) {
               <span className={styles.editorialNum}>04</span>
               <span className={styles.editorialCat}>Interior</span>
             </p>
-            <h2 className={styles.cinematicHeading}>{editorial.interior.heading}</h2>
-            <p className={styles.cinematicBody}>{editorial.interior.body}</p>
+            <h2 className={styles.cinematicHeading}>
+              Kabin<br />
+              yang dirancang untuk<br />
+              perjalanan.
+            </h2>
           </Reveal>
         </div>
       </section>
@@ -359,10 +353,16 @@ export default async function ModelPage({ params }: ModelPageProps) {
               <Reveal variant="fade-up" delay={80}>
                 <p className={styles.editorialLabel}>
                   <span className={styles.editorialNum}>05</span>
-                  <span className={styles.editorialCat}>Cockpit</span>
+                  <span className={styles.editorialCat}>Kokpit</span>
                 </p>
-                <h2 className={styles.cockpitHeading}>{editorial.cockpit.heading}</h2>
-                <p className={styles.cockpitBody}>{editorial.cockpit.body}</p>
+                <h2 className={styles.cockpitHeading}>
+                  Cerdas<br />
+                  sejak dirancang.
+                </h2>
+                <p className={styles.cockpitBody}>
+                  Layar sentuh ganda, panel instrumen digital, dan antarmuka
+                  intuitif — semua dalam jangkauan pengemudi {model.short_name}.
+                </p>
               </Reveal>
             </div>
           </div>
@@ -383,9 +383,13 @@ export default async function ModelPage({ params }: ModelPageProps) {
             <Reveal variant="fade-up">
               <p className={styles.editorialLabel}>
                 <span className={styles.editorialNum}>06</span>
-                <span className={styles.editorialCat}>Performance</span>
+                <span className={styles.editorialCat}>Performa</span>
               </p>
-              <h2 className={styles.performanceHeading}>{editorial.performance.heading}</h2>
+              <h2 className={styles.performanceHeading}>
+                Tenaga<br />
+                tanpa<br />
+                kompromi.
+              </h2>
             </Reveal>
 
             {/* Floating key numbers */}
@@ -400,14 +404,26 @@ export default async function ModelPage({ params }: ModelPageProps) {
                   </Reveal>
                 ))
               ) : (
-                fallbackStats.map((stat, i) => (
-                  <Reveal key={stat.label} variant={i === 1 ? "slide-right" : "fade-up"} delay={i * 100}>
+                <>
+                  <Reveal variant="fade-up">
                     <div className={styles.performanceStat}>
-                      <span className={styles.performanceStatTag}>{stat.tag}</span>
-                      <span className={styles.performanceStatLabel}>{stat.label}</span>
+                      <span className={styles.performanceStatTag}>130 kW</span>
+                      <span className={styles.performanceStatLabel}>Tenaga</span>
                     </div>
                   </Reveal>
-                ))
+                  <Reveal variant="fade-up" delay={100}>
+                    <div className={styles.performanceStat}>
+                      <span className={styles.performanceStatTag}>553 km</span>
+                      <span className={styles.performanceStatLabel}>Jarak Tempuh</span>
+                    </div>
+                  </Reveal>
+                  <Reveal variant="fade-up" delay={200}>
+                    <div className={styles.performanceStat}>
+                      <span className={styles.performanceStatTag}>7.1 s</span>
+                      <span className={styles.performanceStatLabel}>0–100 km/h</span>
+                    </div>
+                  </Reveal>
+                </>
               )}
             </div>
           </div>
@@ -431,10 +447,10 @@ export default async function ModelPage({ params }: ModelPageProps) {
             <Reveal variant="fade-up">
               <p className={styles.editorialLabel}>
                 <span className={styles.editorialNum}>07</span>
-                <span className={styles.editorialCat}>Technology</span>
+                <span className={styles.editorialCat}>Teknologi</span>
               </p>
               <h2 className={styles.techHeading}>
-                {model.technology.headline || "Intelligence built in."}
+                {model.technology.headline || "Kecerdasan built in."}
               </h2>
               {model.technology.subheadline && (
                 <p className={styles.techSubheadline}>{model.technology.subheadline}</p>
@@ -479,17 +495,20 @@ export default async function ModelPage({ params }: ModelPageProps) {
 
         <Container size="wide">
           <div className={styles.adasContent}>
-            <Reveal variant="blur">
+            <Reveal variant="fade-up">
               <p className={styles.editorialLabel}>
                 <span className={styles.editorialNum}>08</span>
-                <span className={styles.editorialCat}>Safety</span>
+                <span className={styles.editorialCat}>Keselamatan</span>
               </p>
               <div className={styles.adasStat}>
                 <span className={styles.adasStatNumber}>19</span>
                 <span className={styles.adasStatUnit}>ADAS</span>
               </div>
-              <h2 className={styles.adasHeading}>{editorial.safety.heading}</h2>
-              <p className={styles.cinematicBody}>{editorial.safety.body}</p>
+              <h2 className={styles.adasHeading}>
+                Kecerdasan<br />
+                that watches<br />
+                ahead.
+              </h2>
             </Reveal>
           </div>
         </Container>
@@ -501,10 +520,9 @@ export default async function ModelPage({ params }: ModelPageProps) {
       {model.colors.length > 0 && (
         <section className={styles.colorsSection}>
           <div className={styles.colorsSectionHeader}>
-            <Reveal variant="fade-down">
-              <p className={styles.colorsEyebrow}>Colors</p>
-              <h2 className={styles.colorsHeading}>{editorial.colors.heading}</h2>
-              <p className={styles.colorsBody}>{editorial.colors.body}</p>
+            <Reveal variant="fade-up">
+              <p className={styles.colorsEyebrow}>Pilihan Warna</p>
+              <h2 className={styles.colorsHeading}>Pilih JAECOO Anda</h2>
             </Reveal>
           </div>
 
@@ -523,13 +541,12 @@ export default async function ModelPage({ params }: ModelPageProps) {
 
         <Container size="wide">
           <div className={styles.specsContent}>
-            <Reveal variant="mask">
+            <Reveal variant="fade-up">
               <p className={styles.editorialLabel}>
                 <span className={styles.editorialNum}>09</span>
-                <span className={styles.editorialCat}>Specifications</span>
+                <span className={styles.editorialCat}>Spesifikasi</span>
               </p>
-              <h2 className={styles.specsHeading}>{editorial.specs.heading}</h2>
-              <p className={styles.specsBody}>{editorial.specs.body}</p>
+              <h2 className={styles.specsHeading}>{model.name}</h2>
 
               <div className={styles.specsPrice}>
                 <PriceDisplay
@@ -599,9 +616,15 @@ export default async function ModelPage({ params }: ModelPageProps) {
         <Container size="narrow">
           <div className={styles.ctaContent}>
             <Reveal variant="fade-up">
-              <p className={styles.ctaEyebrow}>JAECOO {model.short_name} · PALEMBANG</p>
-              <h2 className={styles.ctaHeading}>{editorial.cta.heading}</h2>
-              <p className={styles.ctaBody}>{editorial.cta.body}</p>
+              <p className={styles.ctaEyebrow}>Siap Melangkah Lebih Jauh?</p>
+              <h2 className={styles.ctaHeading}>
+                Tertarik dengan<br />
+                {model.short_name}?
+              </h2>
+              <p className={styles.ctaBody}>
+                Hubungi Alvan untuk harga terkini, jadwal test drive,
+                dan penawaran langsung dari dealer resmi JAECOO Palembang.
+              </p>
             </Reveal>
 
             <Reveal variant="fade-up" delay={120}>

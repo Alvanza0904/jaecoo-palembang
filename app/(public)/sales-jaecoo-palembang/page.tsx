@@ -71,7 +71,7 @@ export default async function SalesPage() {
                 test drive, hingga proses pembelian selesai.
               </p>
               <Button as="a" href={whatsappUrl} variant="darkPrimary" size="lg" target="_blank" rel="noopener noreferrer">
-                Talk to {SALES_NAME} →
+                Chat dengan {SALES_NAME} →
               </Button>
             </div>
           </Reveal>

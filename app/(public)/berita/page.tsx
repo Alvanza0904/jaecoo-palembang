@@ -29,7 +29,7 @@ export default async function BeritaPage() {
       <section className={styles.section}>
         <div className={styles.container}>
           <div className={styles.header}>
-            <span className={styles.eyebrow}>The Journal</span>
+            <span className={styles.eyebrow}>Berita & Informasi</span>
             <h1 className={styles.heading}>Berita &amp; Artikel</h1>
           </div>
 
@@ -56,7 +56,7 @@ export default async function BeritaPage() {
                   </div>
                   <h2 className={styles.featuredTitle}>{featured.title}</h2>
                   <p className={styles.featuredExcerpt}>{featured.excerpt}</p>
-                  <span className={styles.readMore}>Read story →</span>
+                  <span className={styles.readMore}>Baca selengkapnya →</span>
                 </div>
               </Link>
 

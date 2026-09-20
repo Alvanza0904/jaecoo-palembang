@@ -24,7 +24,7 @@ import styles from './homepage.module.css'
 const SECTIONS = [
   { id: 'hero'           as const, label: 'Hero',          hasHeadline: true,  hasEyebrow: true,  hasCta: true  },
   { id: 'experience'     as const, label: 'Experience',    hasHeadline: false, hasEyebrow: false, hasCta: false },
-  { id: 'technology'     as const, label: 'Technology',    hasHeadline: false, hasEyebrow: false, hasCta: false },
+  { id: 'technology'     as const, label: 'Teknologi',    hasHeadline: false, hasEyebrow: false, hasCta: false },
   { id: 'about'          as const, label: 'About',         hasHeadline: false, hasEyebrow: false, hasCta: false },
   { id: 'dealer_location'as const, label: 'Dealer',        hasHeadline: false, hasEyebrow: false, hasCta: false },
   { id: 'final_cta'      as const, label: 'Final CTA',     hasHeadline: false, hasEyebrow: false, hasCta: true  },

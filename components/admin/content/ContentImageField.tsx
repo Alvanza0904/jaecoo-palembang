@@ -71,7 +71,7 @@ export function ContentImageField({ label, contentType, contentKey, slotKey, bre
       </div>
       <div className={styles.imageActions}>
         <button className={styles.primaryBtn} type="button" onClick={() => setPickerOpen(true)} disabled={saving}>
-          {saving ? 'Menyimpan…' : 'Choose from Media Library'}
+          {saving ? 'Menyimpan…' : 'Pilih dari Galeri Media'}
         </button>
         {asset?.id && <button className={styles.secondaryBtn} type="button" onClick={clear} disabled={saving}>Remove</button>}
       </div>

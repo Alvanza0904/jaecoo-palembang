@@ -68,7 +68,7 @@ export default async function ModelIndexPage() {
       <header className={styles.pageHeader}>
         <p className={styles.pageEyebrow}>THE RANGE</p>
         <h1 className={styles.pageTitle}>
-          Choose your<br />
+          Pilih<br />
           <em>JAECOO.</em>
         </h1>
       </header>
@@ -170,7 +170,7 @@ export default async function ModelIndexPage() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Talk to Alvan →
+          Chat dengan Alvan →
         </a>
       </footer>
     </>

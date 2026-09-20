@@ -34,10 +34,10 @@ export default async function GalleryPage() {
       <section className={styles.section}>
         <div className={styles.inner}>
           <div className={styles.header}>
-            <span className={styles.eyebrow}>The Collection</span>
+            <span className={styles.eyebrow}>Lineup JAECOO</span>
             <h1 className={styles.heading}>
               See it.<br />
-              <em>Feel it.</em>
+              <em>Rasakan Sendiri.</em>
             </h1>
           </div>
 

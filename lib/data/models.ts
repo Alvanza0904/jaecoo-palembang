@@ -67,73 +67,73 @@ export const MODELS: ModelData[] = [
     colors: [
       {
         id: "j5-white",
-        name: "White Pristine",
+        name: "Crystal White",
         hex: "#f0f0f0",
         image: {
           desktop: undefined,
-          alt: "JAECOO J5 EV White Pristine",
+          alt: "JAECOO J5 EV Crystal White",
         },
       },
       {
         id: "j5-black",
-        name: "Jet Black",
+        name: "Midnight Black",
         hex: "#1a1a1a",
         image: {
           desktop: undefined,
-          alt: "JAECOO J5 EV Jet Black",
+          alt: "JAECOO J5 EV Midnight Black",
         },
       },
       {
         id: "j5-blue",
-        name: "Forest Green",
-        hex: "#2d4a3e",
+        name: "Ocean Blue",
+        hex: "#1e3a5f",
         image: {
           desktop: undefined,
-          alt: "JAECOO J5 EV Forest Green",
+          alt: "JAECOO J5 EV Ocean Blue",
         },
       },
       {
         id: "j5-silver",
-        name: "Ivory Gray",
-        hex: "#b7b5ae",
+        name: "Stellar Silver",
+        hex: "#c0c0c0",
         image: {
           desktop: undefined,
-          alt: "JAECOO J5 EV Ivory Gray",
+          alt: "JAECOO J5 EV Stellar Silver",
         },
       },
     ],
     technology: {
-      headline: "Electric Intelligence. Uncompromised.",
+      headline: "Kecerdasan Listrik. Tanpa Kompromi.",
       subheadline:
-        "Teknologi EV terdepan yang dirancang untuk memberikan pengalaman berkendara lebih intuitif, lebih aman, dan lebih efisien di setiap perjalanan.",
+        "Teknologi kendaraan listrik yang dirancang untuk menghadirkan respons cepat, efisiensi tinggi, dan pengalaman berkendara yang intuitif di setiap perjalanan.",
       features: [
         {
           id: "j5-ev-range",
           title: "Jangkauan Lebih Jauh",
           description:
-            "Baterai berkapasitas tinggi dirancang untuk perjalanan sehari-hari dengan efisiensi daya yang optimal — kota maupun luar kota.",
-          tag: "Electric Range",
+            "Baterai 60,9 kWh berteknologi LFP menghadirkan jarak tempuh hingga 461 km berdasarkan siklus NEDC, memberi keleluasaan untuk perjalanan harian maupun luar kota.",
+          tag: "Jarak Tempuh Listrik",
         },
         {
           id: "j5-ev-adas",
           title: "Keselamatan Aktif",
           description:
-            "Sistem ADAS generasi terbaru memantau kondisi jalan secara real-time dengan sensor dan kamera 360° untuk ketenangan berkendara.",
-          tag: "Safety",
+            "17 fitur ADAS membantu memantau potensi risiko dan mendukung pengemudi dalam berbagai situasi berkendara. Kamera 540° HD membantu memberikan pandangan lebih menyeluruh saat bermanuver.",
+          tag: "Keselamatan",
         },
         {
           id: "j5-ev-connect",
           title: "Konektivitas Cerdas",
           description:
-            "Layar sentuh besar dengan integrasi smartphone mulus — Apple CarPlay, Android Auto, dan OTA update langsung dari JAECOO.",
+            "Layar dan konektivitas dirancang untuk membuat informasi, hiburan, dan fungsi kendaraan terasa lebih mudah dijangkau selama perjalanan.",
           tag: "Connectivity",
         },
         {
           id: "j5-ev-charge",
           title: "Pengisian Cepat",
           description:
-            "Dukung fast charging DC untuk pengisian daya signifikan dalam waktu singkat — siap melanjutkan perjalanan lebih cepat.",
-          tag: "Charging",
+            "Pengisian cepat DC hingga 130 kW memungkinkan pengisian 30–80% sekitar 28 menit berdasarkan data yang tersedia.",
+          tag: "Pengisian Daya",
         },
       ],
     },
@@ -151,20 +151,14 @@ export const MODELS: ModelData[] = [
       {
         label: "Performa",
         specs: [
-          { label: "Tipe Motor", value: "BEV · FWD · Permanent Magnet Synchronous" },
-          { label: "Transmisi", value: "Single-speed Reducer" },
+          { label: "Tipe Motor", value: "Motor listrik 155 kW / 210 PS" },
+          { label: "Transmisi", value: "Single-speed reducer" },
           { label: "Penggerak", value: "FWD" },
-          { label: "Daya Motor", value: "130 kW / 210 PS" },
-          { label: "Torsi Maksimum", value: "288 Nm" },
+          { label: "Torsi maksimum", value: "288 Nm" },
           { label: "Kapasitas Baterai", value: "60,9 kWh · CATL · LFP" },
           { label: "Jangkauan NEDC", value: "461 km" },
           { label: "0–100 km/jam", value: "7,3 detik" },
           { label: "Pengisian DC", value: "130 kW · sekitar 28 menit" },
-          { label: "AC Wall Mount", value: "7.700 W" },
-          { label: "Pengisian Portabel", value: "2.200 W" },
-          { label: "Regeneratif", value: "3 level" },
-          { label: "Mode Berkendara", value: "Eco · Normal · Sport" },
-          { label: "Ban", value: "235/55 R18" },
         ],
       },
       {
@@ -172,9 +166,9 @@ export const MODELS: ModelData[] = [
         specs: [
           { label: "ADAS", value: "17 fitur" },
           { label: "Airbag", value: "6 Airbag" },
-          { label: "Layar Infotainment", value: "Touchscreen besar" },
-          { label: "Apple CarPlay / Android Auto", value: "Ya (Wireless)" },
-          { label: "Kamera Mundur", value: "Ya" },
+          { label: "Layar Infotainment", value: "13,2 inci Full HD" },
+          { label: "Pengisian AC", value: "7.700 W" },
+          { label: "Kamera", value: "540° HD" },
         ],
       },
     ],
@@ -190,7 +184,7 @@ export const MODELS: ModelData[] = [
     slug: "jaecoo-j7-shs",
     name: "JAECOO J7 SHS",
     short_name: "J7 SHS",
-    tagline: "SUPER HYBRID, REDEFINED.",
+    tagline: "SUPER HYBRID, DIDEFINISIKAN ULANG.",
     description:
       "JAECOO J7 SHS menggabungkan keiritan hybrid dengan performa SUV sejati dan kemampuan AWD — pilihan sempurna untuk jiwa petualang yang tidak mau kompromi antara efisiensi dan tenaga.",
     hero_media: {
@@ -273,37 +267,37 @@ export const MODELS: ModelData[] = [
       },
     ],
     technology: {
-      headline: "Super Hybrid System",
+      headline: "Sistem Super Hybrid",
       subheadline:
-        "Sistem hybrid generasi terbaru yang secara otomatis mengoptimalkan penggunaan daya — memberikan efisiensi terbaik dan tenaga yang selalu tersedia kapan pun dibutuhkan.",
+        "Sistem Super Hybrid memadukan mesin 1.5 TGDI dengan motor listrik melalui transmisi DHT untuk menghadirkan respons yang halus, efisiensi tinggi, dan fleksibilitas berkendara.",
       features: [
         {
           id: "j7-shs-powertrain",
-          title: "Dual Power, Satu Tujuan",
+          title: "Dua Sumber Tenaga, Satu Karakter",
           description:
-            "Mesin bensin dan motor listrik bekerja secara harmonis melalui DHT transmission — performa responsif sekaligus konsumsi BBM yang efisien.",
+            "Mesin 1.5 TGDI dan motor listrik bekerja melalui DHT untuk menghadirkan perpaduan tenaga yang responsif dan efisiensi yang terjaga.",
           tag: "SHS Powertrain",
         },
         {
           id: "j7-shs-awd",
-          title: "AWD Adaptif",
+          title: "Mode Berkendara Fleksibel",
           description:
-            "Sistem penggerak 4 roda adaptif memberikan distribusi torsi optimal di setiap kondisi — aspal basah, berbatu, atau medan off-road ringan.",
+            "Tiga mode berkendara ECO, STANDARD, dan SPORT memungkinkan karakter respons kendaraan disesuaikan dengan kebutuhan perjalanan.",
           tag: "AWD",
         },
         {
           id: "j7-shs-intelligent",
-          title: "Kokpit Digital",
+          title: "Kokpit Modern",
           description:
-            "Panel instrumen digital luas dengan AI assistant, navigasi terintegrasi, dan antarmuka yang merespons setiap perintah dengan presisi tinggi.",
-          tag: "Cockpit",
+            "Kokpit modern menghadirkan informasi kendaraan, hiburan, dan fungsi penting dalam antarmuka yang mudah dijangkau pengemudi.",
+          tag: "Kokpit",
         },
         {
           id: "j7-shs-adas",
-          title: "ADAS Generasi Terbaru",
+          title: "19 Fitur Bantuan Pengemudi",
           description:
-            "Adaptive Cruise Control, Lane Keep Assist, Automatic Emergency Braking, dan Blind Spot Monitoring melindungi setiap momen berkendara.",
-          tag: "Safety",
+            "19 fitur ADAS membantu meningkatkan kewaspadaan pengemudi melalui bantuan seperti Adaptive Cruise Control, AEB, Lane Keeping, Blind Spot Detection, dan pemantauan pengemudi.",
+          tag: "Keselamatan",
         },
       ],
     },
@@ -322,27 +316,30 @@ export const MODELS: ModelData[] = [
         label: "Powertrain",
         specs: [
           { label: "Sistem", value: "Super Hybrid System (SHS)" },
-          { label: "Transmisi", value: "DHT (Dedicated Hybrid Transmission)" },
-          { label: "Penggerak", value: "AWD" },
-          { label: "Kapasitas Mesin", value: "Hubungi dealer untuk detail" },
-          { label: "Kapasitas Tangki", value: "Hubungi dealer untuk detail" },
+          { label: "Tenaga Mesin", value: "140 hp" },
+          { label: "Tenaga Listrik", value: "201 hp" },
+          { label: "Jarak Kombinasi", value: "hingga 1.300 km" },
+          { label: "Transmisi", value: "3DHT" },
+          { label: "Penggerak", value: "Super Hybrid" },
+          { label: "Kapasitas Baterai", value: "18,3 kWh" },
+          { label: "Jarak Tempuh Listrik", value: "100+ km" },
+          { label: "0–100 km/jam", value: "7,3 detik" },
         ],
       },
       {
         label: "Kenyamanan & Keselamatan",
         specs: [
-          { label: "ADAS", value: "Ya — Level 2+" },
+          { label: "ADAS", value: "19 fitur" },
           { label: "Airbag", value: "8 Airbag" },
-          { label: "Layar Infotainment", value: "Dual touchscreen" },
-          { label: "Apple CarPlay / Android Auto", value: "Ya (Wireless)" },
-          { label: "Sunroof", value: "Panoramic Sunroof" },
-          { label: "Kamera 360°", value: "Ya" },
+          { label: "Kamera Surround", value: "540° HD" },
+          { label: "Pengisian AC", value: "7.700 W" },
+          { label: "Mode Berkendara", value: "ECO · STANDARD · SPORT" },
         ],
       },
     ],
     meta_title: "JAECOO J7 SHS — Harga & Spesifikasi | JAECOO Palembang",
     meta_description:
-      "JAECOO J7 SHS Rp534.900.000 OTR Palembang. SUV Super Hybrid AWD dengan teknologi DHT terdepan. Tersedia varian SIVP. Test drive & konsultasi Sales JAECOO Palembang.",
+      "JAECOO J7 SHS Rp534.900.000 OTR Palembang. SUV Super Hybrid dengan teknologi DHT dan efisiensi listrik terdepan. Tersedia varian SIVP. Test drive & konsultasi Sales JAECOO Palembang.",
     published: true,
     updated_at: "2025-09-01T00:00:00Z",
   },
@@ -352,9 +349,9 @@ export const MODELS: ModelData[] = [
     slug: "jaecoo-j8-shs",
     name: "JAECOO J8 Ardis SHS",
     short_name: "J8 Ardis",
-    tagline: "POWER, REFINED.",
+    tagline: "KEKUATAN YANG DISEMPURNAKAN.",
     description:
-      "JAECOO J8 Ardis SHS mendefinisikan ulang standar SUV flagship — kemewahan tanpa kompromi, teknologi hybrid terdepan, dan performa AWD yang menghadirkan sensasi berkendara di level yang berbeda.",
+      "JAECOO J8 Ardis SHS mendefinisikan ulang standar SUV unggulan — kemewahan tanpa kompromi, teknologi hybrid terdepan, dan performa AWD yang menghadirkan sensasi berkendara di level yang berbeda.",
     hero_media: {
       image: {
         desktop: undefined,
@@ -425,37 +422,37 @@ export const MODELS: ModelData[] = [
       },
     ],
     technology: {
-      headline: "Power, Refined.",
+      headline: "Kekuatan yang Disempurnakan.",
       subheadline:
-        "Setiap detail JAECOO J8 Ardis SHS dirancang untuk melampaui ekspektasi — dari suspensi adaptif cerdas hingga kabin yang menenangkan dengan material premium.",
+        "JAECOO J8 SHS-P ARDIS memadukan performa 530 PS, sistem ARDIS, teknologi hybrid, dan kabin premium dalam satu SUV unggulan.",
       features: [
         {
           id: "j8-luxury-cabin",
           title: "Kabin Tanpa Kompromi",
           description:
-            "Material premium pilihan, tata suara audiophile berkelas, pencahayaan ambien 64 warna, dan kursi berpendingin yang menciptakan suasana eksklusif di setiap perjalanan.",
+            "Kabin premium dirancang untuk menghadirkan kenyamanan dan ketenangan, dengan detail yang mendukung pengalaman perjalanan jarak dekat maupun jauh.",
           tag: "Interior",
         },
         {
           id: "j8-adaptive-suspension",
           title: "Suspensi Adaptif Cerdas",
           description:
-            "Sistem suspensi air adaptive yang secara real-time membaca dan menyesuaikan kondisi jalan — kenyamanan luxury di jalan apapun.",
-          tag: "Chassis",
+            "CDC Magnetic Suspension membantu menyesuaikan karakter redaman secara responsif untuk menjaga keseimbangan antara kenyamanan dan kendali.",
+          tag: "Sasis",
         },
         {
           id: "j8-safety360",
           title: "Keamanan 360°",
           description:
-            "Ekosistem sensor, radar, dan kamera menyeluruh dengan Night Vision — melindungi penumpang dari segala arah, siang maupun malam.",
-          tag: "Safety",
+            "19 fitur ADAS dan kamera 540° HD membantu meningkatkan kewaspadaan serta visibilitas di sekitar kendaraan.",
+          tag: "Keselamatan",
         },
         {
           id: "j8-shs-flagship",
           title: "SHS Flagship",
           description:
-            "Super Hybrid System generasi terbaru dengan output tenaga tertinggi di lini JAECOO — performa instan motor listrik berpadu torsi mesin bensin.",
-          tag: "SHS Performance",
+            "Super Hybrid System dengan tiga motor listrik menghasilkan tenaga gabungan hingga 530 PS dan torsi 650 Nm untuk respons yang kuat dan cepat.",
+          tag: "Performa SHS",
         },
       ],
     },
@@ -464,39 +461,43 @@ export const MODELS: ModelData[] = [
         label: "Dimensi",
         specs: [
           { label: "Panjang", value: "4.820 mm" },
-          { label: "Lebar", value: "1.960 mm" },
-          { label: "Tinggi", value: "1.755 mm" },
-          { label: "Wheelbase", value: "2.800 mm" },
-          { label: "Ground Clearance", value: "210 mm (adjustable)" },
+          { label: "Lebar", value: "1.930 mm" },
+          { label: "Tinggi", value: "1.710 mm" },
+          { label: "Wheelbase", value: "2.820 mm" },
+          { label: "Ground Clearance", value: "190 mm" },
         ],
       },
       {
         label: "Powertrain",
         specs: [
-          { label: "Sistem", value: "Super Hybrid System (SHS) Flagship" },
-          { label: "Transmisi", value: "DHT (Dedicated Hybrid Transmission)" },
+          { label: "Sistem", value: "Super Hybrid System · Triple Motor" },
+          { label: "Transmisi", value: "3DHT" },
           { label: "Penggerak", value: "AWD" },
-          { label: "Kapasitas Mesin", value: "Hubungi dealer untuk detail" },
-          { label: "Kapasitas Tangki", value: "Hubungi dealer untuk detail" },
+          { label: "Baterai", value: "34,46 kWh · LFP" },
+          { label: "Jarak Tempuh Listrik", value: "hingga 180 km" },
+          { label: "Tenaga Gabungan", value: "530 PS" },
+          { label: "Torsi Maksimum", value: "650 Nm" },
+          { label: "0–100 km/jam", value: "5,4 detik" },
+          { label: "Kecepatan Maksimum", value: "205 km/jam" },
         ],
       },
       {
         label: "Kenyamanan & Keselamatan",
         specs: [
-          { label: "ADAS", value: "Ya — Level 2+ (dengan Night Vision)" },
+          { label: "ADAS", value: "19 fitur" },
           { label: "Airbag", value: "10 Airbag" },
-          { label: "Layar Infotainment", value: "Triple display flagship" },
-          { label: "Apple CarPlay / Android Auto", value: "Ya (Wireless)" },
-          { label: "Panoramic Sunroof", value: "Ya (Electrochromic)" },
-          { label: "Kamera 360°", value: "Ya (HD dengan Night Vision)" },
-          { label: "Suspensi", value: "Adaptive Air Suspension" },
-          { label: "Kursi Pengemudi", value: "10-way electric + massage + ventilated" },
+          { label: "Kamera", value: "540° HD" },
+          { label: "Pengisian AC", value: "7.700 W" },
+          { label: "V2L", value: "6,6 kW" },
+          { label: "Pengisian DC", value: "sekitar 20 menit" },
+          { label: "Mode Berkendara", value: "7 mode ARDIS" },
+          { label: "Kapasitas", value: "7 penumpang" },
         ],
       },
     ],
     meta_title: "JAECOO J8 Ardis SHS — Harga & Spesifikasi | JAECOO Palembang",
     meta_description:
-      "JAECOO J8 Ardis SHS Rp865.000.000 OTR Palembang. SUV flagship hybrid AWD dengan adaptive air suspension dan kabin premium. Jadwalkan test drive eksklusif bersama Sales JAECOO Palembang.",
+      "JAECOO J8 Ardis SHS Rp865.000.000 OTR Palembang. SUV unggulan hybrid AWD dengan adaptive air suspension dan kabin premium. Jadwalkan test drive eksklusif bersama Sales JAECOO Palembang.",
     published: true,
     updated_at: "2025-09-01T00:00:00Z",
   },

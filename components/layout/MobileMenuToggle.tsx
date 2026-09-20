@@ -103,7 +103,7 @@ export function MobileMenuToggle({ navLinks, inverted = false }: Props) {
               onClick={close}
               tabIndex={open ? 0 : -1}
             >
-              Talk to Alvan →
+              Chat dengan Alvan →
             </a>
           </div>
         </div>

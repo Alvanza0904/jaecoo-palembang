@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/Button";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import type { ResponsiveImage } from "@/lib/types/media";
 import { formatDate } from "@/lib/utils/format";
-import { Reveal } from "@/components/motion/Reveal";
 import styles from "./HomeExperience.module.css";
 
 function Media({ src, alt, className = "" }: { src?: string | null; alt: string; className?: string }) {
@@ -28,7 +27,7 @@ function Media({ src, alt, className = "" }: { src?: string | null; alt: string;
 }
 
 // Kept for fallback
-export function HomeRange({ models }: { models: ModelData[] }) {
+export function HomeJarak Tempuh({ models }: { models: ModelData[] }) {
   return (
     <section className={styles.range} id="range" aria-labelledby="range-title">
       <div>
@@ -65,25 +64,21 @@ export function HomeExperienceSection({
         className={styles.experienceMedia}
       />
       <div className={styles.experienceCopy}>
-        <Reveal variant="fade-up">
-          <span className={styles.eyebrow}>The Experience</span>
-          <h2 id="experience-title" className={styles.experienceTitle}>
-            {cms?.title || "A different kind of journey."}
-          </h2>
-          <p className={styles.experienceDesc}>
-            {cms?.description || "Dari mobilitas elektrik hingga Super Hybrid, JAECOO menghadirkan pengalaman berkendara yang dibangun untuk kebutuhan yang berbeda."}
-          </p>
-        </Reveal>
-        <Reveal variant="slide-right" delay={140}>
-          <Link className={styles.textLink} href="/model">Explore the lineup →</Link>
-        </Reveal>
+        <span className={styles.eyebrow}>Pengalaman Berkendara</span>
+        <h2 id="experience-title" className={styles.experienceTitle}>
+          {cms?.title || "Pengalaman\nTanpa Kompromi."}
+        </h2>
+        <p className={styles.experienceDesc}>
+          {cms?.description || "Kenyamanan premium di setiap medan. Dirancang untuk mereka yang berani menjelajah batas."}
+        </p>
+        <Link className={styles.textLink} href="/berita">Lihat Informasi →</Link>
       </div>
     </section>
   );
 }
 
-// ── Technology ──────────────────────────────────────────────
-export function HomeTechnologySection({
+// ── Teknologi ──────────────────────────────────────────────
+export function HomeTeknologiSection({
   image,
   cms,
 }: {
@@ -94,19 +89,17 @@ export function HomeTechnologySection({
     <section className={styles.technology} aria-labelledby="technology-title">
       <Media
         src={image?.desktop}
-        alt="JAECOO — Advanced Technology"
+        alt="JAECOO — Advanced Teknologi"
         className={styles.technologyMedia}
       />
       <div className={styles.technologyCopy}>
-        <Reveal variant="blur">
-          <span className={styles.eyebrow}>Technology</span>
-          <h2 id="technology-title" className={styles.technologyTitle}>
-            {cms?.title || "Technology that feels natural."}
-          </h2>
-          <p className={styles.technologyDesc}>
-            {cms?.description || "Teknologi JAECOO menyatukan tenaga, awareness, dan kontrol dalam pengalaman yang terasa intuitif—bukan rumit."}
-          </p>
-        </Reveal>
+        <span className={styles.eyebrow}>Teknologi</span>
+        <h2 id="technology-title" className={styles.technologyTitle}>
+          {cms?.title || "Teknologi\nCerdas."}
+        </h2>
+        <p className={styles.technologyDesc}>
+          {cms?.description || "Sistem SHS dan ARDIS terdepan di kelasnya — merevolusi pengalaman berkendara off-road dan EV range."}
+        </p>
       </div>
     </section>
   );
@@ -120,7 +113,7 @@ export function HomePromoSection({ promos }: { promos: Promo[] }) {
       <div className={styles.promoInner}>
         <div className={styles.promoHeader}>
           <span className={styles.eyebrow}>Penawaran</span>
-          <h2 id="promo-title" className={styles.promoTitle}>Promo Eksklusif</h2>
+          <h2 id="promo-title" className={styles.promoTitle}>Penawaran Terkini</h2>
         </div>
         <div className={styles.promoGrid}>
           {promos.slice(0, 3).map((promo) => (
@@ -162,18 +155,14 @@ export function HomeAboutSection({
           className={styles.aboutMedia}
         />
         <div className={styles.aboutCopy}>
-          <Reveal variant="slide-left">
-            <span className={styles.eyebrow}>Dealer Resmi</span>
-            <h2 id="about-title" className={styles.aboutTitle}>
-              {cms?.title || "OMODA JAECOO\nPalembang."}
-            </h2>
-            <p className={styles.aboutDesc}>
-              {cms?.description || "Temukan lineup JAECOO di Palembang dan dapatkan bantuan langsung dari Alvan—mulai dari konsultasi model hingga test drive."}
-            </p>
-          </Reveal>
-          <Reveal variant="fade" delay={180}>
-            <Link href="/sales-jaecoo-palembang" className={styles.aboutLink}>Meet Alvan →</Link>
-          </Reveal>
+          <span className={styles.eyebrow}>Dealer Resmi</span>
+          <h2 id="about-title" className={styles.aboutTitle}>
+            {cms?.title || "OMODA JAECOO\nPalembang."}
+          </h2>
+          <p className={styles.aboutDesc}>
+            {cms?.description || "Dealer resmi OMODA JAECOO Palembang — menghadirkan lineup SUV premium terbaru. Dari konsultasi hingga test drive, kami hadir untuk Anda."}
+          </p>
+          <Link href="/sales-jaecoo-palembang" className={styles.aboutLink}>Hubungi Alvan →</Link>
         </div>
       </div>
     </section>
@@ -186,8 +175,8 @@ export function HomeJournalSection({ news }: { news: NewsData[] }) {
     <section className={styles.journal} aria-labelledby="journal-title">
       <div className={styles.journalInner}>
         <div className={styles.journalHeader}>
-          <h2 id="journal-title" className={styles.journalTitle}>JAECOO Journal</h2>
-          <Link href="/berita" className={styles.textLink}>View all →</Link>
+          <h2 id="journal-title" className={styles.journalTitle}>Berita & Informasi JAECOO</h2>
+          <Link href="/berita" className={styles.textLink}>Lihat semua →</Link>
         </div>
 
         {!news.length ? (
@@ -251,7 +240,7 @@ export function HomeFinalCTA({
           {cms?.description || "Hubungi Alvan sekarang untuk konsultasi gratis, test drive, dan penawaran eksklusif."}
         </p>
         <Button as="a" href={wa} variant="primary" size="lg" target="_blank" rel="noopener noreferrer">
-          Talk to Alvan →
+          Chat dengan Alvan →
         </Button>
       </div>
     </section>

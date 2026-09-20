@@ -512,7 +512,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
   //   - _meta.cutout_bbox is not already present
   //   - Not already computing
   //
-  // Performance: pixel scan runs on a 512px-wide offscreen canvas, once only.
+  // Performa: pixel scan runs on a 512px-wide offscreen canvas, once only.
   // Never runs on every render or during drag.
 
   useEffect(() => {
@@ -1314,7 +1314,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                           >
                             <span className={styles.typoCanvasCtaLabel}>CTA SAFE AREA</span>
                             <div className={styles.typoCanvasCtaButtons}>
-                              <span className={styles.typoCanvasCtaBtn}>Talk to Alvan →</span>
+                              <span className={styles.typoCanvasCtaBtn}>Chat dengan Alvan →</span>
                               <span className={styles.typoCanvasCtaBtnGhost}>Spesifikasi</span>
                             </div>
                           </div>

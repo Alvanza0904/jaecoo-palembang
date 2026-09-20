@@ -36,7 +36,7 @@ export default async function PromoPage() {
       <section className={styles.section}>
         <div className={styles.inner}>
           <div className={styles.header}>
-            <span className={styles.eyebrow}>Current Offers</span>
+            <span className={styles.eyebrow}>Penawaran Terkini</span>
             <h1 className={styles.heading}>Promo Terkini</h1>
           </div>
 

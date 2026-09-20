@@ -1,12 +1,12 @@
 /**
- * JAECOO Palembang — Model Technology Page
+ * JAECOO Palembang — Model Teknologi Page
  * Route: /model/[slug]/technology
  *
- * STEP 7C: Image-Led Cinematic Technology.
+ * STEP 7C: Image-Led Cinematic Teknologi.
  *
  * Architecture (cinematic scenes, NOT card grid):
  *   01 HERO — Full-bleed cinematic image, editorial headline overlay
- *   02 INTELLIGENCE — Cockpit / HMI full scene
+ *   02 INTELLIGENCE — Kokpit / HMI full scene
  *   03 CONNECTIVITY — Smart / digital lifestyle scene
  *   04 SAFETY TECH — ADAS / sensor scene
  *   [N] FEATURE SCENES — Each technology feature as its own cinematic scene
@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function TechnologyPage({ params }: Props) {
+export default async function TeknologiPage({ params }: Props) {
   const { slug } = await params;
   const model = await getModelBySlug(slug);
   if (!model) notFound();
@@ -113,7 +113,7 @@ export default async function TechnologyPage({ params }: Props) {
             <Reveal variant="fade-up" delay={100}>
               <p className={styles.sceneEyebrow}>
                 <span className={styles.eyebrowLine} />
-                <span>Technology</span>
+                <span>Teknologi</span>
               </p>
             </Reveal>
 
@@ -144,7 +144,7 @@ export default async function TechnologyPage({ params }: Props) {
       )}
 
       {/* ══════════════════════════════════════════════════════════
-          02 — INTELLIGENCE SCENE — HMI / Smart Cockpit
+          02 — INTELLIGENCE SCENE — HMI / Smart Kokpit
           Full-bleed dark scene, text overlays bottom-left
       ══════════════════════════════════════════════════════════ */}
       <section className={styles.cinematicScene} data-theme="dark">
@@ -172,7 +172,7 @@ export default async function TechnologyPage({ params }: Props) {
           <Reveal variant="slide-left" delay={0}>
             <p className={styles.sceneEyebrow}>
               <span className={styles.eyebrowLine} />
-              <span>Intelligence</span>
+              <span>Kecerdasan</span>
             </p>
           </Reveal>
           <LineReveal
@@ -286,7 +286,7 @@ export default async function TechnologyPage({ params }: Props) {
               <Reveal variant="fade-down" delay={0}>
                 <p className={styles.sceneEyebrow}>
                   <span className={styles.eyebrowLine} />
-                  <span>Connectivity</span>
+                  <span>Konektivitas</span>
                 </p>
               </Reveal>
               <Reveal variant="scale" delay={140}>
@@ -319,7 +319,7 @@ export default async function TechnologyPage({ params }: Props) {
               <Reveal variant="slide-right" delay={0}>
                 <p className={styles.sceneEyebrow}>
                   <span className={styles.eyebrowLine} />
-                  <span>Safety</span>
+                  <span>Keselamatan</span>
                 </p>
               </Reveal>
               <LineReveal
@@ -422,7 +422,7 @@ export default async function TechnologyPage({ params }: Props) {
       </section>
 
       {/* ══════════════════════════════════════════════════════════
-          NAV — Prev / Next navigation
+          NAV — Sebelumnya / Berikutnya navigation
       ══════════════════════════════════════════════════════════ */}
       <nav className={styles.pageNav} aria-label="Model navigation">
         <Button as="link" href={`/model/${slug}`} variant="ghost" size="md">

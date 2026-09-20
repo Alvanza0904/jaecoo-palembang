@@ -113,7 +113,7 @@ export function ScrollHeader({ navLinks, whatsappUrl, logo, logoLight }: ScrollH
             target="_blank"
             rel="noopener noreferrer"
           >
-            Talk to Alvan
+            Chat dengan Alvan
           </Button>
         </div>
 

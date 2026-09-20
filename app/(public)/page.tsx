@@ -18,7 +18,7 @@ import { HomeDealerLocation } from "@/components/sections/HomeDealerLocation";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import {
   HomeExperienceSection,
-  HomeTechnologySection,
+  HomeTeknologiSection,
   HomePromoSection,
   HomeJournalSection,
   HomeAboutSection,
@@ -73,7 +73,7 @@ export default async function HomePage() {
           cta={
             <div className={styles.heroCtas}>
               <Button as="link" href={cms.hero.ctaUrl || "/model/jaecoo-j5-ev"} variant="primary" size="lg">
-                {cms.hero.ctaText || "Explore J5"}
+                {cms.hero.ctaText || "Jelajahi J5"}
               </Button>
               <Button
                 as="a"
@@ -83,7 +83,7 @@ export default async function HomePage() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Talk to Alvan →
+                Chat dengan Alvan →
               </Button>
             </div>
           }
@@ -102,7 +102,7 @@ export default async function HomePage() {
       />
 
       {/* ── TECHNOLOGY ──────────────────────────────── */}
-      <HomeTechnologySection
+      <HomeTeknologiSection
         image={homeMedia[contentMediaKey("home", "home", "technology")]}
         cms={cms.technology}
       />

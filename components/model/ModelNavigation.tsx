@@ -21,8 +21,8 @@ export function ModelNavigation({ slug, modelName }: ModelNavigationProps) {
 
   const tabs = [
     { label: "Overview", href: `/model/${slug}` },
-    { label: "Technology", href: `/model/${slug}/technology` },
-    { label: "Specifications", href: `/model/${slug}/specifications` },
+    { label: "Teknologi", href: `/model/${slug}/technology` },
+    { label: "Spesifikasi", href: `/model/${slug}/specifications` },
   ];
 
   return (
