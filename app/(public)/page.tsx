@@ -128,6 +128,7 @@ export default async function HomePage() {
       {/* ── DEALER LOCATION ─────────────────────────── */}
       <HomeDealerLocation
         backgroundImage={homeMedia[contentMediaKey("home", "home", "dealer_location")]}
+        cms={cms.dealer_location}
       />
     </>
   );
