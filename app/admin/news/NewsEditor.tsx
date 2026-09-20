@@ -87,7 +87,7 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
   }
 
   function handleMediaSelect(asset: MediaAsset) {
-    setForm(prev => ({ ...prev, cover_url: asset.public_url }));
+    setForm(prev => ({ ...prev, cover_url: asset.public_url ?? '' }));
   }
 
   function handleSubmit() {
