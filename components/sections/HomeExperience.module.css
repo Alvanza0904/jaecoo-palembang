@@ -32,23 +32,44 @@
 
 /* ── Experience ── */
 .experience {
-  display: grid;
-  grid-template-columns: 1fr;
-  min-height: 70vh;
-  background-color: var(--color-off-white);
+  position: relative;
+  min-height: 80vw;
+  display: flex;
+  align-items: flex-end;
+  background-color: var(--color-charcoal);
+  overflow: hidden;
 }
 
 .experienceMedia {
-  height: 50vw;
-  min-height: 280px;
-  max-height: 560px;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.experienceMedia img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* dark gradient overlay */
+.experience::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.20) 60%, transparent 100%);
+  pointer-events: none;
 }
 
 .experienceCopy {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: var(--space-12) var(--container-padding);
+  justify-content: flex-end;
+  padding: var(--space-10) var(--container-padding);
+  width: 100%;
 }
 
 .experienceTitle {
@@ -56,17 +77,17 @@
   font-weight: var(--weight-bold);
   letter-spacing: var(--tracking-tight);
   line-height: var(--leading-tight);
-  color: var(--color-ink);
-  margin-bottom: var(--space-5);
+  color: var(--color-white);
+  margin-bottom: var(--space-3);
   max-width: 18ch;
 }
 
 .experienceDesc {
-  font-size: var(--text-md);
-  color: var(--color-ink-muted);
+  font-size: var(--text-base);
+  color: rgba(255,255,255,0.70);
   max-width: 42ch;
   line-height: var(--leading-normal);
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-6);
 }
 
 .textLink {
@@ -74,9 +95,9 @@
   font-weight: var(--weight-medium);
   letter-spacing: var(--tracking-wider);
   text-transform: uppercase;
-  color: var(--color-ink);
+  color: var(--color-white);
   text-decoration: none;
-  border-bottom: 1px solid var(--color-ink);
+  border-bottom: 1px solid rgba(255,255,255,0.5);
   padding-bottom: 2px;
   display: inline-block;
   transition: opacity var(--duration-fast) var(--ease-out);
@@ -85,39 +106,58 @@
 
 /* ── Technology ── */
 .technology {
-  display: grid;
-  grid-template-columns: 1fr;
+  position: relative;
+  min-height: 80vw;
+  display: flex;
+  align-items: flex-end;
   background-color: var(--color-charcoal);
-  color: var(--color-ink-on-dark);
-  min-height: 70vh;
+  overflow: hidden;
 }
 
 .technologyMedia {
-  height: 50vw;
-  min-height: 280px;
-  max-height: 560px;
-  order: -1;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  order: 0;
+}
+.technologyMedia img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.technology::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.25) 55%, transparent 100%);
+  pointer-events: none;
 }
 
 .technologyCopy {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: var(--space-12) var(--container-padding);
+  justify-content: flex-end;
+  padding: var(--space-10) var(--container-padding);
+  width: 100%;
 }
 
 .technologyTitle {
   font-size: clamp(var(--text-2xl), 5vw, var(--text-4xl));
   font-weight: var(--weight-bold);
   letter-spacing: var(--tracking-tight);
-  color: var(--color-ink-on-dark);
-  margin-bottom: var(--space-5);
+  color: var(--color-white);
+  margin-bottom: var(--space-3);
   max-width: 18ch;
 }
 
 .technologyDesc {
-  font-size: var(--text-md);
-  color: var(--color-ink-muted-dark);
+  font-size: var(--text-base);
+  color: rgba(255,255,255,0.70);
   max-width: 42ch;
   line-height: var(--leading-normal);
 }
@@ -442,30 +482,59 @@
 }
 
 @media (min-width: 1024px) {
+  /* Experience desktop — side by side */
   .experience {
+    display: grid;
     grid-template-columns: 1fr 1fr;
+    min-height: 560px;
+    align-items: stretch;
   }
+  .experience::after { display: none; }
   .experienceMedia {
+    position: relative;
+    inset: unset;
+    width: auto;
     height: auto;
-    max-height: none;
     min-height: 560px;
   }
   .experienceCopy {
+    position: relative;
+    background-color: var(--color-off-white);
     padding: var(--space-20) var(--space-16);
+    justify-content: center;
+  }
+  .experienceTitle { color: var(--color-ink); }
+  .experienceDesc { color: var(--color-ink-muted); }
+  .textLink {
+    color: var(--color-ink);
+    border-bottom-color: var(--color-ink);
   }
 
+  /* Technology desktop — side by side */
   .technology {
+    display: grid;
     grid-template-columns: 1fr 1fr;
-  }
-  .technologyMedia {
-    height: auto;
-    max-height: none;
-    order: 0;
     min-height: 560px;
+    align-items: stretch;
+  }
+  .technology::after { display: none; }
+  .technologyMedia {
+    position: relative;
+    inset: unset;
+    width: auto;
+    height: auto;
+    min-height: 560px;
+    order: 1;
   }
   .technologyCopy {
+    position: relative;
+    background-color: var(--color-charcoal);
     padding: var(--space-20) var(--space-16);
+    justify-content: center;
+    order: 0;
   }
+  .technologyTitle { color: var(--color-ink-on-dark); }
+  .technologyDesc { color: var(--color-ink-muted-dark); }
 
   .aboutInner {
     grid-template-columns: 1fr 1fr;
