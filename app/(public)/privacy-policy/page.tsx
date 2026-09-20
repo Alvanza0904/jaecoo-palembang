@@ -70,7 +70,7 @@ export default function PrivacyPage() {
           }}
         >
           <p style={paraStyle}>
-            OMODA JAECOO Palembang ("kami") berkomitmen untuk melindungi privasi setiap pengunjung dan calon pelanggan yang menggunakan website ini. Kebijakan ini menjelaskan informasi apa yang kami kumpulkan, bagaimana kami menggunakannya, dan bagaimana kami menjaganya.
+            OMODA JAECOO Palembang (&ldquo;kami&rdquo;) berkomitmen untuk melindungi privasi setiap pengunjung dan calon pelanggan yang menggunakan website ini. Kebijakan ini menjelaskan informasi apa yang kami kumpulkan, bagaimana kami menggunakannya, dan bagaimana kami menjaganya.
           </p>
 
           <h2 style={headingStyle}>Informasi yang Kami Kumpulkan</h2>
