@@ -56,13 +56,15 @@ export function HomeExperienceSection({
   image?: ResponsiveImage;
   cms?: { title?: string; description?: string };
 }) {
+  const expSrc = image?.desktop;
   return (
     <section className={styles.experience} aria-labelledby="experience-title">
-      <Media
-        src={image?.desktop}
-        alt="JAECOO — Premium SUV Experience"
-        className={styles.experienceMedia}
-      />
+      {expSrc && expSrc.startsWith("http") ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={expSrc} alt="" className={styles.experienceMedia} loading="lazy" decoding="async" aria-hidden="true" />
+      ) : (
+        <div className={styles.experienceMedia} aria-hidden="true" />
+      )}
       <div className={styles.experienceCopy}>
         <span className={styles.eyebrow}>Pengalaman Berkendara</span>
         <h2 id="experience-title" className={styles.experienceTitle}>
@@ -85,13 +87,15 @@ export function HomeTeknologiSection({
   image?: ResponsiveImage;
   cms?: { title?: string; description?: string };
 }) {
+  const techSrc = image?.desktop;
   return (
     <section className={styles.technology} aria-labelledby="technology-title">
-      <Media
-        src={image?.desktop}
-        alt="JAECOO — Advanced Teknologi"
-        className={styles.technologyMedia}
-      />
+      {techSrc && techSrc.startsWith("http") ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={techSrc} alt="" className={styles.technologyMedia} loading="lazy" decoding="async" aria-hidden="true" />
+      ) : (
+        <div className={styles.technologyMedia} aria-hidden="true" />
+      )}
       <div className={styles.technologyCopy}>
         <span className={styles.eyebrow}>Teknologi</span>
         <h2 id="technology-title" className={styles.technologyTitle}>
