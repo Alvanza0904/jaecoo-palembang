@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/Button";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import type { ResponsiveImage } from "@/lib/types/media";
 import { formatDate } from "@/lib/utils/format";
+import { Reveal } from "@/components/motion/Reveal";
 import styles from "./HomeExperience.module.css";
 
 function Media({ src, alt, className = "" }: { src?: string | null; alt: string; className?: string }) {
@@ -64,14 +65,18 @@ export function HomeExperienceSection({
         className={styles.experienceMedia}
       />
       <div className={styles.experienceCopy}>
-        <span className={styles.eyebrow}>The Experience</span>
-        <h2 id="experience-title" className={styles.experienceTitle}>
-          {cms?.title || "Unrivaled\nExperience."}
-        </h2>
-        <p className={styles.experienceDesc}>
-          {cms?.description || "Kenyamanan premium di setiap medan. Dirancang untuk mereka yang berani menjelajah batas."}
-        </p>
-        <Link className={styles.textLink} href="/berita">Explore the Journal →</Link>
+        <Reveal variant="fade-up">
+          <span className={styles.eyebrow}>The Experience</span>
+          <h2 id="experience-title" className={styles.experienceTitle}>
+            {cms?.title || "A different kind of journey."}
+          </h2>
+          <p className={styles.experienceDesc}>
+            {cms?.description || "Dari mobilitas elektrik hingga Super Hybrid, JAECOO menghadirkan pengalaman berkendara yang dibangun untuk kebutuhan yang berbeda."}
+          </p>
+        </Reveal>
+        <Reveal variant="slide-right" delay={140}>
+          <Link className={styles.textLink} href="/model">Explore the lineup →</Link>
+        </Reveal>
       </div>
     </section>
   );
@@ -93,13 +98,15 @@ export function HomeTechnologySection({
         className={styles.technologyMedia}
       />
       <div className={styles.technologyCopy}>
-        <span className={styles.eyebrow}>Technology</span>
-        <h2 id="technology-title" className={styles.technologyTitle}>
-          {cms?.title || "Advanced\nTechnology."}
-        </h2>
-        <p className={styles.technologyDesc}>
-          {cms?.description || "Sistem SHS dan ARDIS terdepan di kelasnya — merevolusi pengalaman berkendara off-road dan EV range."}
-        </p>
+        <Reveal variant="blur">
+          <span className={styles.eyebrow}>Technology</span>
+          <h2 id="technology-title" className={styles.technologyTitle}>
+            {cms?.title || "Technology that feels natural."}
+          </h2>
+          <p className={styles.technologyDesc}>
+            {cms?.description || "Teknologi JAECOO menyatukan tenaga, awareness, dan kontrol dalam pengalaman yang terasa intuitif—bukan rumit."}
+          </p>
+        </Reveal>
       </div>
     </section>
   );
@@ -155,14 +162,18 @@ export function HomeAboutSection({
           className={styles.aboutMedia}
         />
         <div className={styles.aboutCopy}>
-          <span className={styles.eyebrow}>Dealer Resmi</span>
-          <h2 id="about-title" className={styles.aboutTitle}>
-            {cms?.title || "OMODA JAECOO\nPalembang."}
-          </h2>
-          <p className={styles.aboutDesc}>
-            {cms?.description || "Dealer resmi OMODA JAECOO Palembang — menghadirkan lineup SUV premium terbaru. Dari konsultasi hingga test drive, kami hadir untuk Anda."}
-          </p>
-          <Link href="/sales-jaecoo-palembang" className={styles.aboutLink}>Meet Alvan →</Link>
+          <Reveal variant="slide-left">
+            <span className={styles.eyebrow}>Dealer Resmi</span>
+            <h2 id="about-title" className={styles.aboutTitle}>
+              {cms?.title || "OMODA JAECOO\nPalembang."}
+            </h2>
+            <p className={styles.aboutDesc}>
+              {cms?.description || "Temukan lineup JAECOO di Palembang dan dapatkan bantuan langsung dari Alvan—mulai dari konsultasi model hingga test drive."}
+            </p>
+          </Reveal>
+          <Reveal variant="fade" delay={180}>
+            <Link href="/sales-jaecoo-palembang" className={styles.aboutLink}>Meet Alvan →</Link>
+          </Reveal>
         </div>
       </div>
     </section>

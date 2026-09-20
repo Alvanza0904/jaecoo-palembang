@@ -14,9 +14,15 @@ import styles from "./HomeModelSlider.module.css";
 interface Props { models: ModelData[]; }
 
 const SLUG_LABEL: Record<string, string> = {
-  "jaecoo-j5-ev":  "J5",
+  "jaecoo-j5-ev":  "J5 EV",
   "jaecoo-j7-shs": "J7 SHS",
-  "jaecoo-j8-shs": "J8 SHS",
+  "jaecoo-j8-shs": "J8 SHS-P ARDIS",
+};
+
+const MODEL_HIGHLIGHTS: Record<string, string> = {
+  "jaecoo-j5-ev": "SUV listrik premium · 461 km NEDC · 130 kW / 210 PS",
+  "jaecoo-j7-shs": "Super Hybrid · EV 100+ km · 1.300 km kombinasi",
+  "jaecoo-j8-shs": "Flagship SHS · 530 PS · ARDIS AWD · 5,4 detik",
 };
 
 function sorted(models: ModelData[]) {
@@ -97,10 +103,13 @@ export function HomeModelSlider({ models }: Props) {
                   {SLUG_LABEL[model.slug] ?? model.short_name}
                 </span>
                 <span className={styles.slideTagline}>{model.tagline}</span>
+                <span className={styles.slideHighlight}>
+                  {MODEL_HIGHLIGHTS[model.slug] ?? model.description}
+                </span>
 
                 <div className={styles.slideActions}>
                   <Link href={`/model/${model.slug}`} className={styles.slideLink}>
-                    Explore {SLUG_LABEL[model.slug] ?? model.short_name} →
+                    Jelajahi {SLUG_LABEL[model.slug] ?? model.short_name} →
                   </Link>
                   <span className={styles.slidePrice}>
                     <PriceDisplay

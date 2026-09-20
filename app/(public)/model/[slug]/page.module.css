@@ -903,3 +903,25 @@
   gap: var(--space-3);
   margin-top: var(--space-2);
 }
+
+/* Editorial copy additions */
+.colorsBody,
+.specsBody {
+  max-width: 42ch;
+  margin: var(--space-3) auto 0;
+  color: var(--color-ink-muted);
+  font-size: var(--text-md);
+  line-height: var(--leading-normal);
+}
+
+.specsBody {
+  margin-left: 0;
+  color: rgba(255,255,255,0.72);
+}
+
+@media (max-width: 700px) {
+  .colorsBody,
+  .specsBody {
+    font-size: var(--text-sm);
+  }
+}

@@ -84,8 +84,25 @@
   display: block;
   font-size: clamp(var(--text-base), 2vw, var(--text-lg));
   color: rgba(255,255,255,0.55);
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-3);
   max-width: 42ch;
+}
+
+.slideHighlight {
+  display: block;
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: rgba(255,255,255,0.78);
+  max-width: 56ch;
+  margin-bottom: var(--space-8);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 650ms var(--ease-out) 120ms, transform 650ms var(--ease-out) 120ms;
+}
+
+.slideActive .slideHighlight {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .slideActions {
