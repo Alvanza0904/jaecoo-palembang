@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from 'react';
 import { saveNews, deleteNews, type NewsFormData } from './actions';
+import { MediaPicker } from '@/components/admin/media/MediaPicker';
+import type { MediaAsset } from '@/lib/types/media-asset';
 import styles from '../dashboard.module.css';
 import editorStyles from './news.module.css';
 
@@ -42,6 +44,7 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
   const [message, setMessage] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
   const [isPending, startTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   function openNew() {
     setEditing(null);
@@ -83,6 +86,10 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
     }));
   }
 
+  function handleMediaSelect(asset: MediaAsset) {
+    setForm(prev => ({ ...prev, cover_url: asset.public_url }));
+  }
+
   function handleSubmit() {
     if (!form.title.trim()) { setMessage({ type: 'err', text: 'Judul wajib diisi.' }); return; }
     if (!form.excerpt.trim()) { setMessage({ type: 'err', text: 'Excerpt wajib diisi.' }); return; }
@@ -91,7 +98,6 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
       const result = await saveNews(editing?.id ?? null, form);
       if (result.success) {
         setMessage({ type: 'ok', text: editing ? 'Artikel diperbarui.' : 'Artikel disimpan.' });
-        // Reload list
         setTimeout(() => window.location.reload(), 800);
       } else {
         setMessage({ type: 'err', text: result.error ?? 'Gagal menyimpan.' });
@@ -117,6 +123,15 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
 
   return (
     <div>
+      {/* Media Picker Modal */}
+      <MediaPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={handleMediaSelect}
+        defaultCategory="news"
+        title="Pilih Foto Cover"
+      />
+
       {/* Header */}
       <div className={styles.header}>
         <div>
@@ -167,10 +182,31 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
             </div>
           </div>
 
+          {/* Cover Image — pakai MediaPicker */}
           <div className={editorStyles.field}>
-            <label className={editorStyles.label}>URL Foto Cover</label>
-            <input className={editorStyles.input} name="cover_url" value={form.cover_url} onChange={handleChange} placeholder="https://..." />
-            {form.cover_url && <img src={form.cover_url} alt="preview" className={editorStyles.imgPreview} />}
+            <label className={editorStyles.label}>Foto Cover</label>
+            <div className={editorStyles.coverWrap}>
+              {form.cover_url ? (
+                <div className={editorStyles.coverPreview}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={form.cover_url} alt="Cover preview" className={editorStyles.coverImg} />
+                  <div className={editorStyles.coverActions}>
+                    <button type="button" className={editorStyles.btnGhost} onClick={() => setPickerOpen(true)}>
+                      Ganti Foto
+                    </button>
+                    <button type="button" className={editorStyles.btnDanger} onClick={() => setForm(p => ({ ...p, cover_url: '' }))}>
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button type="button" className={editorStyles.coverUploadBtn} onClick={() => setPickerOpen(true)}>
+                  <span className={editorStyles.coverUploadIcon}>📷</span>
+                  <span>Pilih atau Upload Foto</span>
+                  <span className={editorStyles.coverUploadHint}>JPG, PNG, WebP — maks. 10 MB</span>
+                </button>
+              )}
+            </div>
           </div>
 
           <div className={editorStyles.field}>
@@ -224,6 +260,10 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
         )}
         {news.map(item => (
           <div key={item.id} className={styles.moduleRow}>
+            {item.cover_url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={item.cover_url} alt="" className={editorStyles.listThumb} />
+            )}
             <div className={styles.moduleInfo}>
               <div className={styles.moduleMeta}>
                 <span className={styles.moduleTitle}>{item.title}</span>

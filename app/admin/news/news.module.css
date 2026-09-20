@@ -219,3 +219,72 @@
   color: #dc2626;
   margin-bottom: 1rem;
 }
+
+/* Cover Image */
+.coverWrap {
+  width: 100%;
+}
+
+.coverUploadBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  width: 100%;
+  min-height: 140px;
+  background: var(--color-surface);
+  border: 2px dashed var(--color-border-mid);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  font-family: inherit;
+  color: var(--color-ink-muted);
+  padding: 1.5rem;
+}
+.coverUploadBtn:hover {
+  border-color: var(--color-gold);
+  background: var(--color-off-white);
+  color: var(--color-ink);
+}
+
+.coverUploadIcon {
+  font-size: 1.75rem;
+}
+
+.coverUploadHint {
+  font-size: var(--text-xs);
+  color: var(--color-ink-subtle);
+}
+
+.coverPreview {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.coverImg {
+  width: 180px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.coverActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+}
+
+/* List thumbnail */
+.listThumb {
+  width: 56px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
+}
