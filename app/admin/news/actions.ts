@@ -1,0 +1,78 @@
+'use server';
+
+import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { revalidatePath } from 'next/cache';
+
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
+export interface NewsFormData {
+  title: string;
+  slug?: string;
+  excerpt: string;
+  body_html?: string;
+  category: string;
+  cover_url?: string;
+  published: boolean;
+  published_at?: string;
+  meta_title?: string;
+  meta_description?: string;
+}
+
+export async function saveNews(id: string | null, formData: NewsFormData) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) return { success: false, error: 'Unauthorized.' };
+
+    const slug = formData.slug?.trim()
+      ? formData.slug.trim().toLowerCase()
+      : generateSlug(formData.title);
+
+    const payload = {
+      ...formData,
+      slug,
+      updated_at: new Date().toISOString(),
+      published_at: formData.published_at || new Date().toISOString(),
+    };
+
+    if (id) {
+      const { error } = await supabase.from('news').update(payload).eq('id', id);
+      if (error) throw error;
+    } else {
+      const { error } = await supabase.from('news').insert([payload]);
+      if (error) throw error;
+    }
+
+    revalidatePath('/admin/news');
+    revalidatePath('/berita');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Gagal menyimpan artikel.';
+    return { success: false, error: message };
+  }
+}
+
+export async function deleteNews(id: string) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) return { success: false, error: 'Unauthorized.' };
+
+    const { error } = await supabase.from('news').delete().eq('id', id);
+    if (error) throw error;
+
+    revalidatePath('/admin/news');
+    revalidatePath('/berita');
+    return { success: true };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Gagal menghapus artikel.';
+    return { success: false, error: message };
+  }
+}
