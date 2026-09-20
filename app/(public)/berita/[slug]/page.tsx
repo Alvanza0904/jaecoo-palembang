@@ -80,9 +80,15 @@ export default async function BeritaDetailPage({ params }: Props) {
           {article.body_html ? (
             <div dangerouslySetInnerHTML={{ __html: article.body_html }} />
           ) : (
-            <p className={styles.bodyPlaceholder}>
-              Konten artikel lengkap akan tersedia segera.
-            </p>
+            <div>
+              <p className={styles.bodyPlaceholder}>
+                Artikel ini sedang dalam proses penulisan dan akan segera tersedia.
+              </p>
+              <p className={styles.bodyPlaceholder}>
+                Untuk informasi terkini seputar JAECOO Palembang, hubungi Sales resmi kami
+                Alvan melalui WhatsApp <a href="https://wa.me/6285183145926" target="_blank" rel="noopener noreferrer">0851-8314-5926</a>.
+              </p>
+            </div>
           )}
         </div>
 

@@ -154,8 +154,8 @@ export const MODELS: ModelData[] = [
           { label: "Tipe Motor", value: "Permanent Magnet Synchronous" },
           { label: "Transmisi", value: "Single-speed Reducer" },
           { label: "Penggerak", value: "FWD" },
-          { label: "Kapasitas Baterai", value: "Hubungi dealer untuk detail" },
-          { label: "Jangkauan NEDC", value: "Hubungi dealer untuk detail" },
+          { label: "Kapasitas Baterai", value: "Konfirmasi tersedia di showroom" },
+          { label: "Jangkauan NEDC", value: "Konfirmasi tersedia di showroom" },
         ],
       },
       {
@@ -315,8 +315,8 @@ export const MODELS: ModelData[] = [
           { label: "Sistem", value: "Super Hybrid System (SHS)" },
           { label: "Transmisi", value: "DHT (Dedicated Hybrid Transmission)" },
           { label: "Penggerak", value: "AWD" },
-          { label: "Kapasitas Mesin", value: "Hubungi dealer untuk detail" },
-          { label: "Kapasitas Tangki", value: "Hubungi dealer untuk detail" },
+          { label: "Kapasitas Mesin", value: "Konfirmasi tersedia di showroom" },
+          { label: "Kapasitas Tangki", value: "Konfirmasi tersedia di showroom" },
         ],
       },
       {
@@ -467,8 +467,8 @@ export const MODELS: ModelData[] = [
           { label: "Sistem", value: "Super Hybrid System (SHS) Flagship" },
           { label: "Transmisi", value: "DHT (Dedicated Hybrid Transmission)" },
           { label: "Penggerak", value: "AWD" },
-          { label: "Kapasitas Mesin", value: "Hubungi dealer untuk detail" },
-          { label: "Kapasitas Tangki", value: "Hubungi dealer untuk detail" },
+          { label: "Kapasitas Mesin", value: "Konfirmasi tersedia di showroom" },
+          { label: "Kapasitas Tangki", value: "Konfirmasi tersedia di showroom" },
         ],
       },
       {
