@@ -6,7 +6,7 @@
 
 .heroModel {
   display: block;
-  font-size: clamp(5.5rem, 18vw, 12rem);
+  font-size: clamp(3.5rem, 12vw, 10rem);
   font-weight: var(--weight-bold);
   letter-spacing: var(--tracking-tight);
   line-height: 0.9;

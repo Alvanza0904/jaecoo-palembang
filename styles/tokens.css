@@ -129,9 +129,9 @@
 @media (min-width: 1024px) {
   :root {
     --container-padding: var(--space-8);
-    --section-gap-sm:    var(--space-16);
-    --section-gap-md:    var(--space-32);
-    --section-gap-lg:    var(--space-48);
+    --section-gap-sm:    var(--space-10);
+    --section-gap-md:    var(--space-16);
+    --section-gap-lg:    var(--space-24);
   }
 }
 

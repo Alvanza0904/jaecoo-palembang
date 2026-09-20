@@ -194,12 +194,14 @@ export function HomeJournalSection({ news }: { news: NewsData[] }) {
                     loading="lazy"
                   />
                 )}
-                <div className={styles.newsCardMeta}>
-                  <span className={styles.newsCardCat}>{item.category}</span>
-                  <span className={styles.newsCardDate}>{formatDate(item.published_at)}</span>
+                <div className={styles.newsCardBody}>
+                  <div className={styles.newsCardMeta}>
+                    <span className={styles.newsCardCat}>{item.category}</span>
+                    <span className={styles.newsCardDate}>{formatDate(item.published_at)}</span>
+                  </div>
+                  <h3 className={styles.newsCardTitle}>{item.title}</h3>
+                  <p className={styles.newsCardExcerpt}>{item.excerpt}</p>
                 </div>
-                <h3 className={styles.newsCardTitle}>{item.title}</h3>
-                <p className={styles.newsCardExcerpt}>{item.excerpt}</p>
               </Link>
             ))}
           </div>
