@@ -100,7 +100,7 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
         setMessage({ type: 'ok', text: editing ? 'Artikel diperbarui.' : 'Artikel disimpan.' });
         setTimeout(() => window.location.reload(), 800);
       } else {
-        setMessage({ type: 'err', text: result.error ?? 'Gagal menyimpan.' });
+        setMessage({ type: 'err', text: JSON.stringify(result) });
       }
     });
   }
