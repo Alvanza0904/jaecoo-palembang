@@ -27,10 +27,12 @@ export interface NewsFormData {
 
 export async function saveNews(id: string | null, formData: NewsFormData) {
   try {
+    // Cek auth dulu pakai server client
     const supabase = await createSupabaseServerClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return { success: false, error: 'Unauthorized.' };
 
+    // Pakai admin client untuk bypass RLS
     const admin = createSupabaseAdminClient();
 
     const slug = formData.slug?.trim()
