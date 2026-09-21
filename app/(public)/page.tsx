@@ -1,7 +1,29 @@
 /**
  * JAECOO Palembang — Homepage
  * Route: /
- * Premium automotive editorial experience.
+ *
+ * FIX 2026-09-21: Visual Editor → Live Website data flow
+ *
+ * SEBELUM (BROKEN):
+ *   homeMedia[key]?.desktop  ← hanya URL string, presentation_settings hilang
+ *   homeMedia[key]?.mobile   ← hanya URL string
+ *   → HomepageSectionRenderer tidak punya presentation_settings
+ *   → Hero: fallback ke HeroPlaceholder (no LayeredHero, no custom layout)
+ *   → Sections: object-position hardcoded CSS, bukan dari Visual Editor
+ *
+ * SESUDAH (FIXED):
+ *   homeMedia[key]  ← full ResponsiveImage dengan presentation_settings, focal_x/y, cutout
+ *   → HomepageSectionRenderer.image = full object
+ *   → resolveImage() langsung pakai object lengkap (tidak membangun ulang dari URL)
+ *   → resolveHeroMedia() membaca presentation_settings → LayeredHero dengan layout benar
+ *   → Semua section membaca presentation_settings → visualMediaStyle() + visualTypographyStyles()
+ *
+ * DATA FLOW LENGKAP:
+ *   Visual Editor → save → Supabase (media_assets.presentation_settings)
+ *     → getHomeMedia() → ResponsiveImage (dengan presentation_settings)
+ *     → page.tsx passes as `image` prop
+ *     → HomepageSectionRenderer → resolveImage() → HomeExperienceSection / LayeredHero
+ *     → presentation.ts helpers → CSS styles applied
  */
 
 import type { Metadata } from "next";
@@ -41,6 +63,10 @@ export default async function HomePage() {
     getHomepageContent(),
   ]);
 
+  // Helper — ambil full ResponsiveImage (membawa presentation_settings, focal_x/y, cutout)
+  // KRITIS: jangan extract hanya .desktop atau .mobile — itu membuang presentation_settings
+  const media = (slot: string) => homeMedia[contentMediaKey("home", "home", slot)]
+
   return (
     <>
       <TransparentHeader />
@@ -50,13 +76,16 @@ export default async function HomePage() {
         sectionId="hero"
         mode="live"
         data={{
-          desktop_image: homeMedia[contentMediaKey("home", "home", "hero")]?.desktop,
-          mobile_image: homeMedia[contentMediaKey("home", "home", "hero")]?.mobile,
-          eyebrow: cms.hero.eyebrow,
-          headline: cms.hero.headline,
+          // image = full ResponsiveImage: membawa presentation_settings, focal, cutout
+          image: media("hero"),
+          // Legacy URL fields sebagai fallback (jika image undefined)
+          desktop_image: media("hero")?.desktop,
+          mobile_image:  media("hero")?.mobile,
+          eyebrow:     cms.hero.eyebrow,
+          headline:    cms.hero.headline,
           description: cms.hero.description,
-          ctaText: cms.hero.ctaText,
-          ctaUrl: cms.hero.ctaUrl,
+          ctaText:     cms.hero.ctaText,
+          ctaUrl:      cms.hero.ctaUrl,
         }}
       />
 
@@ -68,10 +97,11 @@ export default async function HomePage() {
         sectionId="experience"
         mode="live"
         data={{
-          desktop_image: homeMedia[contentMediaKey("home", "home", "experience")]?.desktop,
-          mobile_image: homeMedia[contentMediaKey("home", "home", "experience")]?.mobile,
-          title: cms.experience.title,
-          description: cms.experience.description,
+          image:         media("experience"),
+          desktop_image: media("experience")?.desktop,
+          mobile_image:  media("experience")?.mobile,
+          title:         cms.experience.title,
+          description:   cms.experience.description,
         }}
       />
 
@@ -80,10 +110,11 @@ export default async function HomePage() {
         sectionId="technology"
         mode="live"
         data={{
-          desktop_image: homeMedia[contentMediaKey("home", "home", "technology")]?.desktop,
-          mobile_image: homeMedia[contentMediaKey("home", "home", "technology")]?.mobile,
-          title: cms.technology.title,
-          description: cms.technology.description,
+          image:         media("technology"),
+          desktop_image: media("technology")?.desktop,
+          mobile_image:  media("technology")?.mobile,
+          title:         cms.technology.title,
+          description:   cms.technology.description,
         }}
       />
 
@@ -95,10 +126,11 @@ export default async function HomePage() {
         sectionId="about"
         mode="live"
         data={{
-          desktop_image: homeMedia[contentMediaKey("home", "home", "about")]?.desktop,
-          mobile_image: homeMedia[contentMediaKey("home", "home", "about")]?.mobile,
-          title: cms.about.title,
-          description: cms.about.description,
+          image:         media("about"),
+          desktop_image: media("about")?.desktop,
+          mobile_image:  media("about")?.mobile,
+          title:         cms.about.title,
+          description:   cms.about.description,
         }}
       />
 
@@ -110,12 +142,13 @@ export default async function HomePage() {
         sectionId="final_cta"
         mode="live"
         data={{
-          desktop_image: homeMedia[contentMediaKey("home", "home", "final_cta")]?.desktop,
-          mobile_image: homeMedia[contentMediaKey("home", "home", "final_cta")]?.mobile,
-          title: cms.final_cta.title,
-          description: cms.final_cta.description,
-          ctaText: cms.final_cta.ctaText,
-          ctaUrl: cms.final_cta.ctaUrl,
+          image:         media("final_cta"),
+          desktop_image: media("final_cta")?.desktop,
+          mobile_image:  media("final_cta")?.mobile,
+          title:         cms.final_cta.title,
+          description:   cms.final_cta.description,
+          ctaText:       cms.final_cta.ctaText,
+          ctaUrl:        cms.final_cta.ctaUrl,
         }}
       />
 
@@ -124,11 +157,12 @@ export default async function HomePage() {
         sectionId="dealer_location"
         mode="live"
         data={{
-          desktop_image: homeMedia[contentMediaKey("home", "home", "dealer_location")]?.desktop,
-          mobile_image: homeMedia[contentMediaKey("home", "home", "dealer_location")]?.mobile,
-          title: cms.dealer_location.title,
-          description: cms.dealer_location.description,
-          address: cms.dealer_location.address,
+          image:         media("dealer_location"),
+          desktop_image: media("dealer_location")?.desktop,
+          mobile_image:  media("dealer_location")?.mobile,
+          title:         cms.dealer_location.title,
+          description:   cms.dealer_location.description,
+          address:       cms.dealer_location.address,
         }}
       />
     </>

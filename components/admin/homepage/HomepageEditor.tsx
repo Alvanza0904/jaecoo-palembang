@@ -1,13 +1,20 @@
 /**
  * JAECOO Palembang — Homepage Editor (Client Component)
  *
- * Preview sekarang menggunakan HomepageSectionRenderer — komponen
- * yang sama persis dengan live website. TIDAK ada custom preview renderer.
+ * FIX 2026-09-21: Full data flow — Visual Editor → Preview = Live Website
  *
- * SINGLE SOURCE OF TRUTH:
- *   Live Website ──┐
- *                  ├── HomepageSectionRenderer ── CSS Module live
- *   Editor Preview ┘
+ * Perubahan kunci:
+ * - SectionData sekarang menyimpan `image` (full ResponsiveImage) setelah media dipilih
+ * - SectionPreview meneruskan `image` ke SectionRenderData → resolveImage() pakai yang lengkap
+ * - handleMediaSelect: setelah save ke content_media, fetch ulang ResponsiveImage lengkap
+ *   (dengan presentation_settings) dan simpan sebagai `data.image`
+ * - Untuk section hero: heroMediaAsset tetap diisi agar resolveHeroMedia() bisa pakai
+ *   variants object (1920/1440/etc) yang lebih lengkap dari asset MediaAsset langsung
+ *
+ * ARSITEKTUR PREVIEW:
+ *   Editor state.image (ResponsiveImage) → SectionPreview → HomepagePreviewFrame (iframe)
+ *     → HomepagePreviewClient → HomepageSectionRenderer (mode=preview)
+ *     = komponen yang sama persis dengan live website
  *
  * KRITIS: InlineMediaTrigger WAJIB dideklarasikan DI LUAR HomepageEditor
  * agar tidak remount saat parent state berubah (fix keyboard iPhone).
@@ -18,6 +25,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { MediaPicker } from '@/components/admin/media/MediaPicker'
 import AIReadyField from '@/components/admin/ai/AIReadyField'
 import type { MediaAsset } from '@/lib/types/media-asset'
+import type { ResponsiveImage } from '@/lib/types/media'
 import type { HomepageContent } from '@/types/homepage-content'
 import type { SectionId as SharedSectionId, SectionRenderData } from '@/components/sections/HomepageSectionRenderer'
 import { HomepagePreviewFrame } from './HomepagePreviewFrame'
@@ -26,21 +34,20 @@ import styles from './homepage.module.css'
 // ─── Section Config ────────────────────────────────────────────
 
 const SECTIONS = [
-  { id: 'hero'           as const, label: 'Hero',          hasHeadline: true,  hasEyebrow: true,  hasCta: true  },
-  { id: 'experience'     as const, label: 'Experience',    hasHeadline: false, hasEyebrow: false, hasCta: false },
-  { id: 'technology'     as const, label: 'Teknologi',    hasHeadline: false, hasEyebrow: false, hasCta: false },
-  { id: 'about'          as const, label: 'About',         hasHeadline: false, hasEyebrow: false, hasCta: false },
-  { id: 'dealer_location'as const, label: 'Dealer',        hasHeadline: false, hasEyebrow: false, hasCta: false },
-  { id: 'final_cta'      as const, label: 'Final CTA',     hasHeadline: false, hasEyebrow: false, hasCta: true  },
+  { id: 'hero'           as const, label: 'Hero',       hasHeadline: true,  hasEyebrow: true,  hasCta: true  },
+  { id: 'experience'     as const, label: 'Experience', hasHeadline: false, hasEyebrow: false, hasCta: false },
+  { id: 'technology'     as const, label: 'Teknologi',  hasHeadline: false, hasEyebrow: false, hasCta: false },
+  { id: 'about'          as const, label: 'About',      hasHeadline: false, hasEyebrow: false, hasCta: false },
+  { id: 'dealer_location'as const, label: 'Dealer',     hasHeadline: false, hasEyebrow: false, hasCta: false },
+  { id: 'final_cta'      as const, label: 'Final CTA',  hasHeadline: false, hasEyebrow: false, hasCta: true  },
 ]
 
 type SectionId = typeof SECTIONS[number]['id']
 
-// Tipe fleksibel per section: teks string + visual object
+// SectionData menyimpan teks + visual (image = full ResponsiveImage)
 type SectionData = Record<string, unknown>
 
 // ─── Sub-komponen: InlineMediaTrigger ─────────────────────────
-// WAJIB di luar HomepageEditor untuk mencegah remount + keyboard iPhone close
 
 interface InlineMediaTriggerProps {
   label: string
@@ -78,13 +85,8 @@ function InlineMediaTrigger({ label, url, onOpen }: InlineMediaTriggerProps) {
 }
 
 // ─── Sub-komponen: SectionPreview ──────────────────────────────
-// Wrapper tipis di sekitar HomepageSectionRenderer (komponen live website).
-// WAJIB dideklarasikan di luar HomepageEditor (mencegah remount).
-//
-// PERUBAHAN ARSITEKTUR:
-// Sebelumnya: SectionPreview = komponen custom dengan CSS preview sendiri
-// Sekarang:   SectionPreview = shell yang merender HomepageSectionRenderer
-//             → Preview Editor = Live Website secara visual.
+// Shell yang meneruskan data ke HomepagePreviewFrame (iframe).
+// KRITIS: dideklarasikan di luar HomepageEditor (mencegah remount).
 
 interface SectionPreviewProps {
   data: SectionData
@@ -94,21 +96,26 @@ interface SectionPreviewProps {
 
 function SectionPreview({ data, sectionId, device }: SectionPreviewProps) {
   const renderData: SectionRenderData = {
+    // FIX: teruskan full ResponsiveImage (membawa presentation_settings)
+    // Priority 1: data.image = full object yang disimpan setelah media dipilih
+    image: (data.image as ResponsiveImage | undefined) ?? undefined,
+    // Fallback URL strings (untuk thumbnail + inisialisasi awal)
     desktop_image: data.desktop_image as string | undefined,
-    mobile_image: data.mobile_image as string | undefined,
-    eyebrow: data.eyebrow as string | undefined,
-    headline: data.headline as string | undefined,
-    title: data.title as string | undefined,
+    mobile_image:  data.mobile_image  as string | undefined,
+    // Content
+    eyebrow:     data.eyebrow     as string | undefined,
+    headline:    data.headline    as string | undefined,
+    title:       data.title       as string | undefined,
     description: data.description as string | undefined,
-    ctaText: data.ctaText as string | undefined,
-    ctaUrl: data.ctaUrl as string | undefined,
-    address: data.address as string | undefined,
-    // FIX PREVIEW SYNC: pass full MediaAsset → HomepageSectionRenderer render
-    // LayeredHero dengan presentation_settings identik live website.
-    heroMediaAsset: (data.heroMediaAsset as import('@/lib/types/media-asset').MediaAsset | undefined) ?? null,
+    ctaText:     data.ctaText     as string | undefined,
+    ctaUrl:      data.ctaUrl      as string | undefined,
+    address:     data.address     as string | undefined,
+    // Hero editor: full MediaAsset untuk resolveHeroMedia() di renderer
+    heroMediaAsset: (data.heroMediaAsset as MediaAsset | undefined) ?? null,
   }
 
   const hasContent =
+    renderData.image ||
     renderData.desktop_image ||
     renderData.mobile_image ||
     renderData.eyebrow ||
@@ -129,6 +136,27 @@ function SectionPreview({ data, sectionId, device }: SectionPreviewProps) {
   return <HomepagePreviewFrame sectionId={sectionId as SharedSectionId} data={renderData} device={device} />
 }
 
+// ─── Helper: build ResponsiveImage dari MediaAsset ─────────────
+// Digunakan setelah media dipilih untuk mengisi data.image dengan struktur
+// yang identik dengan apa yang dikembalikan getHomeMedia() dari Supabase.
+function mediaAssetToResponsiveImage(asset: MediaAsset): ResponsiveImage {
+  const variants = asset.variants ?? {}
+  const base = asset.public_url ?? undefined
+  return {
+    desktop:      variants['1920'] ?? variants['1440'] ?? base,
+    tablet:       variants['1024'] ?? variants['768']  ?? base,
+    mobile:       variants['768']  ?? variants['480']  ?? base,
+    small_mobile: variants['480']  ?? base,
+    alt:          asset.alt_text ?? asset.filename ?? '',
+    width:        asset.width    ?? undefined,
+    height:       asset.height   ?? undefined,
+    focal_x:      asset.focal_x  ?? 50,
+    focal_y:      asset.focal_y  ?? 50,
+    cutout:       asset.cutout_url ?? undefined,
+    presentation_settings: asset.presentation_settings,
+  }
+}
+
 // ─── Main Component ───────────────────────────────────────────
 
 interface HomepageEditorProps {
@@ -141,7 +169,7 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
   const [activeSection, setActiveSection] = useState<SectionId>('hero')
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop')
 
-  // Local state per section — FIX: tidak ada parent re-render saat onChange
+  // Local state per section
   const [sectionStates, setSectionStates] = useState<Record<SectionId, SectionData>>(() => {
     const init = {} as Record<SectionId, SectionData>
     for (const s of SECTIONS) {
@@ -185,8 +213,6 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
     setDirty(prev => ({ ...prev, [sectionId]: true }))
   }, [])
 
-
-  // Buka picker
   const openPicker = useCallback((sectionId: SectionId, field: 'desktop_image' | 'mobile_image') => {
     setPickerTarget({ sectionId, field })
     setPickerOpen(true)
@@ -204,24 +230,49 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
     const { sectionId, field } = pickerTarget
     const url = asset.public_url ?? undefined
 
-    // 1. Local state segera (live preview instant)
-    // FIX PREVIEW SYNC: untuk hero desktop, simpan full MediaAsset agar
-    // HomepageSectionRenderer bisa merender LayeredHero dengan
-    // presentation_settings yang identik dengan live website.
-    setSectionStates(prev => ({
-      ...prev,
-      [sectionId]: {
-        ...prev[sectionId],
-        [field]: url,
-        // Simpan asset lengkap untuk section hero agar preview = live
-        ...(sectionId === 'hero' && field === 'desktop_image'
-          ? { heroMediaAsset: asset }
-          : {}),
-      },
-    }))
+    // 1. Build ResponsiveImage lengkap dari asset (identik dengan getHomeMedia() output)
+    const responsiveImage = mediaAssetToResponsiveImage(asset)
+
+    // 2. Update local state secara atomik:
+    //    - URL fields (untuk thumbnail InlineMediaTrigger)
+    //    - image: full ResponsiveImage dengan presentation_settings
+    //    - heroMediaAsset: full MediaAsset dengan variants object (hero only)
+    setSectionStates(prev => {
+      const current = prev[sectionId] ?? {}
+
+      // Untuk desktop: ganti seluruh image object (karena desktop = primary)
+      // Untuk mobile: update hanya mobile field di image, pertahankan desktop
+      let updatedImage: ResponsiveImage
+      if (field === 'desktop_image') {
+        updatedImage = responsiveImage
+      } else {
+        // mobile: gabungkan dengan image yang sudah ada
+        const existingImage = current.image as ResponsiveImage | undefined
+        updatedImage = {
+          ...(existingImage ?? {}),
+          mobile:       responsiveImage.mobile ?? responsiveImage.desktop,
+          small_mobile: responsiveImage.small_mobile ?? responsiveImage.mobile,
+          // Mobile presentation_settings (jika ada) disimpan terpisah
+          presentation_settings_mobile: responsiveImage.presentation_settings,
+        } as ResponsiveImage
+      }
+
+      return {
+        ...prev,
+        [sectionId]: {
+          ...current,
+          [field]: url,
+          image: updatedImage,
+          // Hero: simpan full MediaAsset untuk resolveHeroMedia() variants lookup
+          ...(sectionId === 'hero' && field === 'desktop_image'
+            ? { heroMediaAsset: asset }
+            : {}),
+        },
+      }
+    })
     setDirty(prev => ({ ...prev, [sectionId]: true }))
 
-    // 2. Persist ke content_media (arsitektur existing — UUID valid, bukan "fallback-id")
+    // 3. Persist ke content_media (Supabase)
     const breakpoint = field === 'desktop_image' ? 'desktop' : 'mobile'
     try {
       await fetch('/api/admin/content-media', {
@@ -232,7 +283,7 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
           content_key: 'home',
           slot_key: sectionId,
           breakpoint,
-          media_asset_id: asset.id ?? null, // FIX UUID: null, bukan "fallback-id"
+          media_asset_id: asset.id ?? null,
         }),
       })
     } catch {
@@ -245,10 +296,18 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
   const saveSection = useCallback(async (sectionId: SectionId) => {
     setSaveStatus(prev => ({ ...prev, [sectionId]: 'saving' }))
     try {
+      // Ekstrak hanya field teks untuk dikirim ke API (bukan image objects)
+      const state = sectionStates[sectionId]
+      const textPayload: Record<string, unknown> = {}
+      const TEXT_FIELDS = ['eyebrow', 'headline', 'title', 'description', 'ctaText', 'ctaUrl', 'address']
+      for (const field of TEXT_FIELDS) {
+        if (field in state) textPayload[field] = state[field]
+      }
+
       const res = await fetch('/api/admin/homepage-content', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [sectionId]: sectionStates[sectionId] }),
+        body: JSON.stringify({ [sectionId]: textPayload }),
       })
       if (!res.ok) {
         const j = await res.json().catch(() => ({}))
@@ -264,11 +323,11 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
   }, [sectionStates])
 
   // ── Derived ──────────────────────────────────────────────────
-  const section        = SECTIONS.find(s => s.id === activeSection)!
-  const data           = sectionStates[activeSection]
-  const status         = saveStatus[activeSection]
-  const isDirty        = dirty[activeSection]
-  const aiCtx          = { pageType: 'homepage', sectionType: activeSection, purpose: '' }
+  const section  = SECTIONS.find(s => s.id === activeSection)!
+  const data     = sectionStates[activeSection]
+  const status   = saveStatus[activeSection]
+  const isDirty  = dirty[activeSection]
+  const aiCtx    = { pageType: 'homepage', sectionType: activeSection, purpose: '' }
 
   const saveBtnLabel =
     status === 'saving' ? 'Menyimpan…'
@@ -312,7 +371,7 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
             ))}
           </nav>
 
-          {/* Form Content — scroll area */}
+          {/* Form Content */}
           <div className={styles.formContent}>
 
             {/* ── 1. Gambar ─────────────────────────────────── */}
@@ -334,10 +393,11 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
 
             {/* ── 2. Layout ───────────────────────────────────── */}
             <div className={styles.controlGroup}>
-              <p className={styles.groupTitle}>2. Layout Preview</p>
+              <p className={styles.groupTitle}>2. Layout Visual</p>
               <p className={styles.layoutNote}>
-                Tata letak, posisi gambar, typography, spacing, dan responsive mengikuti
-                renderer visual website. Editor ini hanya mengubah konten yang memang diedit.
+                Posisi gambar, scale, typography, dan responsive settings dikontrol melalui
+                Visual Media Editor saat memilih atau mengedit gambar di Media Library.
+                Perubahan tersebut tersimpan di Supabase dan langsung muncul di Live Website setelah Save.
               </p>
             </div>
 
