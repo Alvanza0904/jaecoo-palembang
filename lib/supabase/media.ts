@@ -20,6 +20,7 @@ export interface ResolvedMediaAsset {
   focal_x: number | null;
   focal_y: number | null;
   cutout_url: string | null;
+  presentation_settings?: import("@/lib/types/presentation").PresentationSettings;
 }
 
 type MediaRow = ResolvedMediaAsset;
@@ -40,6 +41,10 @@ export function mediaAssetToImage(
     alt: asset.alt_text ?? asset.filename ?? altFallback,
     width: asset.width ?? undefined,
     height: asset.height ?? undefined,
+    presentation_settings: asset.presentation_settings,
+    focal_x: asset.focal_x ?? undefined,
+    focal_y: asset.focal_y ?? undefined,
+    cutout: asset.cutout_url ?? undefined,
   };
 
   if (!image.desktop && !image.tablet && !image.mobile && !image.small_mobile) {
@@ -89,7 +94,7 @@ export async function getContentMedia(
     const { data: mediaRows, error: mediaError } = await supabase
       .from("media_assets")
       .select(
-        "id,public_url,variants,filename,width,height,alt_text,focal_x,focal_y,cutout_url",
+        "id,public_url,variants,filename,width,height,alt_text,focal_x,focal_y,cutout_url,presentation_settings",
       )
       .in("id", ids);
 
@@ -143,6 +148,14 @@ export async function getContentMedia(
         alt: primary.alt,
         width: primary.width,
         height: primary.height,
+        presentation_settings: primary.presentation_settings,
+        presentation_settings_mobile: mobileImage?.presentation_settings ?? primary.presentation_settings,
+        focal_x: primary.focal_x,
+        focal_y: primary.focal_y,
+        cutout: primary.cutout,
+        cutout_presentation_settings: primary.cutout_presentation_settings,
+        cutout_focal_x: primary.cutout_focal_x,
+        cutout_focal_y: primary.cutout_focal_y,
       };
     }
 

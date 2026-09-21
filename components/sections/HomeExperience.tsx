@@ -4,6 +4,7 @@
  */
 
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import type { ModelData } from "@/lib/types/model";
 import type { Promo } from "@/lib/types/promo";
 import type { NewsData } from "@/lib/types/news";
@@ -11,17 +12,115 @@ import { PriceDisplay } from "@/components/price/PriceDisplay";
 import { Button } from "@/components/ui/Button";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import type { ResponsiveImage } from "@/lib/types/media";
+import { getBackgroundLayerStyle, resolveBreakpointSettings, getTypographyContainerStyle, getHeadingStyle, getSubheadingStyle } from "@/lib/types/presentation";
 import { formatDate } from "@/lib/utils/format";
 import styles from "./HomeExperience.module.css";
 
-function Media({ src, alt, className = "" }: { src?: string | null; alt: string; className?: string }) {
-  if (!src || (!src.startsWith("http://") && !src.startsWith("https://"))) {
+function visualMediaStyle(image: ResponsiveImage | undefined, breakpoint: 'desktop' | 'mobile'): CSSProperties {
+  if (!image?.presentation_settings) return {};
+  const key = breakpoint === 'desktop' ? 'desktop' : 'mobile';
+  const settings = breakpoint === 'mobile'
+    ? (image.presentation_settings_mobile ?? image.presentation_settings)
+    : image.presentation_settings;
+  if (!settings) return {};
+  return getBackgroundLayerStyle(settings, key, image.focal_x ?? 50, image.focal_y ?? 50);
+}
+
+function VisualImage({
+  image,
+  alt,
+  className,
+}: {
+  image?: ResponsiveImage;
+  alt: string;
+  className: string;
+}) {
+  if (!image?.desktop && !image?.mobile) {
     return <div className={`${styles.mediaFallback} ${className}`} aria-hidden="true" />;
   }
+
+  const desktopStyle = visualMediaStyle(image, 'desktop');
+  const mobileStyle = visualMediaStyle(image, 'mobile');
+  const style = {
+    ...desktopStyle,
+    '--visual-mobile-fit': mobileStyle.objectFit,
+    '--visual-mobile-position': mobileStyle.objectPosition,
+    '--visual-mobile-transform': mobileStyle.transform,
+    '--visual-mobile-origin': mobileStyle.transformOrigin,
+  } as CSSProperties;
+
   return (
-    <div className={`${styles.media} ${className}`}>
+    <picture>
+      {image.mobile && <source media="(max-width: 767px)" srcSet={image.mobile} />}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={alt} loading="lazy" decoding="async" />
+      <img
+        src={image.desktop ?? image.mobile ?? ''}
+        alt={alt}
+        className={`${className} ${styles.visualMedia}`}
+        loading="lazy"
+        decoding="async"
+        style={style}
+      />
+    </picture>
+  );
+}
+
+
+function visualTypographyStyles(image: ResponsiveImage | undefined, breakpoint: 'desktop' | 'mobile') {
+  if (!image?.presentation_settings) return null;
+  const key = breakpoint === 'desktop' ? 'desktop' : 'mobile';
+  const settings = breakpoint === 'mobile'
+    ? (image.presentation_settings_mobile ?? image.presentation_settings)
+    : image.presentation_settings;
+  if (!settings) return null;
+  const effective = resolveBreakpointSettings(
+    settings,
+    key,
+    image.focal_x ?? 50,
+    image.focal_y ?? 50,
+  );
+  return {
+    container: getTypographyContainerStyle(effective.typography),
+    heading: getHeadingStyle(effective.typography),
+    subheading: getSubheadingStyle(effective.typography),
+  };
+}
+
+function VisualCopy({
+  image,
+  title,
+  description,
+  titleId,
+  eyebrow,
+  className,
+  titleClassName,
+  descriptionClassName,
+}: {
+  image?: ResponsiveImage;
+  title: string;
+  description: string;
+  titleId: string;
+  eyebrow: string;
+  className: string;
+  titleClassName: string;
+  descriptionClassName: string;
+}) {
+  const desktop = visualTypographyStyles(image, 'desktop');
+  const mobile = visualTypographyStyles(image, 'mobile');
+  const containerStyle = desktop?.container ?? undefined;
+  const style = containerStyle ? ({
+    ...containerStyle,
+    '--visual-mobile-left': mobile?.container.left,
+    '--visual-mobile-top': mobile?.container.top,
+    '--visual-mobile-width': mobile?.container.width,
+    '--visual-mobile-align': mobile?.container.textAlign,
+  } as CSSProperties) : undefined;
+
+  return (
+    <div className={className} style={style}>
+      <span className={styles.eyebrow}>{eyebrow}</span>
+      <h2 id={titleId} className={titleClassName} style={desktop?.heading}>{title}</h2>
+      <p className={descriptionClassName} style={desktop?.subheading}>{description}</p>
     </div>
   );
 }
@@ -56,25 +155,24 @@ export function HomeExperienceSection({
   image?: ResponsiveImage;
   cms?: { title?: string; description?: string };
 }) {
-  const expSrc = image?.desktop;
   return (
     <section className={styles.experience} aria-labelledby="experience-title">
-      {expSrc && expSrc.startsWith("http") ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={expSrc} alt="" className={styles.experienceMedia} loading="lazy" decoding="async" aria-hidden="true" />
+      {image?.desktop || image?.mobile ? (
+        <VisualImage image={image} alt="" className={styles.experienceMedia} />
       ) : (
         <div className={styles.experienceMedia} aria-hidden="true" />
       )}
-      <div className={styles.experienceCopy}>
-        <span className={styles.eyebrow}>Pengalaman Berkendara</span>
-        <h2 id="experience-title" className={styles.experienceTitle}>
-          {cms?.title || "Pengalaman\nTanpa Kompromi."}
-        </h2>
-        <p className={styles.experienceDesc}>
-          {cms?.description || "Kenyamanan premium di setiap medan. Dirancang untuk mereka yang berani menjelajah batas."}
-        </p>
-        <Link className={styles.textLink} href="/berita">Lihat Informasi →</Link>
-      </div>
+      <VisualCopy
+        image={image}
+        className={styles.experienceCopy}
+        titleClassName={styles.experienceTitle}
+        descriptionClassName={styles.experienceDesc}
+        titleId="experience-title"
+        eyebrow="Pengalaman Berkendara"
+        title={cms?.title || "Pengalaman\nTanpa Kompromi."}
+        description={cms?.description || "Kenyamanan premium di setiap medan. Dirancang untuk mereka yang berani menjelajah batas."}
+      />
+      <Link className={styles.textLink} href="/berita" style={visualTypographyStyles(image, 'desktop') ? { position: 'absolute', zIndex: 2, left: visualTypographyStyles(image, 'desktop')!.container.left, top: `calc(${visualTypographyStyles(image, 'desktop')!.container.top} + 42%)` } : undefined}>Lihat Informasi →</Link>
     </section>
   );
 }
@@ -87,24 +185,23 @@ export function HomeTeknologiSection({
   image?: ResponsiveImage;
   cms?: { title?: string; description?: string };
 }) {
-  const techSrc = image?.desktop;
   return (
     <section className={styles.technology} aria-labelledby="technology-title">
-      {techSrc && techSrc.startsWith("http") ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={techSrc} alt="" className={styles.technologyMedia} loading="lazy" decoding="async" aria-hidden="true" />
+      {image?.desktop || image?.mobile ? (
+        <VisualImage image={image} alt="" className={styles.technologyMedia} />
       ) : (
         <div className={styles.technologyMedia} aria-hidden="true" />
       )}
-      <div className={styles.technologyCopy}>
-        <span className={styles.eyebrow}>Teknologi</span>
-        <h2 id="technology-title" className={styles.technologyTitle}>
-          {cms?.title || "Teknologi\nCerdas."}
-        </h2>
-        <p className={styles.technologyDesc}>
-          {cms?.description || "Sistem SHS dan ARDIS terdepan di kelasnya — merevolusi pengalaman berkendara off-road dan EV range."}
-        </p>
-      </div>
+      <VisualCopy
+        image={image}
+        className={styles.technologyCopy}
+        titleClassName={styles.technologyTitle}
+        descriptionClassName={styles.technologyDesc}
+        titleId="technology-title"
+        eyebrow="Teknologi"
+        title={cms?.title || "Teknologi\nCerdas."}
+        description={cms?.description || "Sistem SHS dan ARDIS terdepan di kelasnya — merevolusi pengalaman berkendara off-road dan EV range."}
+      />
     </section>
   );
 }
@@ -153,11 +250,7 @@ export function HomeAboutSection({
   return (
     <section className={styles.about} aria-labelledby="about-title">
       <div className={styles.aboutInner}>
-        <Media
-          src={image?.desktop}
-          alt="OMODA JAECOO Palembang — Dealer Resmi"
-          className={styles.aboutMedia}
-        />
+        <VisualImage image={image} alt="OMODA JAECOO Palembang — Dealer Resmi" className={styles.aboutMedia} />
         <div className={styles.aboutCopy}>
           <span className={styles.eyebrow}>Dealer Resmi</span>
           <h2 id="about-title" className={styles.aboutTitle}>
@@ -226,16 +319,7 @@ export function HomeFinalCTA({
   const wa = buildWhatsAppUrl({ source: "homepage_final_cta", source_cta: "final_cta" });
   return (
     <section className={styles.finalCta} aria-labelledby="final-cta-title">
-      {image?.desktop && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={image.desktop}
-          alt=""
-          className={styles.finalCtaImg}
-          aria-hidden="true"
-          loading="lazy"
-        />
-      )}
+      {image?.desktop && <VisualImage image={image} alt="" className={styles.finalCtaImg} />}
       <div className={styles.finalCtaOverlay} aria-hidden="true" />
       <div className={styles.finalCtaInner}>
         <span className={styles.finalCtaEyebrow}>JAECOO Palembang</span>

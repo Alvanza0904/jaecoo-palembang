@@ -49,6 +49,17 @@ export interface ResponsiveImage {
   width?: number;
   /** Height of source image */
   height?: number;
+  /** Visual Editor presentation settings for this asset. */
+  presentation_settings?: PresentationSettings;
+  presentation_settings_mobile?: PresentationSettings;
+  /** Focal point used by the Visual Editor. */
+  focal_x?: number;
+  focal_y?: number;
+  /** Optional transparent cutout and its visual settings. */
+  cutout?: string;
+  cutout_presentation_settings?: PresentationSettings;
+  cutout_focal_x?: number;
+  cutout_focal_y?: number;
 }
 
 export interface MediaWithArtDirection {

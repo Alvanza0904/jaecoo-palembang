@@ -542,3 +542,29 @@
   .journalGrid { grid-template-columns: repeat(4, 1fr); }
   .newsCardTitle { font-size: var(--text-base); }
 }
+
+
+/* Visual Editor parity: mobile uses the same presentation settings as the Visual Editor. */
+.visualMedia {
+  object-fit: var(--visual-mobile-fit, cover);
+}
+
+@media (max-width: 767px) {
+  .visualMedia {
+    object-fit: var(--visual-mobile-fit, cover);
+    object-position: var(--visual-mobile-position, 50% 50%);
+    transform: var(--visual-mobile-transform, none);
+    transform-origin: var(--visual-mobile-origin, 50% 50%);
+  }
+}
+
+/* Typography geometry comes from the same Visual Editor presentation settings. */
+@media (max-width: 767px) {
+  .experienceCopy,
+  .technologyCopy {
+    left: var(--visual-mobile-left, var(--container-padding));
+    top: var(--visual-mobile-top, auto);
+    width: var(--visual-mobile-width, 100%);
+    text-align: var(--visual-mobile-align, left);
+  }
+}
