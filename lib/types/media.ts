@@ -39,8 +39,6 @@ export interface ResponsiveImage {
   mobile?: string;
   /** Small mobile (<390px) */
   small_mobile?: string;
-  /** Vehicle cutout (transparent PNG/WebP) */
-  cutout?: string;
   /** Video poster fallback */
   poster?: string;
   /** Alt text — required for accessibility */
