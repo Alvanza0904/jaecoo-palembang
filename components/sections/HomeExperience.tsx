@@ -107,20 +107,46 @@ function VisualCopy({
 }) {
   const desktop = visualTypographyStyles(image, 'desktop');
   const mobile = visualTypographyStyles(image, 'mobile');
-  const containerStyle = desktop?.container ?? undefined;
-  const style = containerStyle ? ({
-    ...containerStyle,
+
+  // The Visual Editor stores typography as percentages + breakpoint-specific
+  // font settings. Expose BOTH breakpoint values as CSS variables so the same
+  // section renderer can switch without inventing a second layout system.
+  const style = {
+    '--visual-desktop-left': desktop?.container.left,
+    '--visual-desktop-top': desktop?.container.top,
+    '--visual-desktop-width': desktop?.container.width,
+    '--visual-desktop-align': desktop?.container.textAlign,
+    '--visual-desktop-font-size': desktop?.heading.fontSize,
+    '--visual-desktop-font-weight': desktop?.heading.fontWeight,
+    '--visual-desktop-letter-spacing': desktop?.heading.letterSpacing,
+    '--visual-desktop-line-height': desktop?.heading.lineHeight,
+    '--visual-desktop-font-family': desktop?.heading.fontFamily,
+    '--visual-desktop-sub-font-size': desktop?.subheading.fontSize,
+    '--visual-desktop-sub-font-weight': desktop?.subheading.fontWeight,
+    '--visual-desktop-sub-letter-spacing': desktop?.subheading.letterSpacing,
+    '--visual-desktop-sub-line-height': desktop?.subheading.lineHeight,
+    '--visual-desktop-sub-font-family': desktop?.subheading.fontFamily,
     '--visual-mobile-left': mobile?.container.left,
     '--visual-mobile-top': mobile?.container.top,
     '--visual-mobile-width': mobile?.container.width,
     '--visual-mobile-align': mobile?.container.textAlign,
-  } as CSSProperties) : undefined;
+    '--visual-mobile-font-size': mobile?.heading.fontSize,
+    '--visual-mobile-font-weight': mobile?.heading.fontWeight,
+    '--visual-mobile-letter-spacing': mobile?.heading.letterSpacing,
+    '--visual-mobile-line-height': mobile?.heading.lineHeight,
+    '--visual-mobile-font-family': mobile?.heading.fontFamily,
+    '--visual-mobile-sub-font-size': mobile?.subheading.fontSize,
+    '--visual-mobile-sub-font-weight': mobile?.subheading.fontWeight,
+    '--visual-mobile-sub-letter-spacing': mobile?.subheading.letterSpacing,
+    '--visual-mobile-sub-line-height': mobile?.subheading.lineHeight,
+    '--visual-mobile-sub-font-family': mobile?.subheading.fontFamily,
+  } as CSSProperties;
 
   return (
     <div className={className} style={style}>
       <span className={styles.eyebrow}>{eyebrow}</span>
-      <h2 id={titleId} className={titleClassName} style={desktop?.heading}>{title}</h2>
-      <p className={descriptionClassName} style={desktop?.subheading}>{description}</p>
+      <h2 id={titleId} className={titleClassName}>{title}</h2>
+      <p className={descriptionClassName}>{description}</p>
     </div>
   );
 }
