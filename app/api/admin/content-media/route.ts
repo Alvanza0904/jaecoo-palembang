@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient, getServerUser } from "@/lib/supabase/server";
 
 async function requireUser() {
@@ -114,6 +115,7 @@ export async function PUT(request: Request) {
           .single();
 
         if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+        revalidatePath('/'); revalidatePath('/model/[slug]', 'page');
         return NextResponse.json({ assignment: data });
       }
 
@@ -130,6 +132,7 @@ export async function PUT(request: Request) {
         .single();
 
       if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+      revalidatePath('/'); revalidatePath('/model/[slug]', 'page');
       return NextResponse.json({ assignment: data });
     }
 
@@ -150,6 +153,7 @@ export async function PUT(request: Request) {
       .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    revalidatePath('/'); revalidatePath('/model/[slug]', 'page');
     return NextResponse.json({ assignment: data });
   } catch (error) {
     return errorResponse(error);
@@ -181,6 +185,7 @@ export async function DELETE(request: Request) {
 
     const { error } = await query;
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    revalidatePath('/'); revalidatePath('/model/[slug]', 'page');
     return NextResponse.json({ ok: true });
   } catch (error) {
     return errorResponse(error);

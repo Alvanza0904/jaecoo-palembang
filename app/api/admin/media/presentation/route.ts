@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient, getServerUser } from "@/lib/supabase/server";
 
 export async function PATCH(request: Request) {
@@ -22,5 +23,11 @@ export async function PATCH(request: Request) {
     .single();
 
   if (error) return NextResponse.json({ error: `Presentation settings gagal disimpan: ${error.message}` }, { status: 400 });
+
+  // Revalidate semua halaman publik yang menampilkan media ini
+  revalidatePath('/');
+  revalidatePath('/model/[slug]', 'page');
+  revalidatePath('/model', 'page');
+
   return NextResponse.json({ asset: data });
 }

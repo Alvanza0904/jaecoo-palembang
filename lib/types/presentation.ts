@@ -168,10 +168,10 @@ export const BREAKPOINT_DESIGN_WIDTH: Record<BreakpointKey, number> = {
 
 /** Preview container dimensions (px) — used for sizing only, ratio is canonical above. */
 export const BREAKPOINT_PREVIEW_DIMS: Record<BreakpointKey, { width: number; height: number }> = {
-  desktop:      { width: 320, height: 180 },
-  tablet:       { width: 240, height: 180 },
-  mobile:       { width: 160, height: 284 },  // STEP 6I: fixed 160/(9/16)=284 (was 240)
-  small_mobile: { width: 130, height: 260 },  // STEP 6I: fixed 130/(9/18)=260 (was 220)
+  desktop:      { width: 480, height: 270 },
+  tablet:       { width: 360, height: 270 },
+  mobile:       { width: 390, height: 693 },  // FIX v3: real iPhone viewport width (was 160)
+  small_mobile: { width: 375, height: 667 },  // FIX v3: real small iPhone width (was 130)
 }
 
 /** Default auto settings per breakpoint */
