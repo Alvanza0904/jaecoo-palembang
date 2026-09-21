@@ -186,8 +186,11 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
   const dims = BREAKPOINT_PREVIEW_DIMS[activeBp as BreakpointKey]
   const canonicalRatio = BREAKPOINT_ASPECT_RATIO[activeBp as BreakpointKey]
 
-  // Fit within panel: max width 320px, maintain canonical ratio
-  const maxW = 320
+  // Fit within panel: max width per breakpoint agar preview cocok live.
+  // Mobile = 390px (iPhone 14 Pro viewport), Desktop = 480px.
+  // SEBELUMNYA: selalu 320px — canvas terlalu kecil vs live 390px,
+  // menyebabkan posisi gambar berbeda (cover focal point berbeda).
+  const maxW = activeBp === 'mobile' || activeBp === 'small_mobile' ? 390 : 480
   const previewW = Math.min(dims.width, maxW)
   const previewH = Math.round(previewW / canonicalRatio)
 

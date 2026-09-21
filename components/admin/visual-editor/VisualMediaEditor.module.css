@@ -200,6 +200,9 @@
   gap: 10px;
   padding: 14px 16px;
   background: #0d0d0d;
+  /* Izinkan horizontal scroll saat canvas 390px tidak muat di panel sempit */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .previewModeRow {
