@@ -24,8 +24,7 @@
   color: var(--color-ink-on-dark);
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden; /* children scroll sendiri, panel tidak scroll global */
 }
 
 /* ─── Header ──────────────────────────────────────────── */
@@ -200,9 +199,7 @@
   gap: 10px;
   padding: 14px 16px;
   background: #0d0d0d;
-  /* Izinkan horizontal scroll saat canvas 390px tidak muat di panel sempit */
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  flex-shrink: 0; /* canvas tidak menyusut — selalu visible */
 }
 
 .previewModeRow {
@@ -373,6 +370,10 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .controlSection {
