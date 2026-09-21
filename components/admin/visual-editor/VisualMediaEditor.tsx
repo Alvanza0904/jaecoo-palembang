@@ -186,9 +186,9 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
   const dims = BREAKPOINT_PREVIEW_DIMS[activeBp as BreakpointKey]
   const canonicalRatio = BREAKPOINT_ASPECT_RATIO[activeBp as BreakpointKey]
 
-  // Canvas width = BREAKPOINT_PREVIEW_DIMS[bp].width (sudah cocok live viewport).
-  // FIX v3: mobile=390px, small_mobile=375px, desktop=480px, tablet=360px.
-  const maxW = dims.width
+  // Fit within panel — canvas kecil by design agar muat di editor panel.
+  // Parity live dicapai lewat revalidatePath, bukan ukuran canvas.
+  const maxW = 320
   const previewW = Math.min(dims.width, maxW)
   const previewH = Math.round(previewW / canonicalRatio)
 
