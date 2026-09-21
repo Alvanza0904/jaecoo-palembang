@@ -24,7 +24,7 @@ import { HomepageSectionRenderer } from '@/components/sections/HomepageSectionRe
 interface PreviewPayload {
   sectionId: SectionId
   data: SectionRenderData
-  device: 'desktop' | 'mobile'
+  device: 'desktop' | 'mobile' // digunakan untuk CSS class wrapper saja
 }
 
 export default function AdminPreviewHomepage() {
@@ -62,7 +62,7 @@ export default function AdminPreviewHomepage() {
       <HomepageSectionRenderer
         sectionId={payload.sectionId}
         data={payload.data}
-        device={payload.device}
+        mode="preview"
       />
     </div>
   )
