@@ -19,8 +19,8 @@ import { MediaPicker } from '@/components/admin/media/MediaPicker'
 import AIReadyField from '@/components/admin/ai/AIReadyField'
 import type { MediaAsset } from '@/lib/types/media-asset'
 import type { HomepageContent } from '@/types/homepage-content'
-import { HomepageSectionRenderer } from '@/components/sections/HomepageSectionRenderer'
 import type { SectionId as SharedSectionId, SectionRenderData } from '@/components/sections/HomepageSectionRenderer'
+import { HomepagePreviewFrame } from './HomepagePreviewFrame'
 import styles from './homepage.module.css'
 
 // ─── Section Config ────────────────────────────────────────────
@@ -93,23 +93,22 @@ interface SectionPreviewProps {
 }
 
 function SectionPreview({ data, sectionId, device }: SectionPreviewProps) {
-  // Cast SectionData ke SectionRenderData yang dipakai HomepageSectionRenderer
   const renderData: SectionRenderData = {
     desktop_image: data.desktop_image as string | undefined,
-    mobile_image:  data.mobile_image  as string | undefined,
-    eyebrow:       data.eyebrow       as string | undefined,
-    headline:      data.headline      as string | undefined,
-    title:         data.title         as string | undefined,
-    description:   data.description   as string | undefined,
-    ctaText:       data.ctaText       as string | undefined,
-    ctaUrl:        data.ctaUrl        as string | undefined,
-    address:       data.address       as string | undefined,
+    mobile_image: data.mobile_image as string | undefined,
+    eyebrow: data.eyebrow as string | undefined,
+    headline: data.headline as string | undefined,
+    title: data.title as string | undefined,
+    description: data.description as string | undefined,
+    ctaText: data.ctaText as string | undefined,
+    ctaUrl: data.ctaUrl as string | undefined,
+    address: data.address as string | undefined,
   }
 
-  // Periksa apakah ada konten untuk dirender
   const hasContent =
     renderData.desktop_image ||
     renderData.mobile_image ||
+    renderData.eyebrow ||
     renderData.headline ||
     renderData.title ||
     renderData.description
@@ -124,17 +123,7 @@ function SectionPreview({ data, sectionId, device }: SectionPreviewProps) {
     )
   }
 
-  return (
-    // Wrapper div agar renderer bisa mengambil 100% space canvas preview
-    <div style={{ width: '100%', height: '100%', overflow: 'auto', position: 'relative' }}>
-      <HomepageSectionRenderer
-        sectionId={sectionId as SharedSectionId}
-        data={renderData}
-        device={device}
-        mode="preview"
-      />
-    </div>
-  )
+  return <HomepagePreviewFrame sectionId={sectionId as SharedSectionId} data={renderData} device={device} />
 }
 
 // ─── Main Component ───────────────────────────────────────────
@@ -193,23 +182,6 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
     setDirty(prev => ({ ...prev, [sectionId]: true }))
   }, [])
 
-  // Update object field (desktop_position, mobile_position)
-  const updatePositionField = useCallback((
-    sectionId: SectionId,
-    posField: 'desktop_position' | 'mobile_position',
-    key: 'horizontal' | 'vertical',
-    value: string
-  ) => {
-    setSectionStates(prev => {
-      const cur = prev[sectionId]
-      const existing = (cur[posField] as Record<string,string> | undefined) ?? {}
-      return {
-        ...prev,
-        [sectionId]: { ...cur, [posField]: { ...existing, [key]: value } },
-      }
-    })
-    setDirty(prev => ({ ...prev, [sectionId]: true }))
-  }, [])
 
   // Buka picker
   const openPicker = useCallback((sectionId: SectionId, field: 'desktop_image' | 'mobile_image') => {
@@ -283,9 +255,6 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
   const data           = sectionStates[activeSection]
   const status         = saveStatus[activeSection]
   const isDirty        = dirty[activeSection]
-  const posMode        = (data.text_position_mode as string) || 'auto'
-  const desktopPos     = (data.desktop_position as Record<string,string> | undefined) ?? {}
-  const mobilePos      = (data.mobile_position  as Record<string,string> | undefined) ?? {}
   const aiCtx          = { pageType: 'homepage', sectionType: activeSection, purpose: '' }
 
   const saveBtnLabel =
@@ -350,62 +319,13 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
               </div>
             </div>
 
-            {/* ── 2. Posisi Teks ────────────────────────────── */}
+            {/* ── 2. Layout ───────────────────────────────────── */}
             <div className={styles.controlGroup}>
-              <p className={styles.groupTitle}>2. Posisi Teks</p>
-              <div className={styles.fieldRow}>
-                <label>Mode</label>
-                <select
-                  value={posMode}
-                  onChange={e => updateField(activeSection, 'text_position_mode', e.target.value)}
-                >
-                  <option value="auto">AUTO — Optimal per device</option>
-                  <option value="manual">MANUAL — Override</option>
-                </select>
-              </div>
-
-              {posMode === 'manual' && (
-                <div className={styles.manualControls}>
-                  <div className={styles.manualDevice}>
-                    <h4>Desktop</h4>
-                    <select
-                      value={desktopPos.horizontal || 'left'}
-                      onChange={e => updatePositionField(activeSection, 'desktop_position', 'horizontal', e.target.value)}
-                    >
-                      <option value="left">Kiri</option>
-                      <option value="center">Tengah</option>
-                      <option value="right">Kanan</option>
-                    </select>
-                    <select
-                      value={desktopPos.vertical || 'center'}
-                      onChange={e => updatePositionField(activeSection, 'desktop_position', 'vertical', e.target.value)}
-                    >
-                      <option value="top">Atas</option>
-                      <option value="center">Tengah</option>
-                      <option value="bottom">Bawah</option>
-                    </select>
-                  </div>
-                  <div className={styles.manualDevice}>
-                    <h4>Mobile</h4>
-                    <select
-                      value={mobilePos.horizontal || 'center'}
-                      onChange={e => updatePositionField(activeSection, 'mobile_position', 'horizontal', e.target.value)}
-                    >
-                      <option value="left">Kiri</option>
-                      <option value="center">Tengah</option>
-                      <option value="right">Kanan</option>
-                    </select>
-                    <select
-                      value={mobilePos.vertical || 'bottom'}
-                      onChange={e => updatePositionField(activeSection, 'mobile_position', 'vertical', e.target.value)}
-                    >
-                      <option value="top">Atas</option>
-                      <option value="center">Tengah</option>
-                      <option value="bottom">Bawah</option>
-                    </select>
-                  </div>
-                </div>
-              )}
+              <p className={styles.groupTitle}>2. Layout Preview</p>
+              <p className={styles.layoutNote}>
+                Tata letak, posisi gambar, typography, spacing, dan responsive mengikuti
+                renderer visual website. Editor ini hanya mengubah konten yang memang diedit.
+              </p>
             </div>
 
             {/* ── 3. Konten Teks ────────────────────────────── */}

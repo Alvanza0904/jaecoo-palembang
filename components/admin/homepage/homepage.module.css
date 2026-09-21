@@ -479,6 +479,7 @@
 }
 
 .previewScreen {
+  height: 100%;
   border: 2px solid #2d2d2d;
   overflow-x: hidden;
   overflow-y: auto;
@@ -599,4 +600,41 @@
 .pEmptyHint {
   font-size: 0.66rem;
   color: #374151;
+}
+
+/* Layout is owned by the shared live renderer. The content editor must not
+   invent a second positioning system that can drift from the public site. */
+.layoutNote {
+  margin: 0;
+  padding: 0.75rem;
+  border-radius: 6px;
+  background: #f5f5f5;
+  color: #6b7280;
+  font-size: 0.74rem;
+  line-height: 1.55;
+}
+
+/* The preview is a real iframe viewport so its CSS media queries behave like
+   the selected device instead of the admin browser viewport. */
+.previewFrame {
+  display: block;
+  border: 2px solid #2d2d2d;
+  background: #fff;
+  flex: 0 0 auto;
+  overflow: auto;
+}
+
+.previewFrameDesktop {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.previewFrameMobile {
+  width: 390px;
+  max-width: calc(100% - 1rem);
+  height: 100%;
+  border-radius: 20px;
+  border-color: #444;
 }

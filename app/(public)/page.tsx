@@ -10,21 +10,12 @@ import { getHomeMedia, contentMediaKey } from "@/lib/supabase/media";
 import { getActivePromos } from "@/lib/data/promos";
 import { getPublishedNews } from "@/lib/data/news";
 import { getHomepageContent } from "@/lib/data/homepage-content";
-import { Button } from "@/components/ui/Button";
-import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { HomeModelSlider } from "@/components/sections/HomeModelSlider";
-import { HomeDealerLocation } from "@/components/sections/HomeDealerLocation";
-import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
-import {
-  HomeExperienceSection,
-  HomeTeknologiSection,
-  HomePromoSection,
-  HomeJournalSection,
-  HomeAboutSection,
-  HomeFinalCTA,
-} from "@/components/sections/HomeExperience";
-import styles from "./page.module.css";
+import { HomePromoSection, HomeJournalSection } from "@/components/sections/HomeExperience";
+import { HomepageSectionRenderer } from "@/components/sections/HomepageSectionRenderer";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "JAECOO Palembang — Dealer Resmi JAECOO",
@@ -50,85 +41,95 @@ export default async function HomePage() {
     getHomepageContent(),
   ]);
 
-  const heroUrl = buildWhatsAppUrl({
-    source: "homepage_hero",
-    model: "J5 EV",
-    source_cta: "hero_cta",
-  });
-
   return (
     <>
       <TransparentHeader />
 
       {/* ── HERO ────────────────────────────────────── */}
-      <section className={styles.heroWrap}>
-        <HeroPlaceholder
-          tagline={cms.hero.eyebrow || "DEALER RESMI JAECOO PALEMBANG"}
-          heading={
-            <>
-              <span className={styles.heroModel}>{cms.hero.headline || "J5"}</span>
-            </>
-          }
-          subheading={cms.hero.description || "THIS IS THE REAL SUV."}
-          cta={
-            <div className={styles.heroCtas}>
-              <Button as="link" href={cms.hero.ctaUrl || "/model/jaecoo-j5-ev"} variant="primary" size="lg">
-                {cms.hero.ctaText || "Jelajahi J5"}
-              </Button>
-              <Button
-                as="a"
-                href={heroUrl}
-                variant="secondary"
-                size="lg"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Chat dengan Alvan →
-              </Button>
-            </div>
-          }
-          backgroundImage={homeMedia[contentMediaKey("home", "home", "hero")]?.desktop}
-          backgroundImageMobile={homeMedia[contentMediaKey("home", "home", "hero")]?.mobile}
-        />
-      </section>
+      <HomepageSectionRenderer
+        sectionId="hero"
+        mode="live"
+        data={{
+          desktop_image: homeMedia[contentMediaKey("home", "home", "hero")]?.desktop,
+          mobile_image: homeMedia[contentMediaKey("home", "home", "hero")]?.mobile,
+          eyebrow: cms.hero.eyebrow,
+          headline: cms.hero.headline,
+          description: cms.hero.description,
+          ctaText: cms.hero.ctaText,
+          ctaUrl: cms.hero.ctaUrl,
+        }}
+      />
 
       {/* ── MODEL SHOWCASE (J5 → J7 → J8) ──────────── */}
       <HomeModelSlider models={models} />
 
       {/* ── EXPERIENCE ──────────────────────────────── */}
-      <HomeExperienceSection
-        image={homeMedia[contentMediaKey("home", "home", "experience")]}
-        cms={cms.experience}
+      <HomepageSectionRenderer
+        sectionId="experience"
+        mode="live"
+        data={{
+          desktop_image: homeMedia[contentMediaKey("home", "home", "experience")]?.desktop,
+          mobile_image: homeMedia[contentMediaKey("home", "home", "experience")]?.mobile,
+          title: cms.experience.title,
+          description: cms.experience.description,
+        }}
       />
 
       {/* ── TECHNOLOGY ──────────────────────────────── */}
-      <HomeTeknologiSection
-        image={homeMedia[contentMediaKey("home", "home", "technology")]}
-        cms={cms.technology}
+      <HomepageSectionRenderer
+        sectionId="technology"
+        mode="live"
+        data={{
+          desktop_image: homeMedia[contentMediaKey("home", "home", "technology")]?.desktop,
+          mobile_image: homeMedia[contentMediaKey("home", "home", "technology")]?.mobile,
+          title: cms.technology.title,
+          description: cms.technology.description,
+        }}
       />
 
       {/* ── PROMO ───────────────────────────────────── */}
       <HomePromoSection promos={promos} />
 
       {/* ── ABOUT ───────────────────────────────────── */}
-      <HomeAboutSection
-        image={homeMedia[contentMediaKey("home", "home", "about")]}
-        cms={cms.about}
+      <HomepageSectionRenderer
+        sectionId="about"
+        mode="live"
+        data={{
+          desktop_image: homeMedia[contentMediaKey("home", "home", "about")]?.desktop,
+          mobile_image: homeMedia[contentMediaKey("home", "home", "about")]?.mobile,
+          title: cms.about.title,
+          description: cms.about.description,
+        }}
       />
 
       {/* ── JOURNAL ─────────────────────────────────── */}
       <HomeJournalSection news={news} />
 
       {/* ── FINAL CTA ───────────────────────────────── */}
-      <HomeFinalCTA
-        image={homeMedia[contentMediaKey("home", "home", "final_cta")]}
-        cms={cms.final_cta}
+      <HomepageSectionRenderer
+        sectionId="final_cta"
+        mode="live"
+        data={{
+          desktop_image: homeMedia[contentMediaKey("home", "home", "final_cta")]?.desktop,
+          mobile_image: homeMedia[contentMediaKey("home", "home", "final_cta")]?.mobile,
+          title: cms.final_cta.title,
+          description: cms.final_cta.description,
+          ctaText: cms.final_cta.ctaText,
+          ctaUrl: cms.final_cta.ctaUrl,
+        }}
       />
 
       {/* ── DEALER LOCATION ─────────────────────────── */}
-      <HomeDealerLocation
-        backgroundImage={homeMedia[contentMediaKey("home", "home", "dealer_location")]}
-        cms={cms.dealer_location}
+      <HomepageSectionRenderer
+        sectionId="dealer_location"
+        mode="live"
+        data={{
+          desktop_image: homeMedia[contentMediaKey("home", "home", "dealer_location")]?.desktop,
+          mobile_image: homeMedia[contentMediaKey("home", "home", "dealer_location")]?.mobile,
+          title: cms.dealer_location.title,
+          description: cms.dealer_location.description,
+          address: cms.dealer_location.address,
+        }}
       />
     </>
   );

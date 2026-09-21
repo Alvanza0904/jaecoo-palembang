@@ -10,6 +10,7 @@
  */
 
 import { NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createSupabaseServerClient, createSupabaseAdminClient } from '@/lib/supabase/server'
 
 // Singleton UUID untuk homepage content
@@ -72,6 +73,10 @@ export async function PATCH(request: Request) {
       console.error('[API] homepage-content PATCH upsert error:', upsertError)
       return NextResponse.json({ error: upsertError.message }, { status: 500 })
     }
+
+    revalidatePath('/')
+    revalidatePath('/admin/homepage')
+    revalidatePath('/admin/homepage-content')
 
     return NextResponse.json({ success: true, updated: Object.keys(payload) })
 

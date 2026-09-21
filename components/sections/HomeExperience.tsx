@@ -245,8 +245,15 @@ export function HomeFinalCTA({
         <p className={styles.finalCtaDesc}>
           {cms?.description || "Hubungi Alvan sekarang untuk konsultasi gratis, test drive, dan penawaran eksklusif."}
         </p>
-        <Button as="a" href={wa} variant="primary" size="lg" target="_blank" rel="noopener noreferrer">
-          Chat dengan Alvan →
+        <Button
+          as="a"
+          href={cms?.ctaUrl || wa}
+          variant="primary"
+          size="lg"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {cms?.ctaText || "Chat dengan Alvan →"}
         </Button>
       </div>
     </section>
