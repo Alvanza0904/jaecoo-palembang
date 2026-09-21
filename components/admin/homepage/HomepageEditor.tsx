@@ -1,14 +1,16 @@
 /**
  * JAECOO Palembang — Homepage Editor (Client Component)
- * Step 8.7 — Single-page editor:
- *   - Local state per section (FIX keyboard iPhone — tidak ada parent remount)
- *   - Image picker via content_media (arsitektur existing)
- *   - Live Preview per section (desktop/mobile toggle)
- *   - Save per section ke /api/admin/homepage-content (PATCH)
- *   - AIReadyField untuk semua text field
  *
- * KRITIS: InlineMediaTrigger & SectionPreview WAJIB dideklarasikan
- * DI LUAR HomepageEditor agar tidak remount saat parent state berubah.
+ * Preview sekarang menggunakan HomepageSectionRenderer — komponen
+ * yang sama persis dengan live website. TIDAK ada custom preview renderer.
+ *
+ * SINGLE SOURCE OF TRUTH:
+ *   Live Website ──┐
+ *                  ├── HomepageSectionRenderer ── CSS Module live
+ *   Editor Preview ┘
+ *
+ * KRITIS: InlineMediaTrigger WAJIB dideklarasikan DI LUAR HomepageEditor
+ * agar tidak remount saat parent state berubah (fix keyboard iPhone).
  */
 'use client'
 
@@ -17,6 +19,8 @@ import { MediaPicker } from '@/components/admin/media/MediaPicker'
 import AIReadyField from '@/components/admin/ai/AIReadyField'
 import type { MediaAsset } from '@/lib/types/media-asset'
 import type { HomepageContent } from '@/types/homepage-content'
+import { HomepageSectionRenderer } from '@/components/sections/HomepageSectionRenderer'
+import type { SectionId as SharedSectionId, SectionRenderData } from '@/components/sections/HomepageSectionRenderer'
 import styles from './homepage.module.css'
 
 // ─── Section Config ────────────────────────────────────────────
@@ -74,7 +78,13 @@ function InlineMediaTrigger({ label, url, onOpen }: InlineMediaTriggerProps) {
 }
 
 // ─── Sub-komponen: SectionPreview ──────────────────────────────
-// WAJIB di luar HomepageEditor untuk mencegah remount
+// Wrapper tipis di sekitar HomepageSectionRenderer (komponen live website).
+// WAJIB dideklarasikan di luar HomepageEditor (mencegah remount).
+//
+// PERUBAHAN ARSITEKTUR:
+// Sebelumnya: SectionPreview = komponen custom dengan CSS preview sendiri
+// Sekarang:   SectionPreview = shell yang merender HomepageSectionRenderer
+//             → Preview Editor = Live Website secara visual.
 
 interface SectionPreviewProps {
   data: SectionData
@@ -83,53 +93,28 @@ interface SectionPreviewProps {
 }
 
 function SectionPreview({ data, sectionId, device }: SectionPreviewProps) {
-  const bgImage = device === 'mobile'
-    ? ((data.mobile_image as string | undefined) || (data.desktop_image as string | undefined))
-    : (data.desktop_image as string | undefined)
-
-  const posMode = data.text_position_mode as string | undefined
-  const isAuto = !posMode || posMode === 'auto'
-
-  let flexJustify = 'flex-start'
-  let flexAlign = 'center'
-  let textAlign: 'left' | 'center' | 'right' = 'left'
-
-  if (isAuto) {
-    if (device === 'desktop') {
-      if (sectionId === 'experience') { flexJustify = 'flex-end'; textAlign = 'right' }
-      else                            { flexJustify = 'flex-start'; textAlign = 'left' }
-      flexAlign = 'center'
-    } else {
-      flexJustify = 'center'; flexAlign = 'flex-end'; textAlign = 'center'
-    }
-  } else {
-    const pos = device === 'desktop'
-      ? (data.desktop_position as Record<string,string> | undefined)
-      : (data.mobile_position  as Record<string,string> | undefined)
-    if (pos) {
-      if (pos.horizontal === 'left')   { flexJustify = 'flex-start'; textAlign = 'left' }
-      if (pos.horizontal === 'center') { flexJustify = 'center';     textAlign = 'center' }
-      if (pos.horizontal === 'right')  { flexJustify = 'flex-end';   textAlign = 'right' }
-      if (pos.vertical   === 'top')    flexAlign = 'flex-start'
-      if (pos.vertical   === 'center') flexAlign = 'center'
-      if (pos.vertical   === 'bottom') flexAlign = 'flex-end'
-    }
+  // Cast SectionData ke SectionRenderData yang dipakai HomepageSectionRenderer
+  const renderData: SectionRenderData = {
+    desktop_image: data.desktop_image as string | undefined,
+    mobile_image:  data.mobile_image  as string | undefined,
+    eyebrow:       data.eyebrow       as string | undefined,
+    headline:      data.headline      as string | undefined,
+    title:         data.title         as string | undefined,
+    description:   data.description   as string | undefined,
+    ctaText:       data.ctaText       as string | undefined,
+    ctaUrl:        data.ctaUrl        as string | undefined,
+    address:       data.address       as string | undefined,
   }
 
-  let overlay = 'none'
-  if (bgImage) {
-    if      (flexAlign   === 'flex-end')   overlay = 'linear-gradient(to top,  rgba(0,0,0,0.82) 0%, rgba(0,0,0,0) 65%)'
-    else if (flexJustify === 'flex-start') overlay = 'linear-gradient(to right,rgba(0,0,0,0.72) 0%, rgba(0,0,0,0) 65%)'
-    else if (flexJustify === 'flex-end')   overlay = 'linear-gradient(to left, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0) 65%)'
-    else                                   overlay = 'linear-gradient(to bottom,rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.55) 100%)'
-  }
+  // Periksa apakah ada konten untuk dirender
+  const hasContent =
+    renderData.desktop_image ||
+    renderData.mobile_image ||
+    renderData.headline ||
+    renderData.title ||
+    renderData.description
 
-  const headline = (data.headline as string) || (data.title as string) || ''
-  const desc     = (data.description as string) || ''
-  const eyebrow  = (data.eyebrow    as string) || ''
-  const ctaText  = (data.ctaText    as string) || ''
-
-  if (!bgImage && !headline && !desc) {
+  if (!hasContent) {
     return (
       <div className={styles.previewEmpty}>
         <span className={styles.pEmptyIcon}>⬜</span>
@@ -140,22 +125,14 @@ function SectionPreview({ data, sectionId, device }: SectionPreviewProps) {
   }
 
   return (
-    <div
-      className={styles.previewSection}
-      style={{
-        backgroundImage: bgImage ? `url(${bgImage})` : undefined,
-        backgroundColor: bgImage ? undefined : '#1a1a2e',
-        alignItems: flexAlign,
-        justifyContent: flexJustify,
-      }}
-    >
-      <div className={styles.premiumOverlay} style={{ background: overlay }} />
-      <div className={styles.previewContent} style={{ textAlign }}>
-        {eyebrow  && <span className={styles.pEyebrow}>{eyebrow}</span>}
-        {headline && <h2   className={styles.pHeadline}>{headline}</h2>}
-        {desc     && <p    className={styles.pDesc}>{desc}</p>}
-        {ctaText  && <span className={styles.pBtn}>{ctaText}</span>}
-      </div>
+    // Wrapper div agar renderer bisa mengambil 100% space canvas preview
+    <div style={{ width: '100%', height: '100%', overflow: 'auto', position: 'relative' }}>
+      <HomepageSectionRenderer
+        sectionId={sectionId as SharedSectionId}
+        data={renderData}
+        device={device}
+        mode="preview"
+      />
     </div>
   )
 }

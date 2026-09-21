@@ -388,8 +388,9 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #141414;
-  height: 46dvh;
+  background: #0a0a0a;
+  /* Mobile: lebih tinggi agar section live terlihat dengan baik */
+  height: 54dvh;
   min-height: 0;
 }
 
@@ -458,34 +459,55 @@
 }
 
 /* ─── Preview Wrapper & Screen ────────────────────────────── */
+/*
+ * ARSITEKTUR: Preview harus mensimulasikan viewport browser sebenarnya.
+ * Desktop → full-width container, tidak ada shrink/scale.
+ * Mobile  → 390px wide (iPhone 14 Pro), scrollable height.
+ *
+ * JANGAN gunakan transform/scale — itu membuat ukuran font berbeda
+ * dari live website dan menyebabkan preview ≠ live.
+ */
 .previewWrapper {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 0.5rem;
-  overflow: hidden;
+  padding: 0.75rem;
+  overflow: auto;
   min-height: 0;
+  background: #0a0a0a;
 }
 
 .previewScreen {
   border: 2px solid #2d2d2d;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   position: relative;
-  transition: all 0.2s ease;
+  transition: width 0.2s ease, border-radius 0.2s ease;
   flex-shrink: 0;
 }
 
+/*
+ * Desktop: full width canvas — memaksa layout merespons lebar container,
+ * bukan lebar browser. Identik dengan behavior live site.
+ */
 .screenDesktop {
   width: 100%;
-  height: 100%;
-  border-radius: 5px;
+  min-height: 100%;
+  border-radius: 4px;
 }
 
+/*
+ * Mobile: 390px — ukuran viewport iPhone 14 Pro yang paling umum.
+ * Height auto agar konten scrollable seperti mobile browser sebenarnya.
+ * Min-height 600px agar canvas tidak terlalu pendek saat konten kosong.
+ */
 .screenMobile {
-  width: min(340px, 85%);
-  height: min(600px, calc(100% - 0.5rem));
-  border-radius: 24px;
+  width: 390px;
+  max-width: calc(100% - 1rem);
+  min-height: 600px;
+  border-radius: 20px;
+  border-color: #444;
 }
 
 /* ─── Preview Renderer ────────────────────────────────────── */
