@@ -52,7 +52,7 @@ export async function saveNews(id: string | null, formData: NewsFormData) {
     revalidatePath('/berita');
     return { success: true };
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Gagal menyimpan artikel.';
+    const message = err instanceof Error ? err.message : (typeof err === 'object' ? JSON.stringify(err) : String(err));
     return { success: false, error: message };
   }
 }
@@ -67,7 +67,7 @@ export async function deleteNews(id: string) {
     revalidatePath('/berita');
     return { success: true };
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Gagal menghapus artikel.';
+    const message = err instanceof Error ? err.message : (typeof err === 'object' ? JSON.stringify(err) : String(err));
     return { success: false, error: message };
   }
 }
