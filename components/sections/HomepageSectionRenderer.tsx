@@ -111,7 +111,7 @@ function resolveImage(data: SectionRenderData): ResponsiveImage | undefined {
   // Priority 1: full ResponsiveImage sudah ada (dari live page atau editor post-pick)
   if (data.image) {
     // Pastikan alt selalu ada
-    return { alt: '', ...data.image }
+    return { ...data.image, alt: data.image.alt || '' }
   }
 
   // Priority 2: fallback ke URL strings (tanpa presentation_settings)
