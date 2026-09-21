@@ -103,6 +103,9 @@ function SectionPreview({ data, sectionId, device }: SectionPreviewProps) {
     ctaText: data.ctaText as string | undefined,
     ctaUrl: data.ctaUrl as string | undefined,
     address: data.address as string | undefined,
+    // FIX PREVIEW SYNC: pass full MediaAsset → HomepageSectionRenderer render
+    // LayeredHero dengan presentation_settings identik live website.
+    heroMediaAsset: (data.heroMediaAsset as import('@/lib/types/media-asset').MediaAsset | undefined) ?? null,
   }
 
   const hasContent =
@@ -202,9 +205,19 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
     const url = asset.public_url ?? undefined
 
     // 1. Local state segera (live preview instant)
+    // FIX PREVIEW SYNC: untuk hero desktop, simpan full MediaAsset agar
+    // HomepageSectionRenderer bisa merender LayeredHero dengan
+    // presentation_settings yang identik dengan live website.
     setSectionStates(prev => ({
       ...prev,
-      [sectionId]: { ...prev[sectionId], [field]: url },
+      [sectionId]: {
+        ...prev[sectionId],
+        [field]: url,
+        // Simpan asset lengkap untuk section hero agar preview = live
+        ...(sectionId === 'hero' && field === 'desktop_image'
+          ? { heroMediaAsset: asset }
+          : {}),
+      },
     }))
     setDirty(prev => ({ ...prev, [sectionId]: true }))
 

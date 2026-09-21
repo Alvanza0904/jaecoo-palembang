@@ -19,37 +19,63 @@ interface Props {
  * Tidak ada transform/scale yang mengacaukan font-size atau layout.
  *
  * ARSITEKTUR:
- * 1. iframe load /admin-preview/homepage (page.tsx minimal)
- * 2. Setelah load, kirim postMessage dengan payload section data
- * 3. page.tsx menerima message dan render HomepageSectionRenderer
- * 4. Preview = komponen live yang sama persis
+ * 1. iframe load /admin-preview/homepage (page.tsx → HomepagePreviewClient)
+ * 2. iframe kirim JAECOO_HOMEPAGE_PREVIEW_READY setelah mount
+ * 3. Frame menerima READY → kirim payload section data
+ * 4. Setiap kali data berubah → re-send payload
+ * 5. Preview = komponen live yang sama persis (LayeredHero + presentation_settings)
  *
- * FIX v2: Tambah error state + retry jika iframe gagal load.
+ * FIX v3 (2026-09-21):
+ * - Tunggu JAECOO_HOMEPAGE_PREVIEW_READY sebelum send pertama (fix race condition)
+ * - Re-send setiap kali payload berubah (reactive)
+ * - Tambah error state + retry jika iframe gagal load.
  */
 export function HomepagePreviewFrame({ sectionId, data, device }: Props) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null)
   const [loadError, setLoadError] = useState(false)
   const [iframeKey, setIframeKey] = useState(0) // force remount on retry
+  const [iframeReady, setIframeReady] = useState(false)
+
+  // Serialize payload — heroMediaAsset akan ikut terbawa via postMessage
   const payload = JSON.stringify({ sectionId, data, device })
 
-  const send = useCallback(() => {
+  const send = useCallback((p: string) => {
     iframeRef.current?.contentWindow?.postMessage(
-      { type: 'JAECOO_HOMEPAGE_PREVIEW', payload: JSON.parse(payload) },
+      { type: 'JAECOO_HOMEPAGE_PREVIEW', payload: JSON.parse(p) },
       window.location.origin,
     )
-  }, [payload])
+  }, [])
 
+  // Listen READY dari iframe — kirim payload segera setelah iframe siap
   useEffect(() => {
-    send()
-  }, [send])
+    const handler = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin) return
+      if (e.data?.type === 'JAECOO_HOMEPAGE_PREVIEW_READY') {
+        setIframeReady(true)
+        // Kirim payload terkini saat ini juga
+        send(payload)
+      }
+    }
+    window.addEventListener('message', handler)
+    return () => window.removeEventListener('message', handler)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [send]) // payload sengaja tidak di-dep sini — handler hanya setup sekali
+
+  // Re-send setiap kali payload berubah (teks / gambar diubah di editor)
+  useEffect(() => {
+    if (!iframeReady) return
+    send(payload)
+  }, [payload, iframeReady, send])
 
   const handleLoad = useCallback(() => {
     setLoadError(false)
-    send()
-  }, [send])
+    // Jangan kirim di sini — tunggu READY message dari iframe
+    // (menghindari race condition antara onLoad dan useEffect mount di iframe)
+  }, [])
 
   const handleError = useCallback(() => {
     setLoadError(true)
+    setIframeReady(false)
   }, [])
 
   if (loadError) {
@@ -72,7 +98,7 @@ export function HomepagePreviewFrame({ sectionId, data, device }: Props) {
         <span style={{ fontSize: '1.5rem' }}>⚠️</span>
         <span>Preview tidak bisa dimuat.<br />Route /admin-preview/homepage belum tersedia.</span>
         <button
-          onClick={() => { setLoadError(false); setIframeKey((k) => k + 1) }}
+          onClick={() => { setLoadError(false); setIframeReady(false); setIframeKey((k) => k + 1) }}
           style={{
             padding: '0.4rem 0.875rem',
             borderRadius: '6px',
