@@ -4,18 +4,11 @@
    Posisi turun sedikit (safe offset) agar area touch bebas dari Header.
 ═══════════════════════════════════════════════════════════════ */
 
-/* ─── Safe offset: jarak aman dari bawah header ─────────────
-   Mobile: tambah 4px offset agar seluruh area tap bebas dari header.
-   Desktop: tidak perlu offset tambahan (header lebih tinggi + layout lebih luas).
-─────────────────────────────────────────────────────────────── */
-:root {
-  --model-nav-safe-offset-mobile: 4px;
-  --model-nav-safe-offset-desktop: 0px;
-}
+/* ─── Safe offset: 4px mobile agar area tap bebas dari header ── */
 
 .nav {
   position: sticky;
-  top: calc(var(--header-height-mobile) + var(--model-nav-safe-offset-mobile));
+  top: calc(var(--header-height-mobile) + 4px); /* 4px safe gap — mobile */
   z-index: calc(var(--z-menu) - 1);
   border-bottom: 1px solid transparent;
   /* Transisi mengikuti sistem ScrollHeader */
@@ -150,6 +143,6 @@
 
 @media (min-width: 1024px) {
   .nav {
-    top: calc(var(--header-height-desktop) + var(--model-nav-safe-offset-desktop));
+    top: var(--header-height-desktop); /* desktop: no extra offset needed */
   }
 }
