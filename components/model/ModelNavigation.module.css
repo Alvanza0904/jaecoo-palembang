@@ -1,12 +1,44 @@
-/* Model sub-navigation — sits below main header */
+/* ═══════════════════════════════════════════════════════════════
+   Model sub-navigation — sits below main header
+   Step 8.x: scroll-aware visual system, consistent with ScrollHeader.
+   Posisi turun sedikit (safe offset) agar area touch bebas dari Header.
+═══════════════════════════════════════════════════════════════ */
+
+/* ─── Safe offset: jarak aman dari bawah header ─────────────
+   Mobile: tambah 4px offset agar seluruh area tap bebas dari header.
+   Desktop: tidak perlu offset tambahan (header lebih tinggi + layout lebih luas).
+─────────────────────────────────────────────────────────────── */
+:root {
+  --model-nav-safe-offset-mobile: 4px;
+  --model-nav-safe-offset-desktop: 0px;
+}
+
 .nav {
   position: sticky;
-  top: var(--header-height-mobile);
+  top: calc(var(--header-height-mobile) + var(--model-nav-safe-offset-mobile));
   z-index: calc(var(--z-menu) - 1);
-  background-color: rgba(245, 244, 242, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid transparent;
+  /* Transisi mengikuti sistem ScrollHeader */
+  transition:
+    background-color var(--duration-slow) var(--ease-cinema),
+    border-color var(--duration-slow) var(--ease-cinema),
+    backdrop-filter var(--duration-slow) var(--ease-cinema);
+}
+
+/* ─── Transparent state: saat di hero / belum scroll ──────── */
+.navTransparent {
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Solid state: saat scroll (konsisten dengan Header) ───── */
+.navSolid {
+  background-color: rgba(20, 20, 20, 0.97);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 
 .inner {
@@ -27,6 +59,16 @@
   color: var(--color-ink);
   white-space: nowrap;
   display: none;
+  transition: color var(--duration-base) var(--ease-out);
+}
+
+/* Label warna putih saat transparent (di atas hero gelap) */
+.navTransparent .modelLabel {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.navSolid .modelLabel {
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .tabs {
@@ -46,7 +88,8 @@
   font-weight: var(--weight-medium);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: var(--color-ink-subtle);
+  /* Solid state: mengikuti warna ScrollHeader */
+  color: rgba(255, 255, 255, 0.6);
   transition: color var(--duration-fast) var(--ease-out);
   white-space: nowrap;
 }
@@ -58,22 +101,40 @@
   left: var(--space-4);
   right: var(--space-4);
   height: 1.5px;
-  background-color: var(--color-ink);
+  background-color: rgba(255, 255, 255, 0.9);
   transform: scaleX(0);
   transition: transform var(--duration-base) var(--ease-out);
   transform-origin: left;
 }
 
 .tab:hover {
-  color: var(--color-ink);
+  color: var(--color-white);
 }
 
+/* Active state */
 .tabActive {
-  color: var(--color-ink);
+  color: var(--color-white);
 }
 
 .tabActive::after {
   transform: scaleX(1);
+}
+
+/* ─── Light variant: tab warna putih di atas hero gelap ──── */
+.tabLight {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.tabLight:hover {
+  color: var(--color-white);
+}
+
+.tabLight.tabActive {
+  color: var(--color-white);
+}
+
+.tabLight::after {
+  background-color: rgba(255, 255, 255, 0.72);
 }
 
 @media (min-width: 768px) {
@@ -89,6 +150,6 @@
 
 @media (min-width: 1024px) {
   .nav {
-    top: var(--header-height-desktop);
+    top: calc(var(--header-height-desktop) + var(--model-nav-safe-offset-desktop));
   }
 }
