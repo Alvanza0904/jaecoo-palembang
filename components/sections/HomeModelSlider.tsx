@@ -6,8 +6,8 @@
  */
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import Link from "next/link";
 import type { CSSProperties } from "react";
+import Link from "next/link";
 import type { ModelData } from "@/lib/types/model";
 import { PriceDisplay } from "@/components/price/PriceDisplay";
 import { getBackgroundLayerStyle } from "@/lib/types/presentation";
@@ -69,8 +69,27 @@ export function HomeModelSlider({ models }: Props) {
     >
       <div className={styles.track}>
         {list.map((model, i) => {
-          const src = model.hero_media?.image?.desktop;
+          const heroMedia = model.hero_media;
+          const src = heroMedia?.image?.desktop ?? heroMedia?.image?.mobile;
           const isActive = i === current;
+
+          // Apply presentation_settings (same pattern as LayeredHero / getBackgroundLayerStyle)
+          const ps = heroMedia?.presentation_settings;
+          const desktopImgStyle: CSSProperties = ps
+            ? getBackgroundLayerStyle(ps, "desktop", heroMedia?.focal_x ?? 50, heroMedia?.focal_y ?? 50)
+            : {};
+          const mobilePsSettings = heroMedia?.image?.presentation_settings_mobile ?? ps;
+          const mobileImgStyle: CSSProperties = mobilePsSettings
+            ? getBackgroundLayerStyle(mobilePsSettings, "mobile", heroMedia?.focal_x ?? 50, heroMedia?.focal_y ?? 50)
+            : {};
+          const slideImgStyle: CSSProperties = {
+            ...desktopImgStyle,
+            "--slider-mobile-fit":       mobileImgStyle.objectFit,
+            "--slider-mobile-position":  mobileImgStyle.objectPosition,
+            "--slider-mobile-transform": mobileImgStyle.transform,
+            "--slider-mobile-origin":    mobileImgStyle.transformOrigin,
+          } as CSSProperties;
+
           return (
             <div
               key={model.slug}
@@ -85,14 +104,7 @@ export function HomeModelSlider({ models }: Props) {
                   className={styles.slideImg}
                   loading={i === 0 ? "eager" : "lazy"}
                   decoding="async"
-                  style={model.hero_media?.presentation_settings
-                    ? (getBackgroundLayerStyle(
-                        model.hero_media.presentation_settings,
-                        "desktop",
-                        model.hero_media.focal_x ?? 50,
-                        model.hero_media.focal_y ?? 50,
-                      ) as CSSProperties)
-                    : undefined}
+                  style={Object.keys(desktopImgStyle).length > 0 ? slideImgStyle : undefined}
                 />
               ) : (
                 <div className={styles.slideFallback} aria-hidden="true" />

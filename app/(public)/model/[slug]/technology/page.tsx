@@ -18,6 +18,7 @@
  */
 
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
 import { getModelBySlug, getModelSlugs } from "@/lib/supabase/queries";
 import { Button } from "@/components/ui/Button";
@@ -30,20 +31,20 @@ import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import { getBackgroundLayerStyle } from "@/lib/types/presentation";
 import type { ResponsiveImage } from "@/lib/types/media";
-import type { CSSProperties } from "react";
 import styles from "./technology.module.css";
 
-function techFeatureImageStyle(image: ResponsiveImage | undefined): CSSProperties {
+interface Props { params: Promise<{ slug: string }> }
+
+/** Compute presentation_settings style for a feature image (same pattern as Hero). */
+function featureImageStyle(image: ResponsiveImage | undefined): CSSProperties {
   if (!image?.presentation_settings) return {};
   return getBackgroundLayerStyle(
     image.presentation_settings,
     "desktop",
     image.focal_x ?? 50,
     image.focal_y ?? 50,
-  ) as CSSProperties;
+  );
 }
-
-interface Props { params: Promise<{ slug: string }> }
 
 export async function generateStaticParams() {
   return (await getModelSlugs()).map((slug) => ({ slug }));
@@ -241,7 +242,7 @@ export default async function TeknologiPage({ params }: Props) {
                       src={feature.media.image.desktop}
                       alt={feature.media.image.alt ?? feature.title}
                       className={styles.featureImg}
-                      style={techFeatureImageStyle(feature.media.image)}
+                      style={featureImageStyle(feature.media.image)}
                     />
                   ) : (
                     <ImagePlaceholder

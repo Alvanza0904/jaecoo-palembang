@@ -3,12 +3,12 @@
  * Nomor HP dalam text address otomatis jadi link WhatsApp.
  */
 
+import type { CSSProperties } from "react";
 import Link from "next/link";
-import type { CSSProperties, ReactNode } from "react";
 import { SITE_SETTINGS } from "@/lib/data/site";
+import { getBackgroundLayerStyle } from "@/lib/types/presentation";
 import styles from "./HomeDealerLocation.module.css";
 import type { ResponsiveImage } from "@/lib/types/media";
-import { getBackgroundLayerStyle } from "@/lib/types/presentation";
 
 interface DealerCms {
   title?: string;
@@ -26,7 +26,7 @@ function renderAddressWithWaLinks(text: string) {
   const parts = text.split(phoneRegex);
   const matches = text.match(phoneRegex) || [];
 
-  const result: ReactNode[] = [];
+  const result: React.ReactNode[] = [];
   let matchIndex = 0;
 
   parts.forEach((part, i) => {
@@ -71,24 +71,34 @@ export function HomeDealerLocation({ backgroundImage, cms }: Props) {
 
   return (
     <section className={styles.section} aria-labelledby="dealer-title">
-      {backgroundImage?.desktop && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={backgroundImage.desktop}
-          alt=""
-          className={styles.bgImg}
-          aria-hidden="true"
-          loading="lazy"
-          style={backgroundImage.presentation_settings
-            ? (getBackgroundLayerStyle(
-                backgroundImage.presentation_settings,
-                "desktop",
-                backgroundImage.focal_x ?? 50,
-                backgroundImage.focal_y ?? 50,
-              ) as CSSProperties)
-            : undefined}
-        />
-      )}
+      {backgroundImage?.desktop && (() => {
+        const ps = backgroundImage.presentation_settings;
+        const desktopStyle: CSSProperties = ps
+          ? getBackgroundLayerStyle(ps, "desktop", backgroundImage.focal_x ?? 50, backgroundImage.focal_y ?? 50)
+          : {};
+        const mobilePs = backgroundImage.presentation_settings_mobile ?? ps;
+        const mobileStyle: CSSProperties = mobilePs
+          ? getBackgroundLayerStyle(mobilePs, "mobile", backgroundImage.focal_x ?? 50, backgroundImage.focal_y ?? 50)
+          : {};
+        const imgStyle: CSSProperties = {
+          ...desktopStyle,
+          "--dealer-mobile-fit":       mobileStyle.objectFit,
+          "--dealer-mobile-position":  mobileStyle.objectPosition,
+          "--dealer-mobile-transform": mobileStyle.transform,
+          "--dealer-mobile-origin":    mobileStyle.transformOrigin,
+        } as CSSProperties;
+        return (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={backgroundImage.desktop}
+            alt=""
+            className={styles.bgImg}
+            aria-hidden="true"
+            loading="lazy"
+            style={Object.keys(imgStyle).length > 0 ? imgStyle : undefined}
+          />
+        );
+      })()}
 
       <div className={styles.inner}>
         <span className={styles.eyebrow}>Dealer Resmi</span>

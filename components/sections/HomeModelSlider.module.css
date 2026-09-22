@@ -181,3 +181,13 @@
 .slideActive .slideDescription{opacity:1;transform:none;}
 @media (max-width:700px){.slideDescription{font-size:.9rem;line-height:1.55;max-width:92%;}}
 @media (prefers-reduced-motion:reduce){.slideDescription{transition:none;opacity:1;transform:none;}}
+
+/* ── Presentation settings mobile override ───────────────────────────────── */
+@media (max-width: 767px) {
+  .slideImg {
+    object-fit: var(--slider-mobile-fit, cover) !important;
+    object-position: var(--slider-mobile-position, 50% 50%) !important;
+    transform: var(--slider-mobile-transform, scale(1)) !important;
+    transform-origin: var(--slider-mobile-origin, 50% 50%) !important;
+  }
+}

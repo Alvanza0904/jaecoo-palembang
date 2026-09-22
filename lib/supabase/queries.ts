@@ -101,8 +101,9 @@ function mediaRowToImage(asset: SupabaseMediaRow | undefined, fallbackAlt: strin
       focal_x: asset.focal_x,
       focal_y: asset.focal_y,
       cutout_url: asset.cutout_url,
-      // FIX: pass presentation_settings so image_slots carry Visual Editor settings
-      presentation_settings: asset.presentation_settings as import('@/lib/types/presentation').PresentationSettings | undefined,
+      // PENTING: teruskan presentation_settings agar Visual Editor settings
+      // (position, scale, desktop/mobile) diterapkan di browser.
+      presentation_settings: asset.presentation_settings as import("@/lib/types/presentation").PresentationSettings | undefined,
     },
     fallbackAlt,
   );

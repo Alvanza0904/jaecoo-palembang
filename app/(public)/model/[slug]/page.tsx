@@ -24,6 +24,7 @@
 
 export const revalidate = 0;
 
+import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import type { ResponsiveImage } from "@/lib/types/media";
 import { notFound } from "next/navigation";
@@ -42,21 +43,30 @@ import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import { ColorCarousel } from "@/components/model/ColorCarousel";
 import { getBackgroundLayerStyle } from "@/lib/types/presentation";
-import type { CSSProperties } from "react";
 import styles from "./page.module.css";
 
 /**
- * FIX: Apply presentation_settings per breakpoint — same pattern as Hero.
- * Uses getBackgroundLayerStyle() from presentation.ts (Single Source of Truth).
+ * Compute presentation_settings style for a CMS image slot.
+ * Mirrors the same pattern used by LayeredHero / getBackgroundLayerStyle.
+ * Desktop uses presentation_settings; mobile uses presentation_settings_mobile
+ * (falls back to presentation_settings when the mobile override is absent).
  */
-function cmsImageStyle(image: ResponsiveImage | undefined, breakpoint: "desktop" | "tablet" | "mobile" | "small_mobile"): CSSProperties {
+function cmsImageStyle(
+  image: ResponsiveImage | undefined,
+  breakpoint: "desktop" | "mobile" | "tablet" | "small_mobile",
+): CSSProperties {
   if (!image?.presentation_settings) return {};
+  const settings =
+    (breakpoint === "mobile" || breakpoint === "small_mobile")
+      ? (image.presentation_settings_mobile ?? image.presentation_settings)
+      : image.presentation_settings;
+  if (!settings) return {};
   return getBackgroundLayerStyle(
-    image.presentation_settings,
+    settings,
     breakpoint,
     image.focal_x ?? 50,
     image.focal_y ?? 50,
-  ) as CSSProperties;
+  );
 }
 
 function CmsModelImage({
@@ -82,25 +92,20 @@ function CmsModelImage({
     );
   }
 
-  // Build per-breakpoint styles from presentation_settings — mirrors Hero/VisualImage
-  const hasPresentationSettings = !!image.presentation_settings;
-  const imgStyle: CSSProperties = hasPresentationSettings
-    ? {
-        ...cmsImageStyle(image, "desktop"),
-        "--cms-tablet-fit":       cmsImageStyle(image, "tablet").objectFit,
-        "--cms-tablet-position":  cmsImageStyle(image, "tablet").objectPosition,
-        "--cms-tablet-transform": cmsImageStyle(image, "tablet").transform,
-        "--cms-tablet-origin":    cmsImageStyle(image, "tablet").transformOrigin,
-        "--cms-mobile-fit":       cmsImageStyle(image, "mobile").objectFit,
-        "--cms-mobile-position":  cmsImageStyle(image, "mobile").objectPosition,
-        "--cms-mobile-transform": cmsImageStyle(image, "mobile").transform,
-        "--cms-mobile-origin":    cmsImageStyle(image, "mobile").transformOrigin,
-        "--cms-sm-fit":           cmsImageStyle(image, "small_mobile").objectFit,
-        "--cms-sm-position":      cmsImageStyle(image, "small_mobile").objectPosition,
-        "--cms-sm-transform":     cmsImageStyle(image, "small_mobile").transform,
-        "--cms-sm-origin":        cmsImageStyle(image, "small_mobile").transformOrigin,
-      } as CSSProperties
-    : {};
+  // Desktop presentation style (applied via inline style on the <img>)
+  const desktopStyle = cmsImageStyle(image, "desktop");
+  const mobileStyle  = cmsImageStyle(image, "mobile");
+
+  // Expose mobile overrides as CSS custom properties so a single <img>
+  // can switch between desktop and mobile via a @media rule in the stylesheet.
+  // This mirrors the same pattern used in HomeExperience.tsx (VisualImage).
+  const combinedStyle: CSSProperties = {
+    ...desktopStyle,
+    "--cms-mobile-fit":       mobileStyle.objectFit,
+    "--cms-mobile-position":  mobileStyle.objectPosition,
+    "--cms-mobile-transform": mobileStyle.transform,
+    "--cms-mobile-origin":    mobileStyle.transformOrigin,
+  } as CSSProperties;
 
   return (
     // Keep the existing section classes so the visual composition is unchanged.
@@ -115,13 +120,14 @@ function CmsModelImage({
       {image.tablet && (
         <source media="(max-width: 1023px)" srcSet={image.tablet} />
       )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
         alt={image.alt}
-        className={[className, hasPresentationSettings ? styles.cmsVisualMedia : ""].filter(Boolean).join(" ")}
+        className={`${className ?? ""} ${styles.cmsImg}`}
         loading="lazy"
         decoding="async"
-        style={imgStyle}
+        style={Object.keys(combinedStyle).length > 0 ? combinedStyle : undefined}
       />
     </picture>
   );

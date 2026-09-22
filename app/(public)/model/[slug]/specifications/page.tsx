@@ -29,7 +29,22 @@ import { PriceDisplay } from "@/components/price/PriceDisplay";
 import { priceStatusAllowsCalculator } from "@/lib/types/model";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
+import { getBackgroundLayerStyle } from "@/lib/types/presentation";
+import type { ResponsiveImage } from "@/lib/types/media";
+import type { CSSProperties } from "react";
 import styles from "./specifications.module.css";
+
+/** Color swatch images are decorative; apply presentation_settings so
+ *  Visual Editor position/scale settings are respected here too. */
+function colorImageStyle(image: ResponsiveImage | undefined): CSSProperties {
+  if (!image?.presentation_settings) return {};
+  return getBackgroundLayerStyle(
+    image.presentation_settings,
+    "desktop",
+    image.focal_x ?? 50,
+    image.focal_y ?? 50,
+  );
+}
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -159,6 +174,7 @@ export default async function SpesifikasiPage({ params }: Props) {
                             src={color.image.desktop}
                             alt={color.image.alt ?? color.name}
                             className={styles.colorImg}
+                            style={colorImageStyle(color.image)}
                           />
                         ) : (
                           <ImagePlaceholder

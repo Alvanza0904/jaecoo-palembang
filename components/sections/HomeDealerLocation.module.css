@@ -72,3 +72,13 @@
   transition: opacity 0.2s ease;
 }
 .phoneLink:hover { opacity: 0.7; }
+
+/* ── Presentation settings mobile override ───────────────────────────────── */
+@media (max-width: 767px) {
+  .bgImg {
+    object-fit: var(--dealer-mobile-fit, cover) !important;
+    object-position: var(--dealer-mobile-position, 50% 50%) !important;
+    transform: var(--dealer-mobile-transform, scale(1)) !important;
+    transform-origin: var(--dealer-mobile-origin, 50% 50%) !important;
+  }
+}

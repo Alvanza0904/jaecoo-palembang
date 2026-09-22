@@ -14,6 +14,7 @@ import { useState, useCallback } from "react";
 import Image from "next/image";
 import type { ModelColor } from "@/lib/types/model";
 import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
+import { getBackgroundLayerStyle } from "@/lib/types/presentation";
 import styles from "./ColorCarousel.module.css";
 
 interface ColorCarouselProps {
@@ -55,16 +56,23 @@ export function ColorCarousel({ colors, modelName }: ColorCarouselProps) {
         aria-live="polite"
         aria-label={`${modelName} — ${activeColor.name}`}
       >
-        {activeColor.image?.desktop ? (
-          <Image
-            src={activeColor.image.desktop}
-            alt={activeColor.image.alt ?? `${modelName} ${activeColor.name}`}
-            fill
-            priority
-            className={styles.vehicleImg}
-            sizes="100vw"
-          />
-        ) : (
+        {activeColor.image?.desktop ? (() => {
+          const ps = activeColor.image?.presentation_settings;
+          const imgStyle = ps
+            ? getBackgroundLayerStyle(ps, "desktop", activeColor.image?.focal_x ?? 50, activeColor.image?.focal_y ?? 50)
+            : {};
+          return (
+            <Image
+              src={activeColor.image.desktop}
+              alt={activeColor.image.alt ?? `${modelName} ${activeColor.name}`}
+              fill
+              priority
+              className={styles.vehicleImg}
+              sizes="100vw"
+              style={Object.keys(imgStyle).length > 0 ? imgStyle : undefined}
+            />
+          );
+        })() : (
           <ImagePlaceholder
             label={`COLOR — ${activeColor.name.toUpperCase()}`}
             ratio="16/9"
