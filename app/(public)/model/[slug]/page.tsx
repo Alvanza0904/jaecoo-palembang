@@ -188,68 +188,71 @@ export default async function ModelPage({ params }: ModelPageProps) {
 
       {/* ══════════════════════════════════════════════════════════════════
           01 — HERO — Full Cinematic
+          heroSection: negative margin-top cancels ModelNavigation height (48px)
+          so the hero fills the full viewport and the bottom CTA is reachable.
       ══════════════════════════════════════════════════════════════════ */}
-      {hasHeroImage ? (
-        <LayeredHero
-          media={model.hero_media}
-          heading={model.tagline}
-          subheading={model.name}
-          tagline="OVERVIEW"
-          size="full"
-          cta={
-            <div className={styles.heroCtas}>
-              <Button
-                as="a"
-                href={whatsappUrl}
-                variant="primary"
-                size="lg"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Chat dengan Alvan →
-              </Button>
-              <Button
-                as="link"
-                href={`/model/${slug}/specifications`}
-                variant="ghost"
-                size="lg"
-              >
-                Spesifikasi
-              </Button>
-            </div>
-          }
-        />
-      ) : (
-        <HeroPlaceholder
-          tagline="OVERVIEW"
-          heading={model.tagline}
-          subheading={model.name}
-          cta={
-            <div className={styles.heroCtas}>
-              <Button
-                as="a"
-                href={whatsappUrl}
-                variant="primary"
-                size="lg"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Chat dengan Alvan →
-              </Button>
-              <Button
-                as="link"
-                href={`/model/${slug}/specifications`}
-                variant="ghost"
-                size="lg"
-              >
-                Spesifikasi
-              </Button>
-            </div>
-          }
-          size="full"
-          
-        />
-      )}
+      <div className={styles.heroSection}>
+        {hasHeroImage ? (
+          <LayeredHero
+            media={model.hero_media}
+            heading={model.tagline}
+            subheading={model.name}
+            tagline="OVERVIEW"
+            size="full"
+            cta={
+              <div className={styles.heroCtas}>
+                <Button
+                  as="a"
+                  href={whatsappUrl}
+                  variant="primary"
+                  size="lg"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Chat dengan Alvan →
+                </Button>
+                <Button
+                  as="link"
+                  href={`/model/${slug}/specifications`}
+                  variant="ghost"
+                  size="lg"
+                >
+                  Spesifikasi
+                </Button>
+              </div>
+            }
+          />
+        ) : (
+          <HeroPlaceholder
+            tagline="OVERVIEW"
+            heading={model.tagline}
+            subheading={model.name}
+            cta={
+              <div className={styles.heroCtas}>
+                <Button
+                  as="a"
+                  href={whatsappUrl}
+                  variant="primary"
+                  size="lg"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Chat dengan Alvan →
+                </Button>
+                <Button
+                  as="link"
+                  href={`/model/${slug}/specifications`}
+                  variant="ghost"
+                  size="lg"
+                >
+                  Spesifikasi
+                </Button>
+              </div>
+            }
+            size="full"
+          />
+        )}
+      </div>
 
       {/* ══════════════════════════════════════════════════════════════════
           02 — EXTERIOR — Full-bleed image, editorial text layered inside

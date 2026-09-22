@@ -3,6 +3,16 @@
    Image-led cinematic scenes. No card grids.
 ═══════════════════════════════════════════════════════════════ */
 
+/* ─── Hero Section Wrapper ──────────────────────────────────── */
+/*
+ * ModelNavigation (48px, sticky) in model layout renders BEFORE hero in DOM,
+ * pushing the hero 48px below viewport top. Negative margin-top cancels this
+ * so the hero fills the full viewport (ModelNavigation overlays at z-index:199).
+ */
+.heroSection {
+  margin-top: -48px;
+}
+
 /* ─── Shared scene primitives ───────────────────────────────── */
 
 .sceneBg {

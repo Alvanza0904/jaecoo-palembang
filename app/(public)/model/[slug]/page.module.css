@@ -42,6 +42,18 @@
   pointer-events: none;
 }
 
+/* ─── Hero Section Wrapper ──────────────────────────────────────────── */
+/*
+ * ModelNavigation (48px) renders before the hero in DOM (model layout).
+ * Without correction, the hero starts 48px below viewport top, pushing
+ * the bottom CTA 48px off-screen. This negative margin pulls the hero
+ * back up so it visually covers the full viewport (ModelNavigation
+ * overlays on top via its z-index: 199).
+ */
+.heroSection {
+  margin-top: -48px; /* cancel ModelNavigation height */
+}
+
 /* ─── Hero CTAs ─────────────────────────────────────────────────────── */
 
 .heroCtas {

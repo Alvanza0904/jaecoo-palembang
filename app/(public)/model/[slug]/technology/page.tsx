@@ -90,72 +90,76 @@ export default async function TeknologiPage({ params }: Props) {
 
       {/* ══════════════════════════════════════════════════════════
           01 — TECHNOLOGY HERO — Full cinematic image
+          heroSection: negative margin-top cancels ModelNavigation height (48px)
+          so the hero fills the full viewport.
       ══════════════════════════════════════════════════════════ */}
-      {hasHeroImage ? (
-        <LayeredHero
-          media={model.hero_media}
-          heading={technology.headline}
-          subheading={`${model.short_name}`}
-          tagline="TECHNOLOGY"
-          size="full"
-        />
-      ) : (
-        <section className={styles.heroScene} data-theme="dark">
-          {/* Background */}
-          <div className={styles.sceneBg} aria-hidden="true">
-            <ImagePlaceholder
-              label="TECHNOLOGY HERO — INTELLIGENT COCKPIT / EXTERIOR"
-              device="desktop"
-              ratio="21/9"
-              source="Admin → Media Library"
-              className={styles.sceneBgImg}
-            />
-            <div className={styles.sceneBgImgMobile}>
+      <div className={styles.heroSection}>
+        {hasHeroImage ? (
+          <LayeredHero
+            media={model.hero_media}
+            heading={technology.headline}
+            subheading={`${model.short_name}`}
+            tagline="TECHNOLOGY"
+            size="full"
+          />
+        ) : (
+          <section className={styles.heroScene} data-theme="dark">
+            {/* Background */}
+            <div className={styles.sceneBg} aria-hidden="true">
               <ImagePlaceholder
-                label="TECHNOLOGY HERO — MOBILE"
-                device="mobile"
-                ratio="9/16"
+                label="TECHNOLOGY HERO — INTELLIGENT COCKPIT / EXTERIOR"
+                device="desktop"
+                ratio="21/9"
                 source="Admin → Media Library"
                 className={styles.sceneBgImg}
               />
+              <div className={styles.sceneBgImgMobile}>
+                <ImagePlaceholder
+                  label="TECHNOLOGY HERO — MOBILE"
+                  device="mobile"
+                  ratio="9/16"
+                  source="Admin → Media Library"
+                  className={styles.sceneBgImg}
+                />
+              </div>
+              <div className={styles.sceneOverlay} />
             </div>
-            <div className={styles.sceneOverlay} />
-          </div>
 
-          {/* Editorial text */}
-          <div className={styles.heroContent}>
-            <Reveal variant="fade-up" delay={100}>
-              <p className={styles.sceneEyebrow}>
-                <span className={styles.eyebrowLine} />
-                <span>Teknologi</span>
-              </p>
-            </Reveal>
-
-            {singleLineHeadline ? (
-              <Reveal variant="mask" delay={200}>
-                <h1 className={styles.heroHeading}>
-                  {technology.headline || "Intelligence\nBuilt In."}
-                </h1>
+            {/* Editorial text */}
+            <div className={styles.heroContent}>
+              <Reveal variant="fade-up" delay={100}>
+                <p className={styles.sceneEyebrow}>
+                  <span className={styles.eyebrowLine} />
+                  <span>Teknologi</span>
+                </p>
               </Reveal>
-            ) : (
-              <LineReveal
-                lines={headlineLines}
-                tag="h1"
-                delay={220}
-                staggerMs={130}
-                className={styles.heroHeadingLine}
-                lineClassName={styles.heroHeading}
-              />
-            )}
 
-            {technology.subheadline && (
-              <Reveal variant="fade-up" delay={480}>
-                <p className={styles.heroSubheadline}>{technology.subheadline}</p>
-              </Reveal>
-            )}
-          </div>
-        </section>
-      )}
+              {singleLineHeadline ? (
+                <Reveal variant="mask" delay={200}>
+                  <h1 className={styles.heroHeading}>
+                    {technology.headline || "Intelligence\nBuilt In."}
+                  </h1>
+                </Reveal>
+              ) : (
+                <LineReveal
+                  lines={headlineLines}
+                  tag="h1"
+                  delay={220}
+                  staggerMs={130}
+                  className={styles.heroHeadingLine}
+                  lineClassName={styles.heroHeading}
+                />
+              )}
+
+              {technology.subheadline && (
+                <Reveal variant="fade-up" delay={480}>
+                  <p className={styles.heroSubheadline}>{technology.subheadline}</p>
+                </Reveal>
+              )}
+            </div>
+          </section>
+        )}
+      </div>
 
       {/* ══════════════════════════════════════════════════════════
           02 — INTELLIGENCE SCENE — HMI / Smart Kokpit
