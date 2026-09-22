@@ -101,6 +101,11 @@ function mediaRowToImage(asset: SupabaseMediaRow | undefined, fallbackAlt: strin
       focal_x: asset.focal_x,
       focal_y: asset.focal_y,
       cutout_url: asset.cutout_url,
+      // FIX: presentation_settings WAJIB dipass agar live website menggunakan
+      // layout dari Visual Editor (position, scale, typography, dll).
+      // Sebelumnya field ini tidak dipass → presentation_settings hilang
+      // → image_slots model tidak punya layout data.
+      presentation_settings: asset.presentation_settings as import("@/lib/types/presentation").PresentationSettings | undefined,
     },
     fallbackAlt,
   );

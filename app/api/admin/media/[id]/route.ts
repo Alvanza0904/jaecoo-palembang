@@ -1,6 +1,31 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient, getServerUser } from "@/lib/supabase/server";
 
+/**
+ * GET /api/admin/media/[id]
+ * Fetch single media asset by ID — dipakai oleh ModelEditor.openVisualEditor()
+ * untuk load asset sebelum membuka VisualMediaEditor.
+ * Mengembalikan presentation_settings agar Visual Editor punya state yang benar.
+ */
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const user = await getServerUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { id } = await params;
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("media_assets")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+    return NextResponse.json({ error: "Media tidak ditemukan." }, { status: 404 });
+  }
+
+  return NextResponse.json({ asset: data });
+}
+
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const user = await getServerUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

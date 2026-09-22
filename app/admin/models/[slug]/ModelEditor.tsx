@@ -427,7 +427,13 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
         onSelect={async (asset: MediaAsset) => {
           setPickerOpen(false)
           setHeroImageUrl(asset.public_url ?? '')
-          // Save to model_content.hero
+          // FIX: Gunakan variants object dari asset agar resolveHeroMedia()
+          // punya URL yang benar per breakpoint. presentation_settings sudah
+          // tersimpan di media_assets oleh VisualMediaEditor (autosave).
+          // Queries.ts membaca presentation_settings dari media_assets langsung
+          // via media_asset_id, jadi kita hanya perlu simpan ID-nya.
+          const variants = asset.variants ?? {}
+          const base = asset.public_url ?? ''
           await fetch(`/api/admin/models/${slug}/content`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -436,16 +442,17 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
               content: {
                 ...(heroContent ?? {}),
                 image: {
-                  desktop: asset.public_url,
-                  tablet:  asset.public_url,
-                  mobile:  asset.public_url,
-                  alt:     model.name,
-                  width:   asset.width,
-                  height:  asset.height,
+                  desktop:      variants['1920'] ?? variants['1440'] ?? base,
+                  tablet:       variants['1024'] ?? variants['768']  ?? base,
+                  mobile:       variants['768']  ?? variants['480']  ?? base,
+                  small_mobile: variants['480']  ?? base,
+                  alt:          asset.alt_text ?? model.name,
+                  width:        asset.width,
+                  height:       asset.height,
                 },
                 media_asset_id: asset.id,
-                focal_x: asset.focal_x,
-                focal_y: asset.focal_y,
+                focal_x:        asset.focal_x,
+                focal_y:        asset.focal_y,
                 text_color_mode: asset.text_color_mode,
               },
             }),
