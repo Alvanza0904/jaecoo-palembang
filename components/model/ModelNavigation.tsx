@@ -47,6 +47,15 @@ export function ModelNavigation({ slug, modelName }: ModelNavigationProps) {
 
   const isTransparent = isHeroPage && !scrolled;
 
+  // Header tinggi efektif tergantung state:
+  // Transparent: height(60) + padding-block(space-6=1.5rem)×2 = 60+48 = 108px → top 116px (+8 safe)
+  // Solid:       height(60) + padding-block(space-4=1rem)×2   = 60+32 = 92px  → top 100px (+8 safe)
+  // Desktop transparent: 76+48=124 → 132px | solid: 76+32=108 → 116px
+  const navStyle = {
+    "--model-nav-top": isTransparent ? "116px" : "100px",
+    "--model-nav-top-desktop": isTransparent ? "132px" : "116px",
+  } as React.CSSProperties;
+
   const tabs = [
     { label: "Overview", href: `/model/${slug}` },
     { label: "Teknologi", href: `/model/${slug}/technology` },
@@ -59,6 +68,7 @@ export function ModelNavigation({ slug, modelName }: ModelNavigationProps) {
         styles.nav,
         isTransparent ? styles.navTransparent : styles.navSolid,
       ].join(" ")}
+      style={navStyle}
       aria-label={`Navigasi ${modelName}`}
     >
       <div className={styles.inner}>

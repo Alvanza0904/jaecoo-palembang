@@ -8,7 +8,7 @@
 
 .nav {
   position: sticky;
-  top: calc(var(--header-height-mobile) + 4px); /* 4px safe gap — mobile */
+  top: var(--model-nav-top, calc(var(--header-height-mobile) + 4px));
   z-index: calc(var(--z-menu) - 1);
   border-bottom: 1px solid transparent;
   /* Transisi mengikuti sistem ScrollHeader */
@@ -143,6 +143,6 @@
 
 @media (min-width: 1024px) {
   .nav {
-    top: var(--header-height-desktop); /* desktop: no extra offset needed */
+    top: var(--model-nav-top-desktop, calc(var(--header-height-desktop) + 4px));
   }
 }
