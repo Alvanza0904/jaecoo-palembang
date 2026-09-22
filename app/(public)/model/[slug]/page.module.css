@@ -904,22 +904,22 @@
   margin-top: var(--space-2);
 }
 
-/* ── cms-visual-media: presentation_settings responsive breakpoints ──────── */
-/* Applied by CmsModelImage when image has presentation_settings.            */
-/* Desktop style is set inline (objectFit / objectPosition / transform).     */
-/* Tablet and mobile override via CSS custom properties.                     */
+/* ── cmsVisualMedia: presentation_settings responsive breakpoints ────────── */
+/* Local CSS Modules class — applied by CmsModelImage when asset has          */
+/* presentation_settings. Desktop style is set inline (highest specificity). */
+/* Tablet/mobile use CSS custom props set by CmsModelImage style attribute.  */
 
-/* Small mobile (< 390px) */
-:global(.cms-visual-media) {
+/* Default: small_mobile (< 390px) */
+.cmsVisualMedia {
   object-fit: var(--cms-sm-fit, cover);
   object-position: var(--cms-sm-position, 50% 50%);
   transform: var(--cms-sm-transform, none);
   transform-origin: var(--cms-sm-origin, 50% 50%);
 }
 
-/* Mobile (390px – 767px) */
+/* Mobile: 390px – 767px */
 @media (min-width: 390px) and (max-width: 767px) {
-  :global(.cms-visual-media) {
+  .cmsVisualMedia {
     object-fit: var(--cms-mobile-fit, cover);
     object-position: var(--cms-mobile-position, 50% 50%);
     transform: var(--cms-mobile-transform, none);
@@ -927,9 +927,9 @@
   }
 }
 
-/* Tablet (768px – 1023px) */
+/* Tablet: 768px – 1023px */
 @media (min-width: 768px) and (max-width: 1023px) {
-  :global(.cms-visual-media) {
+  .cmsVisualMedia {
     object-fit: var(--cms-tablet-fit, cover);
     object-position: var(--cms-tablet-position, 50% 50%);
     transform: var(--cms-tablet-transform, none);
@@ -937,5 +937,5 @@
   }
 }
 
-/* Desktop (≥ 1024px): inline style from cmsImageStyle("desktop") wins via specificity */
-/* No override needed — the style attribute already carries objectFit/Position/transform */
+/* Desktop (>= 1024px): inline style from cmsImageStyle("desktop") wins */
+/* Inline style has highest specificity — no CSS override needed here    */

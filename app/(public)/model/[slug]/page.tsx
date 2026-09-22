@@ -118,7 +118,7 @@ function CmsModelImage({
       <img
         src={src}
         alt={image.alt}
-        className={`${className ?? ""}${hasPresentationSettings ? " cms-visual-media" : ""}`}
+        className={[className, hasPresentationSettings ? styles.cmsVisualMedia : ""].filter(Boolean).join(" ")}
         loading="lazy"
         decoding="async"
         style={imgStyle}
