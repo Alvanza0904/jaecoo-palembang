@@ -903,3 +903,39 @@
   gap: var(--space-3);
   margin-top: var(--space-2);
 }
+
+/* ── cms-visual-media: presentation_settings responsive breakpoints ──────── */
+/* Applied by CmsModelImage when image has presentation_settings.            */
+/* Desktop style is set inline (objectFit / objectPosition / transform).     */
+/* Tablet and mobile override via CSS custom properties.                     */
+
+/* Small mobile (< 390px) */
+:global(.cms-visual-media) {
+  object-fit: var(--cms-sm-fit, cover);
+  object-position: var(--cms-sm-position, 50% 50%);
+  transform: var(--cms-sm-transform, none);
+  transform-origin: var(--cms-sm-origin, 50% 50%);
+}
+
+/* Mobile (390px – 767px) */
+@media (min-width: 390px) and (max-width: 767px) {
+  :global(.cms-visual-media) {
+    object-fit: var(--cms-mobile-fit, cover);
+    object-position: var(--cms-mobile-position, 50% 50%);
+    transform: var(--cms-mobile-transform, none);
+    transform-origin: var(--cms-mobile-origin, 50% 50%);
+  }
+}
+
+/* Tablet (768px – 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  :global(.cms-visual-media) {
+    object-fit: var(--cms-tablet-fit, cover);
+    object-position: var(--cms-tablet-position, 50% 50%);
+    transform: var(--cms-tablet-transform, none);
+    transform-origin: var(--cms-tablet-origin, 50% 50%);
+  }
+}
+
+/* Desktop (≥ 1024px): inline style from cmsImageStyle("desktop") wins via specificity */
+/* No override needed — the style attribute already carries objectFit/Position/transform */

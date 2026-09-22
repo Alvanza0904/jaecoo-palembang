@@ -41,7 +41,23 @@ import { priceStatusAllowsCalculator } from "@/lib/types/model";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import { ColorCarousel } from "@/components/model/ColorCarousel";
+import { getBackgroundLayerStyle } from "@/lib/types/presentation";
+import type { CSSProperties } from "react";
 import styles from "./page.module.css";
+
+/**
+ * FIX: Apply presentation_settings per breakpoint — same pattern as Hero.
+ * Uses getBackgroundLayerStyle() from presentation.ts (Single Source of Truth).
+ */
+function cmsImageStyle(image: ResponsiveImage | undefined, breakpoint: "desktop" | "tablet" | "mobile" | "small_mobile"): CSSProperties {
+  if (!image?.presentation_settings) return {};
+  return getBackgroundLayerStyle(
+    image.presentation_settings,
+    breakpoint,
+    image.focal_x ?? 50,
+    image.focal_y ?? 50,
+  ) as CSSProperties;
+}
 
 function CmsModelImage({
   image,
@@ -66,6 +82,26 @@ function CmsModelImage({
     );
   }
 
+  // Build per-breakpoint styles from presentation_settings — mirrors Hero/VisualImage
+  const hasPresentationSettings = !!image.presentation_settings;
+  const imgStyle: CSSProperties = hasPresentationSettings
+    ? {
+        ...cmsImageStyle(image, "desktop"),
+        "--cms-tablet-fit":       cmsImageStyle(image, "tablet").objectFit,
+        "--cms-tablet-position":  cmsImageStyle(image, "tablet").objectPosition,
+        "--cms-tablet-transform": cmsImageStyle(image, "tablet").transform,
+        "--cms-tablet-origin":    cmsImageStyle(image, "tablet").transformOrigin,
+        "--cms-mobile-fit":       cmsImageStyle(image, "mobile").objectFit,
+        "--cms-mobile-position":  cmsImageStyle(image, "mobile").objectPosition,
+        "--cms-mobile-transform": cmsImageStyle(image, "mobile").transform,
+        "--cms-mobile-origin":    cmsImageStyle(image, "mobile").transformOrigin,
+        "--cms-sm-fit":           cmsImageStyle(image, "small_mobile").objectFit,
+        "--cms-sm-position":      cmsImageStyle(image, "small_mobile").objectPosition,
+        "--cms-sm-transform":     cmsImageStyle(image, "small_mobile").transform,
+        "--cms-sm-origin":        cmsImageStyle(image, "small_mobile").transformOrigin,
+      } as CSSProperties
+    : {};
+
   return (
     // Keep the existing section classes so the visual composition is unchanged.
     // The image source is resolved from Supabase media assignments.
@@ -82,9 +118,10 @@ function CmsModelImage({
       <img
         src={src}
         alt={image.alt}
-        className={className}
+        className={`${className ?? ""}${hasPresentationSettings ? " cms-visual-media" : ""}`}
         loading="lazy"
         decoding="async"
+        style={imgStyle}
       />
     </picture>
   );

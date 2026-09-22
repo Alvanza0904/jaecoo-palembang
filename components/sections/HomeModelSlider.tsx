@@ -7,8 +7,10 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import type { ModelData } from "@/lib/types/model";
 import { PriceDisplay } from "@/components/price/PriceDisplay";
+import { getBackgroundLayerStyle } from "@/lib/types/presentation";
 import styles from "./HomeModelSlider.module.css";
 
 interface Props { models: ModelData[]; }
@@ -83,6 +85,14 @@ export function HomeModelSlider({ models }: Props) {
                   className={styles.slideImg}
                   loading={i === 0 ? "eager" : "lazy"}
                   decoding="async"
+                  style={model.hero_media?.presentation_settings
+                    ? (getBackgroundLayerStyle(
+                        model.hero_media.presentation_settings,
+                        "desktop",
+                        model.hero_media.focal_x ?? 50,
+                        model.hero_media.focal_y ?? 50,
+                      ) as CSSProperties)
+                    : undefined}
                 />
               ) : (
                 <div className={styles.slideFallback} aria-hidden="true" />

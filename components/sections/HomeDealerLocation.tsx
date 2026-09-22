@@ -4,9 +4,11 @@
  */
 
 import Link from "next/link";
+import type { CSSProperties, ReactNode } from "react";
 import { SITE_SETTINGS } from "@/lib/data/site";
 import styles from "./HomeDealerLocation.module.css";
 import type { ResponsiveImage } from "@/lib/types/media";
+import { getBackgroundLayerStyle } from "@/lib/types/presentation";
 
 interface DealerCms {
   title?: string;
@@ -24,7 +26,7 @@ function renderAddressWithWaLinks(text: string) {
   const parts = text.split(phoneRegex);
   const matches = text.match(phoneRegex) || [];
 
-  const result: React.ReactNode[] = [];
+  const result: ReactNode[] = [];
   let matchIndex = 0;
 
   parts.forEach((part, i) => {
@@ -77,6 +79,14 @@ export function HomeDealerLocation({ backgroundImage, cms }: Props) {
           className={styles.bgImg}
           aria-hidden="true"
           loading="lazy"
+          style={backgroundImage.presentation_settings
+            ? (getBackgroundLayerStyle(
+                backgroundImage.presentation_settings,
+                "desktop",
+                backgroundImage.focal_x ?? 50,
+                backgroundImage.focal_y ?? 50,
+              ) as CSSProperties)
+            : undefined}
         />
       )}
 

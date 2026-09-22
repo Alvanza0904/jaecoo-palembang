@@ -28,7 +28,20 @@ import { LayeredHero } from "@/components/hero/LayeredHero";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
+import { getBackgroundLayerStyle } from "@/lib/types/presentation";
+import type { ResponsiveImage } from "@/lib/types/media";
+import type { CSSProperties } from "react";
 import styles from "./technology.module.css";
+
+function techFeatureImageStyle(image: ResponsiveImage | undefined): CSSProperties {
+  if (!image?.presentation_settings) return {};
+  return getBackgroundLayerStyle(
+    image.presentation_settings,
+    "desktop",
+    image.focal_x ?? 50,
+    image.focal_y ?? 50,
+  ) as CSSProperties;
+}
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -228,6 +241,7 @@ export default async function TeknologiPage({ params }: Props) {
                       src={feature.media.image.desktop}
                       alt={feature.media.image.alt ?? feature.title}
                       className={styles.featureImg}
+                      style={techFeatureImageStyle(feature.media.image)}
                     />
                   ) : (
                     <ImagePlaceholder
