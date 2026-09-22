@@ -421,6 +421,9 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
         onClose={() => setPickerOpen(false)}
         title="Pilih Hero Image"
         defaultCategory="models"
+        previewHeading={model.tagline || model.name}
+        previewSubheading={model.name}
+        previewTagline="OVERVIEW"
         onSelect={async (asset: MediaAsset) => {
           setPickerOpen(false)
           setHeroImageUrl(asset.public_url ?? '')
@@ -456,6 +459,7 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
         onClose={() => setCutoutPickerOpen(false)}
         title="Pilih Media dengan Cutout"
         defaultCategory="models"
+        skipVisualEditor
         onSelect={handleCutoutSelect}
       />
 
@@ -989,6 +993,7 @@ function ColorRow({
         onClose={() => setColorPickerOpen(false)}
         title={`Pilih Gambar — ${color.name}`}
         defaultCategory="models"
+        skipVisualEditor
         onSelect={async (asset: MediaAsset) => {
           setColorPickerOpen(false)
           setColorImageUrl(asset.public_url ?? '')
@@ -1162,7 +1167,7 @@ function MediaAssignmentField({slug,slot,breakpoint,assignments}:{slug:string;sl
     {a?.public_url&&<img src={a.public_url} alt={a.alt_text??slot} style={{width:'100%',aspectRatio:'16/7',objectFit:'cover',borderRadius:8,display:'block',margin:'8px 0'}}/>}
     <div className={styles.rowActions}><button className={styles.btnSecondary} onClick={()=>setOpen(true)}>Choose from Media Library</button>{a&&<button className={styles.btnSecondary} onClick={remove}>Remove</button>}</div>
     {message&&<div className={styles.fieldNote}>{message}</div>}
-    <MediaPicker open={open} onClose={()=>setOpen(false)} onSelect={choose} title={`Pilih ${breakpoint} — ${slot}`}/>
+    <MediaPicker open={open} onClose={()=>setOpen(false)} onSelect={choose} skipVisualEditor title={`Pilih ${breakpoint} — ${slot}`}/>
   </div>
 }
 

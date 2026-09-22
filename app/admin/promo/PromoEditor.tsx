@@ -94,6 +94,7 @@ function PromoImagePicker({ value, onChange }: PromoImagePickerProps) {
         open={isOpen}
         onClose={() => setIsOpen(false)}
         onSelect={handleSelect}
+        skipVisualEditor
         defaultCategory="promos"
         title="Pilih Gambar Promo"
       />

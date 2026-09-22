@@ -128,6 +128,7 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
         open={pickerOpen}
         onClose={() => setPickerOpen(false)}
         onSelect={handleMediaSelect}
+        skipVisualEditor
         defaultCategory="news"
         title="Pilih Foto Cover"
       />

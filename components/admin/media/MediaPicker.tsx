@@ -3,21 +3,18 @@
  *
  * FIX 2026-09-22: Visual Editor sebagai Single Source of Truth
  *
- * Flow SEBELUM (broken):
- *   browse → pilih → onSelect(asset) → selesai
- *   → presentation_settings TIDAK pernah diatur untuk konteks ini
- *   → live website pakai fallback / settings dari session lain
+ * Flow DEFAULT (untuk hero/section images yang butuh layout control):
+ *   browse → pilih → VisualMediaEditor (atur posisi/scale/typography)
+ *   → Simpan → presentation_settings ke Supabase
+ *   → "Gunakan Gambar Ini" → onSelect(updatedAsset)
  *
- * Flow SESUDAH (fixed):
- *   browse → pilih → VisualMediaEditor terbuka untuk asset ini
- *   → atur posisi/scale/typography/overlay
- *   → Simpan → presentation_settings tersimpan ke Supabase (media_assets)
- *   → onSelect(updatedAsset) dipanggil dengan asset terbaru
- *   → live website baca presentation_settings → layout benar
+ * Flow SIMPLE (skipVisualEditor=true, untuk color/promo/news cover):
+ *   browse → pilih → onSelect(asset) langsung
  *
- * VisualMediaEditor adalah SATU-SATUNYA tempat mengatur layout visual.
- * HomepageEditor, ModelEditor, dll hanya meneruskan asset yang sudah
- * di-configure via VisualMediaEditor.
+ * Props:
+ *   skipVisualEditor?: boolean — default false
+ *     Set true untuk picker yang tidak butuh layout control
+ *     (color swatches, promo thumbnail, news cover sederhana)
  */
 
 'use client'
@@ -34,6 +31,10 @@ interface MediaPickerProps {
   onSelect: (asset: MediaAsset) => void
   defaultCategory?: MediaCategory
   title?: string
+  /** Jika true: skip Visual Editor, langsung onSelect setelah pilih gambar.
+   *  Gunakan untuk picker yang tidak butuh layout control (color, promo thumb, dll).
+   *  Default: false — artinya Visual Editor selalu terbuka untuk layout control. */
+  skipVisualEditor?: boolean
   /** Teks preview di VisualMediaEditor */
   previewHeading?: string
   previewSubheading?: string
@@ -48,6 +49,7 @@ export function MediaPicker({
   onSelect,
   defaultCategory,
   title,
+  skipVisualEditor = false,
   previewHeading,
   previewSubheading,
   previewTagline,
@@ -64,7 +66,7 @@ export function MediaPicker({
     }
   }, [open])
 
-  // Close on Escape (hanya di step browse — Visual Editor punya Escape sendiri)
+  // Close on Escape (hanya di step browse)
   useEffect(() => {
     if (!open || step !== 'browse') return
     function onKey(e: KeyboardEvent) {
@@ -84,29 +86,33 @@ export function MediaPicker({
     return () => { document.body.style.overflow = '' }
   }, [open])
 
-  // Step 1: user pilih gambar dari library → buka Visual Editor
+  // Step 1: pilih gambar dari library
   const handleLibrarySelect = useCallback((asset: MediaAsset) => {
+    if (skipVisualEditor) {
+      // Mode simple: langsung selesai
+      onSelect(asset)
+      onClose()
+      return
+    }
+    // Mode layout: buka Visual Editor
     setSelectedAsset(asset)
     setStep('visual-editor')
-  }, [])
+  }, [skipVisualEditor, onSelect, onClose])
 
-  // Step 2a: user klik Simpan di Visual Editor
-  // → asset sudah punya presentation_settings terbaru dari Supabase
+  // Visual Editor: update asset (autosave sudah terjadi di dalamnya)
   const handleVisualEditorUpdated = useCallback((updatedAsset: MediaAsset) => {
     setSelectedAsset(updatedAsset)
-    // Tidak langsung close — user mungkin masih mau adjust
   }, [])
 
-  // Step 2b: user klik Simpan & Gunakan (close Visual Editor)
-  // → teruskan asset ke parent
-  const handleVisualEditorClose = useCallback(() => {
+  // "Gunakan Gambar Ini" — selesai, kirim ke parent
+  const handleConfirm = useCallback(() => {
     if (selectedAsset) {
       onSelect(selectedAsset)
     }
     onClose()
   }, [selectedAsset, onSelect, onClose])
 
-  // Kembali ke browse tanpa memilih
+  // Kembali ke browse
   const handleBackToBrowse = useCallback(() => {
     setStep('browse')
     setSelectedAsset(null)
@@ -122,69 +128,49 @@ export function MediaPicker({
   if (step === 'visual-editor' && selectedAsset) {
     return (
       <div style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 9999,
-        display: 'flex',
-        flexDirection: 'column',
-        background: '#000',
+        position: 'fixed', inset: 0, zIndex: 9999,
+        display: 'flex', flexDirection: 'column', background: '#000',
       }}>
-        {/* Back button */}
+        {/* Toolbar atas */}
         <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          padding: '0.625rem 1rem',
-          background: '#111',
-          borderBottom: '1px solid #222',
-          flexShrink: 0,
+          display: 'flex', alignItems: 'center', gap: '0.75rem',
+          padding: '0.625rem 1rem', background: '#111',
+          borderBottom: '1px solid #222', flexShrink: 0,
         }}>
           <button
             type="button"
             onClick={handleBackToBrowse}
             style={{
-              background: 'none',
-              border: '1px solid #374151',
-              borderRadius: '6px',
-              color: '#9ca3af',
-              padding: '0.375rem 0.75rem',
-              cursor: 'pointer',
+              background: 'none', border: '1px solid #374151',
+              borderRadius: '6px', color: '#9ca3af',
+              padding: '0.375rem 0.75rem', cursor: 'pointer',
               fontSize: '0.8125rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.375rem',
             }}
           >
             ← Ganti Gambar
           </button>
-          <span style={{ color: '#6b7280', fontSize: '0.8125rem' }}>
+          <span style={{ color: '#6b7280', fontSize: '0.8125rem', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {title ?? 'Visual Editor'} — {selectedAsset.filename}
           </span>
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem' }}>
-            <button
-              type="button"
-              onClick={handleVisualEditorClose}
-              style={{
-                background: '#b8953a',
-                border: 'none',
-                borderRadius: '6px',
-                color: '#000',
-                padding: '0.375rem 1rem',
-                cursor: 'pointer',
-                fontSize: '0.8125rem',
-                fontWeight: 600,
-              }}
-            >
-              Gunakan Gambar Ini →
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleConfirm}
+            style={{
+              background: '#b8953a', border: 'none', borderRadius: '6px',
+              color: '#000', padding: '0.375rem 1rem',
+              cursor: 'pointer', fontSize: '0.8125rem', fontWeight: 600,
+              flexShrink: 0,
+            }}
+          >
+            Gunakan Gambar Ini →
+          </button>
         </div>
 
         {/* Visual Editor */}
         <div style={{ flex: 1, overflow: 'auto' }}>
           <VisualMediaEditor
             asset={selectedAsset}
-            onClose={handleVisualEditorClose}
+            onClose={handleConfirm}
             onUpdated={handleVisualEditorUpdated}
             previewHeading={previewHeading}
             previewSubheading={previewSubheading}
@@ -206,24 +192,17 @@ export function MediaPicker({
       aria-label={title ?? 'Pilih Media'}
     >
       <div className={styles.modal}>
-        {/* Header */}
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>{title ?? 'Pilih Media'}</h2>
           <button
             type="button"
             className={styles.closeBtn}
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              onClose()
-            }}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClose() }}
             aria-label="Tutup"
           >
             ✕
           </button>
         </div>
-
-        {/* Body */}
         <div className={styles.modalBody}>
           <MediaLibrary
             onSelect={handleLibrarySelect}
