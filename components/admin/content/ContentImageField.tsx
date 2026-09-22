@@ -77,7 +77,7 @@ export function ContentImageField({ label, contentType, contentKey, slotKey, bre
       </div>
       {message && <div className={message.includes('✓') ? styles.success : styles.error}>{message}</div>}
       {asset?.id && <div className={styles.assetMeta}>Alt: {asset.alt || 'belum diisi'} · Focal: {Math.round(asset.focal_x ?? 50)}% / {Math.round(asset.focal_y ?? 50)}%</div>}
-      <MediaPicker open={pickerOpen} onClose={() => setPickerOpen(false)} onSelect={assign} skipVisualEditor title={`Pilih image — ${label}`} />
+      <MediaPicker open={pickerOpen} onClose={() => setPickerOpen(false)} onSelect={assign} title={`Pilih image — ${label}`} />
     </div>
   )
 }

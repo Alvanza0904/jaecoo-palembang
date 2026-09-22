@@ -41,21 +41,7 @@ import { priceStatusAllowsCalculator } from "@/lib/types/model";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import { ColorCarousel } from "@/components/model/ColorCarousel";
-import type { CSSProperties } from "react";
-import { getBackgroundLayerStyle } from "@/lib/types/presentation";
 import styles from "./page.module.css";
-
-/**
- * Resolve CSS style dari presentation_settings untuk img element.
- * Dipanggil per-breakpoint sehingga desktop & mobile punya style yang benar.
- */
-function resolveImgStyle(image: ResponsiveImage, breakpoint: "desktop" | "mobile"): CSSProperties {
-  const settings = breakpoint === "mobile"
-    ? (image.presentation_settings_mobile ?? image.presentation_settings)
-    : image.presentation_settings;
-  if (!settings) return {};
-  return getBackgroundLayerStyle(settings, breakpoint, image.focal_x ?? 50, image.focal_y ?? 50);
-}
 
 function CmsModelImage({
   image,
@@ -80,22 +66,9 @@ function CmsModelImage({
     );
   }
 
-  // FIX: Terapkan presentation_settings dari Visual Editor.
-  // Desktop style diterapkan langsung; mobile style via CSS custom properties
-  // agar bisa di-override melalui media query di CSS module.
-  const desktopStyle = resolveImgStyle(image, "desktop");
-  const mobileStyle  = resolveImgStyle(image, "mobile");
-  const imgStyle: CSSProperties = {
-    ...desktopStyle,
-    ...(image.mobile ? {
-      "--cms-img-mobile-fit":       mobileStyle.objectFit,
-      "--cms-img-mobile-position":  mobileStyle.objectPosition,
-      "--cms-img-mobile-transform": mobileStyle.transform,
-      "--cms-img-mobile-origin":    mobileStyle.transformOrigin,
-    } as CSSProperties : {}),
-  };
-
   return (
+    // Keep the existing section classes so the visual composition is unchanged.
+    // The image source is resolved from Supabase media assignments.
     <picture>
       {image.small_mobile && (
         <source media="(max-width: 389px)" srcSet={image.small_mobile} />
@@ -112,7 +85,6 @@ function CmsModelImage({
         className={className}
         loading="lazy"
         decoding="async"
-        style={imgStyle}
       />
     </picture>
   );

@@ -903,26 +903,3 @@
   gap: var(--space-3);
   margin-top: var(--space-2);
 }
-
-/* ─── Presentation Settings CSS vars support ──────────────────────────────
- * CmsModelImage passes --cms-img-mobile-* CSS custom properties from
- * presentation_settings. These media queries apply them on mobile.
- * Without this, only the desktop presentation_settings would be used.
- * ───────────────────────────────────────────────────────────────────────── */
-@media (max-width: 767px) {
-  .cinematicBgImg,
-  .presenceBgImg,
-  .performanceBgImg,
-  .techMainImg,
-  .specsBgImg,
-  .ctaBgImg,
-  .detailMainImg,
-  .detailSecondaryImg,
-  .cockpitMainImg,
-  .cockpitFloatingImg {
-    object-fit: var(--cms-img-mobile-fit, cover);
-    object-position: var(--cms-img-mobile-position, 50% 50%);
-    transform: var(--cms-img-mobile-transform, none);
-    transform-origin: var(--cms-img-mobile-origin, 50% 50%);
-  }
-}

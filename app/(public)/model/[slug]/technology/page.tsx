@@ -25,24 +25,10 @@ import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
 import { Reveal } from "@/components/motion/Reveal";
 import { LineReveal } from "@/components/motion/LineReveal";
 import { LayeredHero } from "@/components/hero/LayeredHero";
-import type { CSSProperties } from "react";
-import { getBackgroundLayerStyle } from "@/lib/types/presentation";
-import type { ResponsiveImage } from "@/lib/types/media";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import styles from "./technology.module.css";
-
-/** Resolve presentation_settings menjadi CSS style untuk img element */
-function resolveFeatureImgStyle(image: ResponsiveImage | undefined): CSSProperties {
-  if (!image?.presentation_settings) return {};
-  return getBackgroundLayerStyle(
-    image.presentation_settings,
-    "desktop",
-    image.focal_x ?? 50,
-    image.focal_y ?? 50,
-  );
-}
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -242,7 +228,6 @@ export default async function TeknologiPage({ params }: Props) {
                       src={feature.media.image.desktop}
                       alt={feature.media.image.alt ?? feature.title}
                       className={styles.featureImg}
-                      style={resolveFeatureImgStyle(feature.media.image)}
                     />
                   ) : (
                     <ImagePlaceholder

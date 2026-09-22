@@ -1,27 +1,12 @@
 /**
  * JAECOO Palembang — HomeDealerLocation
  * Nomor HP dalam text address otomatis jadi link WhatsApp.
- *
- * FIX: Tambah presentation_settings support agar background image mengikuti
- * layout dari Visual Editor (position, scale, object-fit).
  */
 
-import type { CSSProperties } from "react";
 import Link from "next/link";
 import { SITE_SETTINGS } from "@/lib/data/site";
-import { getBackgroundLayerStyle } from "@/lib/types/presentation";
 import styles from "./HomeDealerLocation.module.css";
 import type { ResponsiveImage } from "@/lib/types/media";
-
-/** Resolve CSS styles dari presentation_settings untuk background image */
-function bgStyle(image: ResponsiveImage | undefined, breakpoint: "desktop" | "mobile"): CSSProperties {
-  if (!image?.presentation_settings) return {};
-  const settings = breakpoint === "mobile"
-    ? (image.presentation_settings_mobile ?? image.presentation_settings)
-    : image.presentation_settings;
-  if (!settings) return {};
-  return getBackgroundLayerStyle(settings, breakpoint, image.focal_x ?? 50, image.focal_y ?? 50);
-}
 
 interface DealerCms {
   title?: string;
@@ -85,28 +70,14 @@ export function HomeDealerLocation({ backgroundImage, cms }: Props) {
   return (
     <section className={styles.section} aria-labelledby="dealer-title">
       {backgroundImage?.desktop && (
-        <picture>
-          {backgroundImage.mobile && (
-            <source media="(max-width: 767px)" srcSet={backgroundImage.mobile} />
-          )}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={backgroundImage.desktop}
-            alt=""
-            className={styles.bgImg}
-            aria-hidden="true"
-            loading="lazy"
-            style={{
-              ...bgStyle(backgroundImage, "desktop"),
-              // Mobile override via CSS vars jika ada
-              ...(backgroundImage.mobile ? {
-                "--dealer-bg-mobile-fit":      bgStyle(backgroundImage, "mobile").objectFit,
-                "--dealer-bg-mobile-position": bgStyle(backgroundImage, "mobile").objectPosition,
-                "--dealer-bg-mobile-transform": bgStyle(backgroundImage, "mobile").transform,
-              } as CSSProperties : {}),
-            }}
-          />
-        </picture>
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={backgroundImage.desktop}
+          alt=""
+          className={styles.bgImg}
+          aria-hidden="true"
+          loading="lazy"
+        />
       )}
 
       <div className={styles.inner}>

@@ -271,34 +271,10 @@ export default function UnifiedEditor({ initialData }: UnifiedEditorProps) {
   }, []);
 
   // Handle hasil pick media
-  const handleMediaSelect = useCallback(async (asset: MediaAsset) => {
+  const handleMediaSelect = useCallback((asset: MediaAsset) => {
     if (!pickerTarget) return;
     const url = asset.public_url || '';
-    const { section, field } = pickerTarget;
-
-    // 1. Simpan URL ke local state (untuk thumbnail preview)
-    updateField(section, field, url);
-
-    // 2. Simpan ke content_media di Supabase agar live website membaca asset ini
-    //    (termasuk presentation_settings yang sudah diset di Visual Editor)
-    const breakpoint = field === 'desktop_image' ? 'desktop' : 'mobile';
-    const slotKey = section; // section id = slot key
-    try {
-      await fetch('/api/admin/content-media', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content_type: 'home',
-          content_key: 'home',
-          slot_key: slotKey,
-          breakpoint,
-          media_asset_id: asset.id ?? null,
-        }),
-      });
-    } catch {
-      // Lanjut — URL sudah disimpan ke local state
-    }
-
+    updateField(pickerTarget.section, pickerTarget.field, url);
     setPickerOpen(false);
     setPickerTarget(null);
   }, [pickerTarget, updateField]);
@@ -583,9 +559,6 @@ export default function UnifiedEditor({ initialData }: UnifiedEditorProps) {
         onClose={handlePickerClose}
         onSelect={handleMediaSelect}
         title={`Pilih Gambar — ${SECTIONS.find(s => s.id === activeSection)?.label}`}
-        previewHeading={(data[activeSection]?.headline as string) || (data[activeSection]?.title as string) || 'JAECOO'}
-        previewSubheading={(data[activeSection]?.description as string) || ''}
-        previewTagline={(data[activeSection]?.eyebrow as string) || (SECTIONS.find(s => s.id === activeSection)?.label ?? 'PREVIEW')}
       />
     </>
   );

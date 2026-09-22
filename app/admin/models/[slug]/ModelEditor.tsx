@@ -421,19 +421,10 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
         onClose={() => setPickerOpen(false)}
         title="Pilih Hero Image"
         defaultCategory="models"
-        previewHeading={model.tagline || model.name}
-        previewSubheading={model.name}
-        previewTagline="OVERVIEW"
         onSelect={async (asset: MediaAsset) => {
           setPickerOpen(false)
           setHeroImageUrl(asset.public_url ?? '')
-          // FIX: Gunakan variants object dari asset agar resolveHeroMedia()
-          // punya URL yang benar per breakpoint. presentation_settings sudah
-          // tersimpan di media_assets oleh VisualMediaEditor (autosave).
-          // Queries.ts membaca presentation_settings dari media_assets langsung
-          // via media_asset_id, jadi kita hanya perlu simpan ID-nya.
-          const variants = asset.variants ?? {}
-          const base = asset.public_url ?? ''
+          // Save to model_content.hero
           await fetch(`/api/admin/models/${slug}/content`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -442,17 +433,16 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
               content: {
                 ...(heroContent ?? {}),
                 image: {
-                  desktop:      variants['1920'] ?? variants['1440'] ?? base,
-                  tablet:       variants['1024'] ?? variants['768']  ?? base,
-                  mobile:       variants['768']  ?? variants['480']  ?? base,
-                  small_mobile: variants['480']  ?? base,
-                  alt:          asset.alt_text ?? model.name,
-                  width:        asset.width,
-                  height:       asset.height,
+                  desktop: asset.public_url,
+                  tablet:  asset.public_url,
+                  mobile:  asset.public_url,
+                  alt:     model.name,
+                  width:   asset.width,
+                  height:  asset.height,
                 },
                 media_asset_id: asset.id,
-                focal_x:        asset.focal_x,
-                focal_y:        asset.focal_y,
+                focal_x: asset.focal_x,
+                focal_y: asset.focal_y,
                 text_color_mode: asset.text_color_mode,
               },
             }),
@@ -466,7 +456,6 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
         onClose={() => setCutoutPickerOpen(false)}
         title="Pilih Media dengan Cutout"
         defaultCategory="models"
-        skipVisualEditor
         onSelect={handleCutoutSelect}
       />
 
@@ -1000,7 +989,6 @@ function ColorRow({
         onClose={() => setColorPickerOpen(false)}
         title={`Pilih Gambar — ${color.name}`}
         defaultCategory="models"
-        skipVisualEditor
         onSelect={async (asset: MediaAsset) => {
           setColorPickerOpen(false)
           setColorImageUrl(asset.public_url ?? '')
@@ -1174,7 +1162,7 @@ function MediaAssignmentField({slug,slot,breakpoint,assignments}:{slug:string;sl
     {a?.public_url&&<img src={a.public_url} alt={a.alt_text??slot} style={{width:'100%',aspectRatio:'16/7',objectFit:'cover',borderRadius:8,display:'block',margin:'8px 0'}}/>}
     <div className={styles.rowActions}><button className={styles.btnSecondary} onClick={()=>setOpen(true)}>Choose from Media Library</button>{a&&<button className={styles.btnSecondary} onClick={remove}>Remove</button>}</div>
     {message&&<div className={styles.fieldNote}>{message}</div>}
-    <MediaPicker open={open} onClose={()=>setOpen(false)} onSelect={choose} skipVisualEditor title={`Pilih ${breakpoint} — ${slot}`}/>
+    <MediaPicker open={open} onClose={()=>setOpen(false)} onSelect={choose} title={`Pilih ${breakpoint} — ${slot}`}/>
   </div>
 }
 
