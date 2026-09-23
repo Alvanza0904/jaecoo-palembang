@@ -25,8 +25,8 @@ export const metadata = {
 
 export default function AdminPreviewLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="id" className={manrope.variable}>
-      <body style={{ margin: 0, padding: 0, background: '#000' }}>
+    <html lang="id" className={manrope.variable} style={{ height: '100%' }}>
+      <body style={{ margin: 0, padding: 0, background: '#000', height: '100%' }}>
         {children}
       </body>
     </html>

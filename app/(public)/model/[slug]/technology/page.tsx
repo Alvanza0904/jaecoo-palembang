@@ -21,15 +21,18 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
 import { getModelBySlug, getModelSlugs } from "@/lib/supabase/queries";
+import { getModelBySlug as getStaticModelBySlug } from "@/lib/data/models";
 import { Button } from "@/components/ui/Button";
 import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
 import { Reveal } from "@/components/motion/Reveal";
 import { LineReveal } from "@/components/motion/LineReveal";
 import { LayeredHero } from "@/components/hero/LayeredHero";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
+import { J7ShsExploreCta } from "@/components/model/J7ShsExploreCta";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import { getBackgroundLayerStyle } from "@/lib/types/presentation";
+import type { ModelData, ModelFeature } from "@/lib/types/model";
 import type { ResponsiveImage } from "@/lib/types/media";
 import styles from "./technology.module.css";
 
@@ -74,6 +77,61 @@ function featureImageStyle(image: ResponsiveImage | undefined): CSSProperties {
 
 interface Props { params: Promise<{ slug: string }> }
 
+function hasText(feature: ModelFeature) {
+  return Boolean((feature.title || feature.description || "").trim());
+}
+
+/**
+ * Technology page reads model.technology (Admin → model_content.section = technology).
+ * It does not reuse exterior/interior overview scenes.
+ * J7 SIVP keeps the shared SHS specification sheet, and this page is where
+ * Super Intelligent Valet Parking, LiDAR, and the 27-sensor suite are shown.
+ */
+function technologyFeatures(model: ModelData): ModelFeature[] {
+  let features = (model.technology.features ?? []).filter(hasText);
+
+  if (model.slug === "jaecoo-j7-sivp") {
+    const blob = features.map((feature) => `${feature.title} ${feature.description} ${feature.tag ?? ""}`).join(" ");
+    if (!/lidar|valet|sivp|27/i.test(blob)) {
+      const differentiators = (getStaticModelBySlug("jaecoo-j7-sivp")?.technology.features ?? [])
+        .filter((feature) => /lidar|valet|sensor|sivp|ruang|pilih/i.test(`${feature.title} ${feature.description} ${feature.tag ?? ""}`));
+      features = [...differentiators, ...features];
+    }
+  }
+
+  if (features.length > 0) return features;
+
+  const built: ModelFeature[] = [];
+  const adas = model.page_copy?.adas;
+  if (adas?.heading || adas?.body) {
+    built.push({
+      id: `${model.slug}-adas`,
+      tag: adas.label || "ADAS",
+      title: (adas.heading || "Bantuan pengemudi").replace(/\n/g, " "),
+      description: adas.body || [adas.stat, adas.unit].filter(Boolean).join(" "),
+    });
+  }
+  const cockpit = model.page_copy?.cockpit;
+  if (cockpit?.heading || cockpit?.body) {
+    built.push({
+      id: `${model.slug}-drive`,
+      tag: cockpit.label || "Berkendara",
+      title: (cockpit.heading || "Teknologi berkendara").replace(/\n/g, " "),
+      description: cockpit.body || "",
+    });
+  }
+  const performance = model.page_copy?.performance;
+  if (performance?.heading || (model.highlights?.length ?? 0) > 0) {
+    built.push({
+      id: `${model.slug}-performance`,
+      tag: performance?.label || "Performa",
+      title: (performance?.heading || "Performa").replace(/\n/g, " "),
+      description: (model.highlights ?? []).map((item) => `${item.value} ${item.label}`).join(" · "),
+    });
+  }
+  return built.filter(hasText);
+}
+
 export async function generateStaticParams() {
   return (await getModelSlugs()).map((slug) => ({ slug }));
 }
@@ -110,7 +168,8 @@ export default async function TeknologiPage({ params }: Props) {
   const sceneHeading = (scene?.heading || "SMART\nBY DESIGN.").split("\n").filter(Boolean);
   const techStats = model.page_copy?.tech_stats?.length
     ? model.page_copy.tech_stats
-    : [];
+    : (model.highlights ?? []);
+  const features = technologyFeatures(model);
 
   // Split headline into lines for LineReveal
   const headlineLines = (technology.headline || "Intelligence Built In")
@@ -236,7 +295,7 @@ export default async function TeknologiPage({ params }: Props) {
           03 — TECHNOLOGY FEATURES — Each feature as a cinematic scene
           Alternating: image-left/text-right, then image-right/text-left
       ══════════════════════════════════════════════════════════ */}
-      {technology.features.map((feature, i) => {
+      {features.map((feature, i) => {
         const isEven = i % 2 === 0;
         const textVariants = ["scale", "fade-up", "slide-right", "slide-left", "blur", "fade-down"] as const;
         const imgVariants  = ["fade-up", "scale", "slide-left", "slide-right", "fade-up", "scale"] as const;
@@ -309,77 +368,14 @@ export default async function TeknologiPage({ params }: Props) {
           04 — CONNECTIVITY SCENE — Smart connectivity / voice
           Only shown if there are 0 features (fallback cinematic scene)
       ══════════════════════════════════════════════════════════ */}
-      {technology.features.length === 0 && (
-        <>
-          <section className={styles.cinematicScene} data-theme="dark">
-            <div className={styles.sceneBg} aria-hidden="true">
-              <ImagePlaceholder
-                label="TECHNOLOGY — VOICE / CONNECTIVITY / DIGITAL INTERFACE"
-                device="desktop"
-                ratio="16/9"
-                source="Admin → Media Library"
-                className={styles.sceneBgImg}
-              />
-              <div className={styles.sceneOverlay} data-gradient="left" />
-            </div>
-
-            <div className={styles.sceneContent} data-position="center-right">
-              <Reveal variant="fade-down" delay={0}>
-                <p className={styles.sceneEyebrow}>
-                  <span className={styles.eyebrowLine} />
-                  <span>Konektivitas</span>
-                </p>
-              </Reveal>
-              <Reveal variant="scale" delay={140}>
-                <h2 className={styles.cinematicHeading}>
-                  Always<br />connected.
-                </h2>
-              </Reveal>
-              <Reveal variant="fade-up" delay={340}>
-                <p className={styles.sceneSupportText}>
-                  Tetap terhubung dengan dunia di sekitar Anda — navigasi,
-                  musik, dan kendali kendaraan cerdas dalam satu antarmuka.
-                </p>
-              </Reveal>
-            </div>
-          </section>
-
-          <section className={styles.cinematicScene} data-theme="dark">
-            <div className={styles.sceneBg} aria-hidden="true">
-              <ImagePlaceholder
-                label="TECHNOLOGY — DRIVER ASSISTANCE / ADAS / SENSORS"
-                device="desktop"
-                ratio="16/9"
-                source="Admin → Media Library"
-                className={styles.sceneBgImg}
-              />
-              <div className={styles.sceneOverlay} data-gradient="top" />
-            </div>
-
-            <div className={styles.sceneContent} data-position="bottom-right">
-              <Reveal variant="slide-right" delay={0}>
-                <p className={styles.sceneEyebrow}>
-                  <span className={styles.eyebrowLine} />
-                  <span>Keselamatan</span>
-                </p>
-              </Reveal>
-              <LineReveal
-                lines={["TECHNOLOGY", "THAT SEES AHEAD."]}
-                tag="h2"
-                delay={120}
-                staggerMs={110}
-                lineClassName={styles.cinematicHeading}
-              />
-              <Reveal variant="fade-up" delay={420}>
-                <p className={styles.sceneSupportText}>
-                  Sensor dan kamera canggih bekerja diam-diam —
-                  memindai, memperingatkan, dan melindungi
-                  setiap perjalanan Anda.
-                </p>
-              </Reveal>
-            </div>
-          </section>
-        </>
+      {features.length === 0 && technology.subheadline && (
+        <section className={styles.cinematicScene} data-theme="dark" data-section-transition>
+          <div className={styles.sceneContent} data-position="bottom-left">
+            <Reveal variant="fade-up">
+              <p className={styles.sceneSupportText}>{technology.subheadline}</p>
+            </Reveal>
+          </div>
+        </section>
       )}
 
       {/* ══════════════════════════════════════════════════════════
@@ -403,9 +399,40 @@ export default async function TeknologiPage({ params }: Props) {
       </section>
       )}
 
-      {/* ══════════════════════════════════════════════════════════
-          06 — FINAL CTA — Dark cinematic end
-      ══════════════════════════════════════════════════════════ */}
+      {model.specifications.length > 0 && (
+        <section className={styles.specBand} data-section-transition>
+          <div className={styles.specInner}>
+            <Reveal variant="fade-up">
+              <p className={styles.specEyebrow}>Spesifikasi</p>
+              <h2 className={styles.specHeading}>
+                {model.slug === "jaecoo-j7-sivp" ? "Basis yang sama dengan J7 SHS." : "Angka teknis."}
+              </h2>
+              {model.slug === "jaecoo-j7-sivp" && (
+                <p className={styles.specNote}>
+                  Spesifikasi kendaraan mengikuti J7 SHS. Yang membedakan SIVP adalah Super Intelligent Valet Parking, LiDAR, dan 27 sensor.
+                </p>
+              )}
+            </Reveal>
+            <div className={styles.specGrid}>
+              {model.specifications.map((category) => (
+                <div key={category.label} className={styles.specCategory}>
+                  <h3 className={styles.specCategoryTitle}>{category.label}</h3>
+                  <dl className={styles.specList}>
+                    {category.specs.map((spec) => (
+                      <div key={`${category.label}-${spec.label}`} className={styles.specRow}>
+                        <dt>{spec.label}</dt>
+                        <dd>{spec.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {slug === "jaecoo-j7-sivp" && <J7ShsExploreCta />}
       <section className={styles.ctaScene} data-theme="dark">
         <div className={styles.sceneBg} aria-hidden="true">
           <TechSceneImage

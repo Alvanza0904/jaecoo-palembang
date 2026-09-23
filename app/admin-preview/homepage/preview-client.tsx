@@ -52,21 +52,12 @@ const SECTION_ACCENT: Partial<Record<SectionId, string>> = {
 }
 
 /**
- * Contextual Text Panel — overlay nyata yang muncul di bawah preview
- * saat user fokus ke field teks di editor.
+ * Contextual Text Panel — isi slot preview yang sama dengan live section.
  *
- * Panel ini menampilkan:
- * - Label section + aksen warna
- * - Title/heading yang sedang diedit (realtime)
- * - Description (realtime)
- * - CTA text (jika ada, realtime)
- * - Address (jika dealer_location, realtime)
- *
- * STATE FLOW:
- * Parent textEditMode=true → postMessage → preview-client → panel muncul
- * Parent textEditMode=false → postMessage → preview-client → panel hilang
- *
- * Source of truth = Parent UI state, bukan DOM focus di iframe.
+ * Bukan overlay, bukan sticky sendiri, bukan preview kedua.
+ * Parent (previewCanvas di Homepage Editor) tetap mengontrol posisi iframe.
+ * Saat textEditMode, panel ini MENGGANTIKAN HomepageSectionRenderer
+ * di dalam iframe yang sama.
  */
 function ContextualTextPanel({
   sectionId,
@@ -99,17 +90,15 @@ function ContextualTextPanel({
   return (
     <div
       style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 9999,
-        background: 'rgba(10, 10, 12, 0.97)',
+        width: '100%',
+        height: '100%',
+        minHeight: '100vh',
+        boxSizing: 'border-box',
+        background: '#0a0a0c',
         borderTop: `3px solid ${accent}`,
-        padding: '14px 16px 16px',
-        boxShadow: '0 -8px 32px rgba(0,0,0,0.5)',
-        backdropFilter: 'blur(8px)',
+        padding: '28px 22px 32px',
         fontFamily: 'system-ui, -apple-system, sans-serif',
+        overflow: 'auto',
       }}
     >
       {/* Header row */}
@@ -276,48 +265,38 @@ export function HomepagePreviewClient() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [preview.sectionId, preview.textEditMode])
 
-  // Padding bawah saat contextual panel muncul
-  const contextualPanelHeight = preview.textEditMode && preview.sectionId !== 'hero' ? 120 : 0
+  const showContextualPreview = preview.textEditMode && preview.sectionId !== 'hero'
 
   return (
     <main
       style={{
         margin: 0,
         width: '100%',
-        minHeight: '100vh',
+        height: '100%',
+        minHeight: '100%',
         overflowX: 'hidden',
-        position: 'relative',
-        paddingBottom: contextualPanelHeight > 0 ? `${contextualPanelHeight}px` : undefined,
-        transition: 'padding-bottom 0.2s ease',
+        background: '#0a0a0c',
       }}
     >
-      {/* ── Section Renderer ────────────────────────────────────────
-          Selalu merender section aktif dengan data draft terkini.
-          textEditMode dan focusedFieldId datang dari Parent via postMessage —
-          bukan dari DOM focus di iframe. */}
-      <HomepageSectionRenderer
-        sectionId={preview.sectionId}
-        data={preview.data}
-        mode="preview"
-        textEditMode={preview.textEditMode}
-        focusedFieldId={preview.focusedFieldId}
-        focusKey={focusKey}
-      />
-
-      {/* ── Contextual Text Panel ────────────────────────────────────
-          Panel overlay realtime yang muncul saat textEditMode = true.
-          Source of truth = Parent UI state via postMessage.
-          Panel HANYA muncul di dalam iframe, bukan di HomepageEditor. */}
-      {preview.textEditMode && preview.sectionId !== 'hero' && (
+      {/* Satu slot. textEditMode mengganti preview normal, tidak menumpuknya. */}
+      {showContextualPreview ? (
         <ContextualTextPanel
           sectionId={preview.sectionId}
           data={preview.data}
           focusedFieldId={preview.focusedFieldId}
         />
+      ) : (
+        <HomepageSectionRenderer
+          sectionId={preview.sectionId}
+          data={preview.data}
+          mode="preview"
+          textEditMode={preview.textEditMode}
+          focusedFieldId={preview.focusedFieldId}
+          focusKey={focusKey}
+        />
       )}
 
-      {/* ── Focus ring via CSS ───────────────────────────────────── */}
-      {preview.textEditMode && (
+      {preview.textEditMode && !showContextualPreview && (
         <style>{`
           [data-text-focus] {
             outline: none !important;

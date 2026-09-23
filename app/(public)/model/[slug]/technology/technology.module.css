@@ -48,8 +48,9 @@
     position: absolute;
     inset: 0;
   }
-  /* Hide desktop image, show mobile */
-  .sceneBg > :first-child:not(.sceneBgImgMobile) {
+  /* Hide the desktop frame only when a dedicated mobile frame exists.
+     Otherwise the technology scene loses its only image and looks empty. */
+  .sceneBg:has(.sceneBgImgMobile) > :first-child:not(.sceneBgImgMobile) {
     display: none;
   }
   .sceneBgImgMobile .sceneBgImg {
@@ -565,52 +566,102 @@
   }
 }
 
-/* ─── Section entrance transition ───────────────────────────── */
-/*
- * Each major section has a subtle entrance via CSS.
- * The section starts with slight opacity and tiny translateY.
- * JavaScript (SectionObserver) adds data-entered="true".
- * Reduced-motion: skip transform, keep opacity.
- */
-
+/* Sections stay visible without SectionObserver.
+   A previous rule set opacity: 0 until data-entered="true", but the
+   technology scenes never received that attribute, so the page rendered blank. */
 .cinematicScene,
 .featureScene,
 .statStrip,
-.ctaScene {
-  opacity: 0;
-  transform: translateY(16px);
-  transition:
-    opacity 0.7s var(--ease-out),
-    transform 0.7s var(--ease-out);
-}
-
-.cinematicScene[data-entered="true"],
-.featureScene[data-entered="true"],
-.statStrip[data-entered="true"],
-.ctaScene[data-entered="true"] {
+.ctaScene,
+.specBand {
   opacity: 1;
   transform: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .cinematicScene,
-  .featureScene,
-  .statStrip,
-  .ctaScene {
-    transform: none !important;
-    transition: opacity 0.4s linear !important;
+/* ─── SPECIFICATIONS (same model.specifications source as the specs page) ── */
+
+.specBand {
+  background: var(--color-off-white, #f6f5f2);
+  color: var(--color-ink, #141414);
+  padding: 4.5rem var(--container-padding, 1.25rem) 5rem;
+}
+
+.specInner {
+  max-width: var(--container-max, 1200px);
+  margin: 0 auto;
+}
+
+.specEyebrow {
+  margin: 0 0 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-gold, #c9a84c);
+}
+
+.specHeading {
+  margin: 0 0 0.75rem;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.specNote {
+  max-width: 42rem;
+  margin: 0 0 2rem;
+  color: var(--color-ink-muted, #5c5c5c);
+  line-height: 1.6;
+}
+
+.specGrid {
+  display: grid;
+  gap: 2.5rem;
+  margin-top: 2.5rem;
+}
+
+@media (min-width: 800px) {
+  .specGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem 4rem;
   }
 }
+
+.specCategoryTitle {
+  margin: 0 0 0.5rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.specList {
+  margin: 0;
+}
+
+.specRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 0.95rem;
+}
+
+.specRow dt {
+  color: var(--color-ink-muted, #5c5c5c);
+}
+
+.specRow dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 600;
+}
+
+/* ─── Section entrance transition ───────────────────────────── */
 
 /* ─── Mobile adjustments ────────────────────────────────────── */
 
 @media (max-width: 767px) {
-  /* Reduce movement on mobile */
-  .cinematicScene,
-  .featureScene {
-    transform: translateY(10px);
-  }
-
   .sceneContent[data-position="center-right"] {
     text-align: left;
     margin-left: 0;

@@ -500,7 +500,7 @@ async function buildModelsFromRows(rows: SupabaseModel[]): Promise<ModelData[]> 
     mapped.map((model) => hydrateModelImages(model, model.slug)),
   );
 
-  const merged = [...hydrated, ...missingStaticModels(hydrated)];
+  const merged = applySharedJ7Specifications([...hydrated, ...missingStaticModels(hydrated)]);
   const lineup = ["jaecoo-j5-ev", "jaecoo-j7-shs", "jaecoo-j7-sivp", "jaecoo-j8-shs"];
   return merged.sort((a, b) => {
     const left = lineup.indexOf(a.slug);
@@ -514,6 +514,16 @@ async function buildModelsFromRows(rows: SupabaseModel[]): Promise<ModelData[]> 
 function missingStaticModels(present: ModelData[]): ModelData[] {
   const slugs = new Set(present.map((model) => model.slug));
   return getStaticModels().filter((model) => !slugs.has(model.slug));
+}
+
+function applySharedJ7Specifications(models: ModelData[]): ModelData[] {
+  const shs = models.find((model) => model.slug === "jaecoo-j7-shs");
+  if (!shs?.specifications?.length) return models;
+  return models.map((model) =>
+    model.slug === "jaecoo-j7-sivp"
+      ? { ...model, specifications: shs.specifications }
+      : model,
+  );
 }
 
 export async function getModels(): Promise<ModelData[]> {
@@ -570,9 +580,16 @@ export async function getModelBySlug(
       .filter((id): id is string => !!id);
 
     const assets = await getMediaAssets([heroId, cutoutId, ...colorIds, ...technologyIds].filter((id): id is string => !!id));
-    const model = mapModel(row, staticFallback, assets);
+    const model = await hydrateModelImages(mapModel(row, staticFallback, assets), slug);
 
-    return hydrateModelImages(model, slug);
+    if (slug === "jaecoo-j7-sivp") {
+      const shs = await getModelBySlug("jaecoo-j7-shs");
+      if (shs?.specifications?.length) {
+        return { ...model, specifications: shs.specifications };
+      }
+    }
+
+    return model;
   } catch (err) {
     console.warn(`[Supabase] getModelBySlug(${slug}) failed — using image-safe static fallback:`, err);
     return getStaticModelBySlug(slug);

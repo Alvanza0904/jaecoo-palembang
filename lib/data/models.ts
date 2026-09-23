@@ -8,7 +8,7 @@
  * Slugs: jaecoo-j5-ev | jaecoo-j7-shs | jaecoo-j7-sivp | jaecoo-j8-shs
  */
 
-import type { ModelData } from "@/lib/types/model";
+import type { ModelData, ModelSpecCategory } from "@/lib/types/model";
 
 export const MODEL_PRICES = {
   "jaecoo-j5-ev": 354_900_000,
@@ -17,6 +17,46 @@ export const MODEL_PRICES = {
 } as const;
 
 const emptyImage = (alt: string) => ({ desktop: undefined, alt });
+
+/**
+ * Vehicle specifications shared by J7 SHS and J7 SIVP.
+ * SIVP does not invent a second powertrain sheet — Super Intelligent
+ * Valet Parking, LiDAR, and the 27-sensor suite live on the Technology page.
+ */
+const J7_SHS_SPECIFICATIONS: ModelSpecCategory[] = [
+  {
+    label: "Dimensi",
+    specs: [
+      { label: "Wheelbase", value: "2.672 mm" },
+      { label: "Ground clearance", value: "200 mm" },
+    ],
+  },
+  {
+    label: "Super Hybrid System",
+    specs: [
+      { label: "Mesin", value: "Fifth-generation 1.5TGDI DHE" },
+      { label: "Transmisi", value: "Dedicated Hybrid Transmission (DHT)" },
+      { label: "Tenaga mesin", value: "140 hp" },
+      { label: "Tenaga listrik", value: "201 hp" },
+      { label: "Efisiensi termal", value: "44,5%" },
+      { label: "Efisiensi EV maksimal", value: "98,5%" },
+      { label: "Baterai", value: "18,3 kWh · IP68" },
+      { label: "EV range", value: "100 km" },
+      { label: "Jarak kombinasi", value: "1.300 km" },
+      { label: "0–100 km/jam", value: "7,3 detik" },
+      { label: "Mode berkendara", value: "ECO · STANDARD · SPORT" },
+    ],
+  },
+  {
+    label: "Kabin & Keselamatan",
+    specs: [
+      { label: "ADAS", value: "19 fitur" },
+      { label: "Airbag", value: "8 airbag" },
+      { label: "Kamera", value: "540° HD surround view" },
+      { label: "Pengisian AC", value: "7,7 kW" },
+    ],
+  },
+];
 
 export const MODELS: ModelData[] = [
   {
@@ -329,40 +369,7 @@ export const MODELS: ModelData[] = [
         },
       ],
     },
-    specifications: [
-      {
-        label: "Dimensi",
-        specs: [
-          { label: "Wheelbase", value: "2.672 mm" },
-          { label: "Ground clearance", value: "200 mm" },
-        ],
-      },
-      {
-        label: "Super Hybrid System",
-        specs: [
-          { label: "Mesin", value: "Fifth-generation 1.5TGDI DHE" },
-          { label: "Transmisi", value: "Dedicated Hybrid Transmission (DHT)" },
-          { label: "Tenaga mesin", value: "140 hp" },
-          { label: "Tenaga listrik", value: "201 hp" },
-          { label: "Efisiensi termal", value: "44,5%" },
-          { label: "Efisiensi EV maksimal", value: "98,5%" },
-          { label: "Baterai", value: "18,3 kWh · IP68" },
-          { label: "EV range", value: "100 km" },
-          { label: "Jarak kombinasi", value: "1.300 km" },
-          { label: "0–100 km/jam", value: "7,3 detik" },
-          { label: "Mode berkendara", value: "ECO · STANDARD · SPORT" },
-        ],
-      },
-      {
-        label: "Kabin & Keselamatan",
-        specs: [
-          { label: "ADAS", value: "19 fitur" },
-          { label: "Airbag", value: "8 airbag" },
-          { label: "Kamera", value: "540° HD surround view" },
-          { label: "Pengisian AC", value: "7,7 kW" },
-        ],
-      },
-    ],
+    specifications: J7_SHS_SPECIFICATIONS,
     meta_title: "JAECOO J7 SHS — Harga & Spesifikasi | JAECOO Palembang",
     meta_description:
       "JAECOO J7 SHS Rp534.900.000 OTR Palembang. Super Hybrid 1.5TGDI, EV range 100 km, jarak kombinasi 1.300 km, 19 ADAS. Bukan varian SIVP.",
@@ -390,7 +397,7 @@ export const MODELS: ModelData[] = [
       { value: "27", label: "Sensors & cameras" },
       { value: "128-ch", label: "dToF LiDAR" },
       { value: "540°", label: "Camera coverage" },
-      { value: "100+ km", label: "EV range" },
+      { value: "100 km", label: "EV range" },
     ],
     page_copy: {
       exterior: {
@@ -501,33 +508,12 @@ export const MODELS: ModelData[] = [
           id: "j7-sivp-platform",
           title: "Platform SHS-P",
           description:
-            "Angka platform yang disebut di halaman SIVP: baterai 18,3 kWh, EV range 100+ km, jarak kombinasi 1.300 km, dan pengisian AC 7,7 kW. Bukan spesifikasi J5 atau J8.",
+            "Angka platform yang sama dengan J7 SHS: baterai 18,3 kWh, EV range 100 km, jarak kombinasi 1.300 km, dan pengisian AC 7,7 kW.",
           tag: "Platform",
         },
       ],
     },
-    specifications: [
-      {
-        label: "Super Intelligent Valet Parking",
-        specs: [
-          { label: "Sensor & kamera", value: "27" },
-          { label: "LiDAR", value: "128-channel dToF" },
-          { label: "Kamera", value: "540°" },
-          { label: "Radar", value: "Environmental detection" },
-          { label: "Kontroler", value: "Intelligent Driving Domain Controller" },
-          { label: "Fungsi", value: "Parkir otomatis, tanpa pengemudi di dalam mobil" },
-        ],
-      },
-      {
-        label: "Platform SHS-P",
-        specs: [
-          { label: "Baterai", value: "18,3 kWh" },
-          { label: "EV range", value: "100+ km" },
-          { label: "Jarak kombinasi", value: "1.300 km" },
-          { label: "Pengisian AC", value: "7,7 kW" },
-        ],
-      },
-    ],
+    specifications: J7_SHS_SPECIFICATIONS,
     meta_title: "JAECOO J7 SIVP — Super Intelligent Valet Parking | JAECOO Palembang",
     meta_description:
       "JAECOO J7 SHS-P SIVP di Palembang. 27 sensor dan kamera, LiDAR 128-channel, kamera 540°. Harga resmi menyusul — pre-book.",

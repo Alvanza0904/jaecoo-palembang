@@ -1525,6 +1525,7 @@ function SpecsTab({ model, slug }: { model: AdminModel; slug: string }) {
           <h2 className={styles.sectionTitle}>Specifications</h2>
           <p className={styles.sectionNote}>
             Angka di sini yang tampil di halaman spesifikasi. Jangan menyalin spesifikasi model lain.
+            {slug === "jaecoo-j7-sivp" && " J7 SIVP memakai lembar spesifikasi J7 SHS. Pembeda SIVP — Super Intelligent Valet Parking, LiDAR, dan 27 sensor — berada di Technology."}
           </p>
         </div>
         <button className={styles.btnAdd} type="button" onClick={() => setRows((current) => [...current, { category: "", spec_label: "", spec_value: "" }])}>+ Baris</button>

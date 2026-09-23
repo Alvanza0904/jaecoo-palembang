@@ -30,6 +30,7 @@ import { priceStatusAllowsCalculator } from "@/lib/types/model";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import { getBackgroundLayerStyle } from "@/lib/types/presentation";
+import { J7ShsExploreCta } from "@/components/model/J7ShsExploreCta";
 import type { ResponsiveImage } from "@/lib/types/media";
 import type { CSSProperties } from "react";
 import styles from "./specifications.module.css";
@@ -273,6 +274,8 @@ export default async function SpesifikasiPage({ params }: Props) {
             </Container>
           </section>
         )}
+
+        {slug === "jaecoo-j7-sivp" && <J7ShsExploreCta />}
 
         {/* ── NAVIGATION ────────────────────────────────────────────────── */}
         <section className={styles.navSection}>

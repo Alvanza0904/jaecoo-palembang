@@ -42,6 +42,7 @@ import { priceStatusAllowsCalculator, type ModelSectionCopy } from "@/lib/types/
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import { ColorCarousel } from "@/components/model/ColorCarousel";
+import { J7ShsExploreCta } from "@/components/model/J7ShsExploreCta";
 import { getBackgroundLayerStyle } from "@/lib/types/presentation";
 import styles from "./page.module.css";
 
@@ -673,7 +674,10 @@ export default async function ModelPage({ params }: ModelPageProps) {
 
       {/* ══════════════════════════════════════════════════════════════════
           12 — FINAL CTA — Cinematic end scene
+          J7 SIVP keeps its own story, then a full-width bridge to J7 SHS.
       ══════════════════════════════════════════════════════════════════ */}
+      {slug === "jaecoo-j7-sivp" && <J7ShsExploreCta />}
+
       <section className={styles.ctaSection} data-theme="dark">
         <div className={styles.ctaBg} aria-hidden="true">
           <CmsModelImage image={model.image_slots?.final_cta} label="FINAL CTA — CINEMATIC VEHICLE" ratio="16/9" className={styles.ctaBgImg} />
