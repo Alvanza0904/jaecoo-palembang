@@ -85,6 +85,10 @@ export default async function SpesifikasiPage({ params }: Props) {
 
   const v = model.default_variant;
   const showCalculator = priceStatusAllowsCalculator(v.price_status, v.price_idr);
+  const specsCta = model.page_copy?.specs_cta;
+  const specsHeading = specsCta?.heading || `Siap memesan ${model.short_name}?`;
+  const specsBody = specsCta?.body || "Hubungi Alvan untuk informasi harga terkini, test drive, dan penawaran spesial dealer resmi JAECOO Palembang.";
+  const specsButton = specsCta?.primary_label || "Chat dengan Alvan →";
 
   return (
     <>
@@ -300,11 +304,10 @@ export default async function SpesifikasiPage({ params }: Props) {
               <div className={styles.ctaBlock}>
                 <GoldLine width="short" />
                 <h2 className={styles.ctaHeading}>
-                  Siap memesan {model.short_name}?
+                  {specsHeading}
                 </h2>
                 <p className={styles.ctaBody}>
-                  Hubungi Alvan untuk informasi harga terkini, test drive,
-                  dan penawaran spesial dealer resmi JAECOO Palembang.
+                  {specsBody}
                 </p>
                 <Button
                   as="a"
@@ -314,7 +317,7 @@ export default async function SpesifikasiPage({ params }: Props) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Chat dengan Alvan →
+                  {specsButton}
                 </Button>
               </div>
             </Reveal>

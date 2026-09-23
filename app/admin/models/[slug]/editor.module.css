@@ -82,6 +82,30 @@
   margin-bottom: 1.5rem;
 }
 
+.editorMap {
+  margin: 0 0 1.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-raised, #f7f7f5);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.editorMapTitle {
+  margin: 0 0 0.4rem;
+  font-weight: 650;
+}
+
+.editorMap ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.editorMap li + li {
+  margin-top: 0.2rem;
+}
+
 /* ─── Tabs ──────────────────────────────── */
 
 .tabs {

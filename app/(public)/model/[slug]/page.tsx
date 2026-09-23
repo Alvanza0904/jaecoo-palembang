@@ -156,6 +156,8 @@ function copyOf(copy: ModelSectionCopy | undefined, fallback: ModelSectionCopy):
     body: copy?.body || fallback.body,
     stat: copy?.stat || fallback.stat,
     unit: copy?.unit || fallback.unit,
+    primary_label: copy?.primary_label || fallback.primary_label,
+    secondary_label: copy?.secondary_label || fallback.secondary_label,
   };
 }
 
@@ -241,6 +243,11 @@ export default async function ModelPage({ params }: ModelPageProps) {
     heading: `Tertarik dengan\n${model.short_name}?`,
     body: "Hubungi Alvan untuk harga terkini, jadwal test drive, dan penawaran langsung dari dealer resmi JAECOO Palembang.",
   });
+  const heroCta = copy?.hero_cta;
+  const heroPrimary = heroCta?.primary_label || "Chat dengan Alvan →";
+  const heroSecondary = heroCta?.secondary_label || "Spesifikasi";
+  const ctaPrimary = cta.primary_label || "Chat dengan Alvan →";
+  const ctaSecondary = cta.secondary_label || "Jelajahi Teknologi";
   const highlights = model.highlights ?? [];
 
   return (
@@ -270,7 +277,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Chat dengan Alvan →
+                  {heroPrimary}
                 </Button>
                 <Button
                   as="link"
@@ -278,7 +285,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
                   variant="ghost"
                   size="lg"
                 >
-                  Spesifikasi
+                  {heroSecondary}
                 </Button>
               </div>
             }
@@ -298,7 +305,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Chat dengan Alvan →
+                  {heroPrimary}
                 </Button>
                 <Button
                   as="link"
@@ -306,7 +313,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
                   variant="ghost"
                   size="lg"
                 >
-                  Spesifikasi
+                  {heroSecondary}
                 </Button>
               </div>
             }
@@ -424,6 +431,9 @@ export default async function ModelPage({ params }: ModelPageProps) {
             <h2 className={styles.cinematicHeading}>
               <HeadingLines text={interior.heading} fallback="" />
             </h2>
+            {interior.body && (
+              <p className={styles.cinematicBody}>{interior.body}</p>
+            )}
           </Reveal>
         </div>
       </section>
@@ -482,6 +492,9 @@ export default async function ModelPage({ params }: ModelPageProps) {
               <h2 className={styles.performanceHeading}>
                 <HeadingLines text={performance.heading} fallback="" />
               </h2>
+              {performance.body && (
+                <p className={styles.cinematicBody}>{performance.body}</p>
+              )}
             </Reveal>
 
             <div className={styles.performanceStats}>
@@ -704,7 +717,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Chat dengan Alvan →
+                  {ctaPrimary}
                 </Button>
                 <Button
                   as="link"
@@ -712,7 +725,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
                   variant="ghost"
                   size="lg"
                 >
-                  Jelajahi Teknologi
+                  {ctaSecondary}
                 </Button>
               </div>
             </Reveal>

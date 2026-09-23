@@ -1136,7 +1136,7 @@ function ImageSlotsTab({ slug }: { slug: string }) {
   const groups: Array<{ title: string; note: string; slots: Array<[string, string]> }> = [
     {
       title: 'Exterior',
-      note: 'Dipakai section eksterior, detail desain, dan profile.',
+      note: 'Dipakai Overview → Exterior, Design detail, dan Profile.',
       slots: [
         ['exterior', 'Exterior'],
         ['exterior_mobile', 'Exterior mobile'],
@@ -1148,7 +1148,7 @@ function ImageSlotsTab({ slug }: { slug: string }) {
     },
     {
       title: 'Interior',
-      note: 'Kabin dan kokpit. Slot mobile adalah gambar terpisah, bukan crop desktop.',
+      note: 'Dipakai Overview → Interior dan Cockpit. Slot mobile adalah gambar terpisah, bukan crop desktop.',
       slots: [
         ['interior', 'Interior'],
         ['interior_mobile', 'Interior mobile'],
@@ -1158,7 +1158,7 @@ function ImageSlotsTab({ slug }: { slug: string }) {
     },
     {
       title: 'Performa, teknologi, CTA',
-      note: 'Hero utama tetap di tab Basic Info. Slot di sini untuk section di bawah hero.',
+      note: 'Hero utama tetap di tab Basic Info. Warna di tab Colors. Gambar fitur teknologi di tab Content → Technology.',
       slots: [
         ['performance', 'Performance'],
         ['technology', 'Technology'],
@@ -1236,16 +1236,56 @@ function MediaAssignmentField({slug,slot,breakpoint,assignments}:{slug:string;sl
 
 /* ─── Content Tab ──────────────────────────────────────── */
 
-const PAGE_FIELDS: Array<{ key: keyof ModelPageCopy; title: string; withBody?: boolean; withStat?: boolean }> = [
-  { key: "exterior", title: "Exterior", withBody: true },
-  { key: "design", title: "Design detail", withBody: true },
-  { key: "profile", title: "Profile" },
-  { key: "interior", title: "Interior", withBody: true },
-  { key: "cockpit", title: "Cockpit", withBody: true },
-  { key: "performance", title: "Performance" },
-  { key: "adas", title: "ADAS / keselamatan", withBody: true, withStat: true },
-  { key: "cta", title: "Final CTA", withBody: true },
-  { key: "tech_intelligence", title: "Technology scene", withBody: true },
+const PAGE_GROUPS: Array<{
+  title: string
+  note: string
+  fields: Array<{
+    key: keyof ModelPageCopy
+    title: string
+    where: string
+    withLabel?: boolean
+    withHeading?: boolean
+    withBody?: boolean
+    withStat?: boolean
+    withButtons?: boolean
+  }>
+}> = [
+  {
+    title: "Overview",
+    note: "Nama, tagline, deskripsi, dan gambar hero ada di tab Basic Info. Harga ada di Variants.",
+    fields: [
+      { key: "hero_cta", title: "Hero — tombol", where: "Overview → Hero", withLabel: false, withHeading: false, withButtons: true },
+      { key: "performance", title: "Performa", where: "Overview → Performa", withBody: true },
+      { key: "cta", title: "CTA akhir", where: "Overview → CTA akhir", withBody: true, withButtons: true },
+    ],
+  },
+  {
+    title: "Design",
+    note: "Gambar tiap section ada di tab Image Slots, grup Exterior dan Interior.",
+    fields: [
+      { key: "exterior", title: "Exterior", where: "Overview → Exterior", withBody: true },
+      { key: "design", title: "Design detail", where: "Overview → Design detail", withBody: true },
+      { key: "profile", title: "Profile", where: "Overview → Profile" },
+      { key: "interior", title: "Interior", where: "Overview → Interior", withBody: true },
+      { key: "cockpit", title: "Cockpit", where: "Overview → Cockpit", withBody: true },
+    ],
+  },
+  {
+    title: "Technology",
+    note: "Headline fitur dan gambar fitur ada di blok Technology di bawah. Gambar scene ada di Image Slots.",
+    fields: [
+      { key: "adas", title: "ADAS / keselamatan", where: "Overview + Technology → ADAS", withBody: true, withStat: true },
+      { key: "tech_intelligence", title: "Scene kecerdasan", where: "Technology → Intelligence", withBody: true },
+      { key: "tech_close", title: "CTA Technology", where: "Technology → CTA akhir", withBody: true, withButtons: true },
+    ],
+  },
+  {
+    title: "Specifications",
+    note: "Tabel angka ada di tab Specifications. Teks ini hanya penutup halaman spesifikasi.",
+    fields: [
+      { key: "specs_cta", title: "CTA spesifikasi", where: "Specifications → CTA", withBody: true, withButtons: true },
+    ],
+  },
 ]
 
 function emptyFeature(): ModelFeature {
@@ -1272,6 +1312,14 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
   const [highlights, setHighlights] = useState<ModelHighlight[]>(
     pageInit.highlights?.length ? pageInit.highlights : fallbackHighlights,
   )
+  const [techStats, setTechStats] = useState<ModelHighlight[]>(
+    pageInit.tech_stats?.length ? pageInit.tech_stats : staticModel?.page_copy?.tech_stats ?? [],
+  )
+  const pageSeo = pageInit as ModelPageCopy & { meta_title?: string; meta_description?: string }
+  const [seo, setSeo] = useState({
+    meta_title: pageSeo.meta_title || staticModel?.meta_title || "",
+    meta_description: pageSeo.meta_description || staticModel?.meta_description || "",
+  })
   const [technology, setTechnology] = useState({
     headline: techInit.headline || staticModel?.technology.headline || "",
     subheadline: techInit.subheadline || techInit.description || staticModel?.technology.subheadline || "",
@@ -1296,7 +1344,16 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
         const res = await fetch(`/api/admin/models/${slug}/content`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ section: "page", content: { ...pageCopy, highlights } }),
+          body: JSON.stringify({
+            section: "page",
+            content: {
+              ...pageCopy,
+              highlights,
+              tech_stats: techStats,
+              meta_title: seo.meta_title,
+              meta_description: seo.meta_description,
+            },
+          }),
         })
         const json = await res.json()
         if (!res.ok) throw new Error(json.error || "Gagal menyimpan")
@@ -1363,63 +1420,132 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
       </div>
       {feedback && <Feedback type={feedback.type} message={feedback.msg} />}
 
-      {PAGE_FIELDS.map((field) => {
-        const value = (pageCopy[field.key] as ModelSectionCopy | undefined) ?? {}
-        return (
-          <div key={field.key} className={styles.contentBlock}>
-            <div className={styles.contentBlockHeader}>
-              <h3 className={styles.contentBlockTitle}>{field.title}</h3>
-              <span className={styles.contentSectionStatus}>Editable</span>
-            </div>
-            <div className={styles.field}>
-              <label className={styles.label}>Label</label>
-              <input className={styles.input} value={value.label ?? ""} onChange={(e) => patchSection(field.key, { label: e.target.value })} />
-            </div>
-            <div className={styles.field}>
-              <label className={styles.label}>Heading</label>
-              <textarea className={styles.textarea} rows={3} value={value.heading ?? ""} onChange={(e) => patchSection(field.key, { heading: e.target.value })} />
-              <span className={styles.fieldNote}>Satu baris baru = satu baris di halaman.</span>
-            </div>
-            {field.withBody && (
-              <div className={styles.field}>
-                <label className={styles.label}>Description</label>
-                <textarea className={styles.textarea} rows={3} value={value.body ?? ""} onChange={(e) => patchSection(field.key, { body: e.target.value })} />
-              </div>
-            )}
-            {field.withStat && (
-              <div className={styles.fieldRow}>
-                <div className={styles.field}>
-                  <label className={styles.label}>Angka</label>
-                  <input className={styles.input} value={value.stat ?? ""} onChange={(e) => patchSection(field.key, { stat: e.target.value })} />
-                </div>
-                <div className={styles.field}>
-                  <label className={styles.label}>Satuan</label>
-                  <input className={styles.input} value={value.unit ?? ""} onChange={(e) => patchSection(field.key, { unit: e.target.value })} />
-                </div>
-              </div>
-            )}
+      {PAGE_GROUPS.map((group) => (
+        <div key={group.title}>
+          <div className={styles.contentBlock}>
+            <p className={styles.contentBlockKicker}>{group.title.toUpperCase()}</p>
+            <h3 className={styles.contentBlockTitle}>{group.title}</h3>
+            <p className={styles.sectionNote}>{group.note}</p>
           </div>
-        )
-      })}
+          {group.fields.map((field) => {
+            const value = (pageCopy[field.key] as ModelSectionCopy | undefined) ?? {}
+            const showLabel = field.withLabel !== false
+            const showHeading = field.withHeading !== false
+            return (
+              <div key={field.key} className={styles.contentBlock}>
+                <div className={styles.contentBlockHeader}>
+                  <h3 className={styles.contentBlockTitle}>{field.title}</h3>
+                  <span className={styles.contentSectionStatus}>{field.where}</span>
+                </div>
+                {showLabel && (
+                  <div className={styles.field}>
+                    <label className={styles.label}>Label</label>
+                    <input className={styles.input} value={value.label ?? ""} onChange={(e) => patchSection(field.key, { label: e.target.value })} />
+                  </div>
+                )}
+                {showHeading && (
+                  <div className={styles.field}>
+                    <label className={styles.label}>Heading</label>
+                    <textarea className={styles.textarea} rows={3} value={value.heading ?? ""} onChange={(e) => patchSection(field.key, { heading: e.target.value })} />
+                    <span className={styles.fieldNote}>Satu baris baru = satu baris di halaman.</span>
+                  </div>
+                )}
+                {field.withBody && (
+                  <div className={styles.field}>
+                    <label className={styles.label}>Description</label>
+                    <textarea className={styles.textarea} rows={3} value={value.body ?? ""} onChange={(e) => patchSection(field.key, { body: e.target.value })} />
+                  </div>
+                )}
+                {field.withStat && (
+                  <div className={styles.fieldRow}>
+                    <div className={styles.field}>
+                      <label className={styles.label}>Angka</label>
+                      <input className={styles.input} value={value.stat ?? ""} onChange={(e) => patchSection(field.key, { stat: e.target.value })} />
+                    </div>
+                    <div className={styles.field}>
+                      <label className={styles.label}>Satuan</label>
+                      <input className={styles.input} value={value.unit ?? ""} onChange={(e) => patchSection(field.key, { unit: e.target.value })} />
+                    </div>
+                  </div>
+                )}
+                {field.withButtons && (
+                  <div className={styles.fieldRow}>
+                    <div className={styles.field}>
+                      <label className={styles.label}>Teks tombol utama</label>
+                      <input className={styles.input} value={value.primary_label ?? ""} onChange={(e) => patchSection(field.key, { primary_label: e.target.value })} />
+                    </div>
+                    {field.key !== "specs_cta" && (
+                      <div className={styles.field}>
+                        <label className={styles.label}>Teks tombol kedua</label>
+                        <input className={styles.input} value={value.secondary_label ?? ""} onChange={(e) => patchSection(field.key, { secondary_label: e.target.value })} />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+          {group.title === "Overview" && (
+            <div className={styles.contentBlock}>
+              <div className={styles.contentBlockHeader}>
+                <h3 className={styles.contentBlockTitle}>Angka performa</h3>
+                <span className={styles.contentSectionStatus}>Overview → Performa</span>
+              </div>
+              {highlights.map((item, index) => (
+                <div key={index} className={styles.fieldRow}>
+                  <div className={styles.field}>
+                    <label className={styles.label}>Nilai</label>
+                    <input className={styles.input} value={item.value} onChange={(e) => setHighlights((rows) => rows.map((row, i) => i === index ? { ...row, value: e.target.value } : row))} />
+                  </div>
+                  <div className={styles.field}>
+                    <label className={styles.label}>Label</label>
+                    <input className={styles.input} value={item.label} onChange={(e) => setHighlights((rows) => rows.map((row, i) => i === index ? { ...row, label: e.target.value } : row))} />
+                  </div>
+                  <button className={styles.btnSecondary} type="button" onClick={() => setHighlights((rows) => rows.filter((_, i) => i !== index))}>Hapus</button>
+                </div>
+              ))}
+              <button className={styles.btnSecondary} type="button" onClick={() => setHighlights((rows) => [...rows, { value: "", label: "" }])}>+ Angka</button>
+            </div>
+          )}
+          {group.title === "Technology" && (
+            <div className={styles.contentBlock}>
+              <div className={styles.contentBlockHeader}>
+                <h3 className={styles.contentBlockTitle}>Angka technology</h3>
+                <span className={styles.contentSectionStatus}>Technology → stat strip</span>
+              </div>
+              <p className={styles.sectionNote}>Empat angka di bawah scene teknologi. Bukan tabel Specifications.</p>
+              {techStats.map((item, index) => (
+                <div key={index} className={styles.fieldRow}>
+                  <div className={styles.field}>
+                    <label className={styles.label}>Nilai</label>
+                    <input className={styles.input} value={item.value} onChange={(e) => setTechStats((rows) => rows.map((row, i) => i === index ? { ...row, value: e.target.value } : row))} />
+                  </div>
+                  <div className={styles.field}>
+                    <label className={styles.label}>Label</label>
+                    <input className={styles.input} value={item.label} onChange={(e) => setTechStats((rows) => rows.map((row, i) => i === index ? { ...row, label: e.target.value } : row))} />
+                  </div>
+                  <button className={styles.btnSecondary} type="button" onClick={() => setTechStats((rows) => rows.filter((_, i) => i !== index))}>Hapus</button>
+                </div>
+              ))}
+              <button className={styles.btnSecondary} type="button" onClick={() => setTechStats((rows) => [...rows, { value: "", label: "" }])}>+ Angka</button>
+            </div>
+          )}
+        </div>
+      ))}
 
       <div className={styles.contentBlock}>
         <div className={styles.contentBlockHeader}>
-          <h3 className={styles.contentBlockTitle}>Angka performa</h3>
+          <h3 className={styles.contentBlockTitle}>SEO halaman model</h3>
+          <span className={styles.contentSectionStatus}>Overview, Technology, Specifications</span>
         </div>
-        {highlights.map((item, index) => (
-          <div key={index} className={styles.fieldRow}>
-            <div className={styles.field}>
-              <label className={styles.label}>Nilai</label>
-              <input className={styles.input} value={item.value} onChange={(e) => setHighlights((rows) => rows.map((row, i) => i === index ? { ...row, value: e.target.value } : row))} />
-            </div>
-            <div className={styles.field}>
-              <label className={styles.label}>Label</label>
-              <input className={styles.input} value={item.label} onChange={(e) => setHighlights((rows) => rows.map((row, i) => i === index ? { ...row, label: e.target.value } : row))} />
-            </div>
-            <button className={styles.btnSecondary} type="button" onClick={() => setHighlights((rows) => rows.filter((_, i) => i !== index))}>Hapus</button>
-          </div>
-        ))}
-        <button className={styles.btnSecondary} type="button" onClick={() => setHighlights((rows) => [...rows, { value: "", label: "" }])}>+ Angka</button>
+        <div className={styles.field}>
+          <label className={styles.label}>Meta title</label>
+          <input className={styles.input} value={seo.meta_title} onChange={(e) => setSeo((row) => ({ ...row, meta_title: e.target.value }))} />
+        </div>
+        <div className={styles.field}>
+          <label className={styles.label}>Meta description</label>
+          <textarea className={styles.textarea} rows={3} value={seo.meta_description} onChange={(e) => setSeo((row) => ({ ...row, meta_description: e.target.value }))} />
+        </div>
       </div>
 
       <div className={styles.actions}>
@@ -1599,6 +1725,18 @@ export function ModelEditor({ initialModel, slug }: ModelEditorProps) {
       </div>
 
       <div className={styles.goldLine} />
+
+      <div className={styles.editorMap}>
+        <p className={styles.editorMapTitle}>Lokasi edit — sama untuk J5, J7 SHS, J7 SIVP, dan J8</p>
+        <ul>
+          <li><strong>Basic Info</strong> — nama, tagline, deskripsi, publish, gambar hero, cutout</li>
+          <li><strong>Variants</strong> — harga, status harga, label varian</li>
+          <li><strong>Colors</strong> — nama warna, hex, foto warna</li>
+          <li><strong>Image Slots</strong> — gambar desktop/mobile setiap section Overview, Design, Technology, CTA</li>
+          <li><strong>Content</strong> — teks Overview, Design, Technology, CTA, angka, SEO. Gambar fitur teknologi di bagian Technology</li>
+          <li><strong>Specifications</strong> — tabel dimensi, powertrain, charging, ADAS, dan angka teknis lain</li>
+        </ul>
+      </div>
 
       {/* Tabs */}
       <div className={styles.tabs} role="tablist">

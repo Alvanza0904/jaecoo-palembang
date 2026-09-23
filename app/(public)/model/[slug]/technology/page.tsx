@@ -169,6 +169,11 @@ export default async function TeknologiPage({ params }: Props) {
   const techStats = model.page_copy?.tech_stats?.length
     ? model.page_copy.tech_stats
     : (model.highlights ?? []);
+  const close = model.page_copy?.tech_close;
+  const closeHeading = (close?.heading || "Rasakan sendiri\nteknologinya.").split("\n");
+  const closeBody = close?.body || `Jadwalkan test drive eksklusif dan buktikan perbedaan ${model.short_name} secara langsung.`;
+  const closePrimary = close?.primary_label || "Jadwalkan Test Drive →";
+  const closeSecondary = close?.secondary_label || "Spesifikasi Lengkap";
   const features = technologyFeatures(model);
 
   // Split headline into lines for LineReveal
@@ -446,19 +451,20 @@ export default async function TeknologiPage({ params }: Props) {
 
         <div className={styles.ctaContent}>
           <Reveal variant="mask" threshold={0.15}>
-            <p className={styles.ctaEyebrow}>{model.short_name}</p>
+            <p className={styles.ctaEyebrow}>{close?.label || model.short_name}</p>
           </Reveal>
           <Reveal variant="scale" delay={160} threshold={0.15}>
             <h2 className={styles.ctaHeading}>
-              Rasakan sendiri<br />
-              teknologinya.
+              {closeHeading.map((line, index) => (
+                <span key={`${line}-${index}`}>
+                  {index > 0 && <br />}
+                  {line}
+                </span>
+              ))}
             </h2>
           </Reveal>
           <Reveal variant="fade-up" delay={320} threshold={0.15}>
-            <p className={styles.ctaBody}>
-              Jadwalkan test drive eksklusif dan buktikan
-              perbedaan {model.short_name} secara langsung.
-            </p>
+            <p className={styles.ctaBody}>{closeBody}</p>
           </Reveal>
           <Reveal variant="fade-up" delay={460} threshold={0.15}>
             <div className={styles.ctaButtons}>
@@ -470,7 +476,7 @@ export default async function TeknologiPage({ params }: Props) {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Jadwalkan Test Drive →
+                {closePrimary}
               </Button>
               <Button
                 as="link"
@@ -478,7 +484,7 @@ export default async function TeknologiPage({ params }: Props) {
                 variant="ghost"
                 size="lg"
               >
-                Spesifikasi Lengkap
+                {closeSecondary}
               </Button>
             </div>
           </Reveal>

@@ -6,6 +6,7 @@ import type {
   ModelSpecCategory,
   ModelTechnologySection,
   ModelPageCopy,
+  ModelSectionCopy,
   ModelHighlight,
   PriceStatus,
 } from "@/lib/types/model";
@@ -149,9 +150,9 @@ const LEGACY_DESCRIPTIONS = new Set([
 function asSectionCopy(value: unknown) {
   if (!value || typeof value !== "object") return undefined;
   const row = value as Record<string, unknown>;
-  const copy: { label?: string; heading?: string; body?: string; stat?: string; unit?: string } = {};
-  for (const key of ["label", "heading", "body", "stat", "unit"] as const) {
-    if (typeof row[key] === "string") copy[key] = row[key] as string;
+  const copy: ModelSectionCopy = {};
+  for (const key of ["label", "heading", "body", "stat", "unit", "primary_label", "secondary_label"] as const) {
+    if (typeof row[key] === "string") copy[key] = row[key];
   }
   return Object.keys(copy).length ? copy : undefined;
 }
@@ -185,8 +186,11 @@ function mergePageCopy(
     "cockpit",
     "performance",
     "adas",
+    "hero_cta",
     "cta",
     "tech_intelligence",
+    "tech_close",
+    "specs_cta",
   ] as const;
   const merged: ModelPageCopy = { ...(fallback ?? {}) };
   for (const key of keys) {
@@ -436,6 +440,12 @@ function mapModel(
         : staticFallback?.specifications ?? [],
     published: row.published,
     updated_at: row.updated_at,
+    meta_title:
+      (typeof pageRaw?.meta_title === "string" && pageRaw.meta_title.trim()) ||
+      staticFallback?.meta_title,
+    meta_description:
+      (typeof pageRaw?.meta_description === "string" && pageRaw.meta_description.trim()) ||
+      staticFallback?.meta_description,
   };
 }
 

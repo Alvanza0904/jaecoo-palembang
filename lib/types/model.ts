@@ -123,6 +123,10 @@ export interface ModelSectionCopy {
   body?: string;
   stat?: string;
   unit?: string;
+  /** Primary button label when this section has a CTA. */
+  primary_label?: string;
+  /** Secondary button label when this section has a second CTA. */
+  secondary_label?: string;
 }
 
 /**
@@ -138,8 +142,15 @@ export interface ModelPageCopy {
   cockpit?: ModelSectionCopy;
   performance?: ModelSectionCopy;
   adas?: ModelSectionCopy;
+  /** Overview hero button labels. */
+  hero_cta?: ModelSectionCopy;
+  /** Overview final CTA. */
   cta?: ModelSectionCopy;
   tech_intelligence?: ModelSectionCopy;
+  /** Technology page closing scene. Image is the tech_cta slot. */
+  tech_close?: ModelSectionCopy;
+  /** Specifications page closing CTA. */
+  specs_cta?: ModelSectionCopy;
   tech_stats?: ModelHighlight[];
 }
 
