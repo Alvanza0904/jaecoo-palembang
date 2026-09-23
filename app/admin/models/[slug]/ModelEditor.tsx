@@ -14,6 +14,8 @@ import Link from 'next/link'
 import styles from './editor.module.css'
 import { MediaPicker } from '@/components/admin/media/MediaPicker'
 import { VisualMediaEditor } from '@/components/admin/visual-editor'
+import { ModelStickyPreview } from '@/components/model/ModelStickyPreview'
+import type { MediaWithArtDirection } from '@/lib/types/media'
 import { MODELS } from '@/lib/data/models'
 import type { MediaAsset } from '@/lib/types/media-asset'
 import type { ModelFeature, ModelHighlight, ModelPageCopy, ModelSectionCopy } from '@/lib/types/model'
@@ -1334,6 +1336,21 @@ const PAGE_GROUPS: Array<{
   },
 ]
 
+function heroMediaFromModel(model: AdminModel): MediaWithArtDirection {
+  const hero = model.model_content?.find((item) => item.section === "hero")?.content as Record<string, unknown> | undefined
+  const image = (hero?.image as Record<string, string> | undefined) ?? {}
+  const desktop = image.desktop || ""
+  return {
+    image: {
+      desktop,
+      tablet: image.tablet || desktop,
+      mobile: image.mobile || desktop,
+      alt: image.alt || model.name,
+    },
+    media_asset_id: typeof hero?.media_asset_id === "string" ? hero.media_asset_id : undefined,
+  }
+}
+
 function emptyFeature(): ModelFeature {
   return { id: `feature-${Date.now()}`, title: "", description: "", tag: "" }
 }
@@ -1376,6 +1393,7 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
   const [pickerIndex, setPickerIndex] = useState<number | null>(null)
   const [isPending, startTransition] = useTransition()
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; msg: string } | null>(null)
+  const [previewSection, setPreviewSection] = useState("exterior")
 
   function patchSection(key: keyof ModelPageCopy, patch: Partial<ModelSectionCopy>) {
     setPageCopy((current) => ({
@@ -1460,6 +1478,7 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
   }
 
   return (
+    <div className={styles.previewLayout}>
     <div className={styles.section}>
       <div className={styles.sectionHeader}>
         <div>
@@ -1483,7 +1502,7 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
             const showLabel = field.withLabel !== false
             const showHeading = field.withHeading !== false
             return (
-              <div key={field.key} className={styles.contentBlock}>
+              <div key={field.key} className={styles.contentBlock} onFocusCapture={() => setPreviewSection(String(field.key))}>
                 <div className={styles.contentBlockHeader}>
                   <h3 className={styles.contentBlockTitle}>{field.title}</h3>
                   <span className={styles.contentSectionStatus}>{field.where}</span>
@@ -1537,7 +1556,7 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
             )
           })}
           {group.title === "Overview" && (
-            <div className={styles.contentBlock}>
+            <div className={styles.contentBlock} onFocusCapture={() => setPreviewSection("performance")}>
               <div className={styles.contentBlockHeader}>
                 <h3 className={styles.contentBlockTitle}>Angka performa</h3>
                 <span className={styles.contentSectionStatus}>Overview → Performa</span>
@@ -1559,7 +1578,7 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
             </div>
           )}
           {group.title === "Technology" && (
-            <div className={styles.contentBlock}>
+            <div className={styles.contentBlock} onFocusCapture={() => setPreviewSection("tech_intelligence")}>
               <div className={styles.contentBlockHeader}>
                 <h3 className={styles.contentBlockTitle}>Angka technology</h3>
                 <span className={styles.contentSectionStatus}>Technology → stat strip</span>
@@ -1605,7 +1624,7 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
         </button>
       </div>
 
-      <div className={styles.contentBlock}>
+      <div className={styles.contentBlock} onFocusCapture={() => setPreviewSection("technology")}>
         <div className={styles.contentBlockHeader}>
           <div>
             <p className={styles.contentBlockKicker}>TECHNOLOGY</p>
@@ -1655,6 +1674,20 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
         </div>
         <MediaPicker open={pickerIndex !== null} onClose={() => setPickerIndex(null)} onSelect={assignFeatureImage} title="Pilih gambar fitur" />
       </div>
+    </div>
+    <div className={styles.stickyPreview}>
+      <ModelStickyPreview
+        slug={slug}
+        modelName={model.name}
+        tagline={model.tagline}
+        modelHero={heroMediaFromModel(model)}
+        section={previewSection}
+        pageCopy={pageCopy}
+        highlights={highlights}
+        technology={technology}
+        features={features}
+      />
+    </div>
     </div>
   )
 }

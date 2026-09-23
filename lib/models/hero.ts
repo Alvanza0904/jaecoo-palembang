@@ -13,5 +13,13 @@ export function resolveSubpageHero(
   modelHero: MediaWithArtDirection,
 ): MediaWithArtDirection {
   if (!hasSource(custom) || !custom) return modelHero;
-  return { image: custom };
+  return {
+    image: custom,
+    presentation_settings: custom.presentation_settings,
+    cutout_presentation_settings: custom.cutout_presentation_settings,
+    focal_x: custom.focal_x,
+    focal_y: custom.focal_y,
+    cutout_focal_x: custom.cutout_focal_x,
+    cutout_focal_y: custom.cutout_focal_y,
+  };
 }

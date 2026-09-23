@@ -86,20 +86,29 @@ export function LayeredHero({
   lightBackground = false,
 }: LayeredHeroProps) {
   const { image, art_direction } = media;
-  const presentationSettings = media.presentation_settings;
-  const cutoutPresentationSettings = media.cutout_presentation_settings ?? presentationSettings;
-  const cutoutFocalX = media.cutout_focal_x ?? media.focal_x ?? 50;
-  const cutoutFocalY = media.cutout_focal_y ?? media.focal_y ?? 50;
+  const presentationSettings = media.presentation_settings ?? image.presentation_settings;
+  const mobilePresentation = image.presentation_settings_mobile;
+  const cutoutPresentationSettings =
+    media.cutout_presentation_settings ??
+    image.cutout_presentation_settings ??
+    presentationSettings;
+  const focalX = media.focal_x ?? image.focal_x ?? 50;
+  const focalY = media.focal_y ?? image.focal_y ?? 50;
+  const cutoutFocalX = media.cutout_focal_x ?? image.cutout_focal_x ?? focalX;
+  const cutoutFocalY = media.cutout_focal_y ?? image.cutout_focal_y ?? focalY;
+
+  const settingsFor = (breakpoint: BreakpointKey): PresentationSettings | undefined => {
+    if ((breakpoint === "mobile" || breakpoint === "small_mobile") && mobilePresentation) {
+      return mobilePresentation;
+    }
+    return presentationSettings;
+  };
 
   // Background style — uses getBackgroundLayerStyle() shared helper from presentation.ts
   const getBackgroundStyle = (breakpoint: BreakpointKey): React.CSSProperties => {
-    if (presentationSettings) {
-      return getBackgroundLayerStyle(
-        presentationSettings,
-        breakpoint,
-        media.focal_x ?? 50,
-        media.focal_y ?? 50,
-      );
+    const settings = settingsFor(breakpoint);
+    if (settings) {
+      return getBackgroundLayerStyle(settings, breakpoint, focalX, focalY);
     }
 
     // Legacy fallback for assets without presentation_settings
@@ -216,15 +225,15 @@ export function LayeredHero({
       </div>
 
       {/* ── Typography layer ── */}
-      {presentationSettings ? (
+      {(presentationSettings || mobilePresentation) ? (
         <>
           <div className={styles.typographyLayer} aria-hidden="false">
             {BREAKPOINT_ORDER.map((breakpoint) => {
               const typo = resolveTypography(
-                presentationSettings,
+                settingsFor(breakpoint) ?? {},
                 breakpoint,
-                media.focal_x ?? 50,
-                media.focal_y ?? 50,
+                focalX,
+                focalY,
               );
               // Uses shared helpers from presentation.ts — same as Editor Preview
               return (

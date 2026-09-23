@@ -3,7 +3,30 @@
 /* ─── Page ──────────────────────────────── */
 
 .page {
-  max-width: 860px;
+  max-width: 1280px;
+}
+
+.previewLayout {
+  display: grid;
+  gap: 1rem;
+  align-items: start;
+}
+
+.stickyPreview {
+  min-width: 0;
+}
+
+@media (min-width: 1100px) {
+  .previewLayout {
+    grid-template-columns: minmax(0, 1fr) 380px;
+  }
+
+  .stickyPreview {
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow: auto;
+  }
 }
 
 .topHeader {
