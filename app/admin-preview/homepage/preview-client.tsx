@@ -8,7 +8,7 @@ interface PreviewPayload {
   sectionId: SectionId
   data: SectionRenderData
   device: 'desktop' | 'mobile'
-  /** Saat true: user sedang di area Edit Text — aktifkan contextual text focus */
+  /** Saat true: user sedang fokus di field teks — aktifkan contextual text preview */
   textEditMode?: boolean
 }
 
@@ -25,40 +25,192 @@ const EMPTY: PreviewPayload = {
 }
 
 /**
- * Mapping: sectionId → selector untuk menemukan text container di DOM.
- *
- * Setiap selector menargetkan elemen text utama (container heading/description)
- * dalam rendered section. Digunakan untuk scrollIntoView() dan focus ring.
- *
- * Strategi: gunakan aria-labelledby ID (heading) sebagai anchor.
- * Ini stabil, tidak bergantung pada CSS class name yang bisa berubah,
- * dan mengidentifikasi tepat elemen text yang sedang diedit user.
- *
- * Hero disengaja tidak ada di sini — hero adalah KNOWN-GOOD REFERENCE.
+ * Label display per sectionId — untuk header Contextual Text Panel.
+ * Hero tidak ada di sini (hero = KNOWN-GOOD REFERENCE, tidak menerima textEditMode).
  */
-const SECTION_TEXT_SELECTOR: Partial<Record<SectionId, string>> = {
-  experience:     '[aria-labelledby="experience-title"]',
-  technology:     '[aria-labelledby="technology-title"]',
-  about:          '[aria-labelledby="about-title"]',
-  final_cta:      '[aria-labelledby="final-cta-title"]',
-  dealer_location: '[aria-labelledby="dealer-title"]',
+const SECTION_LABEL: Partial<Record<SectionId, string>> = {
+  experience:      'Experience',
+  technology:      'Teknologi',
+  about:           'About',
+  final_cta:       'Final CTA',
+  dealer_location: 'Dealer Location',
 }
 
 /**
- * CSS focus ring menargetkan [data-text-focus] yang disuntikkan renderer
- * via prop textFocusAttr. Selector ini dipakai via injected <style> saat
- * textEditMode aktif — tidak perlu variabel JS terpisah karena targeting
- * dilakukan oleh attribute selector di CSS, bukan querySelectorAll().
- *
- * Contoh: [data-text-focus="technology"] → experienceCopy / technologyCopy
- * Catatan: CSS Modules class names berubah setiap build (hash), sehingga
- * data attribute adalah cara paling stabil untuk targeting.
+ * Warna aksen per section — membedakan contextual panel secara visual
+ * agar user langsung tahu section mana yang sedang diedit.
  */
+const SECTION_ACCENT: Partial<Record<SectionId, string>> = {
+  experience:      '#4A9ECC',
+  technology:      '#5B8AD4',
+  about:           '#7C6FC4',
+  final_cta:       '#C9A84C',
+  dealer_location: '#4CAF7C',
+}
+
+/**
+ * Contextual Text Panel — overlay nyata yang muncul di bawah preview
+ * saat user fokus ke field teks di editor.
+ *
+ * Panel ini menampilkan:
+ * - Label section + aksen warna
+ * - Title/heading yang sedang diedit (realtime)
+ * - Description (realtime)
+ * - CTA text (jika ada, realtime)
+ * - Address (jika dealer_location, realtime)
+ *
+ * Panel ini adalah perubahan VISUAL NYATA — bukan sekadar badge atau border.
+ * Teks berubah langsung saat user mengetik karena data di-update via postMessage.
+ */
+function ContextualTextPanel({
+  sectionId,
+  data,
+}: {
+  sectionId: SectionId
+  data: SectionRenderData
+}) {
+  const label = SECTION_LABEL[sectionId] || sectionId
+  const accent = SECTION_ACCENT[sectionId] || '#C9A84C'
+
+  const title = data.headline || data.title || ''
+  const description = data.description || ''
+  const ctaText = data.ctaText || ''
+  const address = data.address || ''
+
+  const hasContent = title || description || ctaText || address
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 9999,
+        background: 'rgba(10, 10, 12, 0.97)',
+        borderTop: `3px solid ${accent}`,
+        padding: '14px 16px 16px',
+        boxShadow: '0 -8px 32px rgba(0,0,0,0.5)',
+        backdropFilter: 'blur(8px)',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+      }}
+    >
+      {/* Header row */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          marginBottom: '10px',
+        }}
+      >
+        <span
+          style={{
+            display: 'inline-block',
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: accent,
+            flexShrink: 0,
+            boxShadow: `0 0 6px ${accent}`,
+          }}
+        />
+        <span
+          style={{
+            fontSize: '10px',
+            fontWeight: 700,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: accent,
+          }}
+        >
+          ✏️ Text Preview — {label}
+        </span>
+      </div>
+
+      {/* Content */}
+      {hasContent ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          {title && (
+            <div
+              style={{
+                fontSize: '15px',
+                fontWeight: 700,
+                color: '#ffffff',
+                lineHeight: 1.3,
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {title}
+            </div>
+          )}
+          {description && (
+            <div
+              style={{
+                fontSize: '11px',
+                color: '#9ca3af',
+                lineHeight: 1.5,
+                // Truncate panjang — ini preview, bukan full render
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            >
+              {description}
+            </div>
+          )}
+          {address && (
+            <div
+              style={{
+                fontSize: '11px',
+                color: '#9ca3af',
+                lineHeight: 1.5,
+                fontStyle: 'italic',
+              }}
+            >
+              {address}
+            </div>
+          )}
+          {ctaText && (
+            <div
+              style={{
+                marginTop: '4px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 12px',
+                borderRadius: '4px',
+                background: accent,
+                color: '#0a0a0c',
+                fontSize: '11px',
+                fontWeight: 700,
+                alignSelf: 'flex-start',
+                letterSpacing: '0.02em',
+              }}
+            >
+              {ctaText}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div
+          style={{
+            fontSize: '11px',
+            color: '#4b5563',
+            fontStyle: 'italic',
+          }}
+        >
+          Belum ada teks — ketik di editor untuk melihat perubahan langsung
+        </div>
+      )}
+    </div>
+  )
+}
 
 export function HomepagePreviewClient() {
   const [preview, setPreview] = useState(EMPTY)
-  // Track versi textEditMode+sectionId untuk trigger effect
-  const focusTriggerRef = useRef<string>('')
+  const focusKeyRef = useRef<string>('')
   const [focusKey, setFocusKey] = useState('')
 
   useEffect(() => {
@@ -77,105 +229,42 @@ export function HomepagePreviewClient() {
     return () => window.removeEventListener('message', handler)
   }, [])
 
-  // ── Contextual text focus: scroll + focus ring ────────────────
-  // Trigger saat textEditMode berubah ke true, atau sectionId berubah saat textEditMode aktif.
+  // Track focusKey untuk trigger re-render saat section/mode berubah
   useEffect(() => {
     const key = `${preview.sectionId}:${preview.textEditMode ? '1' : '0'}`
-    if (key === focusTriggerRef.current) return
-    focusTriggerRef.current = key
+    if (key === focusKeyRef.current) return
+    focusKeyRef.current = key
     setFocusKey(key)
-
-    if (!preview.textEditMode) return
-
-    // Tunggu render selesai sebelum scroll (section baru baru saja di-mount)
-    const timer = setTimeout(() => {
-      const sectionSelector = SECTION_TEXT_SELECTOR[preview.sectionId]
-      if (!sectionSelector) return
-
-      const sectionEl = document.querySelector(sectionSelector)
-      if (!sectionEl) return
-
-      // Scroll section ke viewport — "nearest" agar tidak over-scroll
-      // Block "center" memastikan teks terlihat di tengah viewport
-      sectionEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }, 80)
-
-    return () => clearTimeout(timer)
   }, [preview.sectionId, preview.textEditMode])
 
+  // Saat textEditMode aktif, pastikan konten teks section terlihat
+  // (scroll ke atas agar section di viewport, bukan scrollIntoView per element)
+  useEffect(() => {
+    if (!preview.textEditMode) return
+    // Reset scroll ke atas agar section yang baru dipilih langsung terlihat
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [preview.sectionId, preview.textEditMode])
+
+  // Padding bawah saat contextual panel muncul (agar panel tidak overlap konten section)
+  const contextualPanelHeight = preview.textEditMode && preview.sectionId !== 'hero' ? 120 : 0
+
   return (
-    <main style={{ margin: 0, width: '100%', minHeight: '100vh', overflowX: 'hidden', position: 'relative' }}>
-
-      {/* ── Contextual Text Preview indicator ──────────────────────
-          Muncul hanya saat textEditMode = true.
-          Bar emas di atas + badge "✏️ TEXT PREVIEW".
-          pointer-events: none agar tidak menghalangi preview.      */}
-      {preview.textEditMode && (
-        <>
-          <style>{`
-            @keyframes jaecoo-text-preview-pulse {
-              0%, 100% { opacity: 0.65; }
-              50%       { opacity: 1; }
-            }
-          `}</style>
-          <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              zIndex: 9999,
-              pointerEvents: 'none',
-            }}
-          >
-            {/* Garis emas tipis di paling atas */}
-            <div
-              style={{
-                height: '3px',
-                background: 'linear-gradient(90deg, transparent 0%, #C9A84C 25%, #C9A84C 75%, transparent 100%)',
-                animation: 'jaecoo-text-preview-pulse 2s ease-in-out infinite',
-              }}
-            />
-            {/* Badge label */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '6px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                background: 'rgba(201,168,76,0.95)',
-                color: '#1a1a1a',
-                fontSize: '10px',
-                fontWeight: 700,
-                letterSpacing: '0.1em',
-                padding: '3px 12px',
-                borderRadius: '0 0 6px 6px',
-                whiteSpace: 'nowrap',
-                textTransform: 'uppercase',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
-              }}
-            >
-              ✏️ Text Preview
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* ── Focus ring style ────────────────────────────────────────
-          Inject saat textEditMode aktif saja.
-          Menargetkan [data-text-focus] yang dipasang di renderer.
-          ring + subtle glow — clean, tidak terlihat seperti debug UI.  */}
-      {preview.textEditMode && (
-        <style>{`
-          [data-text-focus] {
-            outline: none !important;
-            box-shadow: 0 0 0 2px rgba(201,168,76,0.6), 0 0 18px rgba(201,168,76,0.18) !important;
-            border-radius: 2px !important;
-            transition: box-shadow 0.25s ease !important;
-          }
-        `}</style>
-      )}
-
+    <main
+      style={{
+        margin: 0,
+        width: '100%',
+        minHeight: '100vh',
+        overflowX: 'hidden',
+        position: 'relative',
+        // Padding bawah agar section tidak tertutup panel
+        paddingBottom: contextualPanelHeight > 0 ? `${contextualPanelHeight}px` : undefined,
+        transition: 'padding-bottom 0.2s ease',
+      }}
+    >
+      {/* ── Section Renderer ────────────────────────────────────────
+          Selalu merender section aktif dengan data draft terkini.
+          data-text-focus attribute disuntikkan saat textEditMode = true
+          untuk highlight via CSS ring (secondary feedback, bukan primary). */}
       <HomepageSectionRenderer
         sectionId={preview.sectionId}
         data={preview.data}
@@ -183,6 +272,33 @@ export function HomepagePreviewClient() {
         textEditMode={preview.textEditMode}
         focusKey={focusKey}
       />
+
+      {/* ── Contextual Text Panel ────────────────────────────────────
+          PERUBAHAN VISUAL UTAMA: panel overlay yang menampilkan teks
+          draft secara realtime saat user mengetik di editor.
+          Muncul hanya saat textEditMode = true DAN bukan section hero.
+          Teks berubah langsung karena data di-update via postMessage
+          setiap kali updateField() dipanggil di editor. */}
+      {preview.textEditMode && preview.sectionId !== 'hero' && (
+        <ContextualTextPanel
+          sectionId={preview.sectionId}
+          data={preview.data}
+        />
+      )}
+
+      {/* ── Subtle focus ring via CSS ───────────────────────────────
+          Secondary feedback: ring tipis pada text container yang aktif.
+          Menargetkan [data-text-focus] yang disuntikkan renderer. */}
+      {preview.textEditMode && (
+        <style>{`
+          [data-text-focus] {
+            outline: none !important;
+            box-shadow: 0 0 0 2px rgba(201,168,76,0.55), 0 0 20px rgba(201,168,76,0.12) !important;
+            border-radius: 3px !important;
+            transition: box-shadow 0.2s ease !important;
+          }
+        `}</style>
+      )}
     </main>
   )
 }

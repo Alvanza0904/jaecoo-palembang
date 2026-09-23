@@ -171,13 +171,13 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
   const [activeSection, setActiveSection] = useState<SectionId>('hero')
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop')
 
-  // ── Contextual Text Preview (Step 7C) ────────────────────────
-  // textEditMode = true ketika user scroll ke area "3. Konten Teks".
-  // Preview menampilkan badge "✏️ TEXT PREVIEW" dan title berubah.
-  // Isi preview tidak berubah — sudah reactive terhadap draft state.
+  // ── Contextual Text Preview ───────────────────────────────────
+  // textEditMode = true ketika user aktif di salah satu field teks
+  // (onFocus field), false ketika semua field blur.
+  // Pendekatan explicit focus lebih reliable daripada IntersectionObserver
+  // yang bergantung pada layout/scroll timing.
   const [textEditMode, setTextEditMode] = useState(false)
-  const formContentRef = useRef<HTMLDivElement | null>(null)
-  const textGroupRef = useRef<HTMLDivElement | null>(null)
+  const textFocusCountRef = useRef(0) // track berapa field yang sedang focused
 
   // Local state per section
   const [sectionStates, setSectionStates] = useState<Record<SectionId, SectionData>>(() => {
@@ -216,34 +216,27 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
 
   // ── Contextual Text Preview: reset saat section berubah ──────
   useEffect(() => {
+    textFocusCountRef.current = 0
     setTextEditMode(false)
   }, [activeSection])
 
-  // ── Contextual Text Preview: IntersectionObserver ────────────
-  // Deteksi kapan div "3. Konten Teks" masuk/keluar viewport
-  // dari formContent (scroll container).
-  // Tidak ada scroll listener — ringan dan tidak lag.
-  useEffect(() => {
-    const target = textGroupRef.current
-    const root = formContentRef.current
-    if (!target || !root) return
+  // ── Contextual Text Preview: focus/blur handlers ──────────────
+  // Dipanggil oleh onFocus/onBlur pada wrapper div "3. Konten Teks".
+  // Menggunakan counter agar nested field tidak race (blur A → focus B).
+  const handleTextGroupFocus = useCallback(() => {
+    textFocusCountRef.current += 1
+    setTextEditMode(true)
+  }, [])
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0]
-        // Aktif ketika minimal 20% area teks terlihat dalam scroll container
-        setTextEditMode(entry.isIntersecting && entry.intersectionRatio >= 0.2)
-      },
-      {
-        root,
-        rootMargin: '0px',
-        threshold: [0, 0.2, 0.5, 1.0],
-      },
-    )
-
-    observer.observe(target)
-    return () => observer.disconnect()
-  }, [activeSection]) // Re-attach saat ganti section (node bisa berganti)
+  const handleTextGroupBlur = useCallback(() => {
+    // Delay agar focus berpindah antar field tidak trigger false negative
+    setTimeout(() => {
+      textFocusCountRef.current = Math.max(0, textFocusCountRef.current - 1)
+      if (textFocusCountRef.current === 0) {
+        setTextEditMode(false)
+      }
+    }, 100)
+  }, [])
 
   // Update string field — hanya local state, ZERO network
   const updateField = useCallback((sectionId: SectionId, field: string, value: string) => {
@@ -413,7 +406,7 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
           </nav>
 
           {/* Form Content */}
-          <div className={styles.formContent} ref={formContentRef}>
+          <div className={styles.formContent}>
 
             {/* ── 1. Gambar ─────────────────────────────────── */}
             <div className={styles.controlGroup}>
@@ -443,9 +436,13 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
             </div>
 
             {/* ── 3. Konten Teks ────────────────────────────── */}
-            {/* textGroupRef: target IntersectionObserver — saat area ini visible */}
-            {/* dalam formContent, textEditMode aktif dan preview title berubah */}
-            <div className={styles.controlGroup} ref={textGroupRef}>
+            {/* onFocus/onBlur: aktifkan textEditMode saat user fokus ke field teks */}
+            {/* Pendekatan ini reliable, tidak bergantung pada scroll/IntersectionObserver */}
+            <div
+              className={styles.controlGroup}
+              onFocus={handleTextGroupFocus}
+              onBlur={handleTextGroupBlur}
+            >
               <p className={styles.groupTitle}>3. Konten Teks</p>
 
               {section.hasEyebrow && (
