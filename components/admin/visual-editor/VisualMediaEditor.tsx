@@ -1297,7 +1297,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                               {previewTagline && <p className={heroStyles.tagline}>{previewTagline}</p>}
                               <div className={heroStyles.headingBlock}>
                                 <h1 className={heroStyles.heading} style={headingStyle}>
-                                  {previewHeading ?? 'JAECOO J8'}
+                                  {previewHeading || ''}
                                 </h1>
                                 {previewSubheading && (
                                   <p className={heroStyles.subheading} style={subheadingStyle}>
