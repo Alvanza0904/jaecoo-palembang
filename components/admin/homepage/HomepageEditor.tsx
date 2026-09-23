@@ -140,6 +140,161 @@ function SectionPreview({ data, sectionId, device, textEditMode = false, focused
   return <HomepagePreviewFrame sectionId={sectionId as SharedSectionId} data={renderData} device={device} textEditMode={textEditMode} focusedFieldId={focusedFieldId} />
 }
 
+// ─── Sub-komponen: ContextualTextPreview ────────────────────────
+// Menggantikan SectionPreview di sticky container ketika textEditMode=true.
+// Membaca data langsung dari parent (tidak via iframe/postMessage).
+// Panel ini BUKAN overlay tambahan — ia menempati container yang sama
+// dengan SectionPreview (conditional swap, bukan duplikasi).
+
+const SECTION_ACCENT_COLOR: Partial<Record<string, string>> = {
+  experience:      '#4A9ECC',
+  technology:      '#5B8AD4',
+  about:           '#7C6FC4',
+  final_cta:       '#C9A84C',
+  dealer_location: '#4CAF7C',
+}
+
+interface ContextualTextPreviewProps {
+  data: SectionData
+  sectionLabel: string
+  sectionId: string
+  focusedFieldId?: string | null
+}
+
+function ContextualTextPreview({ data, sectionLabel, sectionId, focusedFieldId }: ContextualTextPreviewProps) {
+  const accent = SECTION_ACCENT_COLOR[sectionId] || '#C9A84C'
+
+  const title       = (data.headline as string) || (data.title as string) || ''
+  const eyebrow     = (data.eyebrow  as string) || ''
+  const description = (data.description as string) || ''
+  const ctaText     = (data.ctaText  as string) || ''
+  const address     = (data.address  as string) || ''
+
+  const isActive = (field: string) => focusedFieldId === field
+
+  const activeStyle = (field: string): React.CSSProperties =>
+    isActive(field)
+      ? { borderLeft: `2px solid ${accent}`, paddingLeft: '10px', marginLeft: '-12px', transition: 'all 0.15s ease' }
+      : { transition: 'all 0.15s ease' }
+
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        background: '#0a0a0c',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '20px 18px',
+        boxSizing: 'border-box',
+        overflow: 'auto',
+        gap: '0',
+      }}
+    >
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '18px' }}>
+        <span style={{
+          width: '8px', height: '8px', borderRadius: '50%',
+          background: accent, flexShrink: 0, boxShadow: `0 0 6px ${accent}`,
+          display: 'inline-block',
+        }} />
+        <span style={{
+          fontSize: '10px', fontWeight: 700,
+          letterSpacing: '0.12em', textTransform: 'uppercase' as const,
+          color: accent, fontFamily: 'system-ui, sans-serif',
+        }}>
+          ✏️ Text Preview — {sectionLabel}
+        </span>
+      </div>
+
+      {/* Content */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+        {eyebrow && (
+          <div style={{
+            fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em',
+            textTransform: 'uppercase' as const, color: accent,
+            fontFamily: 'system-ui, sans-serif',
+            ...activeStyle('eyebrow'),
+          }}>
+            {eyebrow}
+          </div>
+        )}
+
+        {title && (
+          <div style={{
+            fontSize: '22px', fontWeight: 800, color: '#ffffff',
+            lineHeight: 1.2, letterSpacing: '-0.02em',
+            fontFamily: 'system-ui, sans-serif',
+            ...activeStyle('headline'),
+            ...(isActive('title') ? activeStyle('title') : {}),
+          }}>
+            {title}
+          </div>
+        )}
+
+        {description && (
+          <div style={{
+            fontSize: '13px', color: '#9ca3af', lineHeight: 1.6,
+            fontFamily: 'system-ui, sans-serif',
+            ...activeStyle('description'),
+          }}>
+            {description}
+          </div>
+        )}
+
+        {address && (
+          <div style={{
+            fontSize: '12px', color: '#6b7280', lineHeight: 1.6,
+            fontStyle: 'italic', fontFamily: 'system-ui, sans-serif',
+            ...activeStyle('address'),
+          }}>
+            📍 {address}
+          </div>
+        )}
+
+        {ctaText && (
+          <div style={{ marginTop: '6px' }}>
+            <span style={{
+              display: 'inline-block',
+              padding: '8px 18px',
+              borderRadius: '4px',
+              background: accent,
+              color: '#0a0a0c',
+              fontSize: '12px', fontWeight: 700,
+              letterSpacing: '0.04em',
+              fontFamily: 'system-ui, sans-serif',
+              outline: isActive('ctaText') ? `2px solid white` : undefined,
+              outlineOffset: '3px',
+            }}>
+              {ctaText}
+            </span>
+          </div>
+        )}
+
+        {!title && !description && !ctaText && !address && (
+          <div style={{
+            fontSize: '12px', color: '#374151', fontStyle: 'italic',
+            fontFamily: 'system-ui, sans-serif', marginTop: '8px',
+          }}>
+            Belum ada teks — ketik di kolom editor untuk melihat perubahan langsung
+          </div>
+        )}
+      </div>
+
+      {/* Footer hint */}
+      <div style={{
+        marginTop: 'auto', paddingTop: '16px',
+        borderTop: '1px solid #1f2937',
+        fontSize: '10px', color: '#374151',
+        fontFamily: 'system-ui, sans-serif',
+        letterSpacing: '0.02em',
+      }}>
+        Perubahan muncul secara realtime ↑
+      </div>
+    </div>
+  )
+}
+
 // ─── Helper: build ResponsiveImage dari MediaAsset ─────────────
 // Digunakan setelah media dipilih untuk mengisi data.image dengan struktur
 // yang identik dengan apa yang dikembalikan getHomeMedia() dari Supabase.
@@ -580,9 +735,22 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
             </div>
           </div>
           <div className={styles.previewWrapper}>
-            <div className={`${styles.previewScreen} ${previewDevice === 'desktop' ? styles.screenDesktop : styles.screenMobile}`}>
-              <SectionPreview data={data} sectionId={activeSection} device={previewDevice} textEditMode={textEditMode} focusedFieldId={focusedFieldId} />
-            </div>
+            {/* ── Conditional swap: satu container, satu preview aktif ──
+                Normal mode  → SectionPreview (iframe)
+                Text edit    → ContextualTextPreview (inline, tanpa iframe)
+                Tidak ada dua preview sekaligus. */}
+            {textEditMode && activeSection !== 'hero' ? (
+              <ContextualTextPreview
+                data={data}
+                sectionLabel={section.label}
+                sectionId={activeSection}
+                focusedFieldId={focusedFieldId}
+              />
+            ) : (
+              <div className={`${styles.previewScreen} ${previewDevice === 'desktop' ? styles.screenDesktop : styles.screenMobile}`}>
+                <SectionPreview data={data} sectionId={activeSection} device={previewDevice} textEditMode={false} focusedFieldId={null} />
+              </div>
+            )}
           </div>
         </div>
 
