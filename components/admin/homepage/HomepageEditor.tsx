@@ -21,7 +21,7 @@
  */
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { MediaPicker } from '@/components/admin/media/MediaPicker'
 import AIReadyField from '@/components/admin/ai/AIReadyField'
 import type { MediaAsset } from '@/lib/types/media-asset'
@@ -92,9 +92,11 @@ interface SectionPreviewProps {
   data: SectionData
   sectionId: SectionId
   device: 'desktop' | 'mobile'
+  /** Saat true: user sedang di area Edit Text — badge TEXT PREVIEW muncul di iframe */
+  textEditMode?: boolean
 }
 
-function SectionPreview({ data, sectionId, device }: SectionPreviewProps) {
+function SectionPreview({ data, sectionId, device, textEditMode = false }: SectionPreviewProps) {
   const renderData: SectionRenderData = {
     // FIX: teruskan full ResponsiveImage (membawa presentation_settings)
     // Priority 1: data.image = full object yang disimpan setelah media dipilih
@@ -133,7 +135,7 @@ function SectionPreview({ data, sectionId, device }: SectionPreviewProps) {
     )
   }
 
-  return <HomepagePreviewFrame sectionId={sectionId as SharedSectionId} data={renderData} device={device} />
+  return <HomepagePreviewFrame sectionId={sectionId as SharedSectionId} data={renderData} device={device} textEditMode={textEditMode} />
 }
 
 // ─── Helper: build ResponsiveImage dari MediaAsset ─────────────
@@ -169,6 +171,14 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
   const [activeSection, setActiveSection] = useState<SectionId>('hero')
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop')
 
+  // ── Contextual Text Preview (Step 7C) ────────────────────────
+  // textEditMode = true ketika user scroll ke area "3. Konten Teks".
+  // Preview menampilkan badge "✏️ TEXT PREVIEW" dan title berubah.
+  // Isi preview tidak berubah — sudah reactive terhadap draft state.
+  const [textEditMode, setTextEditMode] = useState(false)
+  const formContentRef = useRef<HTMLDivElement | null>(null)
+  const textGroupRef = useRef<HTMLDivElement | null>(null)
+
   // Local state per section
   const [sectionStates, setSectionStates] = useState<Record<SectionId, SectionData>>(() => {
     const init = {} as Record<SectionId, SectionData>
@@ -203,6 +213,37 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
     if (hasDirty) window.addEventListener('beforeunload', handler)
     return () => window.removeEventListener('beforeunload', handler)
   }, [dirty])
+
+  // ── Contextual Text Preview: reset saat section berubah ──────
+  useEffect(() => {
+    setTextEditMode(false)
+  }, [activeSection])
+
+  // ── Contextual Text Preview: IntersectionObserver ────────────
+  // Deteksi kapan div "3. Konten Teks" masuk/keluar viewport
+  // dari formContent (scroll container).
+  // Tidak ada scroll listener — ringan dan tidak lag.
+  useEffect(() => {
+    const target = textGroupRef.current
+    const root = formContentRef.current
+    if (!target || !root) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0]
+        // Aktif ketika minimal 20% area teks terlihat dalam scroll container
+        setTextEditMode(entry.isIntersecting && entry.intersectionRatio >= 0.2)
+      },
+      {
+        root,
+        rootMargin: '0px',
+        threshold: [0, 0.2, 0.5, 1.0],
+      },
+    )
+
+    observer.observe(target)
+    return () => observer.disconnect()
+  }, [activeSection]) // Re-attach saat ganti section (node bisa berganti)
 
   // Update string field — hanya local state, ZERO network
   const updateField = useCallback((sectionId: SectionId, field: string, value: string) => {
@@ -372,7 +413,7 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
           </nav>
 
           {/* Form Content */}
-          <div className={styles.formContent}>
+          <div className={styles.formContent} ref={formContentRef}>
 
             {/* ── 1. Gambar ─────────────────────────────────── */}
             <div className={styles.controlGroup}>
@@ -402,7 +443,9 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
             </div>
 
             {/* ── 3. Konten Teks ────────────────────────────── */}
-            <div className={styles.controlGroup}>
+            {/* textGroupRef: target IntersectionObserver — saat area ini visible */}
+            {/* dalam formContent, textEditMode aktif dan preview title berubah */}
+            <div className={styles.controlGroup} ref={textGroupRef}>
               <p className={styles.groupTitle}>3. Konten Teks</p>
 
               {section.hasEyebrow && (
@@ -511,7 +554,10 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
         <div className={styles.previewCanvas}>
           <div className={styles.previewToolbar}>
             <span className={styles.previewTitle}>
-              Live Preview — {section.label}
+              {textEditMode
+                ? <>✏️ Text Preview — {section.label}</>
+                : <>Live Preview — {section.label}</>
+              }
               {isDirty && <span className={styles.dirtyBadge}> • Belum disimpan</span>}
             </span>
             <div className={styles.deviceToggle}>
@@ -529,7 +575,7 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
           </div>
           <div className={styles.previewWrapper}>
             <div className={`${styles.previewScreen} ${previewDevice === 'desktop' ? styles.screenDesktop : styles.screenMobile}`}>
-              <SectionPreview data={data} sectionId={activeSection} device={previewDevice} />
+              <SectionPreview data={data} sectionId={activeSection} device={previewDevice} textEditMode={textEditMode} />
             </div>
           </div>
         </div>

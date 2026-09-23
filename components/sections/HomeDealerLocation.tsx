@@ -19,6 +19,8 @@ interface DealerCms {
 interface Props {
   backgroundImage?: ResponsiveImage;
   cms?: DealerCms;
+  /** Preview-only: nilai untuk data-text-focus attribute pada text container. Undefined di live website. */
+  textFocusAttr?: string;
 }
 
 function renderAddressWithWaLinks(text: string) {
@@ -61,7 +63,7 @@ function renderAddressWithWaLinks(text: string) {
   return result;
 }
 
-export function HomeDealerLocation({ backgroundImage, cms }: Props) {
+export function HomeDealerLocation({ backgroundImage, cms, textFocusAttr }: Props) {
   const { dealerAddress } = SITE_SETTINGS;
 
   // Fallback ke SITE_SETTINGS kalau CMS kosong
@@ -100,7 +102,10 @@ export function HomeDealerLocation({ backgroundImage, cms }: Props) {
         );
       })()}
 
-      <div className={styles.inner}>
+      <div
+        className={styles.inner}
+        {...(textFocusAttr ? { 'data-text-focus': textFocusAttr } : {})}
+      >
         <span className={styles.eyebrow}>Dealer Resmi</span>
         <h2 id="dealer-title" className={styles.title}>
           {title.split("\n").map((line, i, arr) => (

@@ -8,6 +8,8 @@ interface Props {
   sectionId: SectionId
   data: SectionRenderData
   device: 'desktop' | 'mobile'
+  /** Saat true: user di area Edit Text — iframe menampilkan TEXT PREVIEW badge */
+  textEditMode?: boolean
 }
 
 /**
@@ -30,14 +32,14 @@ interface Props {
  * - Re-send setiap kali payload berubah (reactive)
  * - Tambah error state + retry jika iframe gagal load.
  */
-export function HomepagePreviewFrame({ sectionId, data, device }: Props) {
+export function HomepagePreviewFrame({ sectionId, data, device, textEditMode = false }: Props) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null)
   const [loadError, setLoadError] = useState(false)
   const [iframeKey, setIframeKey] = useState(0) // force remount on retry
   const [iframeReady, setIframeReady] = useState(false)
 
   // Serialize payload — heroMediaAsset akan ikut terbawa via postMessage
-  const payload = JSON.stringify({ sectionId, data, device })
+  const payload = JSON.stringify({ sectionId, data, device, textEditMode })
 
   const send = useCallback((p: string) => {
     iframeRef.current?.contentWindow?.postMessage(

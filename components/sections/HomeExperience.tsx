@@ -95,6 +95,7 @@ function VisualCopy({
   className,
   titleClassName,
   descriptionClassName,
+  textFocusAttr,
 }: {
   image?: ResponsiveImage;
   title: string;
@@ -104,6 +105,8 @@ function VisualCopy({
   className: string;
   titleClassName: string;
   descriptionClassName: string;
+  /** Preview-only: nilai untuk data-text-focus attribute. Undefined di live website. */
+  textFocusAttr?: string;
 }) {
   const desktop = visualTypographyStyles(image, 'desktop');
   const mobile = visualTypographyStyles(image, 'mobile');
@@ -143,7 +146,11 @@ function VisualCopy({
   } as CSSProperties;
 
   return (
-    <div className={className} style={style}>
+    <div
+      className={className}
+      style={style}
+      {...(textFocusAttr ? { 'data-text-focus': textFocusAttr } : {})}
+    >
       <span className={styles.eyebrow}>{eyebrow}</span>
       <h2 id={titleId} className={titleClassName}>{title}</h2>
       <p className={descriptionClassName}>{description}</p>
@@ -177,9 +184,12 @@ export function HomeJarakTempuh({ models }: { models: ModelData[] }) {
 export function HomeExperienceSection({
   image,
   cms,
+  textFocusAttr,
 }: {
   image?: ResponsiveImage;
   cms?: { title?: string; description?: string };
+  /** Preview-only: nilai untuk data-text-focus attribute pada text container. Undefined di live website. */
+  textFocusAttr?: string;
 }) {
   return (
     <section className={styles.experience} aria-labelledby="experience-title">
@@ -197,6 +207,7 @@ export function HomeExperienceSection({
         eyebrow="Pengalaman Berkendara"
         title={cms?.title || "Pengalaman\nTanpa Kompromi."}
         description={cms?.description || "Kenyamanan premium di setiap medan. Dirancang untuk mereka yang berani menjelajah batas."}
+        textFocusAttr={textFocusAttr}
       />
       <Link className={styles.textLink} href="/berita" style={visualTypographyStyles(image, 'desktop') ? { position: 'absolute', zIndex: 2, left: visualTypographyStyles(image, 'desktop')!.container.left, top: `calc(${visualTypographyStyles(image, 'desktop')!.container.top} + 42%)` } : undefined}>Lihat Informasi →</Link>
     </section>
@@ -207,9 +218,12 @@ export function HomeExperienceSection({
 export function HomeTeknologiSection({
   image,
   cms,
+  textFocusAttr,
 }: {
   image?: ResponsiveImage;
   cms?: { title?: string; description?: string };
+  /** Preview-only: nilai untuk data-text-focus attribute pada text container. Undefined di live website. */
+  textFocusAttr?: string;
 }) {
   return (
     <section className={styles.technology} aria-labelledby="technology-title">
@@ -227,6 +241,7 @@ export function HomeTeknologiSection({
         eyebrow="Teknologi"
         title={cms?.title || "Teknologi\nCerdas."}
         description={cms?.description || "Sistem SHS dan ARDIS terdepan di kelasnya — merevolusi pengalaman berkendara off-road dan EV range."}
+        textFocusAttr={textFocusAttr}
       />
     </section>
   );
@@ -269,15 +284,21 @@ export function HomePromoSection({ promos }: { promos: Promo[] }) {
 export function HomeAboutSection({
   image,
   cms,
+  textFocusAttr,
 }: {
   image?: ResponsiveImage;
   cms?: { title?: string; description?: string };
+  /** Preview-only: nilai untuk data-text-focus attribute pada text container. Undefined di live website. */
+  textFocusAttr?: string;
 }) {
   return (
     <section className={styles.about} aria-labelledby="about-title">
       <div className={styles.aboutInner}>
         <VisualImage image={image} alt="OMODA JAECOO Palembang — Dealer Resmi" className={styles.aboutMedia} />
-        <div className={styles.aboutCopy}>
+        <div
+          className={styles.aboutCopy}
+          {...(textFocusAttr ? { 'data-text-focus': textFocusAttr } : {})}
+        >
           <span className={styles.eyebrow}>Dealer Resmi</span>
           <h2 id="about-title" className={styles.aboutTitle}>
             {cms?.title || "OMODA JAECOO\nPalembang."}
@@ -338,16 +359,22 @@ export function HomeJournalSection({ news }: { news: NewsData[] }) {
 export function HomeFinalCTA({
   image,
   cms,
+  textFocusAttr,
 }: {
   image?: ResponsiveImage;
   cms?: { title?: string; description?: string; ctaText?: string; ctaUrl?: string };
+  /** Preview-only: nilai untuk data-text-focus attribute pada text container. Undefined di live website. */
+  textFocusAttr?: string;
 }) {
   const wa = buildWhatsAppUrl({ source: "homepage_final_cta", source_cta: "final_cta" });
   return (
     <section className={styles.finalCta} aria-labelledby="final-cta-title">
       {image?.desktop && <VisualImage image={image} alt="" className={styles.finalCtaImg} />}
       <div className={styles.finalCtaOverlay} aria-hidden="true" />
-      <div className={styles.finalCtaInner}>
+      <div
+        className={styles.finalCtaInner}
+        {...(textFocusAttr ? { 'data-text-focus': textFocusAttr } : {})}
+      >
         <span className={styles.finalCtaEyebrow}>JAECOO Palembang</span>
         <h2 id="final-cta-title" className={styles.finalCtaTitle}>
           {cms?.title || "Siap memulai perjalanan Anda?"}

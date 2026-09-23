@@ -32,6 +32,15 @@
  * - HeroShared: gunakan `data.image` (sudah ada presentation_settings) sebagai
  *   sumber utama, lalu heroMediaAsset (dari editor picker), lalu HeroPlaceholder
  * - Live page.tsx pass homeMedia[slot] langsung sebagai `image`
+ *
+ * TEXT FOCUS (Step 7C):
+ * - Props `textEditMode` + `focusKey` diteruskan dari preview-client.
+ * - Saat textEditMode = true, renderer menyuntikkan data-text-focus attribute
+ *   ke text container (copy/inner) masing-masing section.
+ * - preview-client.tsx memakai attribute ini untuk:
+ *   (a) CSS focus ring via [data-text-focus] selector
+ *   (b) scrollIntoView ke section parent
+ * - Live website tidak menerima prop ini (default false) — ZERO impact.
  */
 
 import type { ReactNode } from 'react'
@@ -98,6 +107,18 @@ interface Props {
   sectionId: SectionId
   data: SectionRenderData
   mode?: 'preview' | 'live'
+  /**
+   * Saat true (dari preview-client): renderer menyuntikkan data-text-focus
+   * ke text container section sehingga CSS focus ring dapat menargetnya.
+   * Live website selalu false — tidak ada efek di live page.
+   */
+  textEditMode?: boolean
+  /**
+   * Key yang berubah setiap kali section/textEditMode berubah.
+   * Tidak digunakan langsung oleh renderer — dibawa agar React
+   * menjamin re-render (dan scrollIntoView) saat section berpindah.
+   */
+  focusKey?: string
 }
 
 /**
@@ -188,6 +209,7 @@ function PreviewInteractionGuard({ children }: { children: ReactNode }) {
   )
 }
 
+// ── Hero: KNOWN-GOOD REFERENCE — tidak menerima textEditMode ──
 function HeroShared({ data }: { data: SectionRenderData }) {
   const heroUrl = buildWhatsAppUrl({
     source: 'homepage_hero',
@@ -262,13 +284,21 @@ function HeroShared({ data }: { data: SectionRenderData }) {
   )
 }
 
-export function HomepageSectionRenderer({ sectionId, data, mode = 'live' }: Props) {
+export function HomepageSectionRenderer({
+  sectionId,
+  data,
+  mode = 'live',
+  textEditMode = false,
+  // focusKey didestrukturisasi agar tidak bocor ke DOM, tapi tidak perlu dipakai di sini
+  focusKey: _focusKey,
+}: Props) {
   // resolveImage sekarang membawa presentation_settings untuk semua section
   const image = resolveImage(data)
 
   const content = (() => {
     switch (sectionId) {
       case 'hero':
+        // Hero: KNOWN-GOOD REFERENCE — tidak menerima textEditMode
         return <HeroShared data={data} />
 
       case 'experience':
@@ -279,6 +309,7 @@ export function HomepageSectionRenderer({ sectionId, data, mode = 'live' }: Prop
               title: data.title,
               description: data.description,
             }}
+            textFocusAttr={textEditMode ? 'experience' : undefined}
           />
         )
 
@@ -290,6 +321,7 @@ export function HomepageSectionRenderer({ sectionId, data, mode = 'live' }: Prop
               title: data.title,
               description: data.description,
             }}
+            textFocusAttr={textEditMode ? 'technology' : undefined}
           />
         )
 
@@ -301,6 +333,7 @@ export function HomepageSectionRenderer({ sectionId, data, mode = 'live' }: Prop
               title: data.title,
               description: data.description,
             }}
+            textFocusAttr={textEditMode ? 'about' : undefined}
           />
         )
 
@@ -314,6 +347,7 @@ export function HomepageSectionRenderer({ sectionId, data, mode = 'live' }: Prop
               ctaText: data.ctaText,
               ctaUrl: data.ctaUrl,
             }}
+            textFocusAttr={textEditMode ? 'final_cta' : undefined}
           />
         )
 
@@ -326,6 +360,7 @@ export function HomepageSectionRenderer({ sectionId, data, mode = 'live' }: Prop
               description: data.description,
               address: data.address,
             }}
+            textFocusAttr={textEditMode ? 'dealer_location' : undefined}
           />
         )
 
