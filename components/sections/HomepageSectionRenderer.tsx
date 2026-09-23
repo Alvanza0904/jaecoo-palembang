@@ -111,12 +111,19 @@ interface Props {
    * Saat true (dari preview-client): renderer menyuntikkan data-text-focus
    * ke text container section sehingga CSS focus ring dapat menargetnya.
    * Live website selalu false — tidak ada efek di live page.
+   * Source of truth = Parent UI state via postMessage (bukan DOM focus iframe).
    */
   textEditMode?: boolean
   /**
+   * Field yang sedang aktif di Parent editor.
+   * Diteruskan dari preview-client yang menerimanya via postMessage.
+   * Digunakan untuk highlight field yang relevan di ContextualTextPanel.
+   */
+  focusedFieldId?: string | null
+  /**
    * Key yang berubah setiap kali section/textEditMode berubah.
    * Tidak digunakan langsung oleh renderer — dibawa agar React
-   * menjamin re-render (dan scrollIntoView) saat section berpindah.
+   * menjamin re-render saat section berpindah.
    */
   focusKey?: string
 }
@@ -289,7 +296,11 @@ export function HomepageSectionRenderer({
   data,
   mode = 'live',
   textEditMode = false,
-  // focusKey didestrukturisasi agar tidak bocor ke DOM, tapi tidak perlu dipakai di sini
+  // focusedFieldId didestrukturisasi — saat ini diteruskan ke ContextualTextPanel
+  // via preview-client, tidak perlu diteruskan ke section components
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  focusedFieldId: _focusedFieldId,
+  // focusKey didestrukturisasi agar tidak bocor ke DOM
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   focusKey: _focusKey,
 }: Props) {

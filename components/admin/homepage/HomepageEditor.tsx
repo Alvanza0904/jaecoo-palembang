@@ -92,11 +92,13 @@ interface SectionPreviewProps {
   data: SectionData
   sectionId: SectionId
   device: 'desktop' | 'mobile'
-  /** Saat true: user sedang di area Edit Text — badge TEXT PREVIEW muncul di iframe */
+  /** Saat true: user sedang di area Edit Text — ContextualTextPanel muncul di iframe */
   textEditMode?: boolean
+  /** Field mana yang sedang fokus: 'title'|'headline'|'description'|'ctaText'|'address'|null */
+  focusedFieldId?: string | null
 }
 
-function SectionPreview({ data, sectionId, device, textEditMode = false }: SectionPreviewProps) {
+function SectionPreview({ data, sectionId, device, textEditMode = false, focusedFieldId = null }: SectionPreviewProps) {
   const renderData: SectionRenderData = {
     // FIX: teruskan full ResponsiveImage (membawa presentation_settings)
     // Priority 1: data.image = full object yang disimpan setelah media dipilih
@@ -135,7 +137,7 @@ function SectionPreview({ data, sectionId, device, textEditMode = false }: Secti
     )
   }
 
-  return <HomepagePreviewFrame sectionId={sectionId as SharedSectionId} data={renderData} device={device} textEditMode={textEditMode} />
+  return <HomepagePreviewFrame sectionId={sectionId as SharedSectionId} data={renderData} device={device} textEditMode={textEditMode} focusedFieldId={focusedFieldId} />
 }
 
 // ─── Helper: build ResponsiveImage dari MediaAsset ─────────────
@@ -177,6 +179,7 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
   // Pendekatan explicit focus lebih reliable daripada IntersectionObserver
   // yang bergantung pada layout/scroll timing.
   const [textEditMode, setTextEditMode] = useState(false)
+  const [focusedFieldId, setFocusedFieldId] = useState<string | null>(null)
   const textFocusCountRef = useRef(0) // track berapa field yang sedang focused
 
   // Local state per section
@@ -218,14 +221,19 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
   useEffect(() => {
     textFocusCountRef.current = 0
     setTextEditMode(false)
+    setFocusedFieldId(null)
   }, [activeSection])
 
   // ── Contextual Text Preview: focus/blur handlers ──────────────
   // Dipanggil oleh onFocus/onBlur pada wrapper div "3. Konten Teks".
   // Menggunakan counter agar nested field tidak race (blur A → focus B).
-  const handleTextGroupFocus = useCallback(() => {
+  const handleTextGroupFocus = useCallback((e: React.FocusEvent<HTMLDivElement>) => {
     textFocusCountRef.current += 1
     setTextEditMode(true)
+    // Baca field identifier dari target element (data-field attribute)
+    const target = e.target as HTMLElement
+    const fieldId = target.dataset?.field || target.getAttribute('name') || null
+    if (fieldId) setFocusedFieldId(fieldId)
   }, [])
 
   const handleTextGroupBlur = useCallback(() => {
@@ -234,6 +242,7 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
       textFocusCountRef.current = Math.max(0, textFocusCountRef.current - 1)
       if (textFocusCountRef.current === 0) {
         setTextEditMode(false)
+        setFocusedFieldId(null)
       }
     }, 100)
   }, [])
@@ -572,7 +581,7 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
           </div>
           <div className={styles.previewWrapper}>
             <div className={`${styles.previewScreen} ${previewDevice === 'desktop' ? styles.screenDesktop : styles.screenMobile}`}>
-              <SectionPreview data={data} sectionId={activeSection} device={previewDevice} textEditMode={textEditMode} />
+              <SectionPreview data={data} sectionId={activeSection} device={previewDevice} textEditMode={textEditMode} focusedFieldId={focusedFieldId} />
             </div>
           </div>
         </div>

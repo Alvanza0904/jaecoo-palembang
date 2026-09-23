@@ -10,6 +10,8 @@ interface PreviewPayload {
   device: 'desktop' | 'mobile'
   /** Saat true: user sedang fokus di field teks — aktifkan contextual text preview */
   textEditMode?: boolean
+  /** Field mana yang sedang aktif di Parent editor */
+  focusedFieldId?: string | null
 }
 
 interface PreviewMessage {
@@ -22,6 +24,7 @@ const EMPTY: PreviewPayload = {
   data: {},
   device: 'desktop',
   textEditMode: false,
+  focusedFieldId: null,
 }
 
 /**
@@ -59,15 +62,20 @@ const SECTION_ACCENT: Partial<Record<SectionId, string>> = {
  * - CTA text (jika ada, realtime)
  * - Address (jika dealer_location, realtime)
  *
- * Panel ini adalah perubahan VISUAL NYATA — bukan sekadar badge atau border.
- * Teks berubah langsung saat user mengetik karena data di-update via postMessage.
+ * STATE FLOW:
+ * Parent textEditMode=true → postMessage → preview-client → panel muncul
+ * Parent textEditMode=false → postMessage → preview-client → panel hilang
+ *
+ * Source of truth = Parent UI state, bukan DOM focus di iframe.
  */
 function ContextualTextPanel({
   sectionId,
   data,
+  focusedFieldId,
 }: {
   sectionId: SectionId
   data: SectionRenderData
+  focusedFieldId?: string | null
 }) {
   const label = SECTION_LABEL[sectionId] || sectionId
   const accent = SECTION_ACCENT[sectionId] || '#C9A84C'
@@ -78,6 +86,15 @@ function ContextualTextPanel({
   const address = data.address || ''
 
   const hasContent = title || description || ctaText || address
+
+  // Highlight field yang sedang aktif di Parent
+  const isFieldActive = (fieldName: string) =>
+    focusedFieldId === fieldName
+
+  const activeFieldStyle = (fieldName: string): React.CSSProperties =>
+    isFieldActive(fieldName)
+      ? { borderLeft: `2px solid ${accent}`, paddingLeft: '8px', marginLeft: '-10px' }
+      : {}
 
   return (
     <div
@@ -139,6 +156,9 @@ function ContextualTextPanel({
                 color: '#ffffff',
                 lineHeight: 1.3,
                 letterSpacing: '-0.01em',
+                transition: 'border-color 0.15s ease, padding-left 0.15s ease',
+                ...activeFieldStyle('title'),
+                ...activeFieldStyle('headline'),
               }}
             >
               {title}
@@ -150,11 +170,12 @@ function ContextualTextPanel({
                 fontSize: '11px',
                 color: '#9ca3af',
                 lineHeight: 1.5,
-                // Truncate panjang — ini preview, bukan full render
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: 'vertical',
                 overflow: 'hidden',
+                transition: 'border-color 0.15s ease, padding-left 0.15s ease',
+                ...activeFieldStyle('description'),
               }}
             >
               {description}
@@ -167,6 +188,8 @@ function ContextualTextPanel({
                 color: '#9ca3af',
                 lineHeight: 1.5,
                 fontStyle: 'italic',
+                transition: 'border-color 0.15s ease, padding-left 0.15s ease',
+                ...activeFieldStyle('address'),
               }}
             >
               {address}
@@ -187,6 +210,8 @@ function ContextualTextPanel({
                 fontWeight: 700,
                 alignSelf: 'flex-start',
                 letterSpacing: '0.02em',
+                outline: isFieldActive('ctaText') ? `2px solid white` : undefined,
+                outlineOffset: '2px',
               }}
             >
               {ctaText}
@@ -217,7 +242,15 @@ export function HomepagePreviewClient() {
     const handler = (event: MessageEvent<PreviewMessage>) => {
       if (event.origin !== window.location.origin) return
       if (!event.data || event.data.type !== 'JAECOO_HOMEPAGE_PREVIEW') return
-      setPreview(event.data.payload)
+
+      const p = event.data.payload
+      setPreview({
+        sectionId:     p.sectionId,
+        data:          p.data,
+        device:        p.device,
+        textEditMode:  p.textEditMode  ?? false,
+        focusedFieldId: p.focusedFieldId ?? null,
+      })
     }
 
     window.addEventListener('message', handler)
@@ -237,15 +270,13 @@ export function HomepagePreviewClient() {
     setFocusKey(key)
   }, [preview.sectionId, preview.textEditMode])
 
-  // Saat textEditMode aktif, pastikan konten teks section terlihat
-  // (scroll ke atas agar section di viewport, bukan scrollIntoView per element)
+  // Saat textEditMode aktif, scroll ke atas agar section terlihat
   useEffect(() => {
     if (!preview.textEditMode) return
-    // Reset scroll ke atas agar section yang baru dipilih langsung terlihat
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [preview.sectionId, preview.textEditMode])
 
-  // Padding bawah saat contextual panel muncul (agar panel tidak overlap konten section)
+  // Padding bawah saat contextual panel muncul
   const contextualPanelHeight = preview.textEditMode && preview.sectionId !== 'hero' ? 120 : 0
 
   return (
@@ -256,39 +287,36 @@ export function HomepagePreviewClient() {
         minHeight: '100vh',
         overflowX: 'hidden',
         position: 'relative',
-        // Padding bawah agar section tidak tertutup panel
         paddingBottom: contextualPanelHeight > 0 ? `${contextualPanelHeight}px` : undefined,
         transition: 'padding-bottom 0.2s ease',
       }}
     >
       {/* ── Section Renderer ────────────────────────────────────────
           Selalu merender section aktif dengan data draft terkini.
-          data-text-focus attribute disuntikkan saat textEditMode = true
-          untuk highlight via CSS ring (secondary feedback, bukan primary). */}
+          textEditMode dan focusedFieldId datang dari Parent via postMessage —
+          bukan dari DOM focus di iframe. */}
       <HomepageSectionRenderer
         sectionId={preview.sectionId}
         data={preview.data}
         mode="preview"
         textEditMode={preview.textEditMode}
+        focusedFieldId={preview.focusedFieldId}
         focusKey={focusKey}
       />
 
       {/* ── Contextual Text Panel ────────────────────────────────────
-          PERUBAHAN VISUAL UTAMA: panel overlay yang menampilkan teks
-          draft secara realtime saat user mengetik di editor.
-          Muncul hanya saat textEditMode = true DAN bukan section hero.
-          Teks berubah langsung karena data di-update via postMessage
-          setiap kali updateField() dipanggil di editor. */}
+          Panel overlay realtime yang muncul saat textEditMode = true.
+          Source of truth = Parent UI state via postMessage.
+          Panel HANYA muncul di dalam iframe, bukan di HomepageEditor. */}
       {preview.textEditMode && preview.sectionId !== 'hero' && (
         <ContextualTextPanel
           sectionId={preview.sectionId}
           data={preview.data}
+          focusedFieldId={preview.focusedFieldId}
         />
       )}
 
-      {/* ── Subtle focus ring via CSS ───────────────────────────────
-          Secondary feedback: ring tipis pada text container yang aktif.
-          Menargetkan [data-text-focus] yang disuntikkan renderer. */}
+      {/* ── Focus ring via CSS ───────────────────────────────────── */}
       {preview.textEditMode && (
         <style>{`
           [data-text-focus] {

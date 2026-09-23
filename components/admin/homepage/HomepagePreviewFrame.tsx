@@ -8,8 +8,10 @@ interface Props {
   sectionId: SectionId
   data: SectionRenderData
   device: 'desktop' | 'mobile'
-  /** Saat true: user di area Edit Text — iframe menampilkan TEXT PREVIEW badge */
+  /** Saat true: user di area Edit Text — iframe menampilkan ContextualTextPanel */
   textEditMode?: boolean
+  /** Field mana yang sedang aktif: 'title'|'headline'|'description'|'ctaText'|'address'|null */
+  focusedFieldId?: string | null
 }
 
 /**
@@ -24,22 +26,35 @@ interface Props {
  * 1. iframe load /admin-preview/homepage (page.tsx → HomepagePreviewClient)
  * 2. iframe kirim JAECOO_HOMEPAGE_PREVIEW_READY setelah mount
  * 3. Frame menerima READY → kirim payload section data
- * 4. Setiap kali data berubah → re-send payload
+ * 4. Setiap kali data, textEditMode, focusedFieldId berubah → re-send payload
  * 5. Preview = komponen live yang sama persis (LayeredHero + presentation_settings)
  *
- * FIX v3 (2026-09-21):
- * - Tunggu JAECOO_HOMEPAGE_PREVIEW_READY sebelum send pertama (fix race condition)
- * - Re-send setiap kali payload berubah (reactive)
- * - Tambah error state + retry jika iframe gagal load.
+ * STATE BRIDGE FIX:
+ * - textEditMode + focusedFieldId ikut dalam payload postMessage
+ * - Dependency array useEffect mencakup semua state yang membentuk payload
+ * - iframe (preview-client) menerima dan menyimpan UI state ini
+ * - ContextualTextPanel di iframe muncul/hilang berdasarkan textEditMode dari Parent
  */
-export function HomepagePreviewFrame({ sectionId, data, device, textEditMode = false }: Props) {
+export function HomepagePreviewFrame({
+  sectionId,
+  data,
+  device,
+  textEditMode = false,
+  focusedFieldId = null,
+}: Props) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null)
   const [loadError, setLoadError] = useState(false)
   const [iframeKey, setIframeKey] = useState(0) // force remount on retry
   const [iframeReady, setIframeReady] = useState(false)
 
-  // Serialize payload — heroMediaAsset akan ikut terbawa via postMessage
-  const payload = JSON.stringify({ sectionId, data, device, textEditMode })
+  // Serialize payload — semua state yang mempengaruhi preview ikut
+  const payload = JSON.stringify({
+    sectionId,
+    data,
+    device,
+    textEditMode,
+    focusedFieldId,
+  })
 
   const send = useCallback((p: string) => {
     iframeRef.current?.contentWindow?.postMessage(
@@ -63,10 +78,12 @@ export function HomepagePreviewFrame({ sectionId, data, device, textEditMode = f
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [send]) // payload sengaja tidak di-dep sini — handler hanya setup sekali
 
-  // Re-send setiap kali payload berubah (teks / gambar diubah di editor)
+  // Re-send setiap kali payload berubah (teks / gambar / textEditMode / focusedFieldId)
+  // Dependency array eksplisit mencakup SEMUA state yang membentuk payload
   useEffect(() => {
     if (!iframeReady) return
     send(payload)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [payload, iframeReady, send])
 
   const handleLoad = useCallback(() => {
