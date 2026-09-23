@@ -290,6 +290,7 @@ export function HomepageSectionRenderer({
   mode = 'live',
   textEditMode = false,
   // focusKey didestrukturisasi agar tidak bocor ke DOM, tapi tidak perlu dipakai di sini
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   focusKey: _focusKey,
 }: Props) {
   // resolveImage sekarang membawa presentation_settings untuk semua section
