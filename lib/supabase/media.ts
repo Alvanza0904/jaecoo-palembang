@@ -253,7 +253,9 @@ export const MODEL_MEDIA_SLOTS = [
   "cockpit_detail",
   "performance",
   "technology",
+  "tech_intelligence",
   "adas",
   "specs_visual",
   "final_cta",
+  "tech_cta",
 ] as const;

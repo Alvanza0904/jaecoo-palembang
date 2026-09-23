@@ -38,7 +38,7 @@ import { LayeredHero } from "@/components/hero/LayeredHero";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { FinanceCalculator } from "@/components/finance/FinanceCalculator";
 import { PriceDisplay } from "@/components/price/PriceDisplay";
-import { priceStatusAllowsCalculator } from "@/lib/types/model";
+import { priceStatusAllowsCalculator, type ModelSectionCopy } from "@/lib/types/model";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import { ColorCarousel } from "@/components/model/ColorCarousel";
@@ -133,6 +133,31 @@ function CmsModelImage({
   );
 }
 
+function HeadingLines({ text, fallback }: { text?: string; fallback: string }) {
+  const source = (text && text.trim()) || fallback;
+  const lines = source.split("\n");
+  return (
+    <>
+      {lines.map((line, index) => (
+        <span key={`${line}-${index}`}>
+          {index > 0 && <br />}
+          {line}
+        </span>
+      ))}
+    </>
+  );
+}
+
+function copyOf(copy: ModelSectionCopy | undefined, fallback: ModelSectionCopy): ModelSectionCopy {
+  return {
+    label: copy?.label || fallback.label,
+    heading: copy?.heading || fallback.heading,
+    body: copy?.body || fallback.body,
+    stat: copy?.stat || fallback.stat,
+    unit: copy?.unit || fallback.unit,
+  };
+}
+
 interface ModelPageProps {
   params: Promise<{ slug: string }>;
 }
@@ -178,9 +203,44 @@ export default async function ModelPage({ params }: ModelPageProps) {
   });
 
   const hasHeroImage = !!(model.hero_media?.image?.desktop);
-
-  // Key specs dari model — ambil dari data technology features untuk highlights
-  const keyFeatures = model.technology.features.slice(0, 3);
+  const copy = model.page_copy;
+  const exterior = copyOf(copy?.exterior, {
+    label: "Desain",
+    heading: "Dirancang\nuntuk tampil berkarakter.",
+    body: model.description,
+  });
+  const design = copyOf(copy?.design, {
+    label: "Detail",
+    heading: "Setiap garis\nmemiliki tujuan.",
+    body: `Dari lampu depan LED signature hingga lekukan bodi yang tegas — setiap detail ${model.short_name} dirancang dengan presisi.`,
+  });
+  const profile = copyOf(copy?.profile, {
+    label: "Karakter",
+    heading: "Percaya diri\ndari setiap\nsudut.",
+  });
+  const interior = copyOf(copy?.interior, {
+    label: "Interior",
+    heading: "Kabin\nyang dirancang untuk\nperjalanan.",
+  });
+  const cockpit = copyOf(copy?.cockpit, {
+    label: "Kokpit",
+    heading: "Cerdas\nsejak dirancang.",
+    body: `Layar, kontrol, dan informasi kendaraan tetap dalam jangkauan pengemudi ${model.short_name}.`,
+  });
+  const performance = copyOf(copy?.performance, {
+    label: "Performa",
+    heading: "Tenaga\ntanpa\nkompromi.",
+  });
+  const adas = copyOf(copy?.adas, {
+    label: "Keselamatan",
+    heading: "Bantuan pengemudi\nyang bekerja diam-diam.",
+  });
+  const cta = copyOf(copy?.cta, {
+    label: "Siap Melangkah Lebih Jauh?",
+    heading: `Tertarik dengan\n${model.short_name}?`,
+    body: "Hubungi Alvan untuk harga terkini, jadwal test drive, dan penawaran langsung dari dealer resmi JAECOO Palembang.",
+  });
+  const highlights = model.highlights ?? [];
 
   return (
     <>
@@ -272,14 +332,13 @@ export default async function ModelPage({ params }: ModelPageProps) {
           <Reveal variant="fade-up">
             <p className={styles.editorialLabel}>
               <span className={styles.editorialNum}>01</span>
-              <span className={styles.editorialCat}>Desain</span>
+              <span className={styles.editorialCat}>{exterior.label}</span>
             </p>
             <h2 className={styles.cinematicHeading}>
-              Desained<br />
-              untuk tampil berkarakter.
+              <HeadingLines text={exterior.heading} fallback="" />
             </h2>
             <p className={styles.cinematicBody}>
-              {model.description}
+              {exterior.body || model.description}
             </p>
           </Reveal>
         </div>
@@ -300,16 +359,12 @@ export default async function ModelPage({ params }: ModelPageProps) {
             <Reveal variant="fade-up" delay={120}>
               <p className={styles.editorialLabel}>
                 <span className={styles.editorialNum}>02</span>
-                <span className={styles.editorialCat}>Detail</span>
+                <span className={styles.editorialCat}>{design.label}</span>
               </p>
               <h2 className={styles.detailHeading}>
-                Setiap garis<br />
-                memiliki tujuan.
+                <HeadingLines text={design.heading} fallback="" />
               </h2>
-              <p className={styles.detailBody}>
-                Dari lampu depan LED signature hingga lekukan bodi yang tegas —
-                setiap detail {model.short_name} dirancang dengan presisi.
-              </p>
+              <p className={styles.detailBody}>{design.body}</p>
             </Reveal>
 
             {/* Secondary detail images stacked */}
@@ -338,12 +393,10 @@ export default async function ModelPage({ params }: ModelPageProps) {
           <Reveal variant="fade-up">
             <p className={styles.presenceLabel}>
               <span className={styles.editorialNum}>03</span>
-              <span className={styles.editorialCat}>Karakter</span>
+              <span className={styles.editorialCat}>{profile.label}</span>
             </p>
             <h2 className={styles.presenceHeading}>
-              Percaya Diri<br />
-              dari setiap<br />
-              sudut.
+              <HeadingLines text={profile.heading} fallback="" />
             </h2>
           </Reveal>
         </div>
@@ -365,12 +418,10 @@ export default async function ModelPage({ params }: ModelPageProps) {
           <Reveal variant="fade-up">
             <p className={styles.editorialLabel}>
               <span className={styles.editorialNum}>04</span>
-              <span className={styles.editorialCat}>Interior</span>
+              <span className={styles.editorialCat}>{interior.label}</span>
             </p>
             <h2 className={styles.cinematicHeading}>
-              Kabin<br />
-              yang dirancang untuk<br />
-              perjalanan.
+              <HeadingLines text={interior.heading} fallback="" />
             </h2>
           </Reveal>
         </div>
@@ -399,16 +450,12 @@ export default async function ModelPage({ params }: ModelPageProps) {
               <Reveal variant="fade-up" delay={80}>
                 <p className={styles.editorialLabel}>
                   <span className={styles.editorialNum}>05</span>
-                  <span className={styles.editorialCat}>Kokpit</span>
+                  <span className={styles.editorialCat}>{cockpit.label}</span>
                 </p>
                 <h2 className={styles.cockpitHeading}>
-                  Cerdas<br />
-                  sejak dirancang.
+                  <HeadingLines text={cockpit.heading} fallback="" />
                 </h2>
-                <p className={styles.cockpitBody}>
-                  Layar sentuh ganda, panel instrumen digital, dan antarmuka
-                  intuitif — semua dalam jangkauan pengemudi {model.short_name}.
-                </p>
+                <p className={styles.cockpitBody}>{cockpit.body}</p>
               </Reveal>
             </div>
           </div>
@@ -429,48 +476,22 @@ export default async function ModelPage({ params }: ModelPageProps) {
             <Reveal variant="fade-up">
               <p className={styles.editorialLabel}>
                 <span className={styles.editorialNum}>06</span>
-                <span className={styles.editorialCat}>Performa</span>
+                <span className={styles.editorialCat}>{performance.label}</span>
               </p>
               <h2 className={styles.performanceHeading}>
-                Tenaga<br />
-                tanpa<br />
-                kompromi.
+                <HeadingLines text={performance.heading} fallback="" />
               </h2>
             </Reveal>
 
-            {/* Floating key numbers */}
             <div className={styles.performanceStats}>
-              {keyFeatures.length > 0 ? (
-                keyFeatures.map((feature, i) => (
-                  <Reveal key={feature.id} variant="fade-up" delay={i * 100}>
-                    <div className={styles.performanceStat}>
-                      <span className={styles.performanceStatTag}>{feature.tag ?? "—"}</span>
-                      <span className={styles.performanceStatLabel}>{feature.title}</span>
-                    </div>
-                  </Reveal>
-                ))
-              ) : (
-                <>
-                  <Reveal variant="fade-up">
-                    <div className={styles.performanceStat}>
-                      <span className={styles.performanceStatTag}>130 kW</span>
-                      <span className={styles.performanceStatLabel}>Tenaga</span>
-                    </div>
-                  </Reveal>
-                  <Reveal variant="fade-up" delay={100}>
-                    <div className={styles.performanceStat}>
-                      <span className={styles.performanceStatTag}>553 km</span>
-                      <span className={styles.performanceStatLabel}>Jarak Tempuh</span>
-                    </div>
-                  </Reveal>
-                  <Reveal variant="fade-up" delay={200}>
-                    <div className={styles.performanceStat}>
-                      <span className={styles.performanceStatTag}>7.1 s</span>
-                      <span className={styles.performanceStatLabel}>0–100 km/h</span>
-                    </div>
-                  </Reveal>
-                </>
-              )}
+              {highlights.map((item, i) => (
+                <Reveal key={`${item.value}-${item.label}`} variant="fade-up" delay={i * 100}>
+                  <div className={styles.performanceStat}>
+                    <span className={styles.performanceStatTag}>{item.value}</span>
+                    <span className={styles.performanceStatLabel}>{item.label}</span>
+                  </div>
+                </Reveal>
+              ))}
             </div>
           </div>
         </Container>
@@ -544,16 +565,16 @@ export default async function ModelPage({ params }: ModelPageProps) {
             <Reveal variant="fade-up">
               <p className={styles.editorialLabel}>
                 <span className={styles.editorialNum}>08</span>
-                <span className={styles.editorialCat}>Keselamatan</span>
+                <span className={styles.editorialCat}>{adas.label}</span>
               </p>
-              <div className={styles.adasStat}>
-                <span className={styles.adasStatNumber}>19</span>
-                <span className={styles.adasStatUnit}>ADAS</span>
-              </div>
+              {adas.stat && (
+                <div className={styles.adasStat}>
+                  <span className={styles.adasStatNumber}>{adas.stat}</span>
+                  <span className={styles.adasStatUnit}>{adas.unit || "ADAS"}</span>
+                </div>
+              )}
               <h2 className={styles.adasHeading}>
-                Kecerdasan<br />
-                that watches<br />
-                ahead.
+                <HeadingLines text={adas.heading} fallback="" />
               </h2>
             </Reveal>
           </div>
@@ -662,15 +683,11 @@ export default async function ModelPage({ params }: ModelPageProps) {
         <Container size="narrow">
           <div className={styles.ctaContent}>
             <Reveal variant="fade-up">
-              <p className={styles.ctaEyebrow}>Siap Melangkah Lebih Jauh?</p>
+              <p className={styles.ctaEyebrow}>{cta.label}</p>
               <h2 className={styles.ctaHeading}>
-                Tertarik dengan<br />
-                {model.short_name}?
+                <HeadingLines text={cta.heading} fallback="" />
               </h2>
-              <p className={styles.ctaBody}>
-                Hubungi Alvan untuk harga terkini, jadwal test drive,
-                dan penawaran langsung dari dealer resmi JAECOO Palembang.
-              </p>
+              <p className={styles.ctaBody}>{cta.body}</p>
             </Reveal>
 
             <Reveal variant="fade-up" delay={120}>

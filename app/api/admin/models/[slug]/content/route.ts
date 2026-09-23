@@ -13,7 +13,7 @@ interface RouteParams {
   params: Promise<{ slug: string }>
 }
 
-const VALID_SECTIONS = ['overview', 'technology', 'hero']
+const VALID_SECTIONS = ['overview', 'technology', 'hero', 'page']
 
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
   try {
@@ -63,6 +63,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     if (error) throw error
 
     revalidatePath(`/model/${slug}`, 'page')
+    revalidatePath(`/model/${slug}/technology`, 'page')
     revalidatePath(`/model/${slug}/specifications`, 'page')
 
     return NextResponse.json({ content: data })

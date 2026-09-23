@@ -6,7 +6,86 @@
  */
 
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { MODELS } from '@/lib/data/models'
 import styles from './models.module.css'
+
+async function ensureCatalogModels() {
+  const supabase = await createSupabaseServerClient()
+  const { data: existing, error } = await supabase.from('models').select('id, slug, description, short_name')
+  if (error || !existing) return
+
+  const bySlug = new Map(existing.map((row) => [row.slug as string, row]))
+
+  for (const model of MODELS) {
+    const current = bySlug.get(model.slug)
+    if (!current) {
+      const { data: inserted, error: insertError } = await supabase
+        .from('models')
+        .insert({
+          slug: model.slug,
+          name: model.name,
+          short_name: model.short_name,
+          tagline: model.tagline,
+          description: model.description,
+          published: model.published,
+          sort_order: Math.round(model.sort_order ?? 0),
+        })
+        .select('id')
+        .single()
+      if (insertError || !inserted) continue
+
+      const variant = model.default_variant
+      await supabase.from('model_variants').insert({
+        model_id: inserted.id,
+        variant_key: variant.id,
+        name: variant.name,
+        label: variant.label ?? null,
+        price_status: variant.price_status,
+        price_idr: variant.price_idr,
+        price_display: variant.price_display,
+        price_region: variant.price_region,
+        is_default: true,
+      })
+
+      if (model.colors.length) {
+        await supabase.from('model_colors').insert(
+          model.colors.map((color, index) => ({
+            model_id: inserted.id,
+            color_key: color.id,
+            name: color.name,
+            hex: color.hex,
+            sort_order: index + 1,
+          })),
+        )
+      }
+
+      const specRows = model.specifications.flatMap((category, categoryIndex) =>
+        category.specs.map((spec, specIndex) => ({
+          model_id: inserted.id,
+          category: category.label,
+          spec_label: spec.label,
+          spec_value: spec.value,
+          sort_order: categoryIndex * 100 + specIndex,
+        })),
+      )
+      if (specRows.length) {
+        await supabase.from('model_specifications').insert(specRows)
+      }
+      continue
+    }
+
+    const patch: { description?: string; short_name?: string } = {}
+    if (model.slug === 'jaecoo-j7-shs' && typeof current.description === 'string' && current.description.includes('kemampuan AWD')) {
+      patch.description = model.description
+    }
+    if (model.slug === 'jaecoo-j8-shs' && !String(current.short_name ?? '').trim()) {
+      patch.short_name = model.short_name
+    }
+    if (Object.keys(patch).length) {
+      await supabase.from('models').update(patch).eq('id', current.id)
+    }
+  }
+}
 
 async function getAdminModels() {
   const supabase = await createSupabaseServerClient()
@@ -30,6 +109,11 @@ export default async function AdminModelsPage() {
   let fetchError: string | null = null
 
   try {
+    try {
+      await ensureCatalogModels()
+    } catch {
+      // Catalog sync is best-effort. The existing list still renders.
+    }
     models = await getAdminModels()
   } catch (err) {
     fetchError = String(err)

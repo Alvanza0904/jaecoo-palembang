@@ -21,7 +21,8 @@ async function getAdminModel(slug: string) {
       *,
       model_variants(id, variant_key, name, label, price_status, price_idr, price_display, price_display_override, price_region, is_default),
       model_colors(id, color_key, name, hex, image_path, media_asset_id, sort_order),
-      model_content(section, content)
+      model_content(section, content),
+      model_specifications(id, category, spec_label, spec_value, sort_order)
     `)
     .eq('slug', slug)
     .single()

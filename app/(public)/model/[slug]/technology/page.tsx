@@ -33,7 +33,33 @@ import { getBackgroundLayerStyle } from "@/lib/types/presentation";
 import type { ResponsiveImage } from "@/lib/types/media";
 import styles from "./technology.module.css";
 
-interface Props { params: Promise<{ slug: string }> }
+function TechSceneImage({
+  image,
+  label,
+  ratio,
+  className,
+}: {
+  image?: ResponsiveImage;
+  label: string;
+  ratio: string;
+  className?: string;
+}) {
+  const src = image?.desktop ?? image?.tablet ?? image?.mobile;
+  if (!src) {
+    return (
+      <ImagePlaceholder
+        label={label}
+        ratio={ratio}
+        source="Admin → Media Library"
+        className={className}
+      />
+    );
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={src} alt={image?.alt || label} className={className} />
+  );
+}
 
 /** Compute presentation_settings style for a feature image (same pattern as Hero). */
 function featureImageStyle(image: ResponsiveImage | undefined): CSSProperties {
@@ -45,6 +71,8 @@ function featureImageStyle(image: ResponsiveImage | undefined): CSSProperties {
     image.focal_y ?? 50,
   );
 }
+
+interface Props { params: Promise<{ slug: string }> }
 
 export async function generateStaticParams() {
   return (await getModelSlugs()).map((slug) => ({ slug }));
@@ -77,6 +105,12 @@ export default async function TeknologiPage({ params }: Props) {
     model: model.short_name,
     source_cta: "tech_cta",
   });
+
+  const scene = model.page_copy?.tech_intelligence;
+  const sceneHeading = (scene?.heading || "SMART\nBY DESIGN.").split("\n").filter(Boolean);
+  const techStats = model.page_copy?.tech_stats?.length
+    ? model.page_copy.tech_stats
+    : [];
 
   // Split headline into lines for LineReveal
   const headlineLines = (technology.headline || "Intelligence Built In")
@@ -167,22 +201,12 @@ export default async function TeknologiPage({ params }: Props) {
       ══════════════════════════════════════════════════════════ */}
       <section className={styles.cinematicScene} data-theme="dark">
         <div className={styles.sceneBg} aria-hidden="true">
-          <ImagePlaceholder
+          <TechSceneImage
+            image={model.image_slots?.tech_intelligence ?? model.image_slots?.technology}
             label="TECHNOLOGY — INTELLIGENT COCKPIT / DISPLAY SCREEN"
-            device="desktop"
             ratio="16/9"
-            source="Admin → Media Library"
             className={styles.sceneBgImg}
           />
-          <div className={styles.sceneBgImgMobile}>
-            <ImagePlaceholder
-              label="TECHNOLOGY — HMI MOBILE"
-              device="mobile"
-              ratio="3/4"
-              source="Admin → Media Library"
-              className={styles.sceneBgImg}
-            />
-          </div>
           <div className={styles.sceneOverlay} data-gradient="bottom" />
         </div>
 
@@ -190,11 +214,11 @@ export default async function TeknologiPage({ params }: Props) {
           <Reveal variant="slide-left" delay={0}>
             <p className={styles.sceneEyebrow}>
               <span className={styles.eyebrowLine} />
-              <span>Kecerdasan</span>
+              <span>{scene?.label || "Kecerdasan"}</span>
             </p>
           </Reveal>
           <LineReveal
-            lines={["SMART", "BY DESIGN."]}
+            lines={sceneHeading}
             tag="h2"
             delay={120}
             staggerMs={110}
@@ -202,9 +226,7 @@ export default async function TeknologiPage({ params }: Props) {
           />
           <Reveal variant="fade-up" delay={420}>
             <p className={styles.sceneSupportText}>
-              Antarmuka digital {model.short_name} dirancang untuk memahami pengemudi
-              — bukan sebaliknya. Kontrol intuitif, layar lebar,
-              respons yang akurat.
+              {scene?.body || `Antarmuka dan fitur ${model.short_name} mengikuti data model ini — bukan salinan model lain.`}
             </p>
           </Reveal>
         </div>
@@ -363,15 +385,11 @@ export default async function TeknologiPage({ params }: Props) {
       {/* ══════════════════════════════════════════════════════════
           05 — STAT STRIP — Key technology numbers
       ══════════════════════════════════════════════════════════ */}
+      {techStats.length > 0 && (
       <section className={styles.statStrip}>
         <div className={styles.statStripInner}>
-          {[
-            { value: "19", label: "ADAS Features", unit: "+" },
-            { value: "12.3″", label: "Display Utama", unit: "" },
-            { value: "5G", label: "Connectivity", unit: "" },
-            { value: "360°", label: "Camera System", unit: "" },
-          ].map((stat, i) => (
-            <Reveal key={i} variant="fade-down" delay={i * 80} threshold={0.1}>
+          {techStats.map((stat, i) => (
+            <Reveal key={`${stat.label}-${stat.value}`} variant="fade-down" delay={i * 80} threshold={0.1}>
               <div className={styles.statItem}>
                 <span className={styles.statValue}>
                   {stat.value}
@@ -383,17 +401,17 @@ export default async function TeknologiPage({ params }: Props) {
           ))}
         </div>
       </section>
+      )}
 
       {/* ══════════════════════════════════════════════════════════
           06 — FINAL CTA — Dark cinematic end
       ══════════════════════════════════════════════════════════ */}
       <section className={styles.ctaScene} data-theme="dark">
         <div className={styles.sceneBg} aria-hidden="true">
-          <ImagePlaceholder
+          <TechSceneImage
+            image={model.image_slots?.tech_cta ?? model.image_slots?.final_cta}
             label="TECHNOLOGY CTA — VEHICLE / DRAMATIC ANGLE"
-            device="desktop"
             ratio="21/9"
-            source="Admin → Media Library"
             className={styles.sceneBgImg}
           />
           <div className={styles.sceneOverlay} data-gradient="center" style={{ opacity: 0.75 }} />

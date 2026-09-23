@@ -18,6 +18,7 @@ interface Props { models: ModelData[]; }
 const SLUG_LABEL: Record<string, string> = {
   "jaecoo-j5-ev":  "J5",
   "jaecoo-j7-shs": "J7 SHS",
+  "jaecoo-j7-sivp": "J7 SIVP",
   "jaecoo-j8-shs": "J8 SHS",
 };
 

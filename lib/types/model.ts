@@ -11,7 +11,7 @@
 
 import type { MediaWithArtDirection, ResponsiveImage } from "./media";
 
-export type ModelSlug = "jaecoo-j5-ev" | "jaecoo-j7-shs" | "jaecoo-j8-shs";
+export type ModelSlug = "jaecoo-j5-ev" | "jaecoo-j7-shs" | "jaecoo-j7-sivp" | "jaecoo-j8-shs";
 
 // ─── Price Status ─────────────────────────────────────────────────────────────
 
@@ -109,6 +109,40 @@ export interface ModelImageSlots {
   [slot: string]: ResponsiveImage | undefined;
 }
 
+export interface ModelHighlight {
+  value: string;
+  label: string;
+  unit?: string;
+}
+
+export interface ModelSectionCopy {
+  /** Small category label, e.g. "Desain" */
+  label?: string;
+  /** Heading. Newlines become line breaks. */
+  heading?: string;
+  body?: string;
+  stat?: string;
+  unit?: string;
+}
+
+/**
+ * Editable editorial copy for the cinematic model pages.
+ * Stored in model_content.section = "page". Empty fields fall back
+ * to the static copy for that model — never to another model's data.
+ */
+export interface ModelPageCopy {
+  exterior?: ModelSectionCopy;
+  design?: ModelSectionCopy;
+  profile?: ModelSectionCopy;
+  interior?: ModelSectionCopy;
+  cockpit?: ModelSectionCopy;
+  performance?: ModelSectionCopy;
+  adas?: ModelSectionCopy;
+  cta?: ModelSectionCopy;
+  tech_intelligence?: ModelSectionCopy;
+  tech_stats?: ModelHighlight[];
+}
+
 export interface ModelData {
   /** URL slug — matches route /model/[slug] */
   slug: ModelSlug;
@@ -128,6 +162,12 @@ export interface ModelData {
 
   /** CMS-managed image slots for the cinematic model page. */
   image_slots?: ModelImageSlots;
+
+  /** Key performance numbers for the overview performance scene. */
+  highlights?: ModelHighlight[];
+
+  /** Per-model editorial copy. Not shared across variants. */
+  page_copy?: ModelPageCopy;
 
   /** Default / base variant */
   default_variant: ModelVariant;

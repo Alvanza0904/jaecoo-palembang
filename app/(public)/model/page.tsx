@@ -7,9 +7,9 @@ import styles from "./model-listing.module.css";
 
 export const revalidate = 0;
 export const metadata: Metadata = {
-  title: "Model JAECOO Palembang — J5 EV, J7 SHS, J8 Ardis SHS",
+  title: "Model JAECOO Palembang — J5 EV, J7 SHS, J7 SIVP, J8 SHS-P ARDIS",
   description:
-    "Jelajahi lineup JAECOO di Palembang: J5 EV, J7 SHS, dan J8 Ardis SHS. Tiga SUV premium dengan teknologi terdepan.",
+    "Jelajahi lineup JAECOO di Palembang: J5 EV, J7 SHS, J7 SIVP, dan J8 SHS-P ARDIS.",
   alternates: { canonical: "/model" },
 };
 
@@ -35,10 +35,15 @@ const MODEL_CONFIG: Record<
     textPosition: "center-right",
     ctaLabel: "EXPLORE J7 SHS",
   },
+  "jaecoo-j7-sivp": {
+    displayLabel: "J7 SIVP",
+    textPosition: "bottom-left",
+    ctaLabel: "EXPLORE J7 SIVP",
+  },
   "jaecoo-j8-shs": {
-    displayLabel: "J8 SHS ARDIS",
+    displayLabel: "J8 SHS-P ARDIS",
     textPosition: "center-left",
-    ctaLabel: "EXPLORE J8 SHS ARDIS",
+    ctaLabel: "EXPLORE J8",
   },
 };
 

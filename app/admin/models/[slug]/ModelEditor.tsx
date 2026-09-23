@@ -14,7 +14,9 @@ import Link from 'next/link'
 import styles from './editor.module.css'
 import { MediaPicker } from '@/components/admin/media/MediaPicker'
 import { VisualMediaEditor } from '@/components/admin/visual-editor'
+import { MODELS } from '@/lib/data/models'
 import type { MediaAsset } from '@/lib/types/media-asset'
+import type { ModelFeature, ModelHighlight, ModelPageCopy, ModelSectionCopy } from '@/lib/types/model'
 
 /* ─── Types ────────────────────────────────────────────── */
 
@@ -65,6 +67,12 @@ interface ContentRow {
   content: Record<string, unknown>
 }
 
+interface SpecRow {
+  category: string
+  spec_label: string
+  spec_value: string
+}
+
 interface AdminModel {
   id: string
   slug: string
@@ -77,6 +85,7 @@ interface AdminModel {
   model_variants: Variant[]
   model_colors: Color[]
   model_content: ContentRow[]
+  model_specifications?: Array<SpecRow & { id?: string; sort_order?: number }>
 }
 
 interface ModelEditorProps {
@@ -84,7 +93,7 @@ interface ModelEditorProps {
   slug: string
 }
 
-type TabId = 'basic' | 'variants' | 'colors' | 'imageSlots' | 'content'
+type TabId = 'basic' | 'variants' | 'colors' | 'imageSlots' | 'content' | 'specs'
 
 /* ─── Helpers ──────────────────────────────────────────── */
 
@@ -1124,43 +1133,102 @@ function ColorsTab({ model, slug }: { model: AdminModel; slug: string }) {
 
 /* ─── Image Slots Tab ─────────────────────────────────── */
 function ImageSlotsTab({ slug }: { slug: string }) {
-  const slots = [
-    ['hero','Hero'],['exterior','Exterior'],['design_detail_main','Design Detail'],
-    ['profile','Profile'],['interior','Interior'],['cockpit_main','Cockpit'],
-    ['performance','Electric Performance'],['technology','Intelligent Technology'],
-    ['adas','ADAS'],['specs_visual','Specifications Visual'],['final_cta','Final CTA'],
-  ] as const
+  const groups: Array<{ title: string; note: string; slots: Array<[string, string]> }> = [
+    {
+      title: 'Exterior',
+      note: 'Dipakai section eksterior, detail desain, dan profile.',
+      slots: [
+        ['exterior', 'Exterior'],
+        ['exterior_mobile', 'Exterior mobile'],
+        ['design_detail_main', 'Design detail'],
+        ['design_detail_wheel', 'Detail roda'],
+        ['design_detail_rear', 'Detail belakang'],
+        ['profile', 'Profile'],
+      ],
+    },
+    {
+      title: 'Interior',
+      note: 'Kabin dan kokpit. Slot mobile adalah gambar terpisah, bukan crop desktop.',
+      slots: [
+        ['interior', 'Interior'],
+        ['interior_mobile', 'Interior mobile'],
+        ['cockpit_main', 'Cockpit'],
+        ['cockpit_detail', 'Cockpit detail'],
+      ],
+    },
+    {
+      title: 'Performa, teknologi, CTA',
+      note: 'Hero utama tetap di tab Basic Info. Slot di sini untuk section di bawah hero.',
+      slots: [
+        ['performance', 'Performance'],
+        ['technology', 'Technology'],
+        ['tech_intelligence', 'Technology — scene kecerdasan'],
+        ['adas', 'ADAS / keselamatan'],
+        ['specs_visual', 'Specifications visual'],
+        ['final_cta', 'Final CTA'],
+        ['tech_cta', 'Technology CTA'],
+      ],
+    },
+  ]
   const [assignments,setAssignments]=useState<Array<{slot_key:string;breakpoint:string|null;media_assets?:{id:string;public_url:string|null;alt_text:string|null;focal_x:number|null;focal_y:number|null}}>>([])
   useEffect(()=>{fetch(`/api/admin/content-media?content_type=model&content_key=${encodeURIComponent(slug)}`).then(r=>r.json()).then(j=>setAssignments(j.assignments??[]))},[slug])
   return <div className={styles.section}>
-    <div className={styles.sectionHeader}><div><h2 className={styles.sectionTitle}>Image Slots</h2><p className={styles.sectionNote}>Shared content_media source. Mobile override optional; jika kosong frontend fallback ke desktop.</p></div></div>
-    <div className={styles.contentSectionGrid}>
-      {slots.map(([slot,label])=><div key={slot} className={styles.contentBlock}>
-        <div className={styles.contentBlockHeader}><h3 className={styles.contentBlockTitle}>{label}</h3><span className={styles.contentSectionStatus}>CMS image</span></div>
-        <div className={styles.field}><MediaAssignmentField slug={slug} slot={slot} breakpoint="desktop" assignments={assignments}/></div>
-        <div className={styles.field}><MediaAssignmentField slug={slug} slot={slot} breakpoint="mobile" assignments={assignments}/></div>
-      </div>)}
-    </div>
-    <div className={styles.contentBlock}><h3 className={styles.contentBlockTitle}>Colors</h3><p className={styles.sectionNote}>Warna tetap dikelola dari model_colors.media_asset_id pada tab Colors; tidak ada color table kedua.</p></div>
+    <div className={styles.sectionHeader}><div><h2 className={styles.sectionTitle}>Image Slots</h2><p className={styles.sectionNote}>Setiap slot yang dipakai halaman model punya kontrol Media Library. Preview, ganti, dan hapus tersimpan ke content_media. Mobile opsional; kalau kosong, frontend memakai gambar desktop slot yang sama.</p></div></div>
+    {groups.map((group) => (
+      <div key={group.title} className={styles.contentBlock}>
+        <div className={styles.contentBlockHeader}>
+          <div>
+            <p className={styles.contentBlockKicker}>GAMBAR</p>
+            <h3 className={styles.contentBlockTitle}>{group.title}</h3>
+          </div>
+        </div>
+        <p className={styles.sectionNote}>{group.note}</p>
+        <div className={styles.contentSectionGrid}>
+          {group.slots.map(([slot, label]) => (
+            <div key={slot} className={styles.contentBlock}>
+              <div className={styles.contentBlockHeader}><h3 className={styles.contentBlockTitle}>{label}</h3><span className={styles.contentSectionStatus}>{slot}</span></div>
+              <div className={styles.field}><MediaAssignmentField slug={slug} slot={slot} breakpoint="desktop" assignments={assignments}/></div>
+              <div className={styles.field}><MediaAssignmentField slug={slug} slot={slot} breakpoint="mobile" assignments={assignments}/></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
+    <div className={styles.contentBlock}><h3 className={styles.contentBlockTitle}>Colors</h3><p className={styles.sectionNote}>Warna tetap dikelola dari model_colors.media_asset_id pada tab Colors.</p></div>
   </div>
 }
 
 function MediaAssignmentField({slug,slot,breakpoint,assignments}:{slug:string;slot:string;breakpoint:'desktop'|'mobile';assignments:Array<{slot_key:string;breakpoint:string|null;media_assets?:{id:string;public_url:string|null;alt_text:string|null;focal_x:number|null;focal_y:number|null}}>}) {
-  const a=assignments.find(x=>x.slot_key===slot&&x.breakpoint===breakpoint)?.media_assets
-  const [open,setOpen]=useState(false); const [message,setMessage]=useState('')
-  async function choose(asset:MediaAsset){
+  const initial=assignments.find(x=>x.slot_key===slot&&x.breakpoint===breakpoint)?.media_assets
+  const [asset,setAsset]=useState(initial)
+  const [open,setOpen]=useState(false)
+  const [message,setMessage]=useState('')
+  useEffect(()=>{ setAsset(initial) }, [initial?.id, initial?.public_url])
+  async function choose(next:MediaAsset){
     setOpen(false); setMessage('')
-    const r=await fetch('/api/admin/content-media',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({content_type:'model',content_key:slug,slot_key:slot,breakpoint,media_asset_id:asset.id})})
-    setMessage(r.ok?'Tersimpan ✓':(await r.json()).error||'Gagal')
+    const r=await fetch('/api/admin/content-media',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({content_type:'model',content_key:slug,slot_key:slot,breakpoint,media_asset_id:next.id})})
+    if (r.ok) {
+      setAsset({ id: next.id, public_url: next.public_url, alt_text: next.alt_text, focal_x: next.focal_x, focal_y: next.focal_y })
+      setMessage('Tersimpan ✓')
+    } else {
+      setMessage((await r.json()).error||'Gagal')
+    }
   }
   async function remove(){
     const p=new URLSearchParams({content_type:'model',content_key:slug,slot_key:slot,breakpoint})
-    const r=await fetch(`/api/admin/content-media?${p}`,{method:'DELETE'}); setMessage(r.ok?'Dilepas — fallback aktif ✓':'Gagal')
+    const r=await fetch(`/api/admin/content-media?${p}`,{method:'DELETE'})
+    if (r.ok) { setAsset(undefined); setMessage('Gambar dikosongkan ✓') }
+    else setMessage('Gagal menghapus')
   }
   return <div>
     <div className={styles.label}>{breakpoint} image</div>
-    {a?.public_url&&<img src={a.public_url} alt={a.alt_text??slot} style={{width:'100%',aspectRatio:'16/7',objectFit:'cover',borderRadius:8,display:'block',margin:'8px 0'}}/>}
-    <div className={styles.rowActions}><button className={styles.btnSecondary} onClick={()=>setOpen(true)}>Choose from Media Library</button>{a&&<button className={styles.btnSecondary} onClick={remove}>Remove</button>}</div>
+    {asset?.public_url
+      ? <img src={asset.public_url} alt={asset.alt_text??slot} style={{width:'100%',aspectRatio:'16/7',objectFit:'cover',borderRadius:8,display:'block',margin:'8px 0'}}/>
+      : <div className={styles.fieldNote}>Belum ada gambar {breakpoint}.</div>}
+    <div className={styles.rowActions}>
+      <button className={styles.btnSecondary} type="button" onClick={()=>setOpen(true)}>{asset ? 'Ganti dari Media Library' : 'Pilih dari Media Library'}</button>
+      {asset && <button className={styles.btnSecondary} type="button" onClick={remove}>Hapus</button>}
+    </div>
     {message&&<div className={styles.fieldNote}>{message}</div>}
     <MediaPicker open={open} onClose={()=>setOpen(false)} onSelect={choose} title={`Pilih ${breakpoint} — ${slot}`}/>
   </div>
@@ -1168,149 +1236,324 @@ function MediaAssignmentField({slug,slot,breakpoint,assignments}:{slug:string;sl
 
 /* ─── Content Tab ──────────────────────────────────────── */
 
+const PAGE_FIELDS: Array<{ key: keyof ModelPageCopy; title: string; withBody?: boolean; withStat?: boolean }> = [
+  { key: "exterior", title: "Exterior", withBody: true },
+  { key: "design", title: "Design detail", withBody: true },
+  { key: "profile", title: "Profile" },
+  { key: "interior", title: "Interior", withBody: true },
+  { key: "cockpit", title: "Cockpit", withBody: true },
+  { key: "performance", title: "Performance" },
+  { key: "adas", title: "ADAS / keselamatan", withBody: true, withStat: true },
+  { key: "cta", title: "Final CTA", withBody: true },
+  { key: "tech_intelligence", title: "Technology scene", withBody: true },
+]
+
+function emptyFeature(): ModelFeature {
+  return { id: `feature-${Date.now()}`, title: "", description: "", tag: "" }
+}
+
 function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
+  const staticModel = MODELS.find((item) => item.slug === slug)
   const getSection = (section: string) =>
     model.model_content?.find((c) => c.section === section)?.content ?? {}
 
-  const ovInit = getSection('overview') as { headline?: string; description?: string }
-  const techInit = getSection('technology') as { headline?: string; description?: string }
+  const techInit = getSection("technology") as {
+    headline?: string
+    subheadline?: string
+    description?: string
+    features?: ModelFeature[]
+  }
+  const pageInit = getSection("page") as ModelPageCopy & { highlights?: ModelHighlight[] }
+  const fallbackCopy = staticModel?.page_copy ?? {}
+  const fallbackHighlights = staticModel?.highlights ?? []
+  const fallbackFeatures = staticModel?.technology.features ?? []
 
-  const [overview, setOverview] = useState({
-    headline: ovInit.headline ?? '',
-    description: ovInit.description ?? '',
-  })
+  const [pageCopy, setPageCopy] = useState<ModelPageCopy>({ ...fallbackCopy, ...pageInit })
+  const [highlights, setHighlights] = useState<ModelHighlight[]>(
+    pageInit.highlights?.length ? pageInit.highlights : fallbackHighlights,
+  )
   const [technology, setTechnology] = useState({
-    headline: techInit.headline ?? '',
-    description: techInit.description ?? '',
+    headline: techInit.headline || staticModel?.technology.headline || "",
+    subheadline: techInit.subheadline || techInit.description || staticModel?.technology.subheadline || "",
   })
+  const [features, setFeatures] = useState<ModelFeature[]>(
+    techInit.features?.length ? techInit.features : fallbackFeatures,
+  )
+  const [pickerIndex, setPickerIndex] = useState<number | null>(null)
   const [isPending, startTransition] = useTransition()
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; msg: string } | null>(null)
 
-  function handleSave(section: 'overview' | 'technology', content: Record<string, string>) {
+  function patchSection(key: keyof ModelPageCopy, patch: Partial<ModelSectionCopy>) {
+    setPageCopy((current) => ({
+      ...current,
+      [key]: { ...(current[key] as ModelSectionCopy | undefined), ...patch },
+    }))
+  }
+
+  function savePage() {
     startTransition(async () => {
       try {
         const res = await fetch(`/api/admin/models/${slug}/content`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ section, content }),
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ section: "page", content: { ...pageCopy, highlights } }),
         })
         const json = await res.json()
-        if (!res.ok) throw new Error(json.error || 'Gagal menyimpan')
-        setFeedback({ type: 'success', msg: `Section "${section}" tersimpan ✓` })
+        if (!res.ok) throw new Error(json.error || "Gagal menyimpan")
+        setFeedback({ type: "success", msg: "Copy halaman tersimpan ✓" })
       } catch (err) {
-        setFeedback({ type: 'error', msg: String(err) })
+        setFeedback({ type: "error", msg: String(err) })
       }
     })
   }
 
-  const sections = [
-    { id: 'hero', no: '01', title: 'Hero', desc: 'Hero visual, headline, background, cutout dan art direction.', status: 'Media + Visual Editor' },
-    { id: 'overview', no: '02', title: 'Overview', desc: 'Opening story, positioning dan pengenalan model.', status: 'Content ready' },
-    { id: 'experience', no: '03', title: 'Experience', desc: 'Storytelling pengalaman, comfort dan lifestyle.', status: 'Section ready' },
-    { id: 'technology', no: '04', title: 'Technology', desc: 'Teknologi utama dan feature storytelling.', status: 'Content ready' },
-    { id: 'specifications', no: '05', title: 'Specifications', desc: 'Spesifikasi teknis dan kategori detail.', status: 'Data ready' },
-    { id: 'colors', no: '06', title: 'Colors', desc: 'Pilihan warna dan media setiap warna.', status: `${model.model_colors?.length ?? 0} colors` },
-    { id: 'variants', no: '07', title: 'Variants', desc: 'Varian, harga dan status ketersediaan.', status: `${model.model_variants?.length ?? 0} variants` },
-    { id: 'cta', no: '08', title: 'CTA / Conversion', desc: 'CTA model, WhatsApp, test drive dan finance flow.', status: 'Section ready' },
-  ]
+  function saveTechnology(nextFeatures = features) {
+    startTransition(async () => {
+      try {
+        const res = await fetch(`/api/admin/models/${slug}/content`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            section: "technology",
+            content: {
+              headline: technology.headline,
+              subheadline: technology.subheadline,
+              features: nextFeatures,
+            },
+          }),
+        })
+        const json = await res.json()
+        if (!res.ok) throw new Error(json.error || "Gagal menyimpan")
+        setFeedback({ type: "success", msg: "Technology tersimpan ✓" })
+      } catch (err) {
+        setFeedback({ type: "error", msg: String(err) })
+      }
+    })
+  }
+
+  async function assignFeatureImage(asset: MediaAsset) {
+    if (pickerIndex === null) return
+    const index = pickerIndex
+    setPickerIndex(null)
+    const next = features.map((feature, i) => i === index
+      ? {
+          ...feature,
+          media: {
+            media_asset_id: asset.id,
+            image: {
+              desktop: asset.public_url ?? undefined,
+              alt: asset.alt_text || feature.title,
+            },
+          },
+        }
+      : feature)
+    setFeatures(next)
+    saveTechnology(next)
+  }
 
   return (
     <div className={styles.section}>
       <div className={styles.sectionHeader}>
         <div>
-          <h2 className={styles.sectionTitle}>Page Structure</h2>
+          <h2 className={styles.sectionTitle}>Page Content</h2>
           <p className={styles.sectionNote}>
-            Struktur halaman model sudah disiapkan. Penyesuaian visual, responsive preview, animation,
-            typography dan art direction dilakukan pada final visual pass.
+            Copy ini hanya untuk model yang sedang dibuka. Menyimpan technology tidak menghapus daftar fitur.
           </p>
         </div>
       </div>
-
       {feedback && <Feedback type={feedback.type} message={feedback.msg} />}
 
-      <div className={styles.contentSectionGrid}>
-        {sections.map((section) => (
-          <div key={section.id} className={styles.contentSectionCard}>
-            <div className={styles.contentSectionNo}>{section.no}</div>
-            <div className={styles.contentSectionBody}>
-              <div className={styles.contentSectionTop}>
-                <h3>{section.title}</h3>
-                <span className={styles.contentSectionStatus}>{section.status}</span>
-              </div>
-              <p>{section.desc}</p>
-              <span className={styles.contentSectionHint}>Visual editor → Final QA</span>
+      {PAGE_FIELDS.map((field) => {
+        const value = (pageCopy[field.key] as ModelSectionCopy | undefined) ?? {}
+        return (
+          <div key={field.key} className={styles.contentBlock}>
+            <div className={styles.contentBlockHeader}>
+              <h3 className={styles.contentBlockTitle}>{field.title}</h3>
+              <span className={styles.contentSectionStatus}>Editable</span>
             </div>
+            <div className={styles.field}>
+              <label className={styles.label}>Label</label>
+              <input className={styles.input} value={value.label ?? ""} onChange={(e) => patchSection(field.key, { label: e.target.value })} />
+            </div>
+            <div className={styles.field}>
+              <label className={styles.label}>Heading</label>
+              <textarea className={styles.textarea} rows={3} value={value.heading ?? ""} onChange={(e) => patchSection(field.key, { heading: e.target.value })} />
+              <span className={styles.fieldNote}>Satu baris baru = satu baris di halaman.</span>
+            </div>
+            {field.withBody && (
+              <div className={styles.field}>
+                <label className={styles.label}>Description</label>
+                <textarea className={styles.textarea} rows={3} value={value.body ?? ""} onChange={(e) => patchSection(field.key, { body: e.target.value })} />
+              </div>
+            )}
+            {field.withStat && (
+              <div className={styles.fieldRow}>
+                <div className={styles.field}>
+                  <label className={styles.label}>Angka</label>
+                  <input className={styles.input} value={value.stat ?? ""} onChange={(e) => patchSection(field.key, { stat: e.target.value })} />
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>Satuan</label>
+                  <input className={styles.input} value={value.unit ?? ""} onChange={(e) => patchSection(field.key, { unit: e.target.value })} />
+                </div>
+              </div>
+            )}
           </div>
-        ))}
-      </div>
+        )
+      })}
 
       <div className={styles.contentBlock}>
         <div className={styles.contentBlockHeader}>
-          <div>
-            <p className={styles.contentBlockKicker}>CONTENT</p>
-            <h3 className={styles.contentBlockTitle}>Overview</h3>
+          <h3 className={styles.contentBlockTitle}>Angka performa</h3>
+        </div>
+        {highlights.map((item, index) => (
+          <div key={index} className={styles.fieldRow}>
+            <div className={styles.field}>
+              <label className={styles.label}>Nilai</label>
+              <input className={styles.input} value={item.value} onChange={(e) => setHighlights((rows) => rows.map((row, i) => i === index ? { ...row, value: e.target.value } : row))} />
+            </div>
+            <div className={styles.field}>
+              <label className={styles.label}>Label</label>
+              <input className={styles.input} value={item.label} onChange={(e) => setHighlights((rows) => rows.map((row, i) => i === index ? { ...row, label: e.target.value } : row))} />
+            </div>
+            <button className={styles.btnSecondary} type="button" onClick={() => setHighlights((rows) => rows.filter((_, i) => i !== index))}>Hapus</button>
           </div>
-          <span className={styles.contentSectionStatus}>Editable</span>
-        </div>
-        <div className={styles.field}>
-          <label className={styles.label}>Headline</label>
-          <input
-            className={styles.input}
-            value={overview.headline}
-            onChange={(e) => setOverview((f) => ({ ...f, headline: e.target.value }))}
-            placeholder="Inovasi yang Menggerakkan Masa Depan"
-          />
-        </div>
-        <div className={styles.field}>
-          <label className={styles.label}>Description</label>
-          <textarea
-            className={styles.textarea}
-            value={overview.description}
-            onChange={(e) => setOverview((f) => ({ ...f, description: e.target.value }))}
-            rows={3}
-          />
-        </div>
-        <button
-          className={styles.btnSecondary}
-          onClick={() => handleSave('overview', overview)}
-          disabled={isPending}
-        >
-          {isPending ? '...' : 'Simpan Overview'}
+        ))}
+        <button className={styles.btnSecondary} type="button" onClick={() => setHighlights((rows) => [...rows, { value: "", label: "" }])}>+ Angka</button>
+      </div>
+
+      <div className={styles.actions}>
+        <button className={styles.btnPrimary} type="button" onClick={savePage} disabled={isPending}>
+          {isPending ? "Menyimpan..." : "Simpan copy halaman"}
         </button>
       </div>
 
       <div className={styles.contentBlock}>
         <div className={styles.contentBlockHeader}>
           <div>
-            <p className={styles.contentBlockKicker}>CONTENT</p>
+            <p className={styles.contentBlockKicker}>TECHNOLOGY</p>
             <h3 className={styles.contentBlockTitle}>Technology</h3>
           </div>
-          <span className={styles.contentSectionStatus}>Editable</span>
         </div>
         <div className={styles.field}>
           <label className={styles.label}>Headline</label>
-          <input
-            className={styles.input}
-            value={technology.headline}
-            onChange={(e) => setTechnology((f) => ({ ...f, headline: e.target.value }))}
-            placeholder="Teknologi di Balik Performa"
-          />
+          <input className={styles.input} value={technology.headline} onChange={(e) => setTechnology((row) => ({ ...row, headline: e.target.value }))} />
         </div>
         <div className={styles.field}>
-          <label className={styles.label}>Description</label>
-          <textarea
-            className={styles.textarea}
-            value={technology.description}
-            onChange={(e) => setTechnology((f) => ({ ...f, description: e.target.value }))}
-            rows={3}
-          />
+          <label className={styles.label}>Subheadline</label>
+          <textarea className={styles.textarea} rows={3} value={technology.subheadline} onChange={(e) => setTechnology((row) => ({ ...row, subheadline: e.target.value }))} />
         </div>
-        <button
-          className={styles.btnSecondary}
-          onClick={() => handleSave('technology', technology)}
-          disabled={isPending}
-        >
-          {isPending ? '...' : 'Simpan Technology'}
+        {features.map((feature, index) => (
+          <div key={feature.id || index} className={styles.contentBlock}>
+            <div className={styles.fieldRow}>
+              <div className={styles.field}>
+                <label className={styles.label}>Tag</label>
+                <input className={styles.input} value={feature.tag ?? ""} onChange={(e) => setFeatures((rows) => rows.map((row, i) => i === index ? { ...row, tag: e.target.value } : row))} />
+              </div>
+              <div className={styles.field}>
+                <label className={styles.label}>Judul</label>
+                <input className={styles.input} value={feature.title} onChange={(e) => setFeatures((rows) => rows.map((row, i) => i === index ? { ...row, title: e.target.value } : row))} />
+              </div>
+            </div>
+            <div className={styles.field}>
+              <label className={styles.label}>Deskripsi</label>
+              <textarea className={styles.textarea} rows={3} value={feature.description} onChange={(e) => setFeatures((rows) => rows.map((row, i) => i === index ? { ...row, description: e.target.value } : row))} />
+            </div>
+            {feature.media?.image?.desktop && (
+              <img src={feature.media.image.desktop} alt={feature.title} style={{ width: "100%", maxHeight: 180, objectFit: "cover", borderRadius: 8 }} />
+            )}
+            <div className={styles.rowActions}>
+              <button className={styles.btnSecondary} type="button" onClick={() => setPickerIndex(index)}>
+                {feature.media?.media_asset_id ? "Ganti gambar fitur" : "Pilih gambar fitur"}
+              </button>
+              <button className={styles.btnSecondary} type="button" onClick={() => setFeatures((rows) => rows.filter((_, i) => i !== index))}>Hapus fitur</button>
+            </div>
+          </div>
+        ))}
+        <div className={styles.rowActions}>
+          <button className={styles.btnSecondary} type="button" onClick={() => setFeatures((rows) => [...rows, emptyFeature()])}>+ Fitur</button>
+          <button className={styles.btnPrimary} type="button" onClick={() => saveTechnology()} disabled={isPending}>
+            {isPending ? "Menyimpan..." : "Simpan technology"}
+          </button>
+        </div>
+        <MediaPicker open={pickerIndex !== null} onClose={() => setPickerIndex(null)} onSelect={assignFeatureImage} title="Pilih gambar fitur" />
+      </div>
+    </div>
+  )
+}
+
+/* ─── Specifications Tab ───────────────────────────────── */
+
+function SpecsTab({ model, slug }: { model: AdminModel; slug: string }) {
+  const staticSpecs = MODELS.find((item) => item.slug === slug)?.specifications ?? []
+  const fromDb = (model.model_specifications ?? [])
+    .slice()
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    .map((row) => ({ category: row.category, spec_label: row.spec_label, spec_value: row.spec_value }))
+  const seeded = staticSpecs.flatMap((category) =>
+    category.specs.map((spec) => ({ category: category.label, spec_label: spec.label, spec_value: spec.value })),
+  )
+  const [rows, setRows] = useState<SpecRow[]>(fromDb.length ? fromDb : seeded)
+  const [isPending, startTransition] = useTransition()
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; msg: string } | null>(null)
+
+  function update(index: number, patch: Partial<SpecRow>) {
+    setRows((current) => current.map((row, i) => i === index ? { ...row, ...patch } : row))
+  }
+
+  function save() {
+    startTransition(async () => {
+      try {
+        const res = await fetch(`/api/admin/models/${slug}/specs`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ specs: rows }),
+        })
+        const json = await res.json()
+        if (!res.ok) throw new Error(json.error || "Gagal menyimpan spesifikasi")
+        setFeedback({ type: "success", msg: "Spesifikasi tersimpan ✓" })
+      } catch (err) {
+        setFeedback({ type: "error", msg: String(err) })
+      }
+    })
+  }
+
+  return (
+    <div className={styles.section}>
+      <div className={styles.sectionHeader}>
+        <div>
+          <h2 className={styles.sectionTitle}>Specifications</h2>
+          <p className={styles.sectionNote}>
+            Angka di sini yang tampil di halaman spesifikasi. Jangan menyalin spesifikasi model lain.
+          </p>
+        </div>
+        <button className={styles.btnAdd} type="button" onClick={() => setRows((current) => [...current, { category: "", spec_label: "", spec_value: "" }])}>+ Baris</button>
+      </div>
+      {feedback && <Feedback type={feedback.type} message={feedback.msg} />}
+      <div className={styles.rowList}>
+        {rows.map((row, index) => (
+          <div key={index} className={styles.contentBlock}>
+            <div className={styles.fieldRow}>
+              <div className={styles.field}>
+                <label className={styles.label}>Kategori</label>
+                <input className={styles.input} value={row.category} onChange={(e) => update(index, { category: e.target.value })} />
+              </div>
+              <div className={styles.field}>
+                <label className={styles.label}>Label</label>
+                <input className={styles.input} value={row.spec_label} onChange={(e) => update(index, { spec_label: e.target.value })} />
+              </div>
+              <div className={styles.field}>
+                <label className={styles.label}>Nilai</label>
+                <input className={styles.input} value={row.spec_value} onChange={(e) => update(index, { spec_value: e.target.value })} />
+              </div>
+            </div>
+            <button className={styles.btnSecondary} type="button" onClick={() => setRows((current) => current.filter((_, i) => i !== index))}>Hapus</button>
+          </div>
+        ))}
+      </div>
+      <div className={styles.actions}>
+        <button className={styles.btnPrimary} type="button" onClick={save} disabled={isPending}>
+          {isPending ? "Menyimpan..." : "Simpan spesifikasi"}
         </button>
       </div>
     </div>
@@ -1328,6 +1571,7 @@ export function ModelEditor({ initialModel, slug }: ModelEditorProps) {
     { id: 'colors', label: `Colors (${initialModel.model_colors?.length ?? 0})` },
     { id: 'imageSlots', label: 'Image Slots' },
     { id: 'content', label: 'Content' },
+    { id: 'specs', label: 'Specifications' },
   ]
 
   return (
@@ -1377,6 +1621,7 @@ export function ModelEditor({ initialModel, slug }: ModelEditorProps) {
         {activeTab === 'colors' && <ColorsTab model={initialModel} slug={slug} />}
         {activeTab === 'imageSlots' && <ImageSlotsTab slug={slug} />}
         {activeTab === 'content' && <ContentTab model={initialModel} slug={slug} />}
+        {activeTab === 'specs' && <SpecsTab model={initialModel} slug={slug} />}
       </div>
     </div>
   )

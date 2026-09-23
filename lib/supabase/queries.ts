@@ -5,6 +5,8 @@ import type {
   ModelColor,
   ModelSpecCategory,
   ModelTechnologySection,
+  ModelPageCopy,
+  ModelHighlight,
   PriceStatus,
 } from "@/lib/types/model";
 import type { PresentationSettings } from "@/lib/types/presentation";
@@ -137,6 +139,65 @@ function readMediaId(content: Record<string, unknown> | undefined, key: string):
   return typeof value === "string" && value ? value : undefined;
 }
 
+/** Legacy seed copy that contradicts the reference site. Newer admin copy is kept. */
+const LEGACY_DESCRIPTIONS = new Set([
+  "JAECOO J5 EV hadir sebagai SUV elektrik yang menggabungkan performa modern dengan desain premium — siap mengubah cara Anda berkendara di Palembang dan sekitarnya.",
+  "JAECOO J7 SHS menggabungkan keiritan hybrid dengan performa SUV sejati dan kemampuan AWD — pilihan sempurna untuk jiwa petualang yang tidak mau kompromi.",
+  "JAECOO J7 SHS menggabungkan keiritan hybrid dengan performa SUV sejati dan kemampuan AWD — pilihan sempurna untuk jiwa petualang yang tidak mau kompromi antara efisiensi dan tenaga.",
+]);
+
+function asSectionCopy(value: unknown) {
+  if (!value || typeof value !== "object") return undefined;
+  const row = value as Record<string, unknown>;
+  const copy: { label?: string; heading?: string; body?: string; stat?: string; unit?: string } = {};
+  for (const key of ["label", "heading", "body", "stat", "unit"] as const) {
+    if (typeof row[key] === "string") copy[key] = row[key] as string;
+  }
+  return Object.keys(copy).length ? copy : undefined;
+}
+
+function asHighlights(value: unknown): ModelHighlight[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const rows: ModelHighlight[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== "object") continue;
+    const row = item as Record<string, unknown>;
+    if (typeof row.value !== "string" || typeof row.label !== "string") continue;
+    rows.push({
+      value: row.value,
+      label: row.label,
+      unit: typeof row.unit === "string" ? row.unit : undefined,
+    });
+  }
+  return rows.length ? rows : undefined;
+}
+
+function mergePageCopy(
+  fallback: ModelPageCopy | undefined,
+  raw: Record<string, unknown> | undefined,
+): ModelPageCopy | undefined {
+  if (!raw) return fallback;
+  const keys = [
+    "exterior",
+    "design",
+    "profile",
+    "interior",
+    "cockpit",
+    "performance",
+    "adas",
+    "cta",
+    "tech_intelligence",
+  ] as const;
+  const merged: ModelPageCopy = { ...(fallback ?? {}) };
+  for (const key of keys) {
+    const next = asSectionCopy(raw[key]);
+    if (next) merged[key] = { ...(fallback?.[key] ?? {}), ...next };
+  }
+  const stats = asHighlights(raw.tech_stats);
+  if (stats) merged.tech_stats = stats;
+  return merged;
+}
+
 function mapTechnologyMedia(
   technology: ModelTechnologySection,
   assets: Map<string, SupabaseMediaRow>,
@@ -170,7 +231,11 @@ function mapModel(
   staticFallback?: ModelData,
   mediaAssets: Map<string, SupabaseMediaRow> = new Map(),
 ): ModelData {
-  const variants: ModelVariant[] = (row.model_variants ?? []).map((v) => ({
+  const variantRows = (row.model_variants ?? []).filter(
+    (variant) => !(row.slug === "jaecoo-j7-shs" && variant.variant_key === "j7-sivp"),
+  );
+
+  const variants: ModelVariant[] = variantRows.map((v) => ({
     id: v.variant_key,
     name: v.name,
     label: v.label ?? undefined,
@@ -182,8 +247,8 @@ function mapModel(
   }));
 
   const defaultVariant =
-    (row.model_variants ?? []).find((v) => v.is_default) ??
-    (row.model_variants ?? [])[0];
+    variantRows.find((v) => v.is_default) ??
+    variantRows[0];
 
   const colors: ModelColor[] = (row.model_colors ?? [])
     .sort((a, b) => a.sort_order - b.sort_order)
@@ -222,12 +287,18 @@ function mapModel(
     (c) => c.section === "technology",
   );
   const technologyRaw =
-    (techContent?.content as unknown as ModelTechnologySection) ??
-    staticFallback?.technology ?? {
+    (techContent?.content as unknown as ModelTechnologySection) ?? {
       headline: "",
       features: [],
     };
-  const technology = mapTechnologyMedia(technologyRaw, mediaAssets);
+  const staticTechnology = staticFallback?.technology;
+  const dbFeatures = technologyRaw.features ?? [];
+  const technologyBase: ModelTechnologySection = {
+    headline: technologyRaw.headline || staticTechnology?.headline || "",
+    subheadline: technologyRaw.subheadline || staticTechnology?.subheadline,
+    features: dbFeatures.length > 0 ? dbFeatures : staticTechnology?.features ?? [],
+  };
+  const technology = mapTechnologyMedia(technologyBase, mediaAssets);
 
   const heroContent = (row.model_content ?? []).find((c) => c.section === "hero");
   const heroRaw = heroContent?.content as Record<string, unknown> | undefined;
@@ -312,17 +383,38 @@ function mapModel(
     }
   }
 
+  let colorsOut = colors;
+  const colorsHaveMedia = colors.some((color) => !!color.image?.desktop || !!color.image?.mobile);
+  if (
+    staticFallback &&
+    (row.slug === "jaecoo-j7-shs" || row.slug === "jaecoo-j8-shs") &&
+    !colorsHaveMedia
+  ) {
+    // Unillustrated seed palettes disagreed with the reference site.
+    // Once a color image is assigned in Admin, the database palette is kept.
+    colorsOut = staticFallback.colors;
+  }
+
+  const pageContent = (row.model_content ?? []).find((c) => c.section === "page");
+  const pageRaw = pageContent?.content as Record<string, unknown> | undefined;
+  const description =
+    row.description && LEGACY_DESCRIPTIONS.has(row.description.trim()) && staticFallback?.description
+      ? staticFallback.description
+      : row.description;
+
   // Section images are assigned through content_media, not hardcoded in JSX.
   // This property is hydrated by getModelBySlug/getModels below.
   return {
     slug: row.slug as ModelData["slug"],
     sort_order: row.sort_order,
     name: row.name,
-    short_name: row.short_name,
-    tagline: row.tagline,
-    description: row.description,
+    short_name: row.short_name?.trim() || staticFallback?.short_name || row.name,
+    tagline: row.tagline?.trim() || staticFallback?.tagline || row.name,
+    description,
     hero_media,
     image_slots,
+    highlights: asHighlights(pageRaw?.highlights) ?? staticFallback?.highlights,
+    page_copy: mergePageCopy(staticFallback?.page_copy, pageRaw),
     default_variant: defaultVariant
       ? {
           id: defaultVariant.variant_key,
@@ -336,7 +428,7 @@ function mapModel(
         }
       : staticFallback!.default_variant,
     variants: variants.length > 0 ? variants : staticFallback?.variants ?? [],
-    colors: colors.length > 0 ? colors : staticFallback?.colors ?? [],
+    colors: colorsOut.length > 0 ? colorsOut : staticFallback?.colors ?? [],
     technology,
     specifications:
       specifications.length > 0
@@ -408,7 +500,20 @@ async function buildModelsFromRows(rows: SupabaseModel[]): Promise<ModelData[]> 
     mapped.map((model) => hydrateModelImages(model, model.slug)),
   );
 
-  return hydrated;
+  const merged = [...hydrated, ...missingStaticModels(hydrated)];
+  const lineup = ["jaecoo-j5-ev", "jaecoo-j7-shs", "jaecoo-j7-sivp", "jaecoo-j8-shs"];
+  return merged.sort((a, b) => {
+    const left = lineup.indexOf(a.slug);
+    const right = lineup.indexOf(b.slug);
+    const leftRank = left === -1 ? 100 + (a.sort_order ?? 0) : left;
+    const rightRank = right === -1 ? 100 + (b.sort_order ?? 0) : right;
+    return leftRank - rightRank;
+  });
+}
+
+function missingStaticModels(present: ModelData[]): ModelData[] {
+  const slugs = new Set(present.map((model) => model.slug));
+  return getStaticModels().filter((model) => !slugs.has(model.slug));
 }
 
 export async function getModels(): Promise<ModelData[]> {
@@ -486,7 +591,9 @@ export async function getModelSlugs(): Promise<string[]> {
     if (error) throw error;
     if (!data || data.length === 0) throw new Error("No slugs returned");
 
-    return data.map((m: { slug: string }) => m.slug);
+    const fromDb = data.map((m: { slug: string }) => m.slug);
+    const extras = getStaticModelSlugs().filter((slug) => !fromDb.includes(slug));
+    return [...fromDb, ...extras];
   } catch (err) {
     console.warn("[Supabase] getModelSlugs() failed — using static fallback:", err);
     return getStaticModelSlugs();
