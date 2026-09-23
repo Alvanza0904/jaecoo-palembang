@@ -144,6 +144,10 @@ export interface ModelPageCopy {
   adas?: ModelSectionCopy;
   /** Overview hero button labels. */
   hero_cta?: ModelSectionCopy;
+  /** Technology page hero copy. Image is the technology_hero slot. */
+  technology_hero?: ModelSectionCopy;
+  /** Specifications page hero copy. Image is the specifications_hero slot. */
+  specifications_hero?: ModelSectionCopy;
   /** Overview final CTA. */
   cta?: ModelSectionCopy;
   tech_intelligence?: ModelSectionCopy;

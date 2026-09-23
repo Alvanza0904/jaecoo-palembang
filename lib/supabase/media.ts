@@ -254,6 +254,8 @@ export const MODEL_MEDIA_SLOTS = [
   "performance",
   "technology",
   "tech_intelligence",
+  "technology_hero",
+  "specifications_hero",
   "adas",
   "specs_visual",
   "final_cta",

@@ -93,7 +93,7 @@ interface ModelEditorProps {
   slug: string
 }
 
-type TabId = 'basic' | 'variants' | 'colors' | 'imageSlots' | 'content' | 'specs'
+type TabId = 'basic' | 'heroes' | 'variants' | 'colors' | 'imageSlots' | 'content' | 'specs'
 
 /* ─── Helpers ──────────────────────────────────────────── */
 
@@ -116,7 +116,7 @@ function Feedback({ type, message }: { type: 'success' | 'error'; message: strin
 
 /* ─── Basic Info Tab ───────────────────────────────────── */
 
-function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
+function BasicTab({ model, slug, mode = 'identity' }: { model: AdminModel; slug: string; mode?: 'identity' | 'hero' }) {
   const [form, setForm] = useState({
     name: model.name,
     short_name: model.short_name,
@@ -242,6 +242,8 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
 
   return (
     <div className={styles.section}>
+      {mode === 'identity' && (
+        <>
       <h2 className={styles.sectionTitle}>Basic Information</h2>
 
       <div className={styles.field}>
@@ -316,8 +318,13 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
           {isPending ? 'Menyimpan...' : 'Simpan Basic Info'}
         </button>
       </div>
+        </>
+      )}
 
-      {/* ── Hero Image ─────────────────────────────── */}
+      {mode === 'hero' && (
+        <>
+      <h2 className={styles.sectionTitle}>Model Hero</h2>
+      <p className={styles.sectionNote}>Dipakai halaman Overview. Technology dan Specifications memakai gambar ini hanya jika hero sub-page-nya masih kosong.</p>
       <div className={styles.mediaSection}>
         <h3 className={styles.mediaSectionTitle}>Hero Image</h3>
         <p className={styles.mediaSectionNote}>
@@ -485,6 +492,8 @@ function BasicTab({ model, slug }: { model: AdminModel; slug: string }) {
             if (updated.id === cutoutMediaAssetId && updated.cutout_url) setCutoutUrl(updated.cutout_url)
           }}
         />
+      )}
+        </>
       )}
     </div>
   )
@@ -1133,47 +1142,85 @@ function ColorsTab({ model, slug }: { model: AdminModel; slug: string }) {
 
 /* ─── Image Slots Tab ─────────────────────────────────── */
 function ImageSlotsTab({ slug }: { slug: string }) {
-  const groups: Array<{ title: string; note: string; slots: Array<[string, string]> }> = [
+  const groups: Array<{ title: string; note: string; slots: Array<[string, string, 'desktop' | 'mobile']> }> = [
     {
-      title: 'Exterior',
-      note: 'Dipakai Overview → Exterior, Design detail, dan Profile.',
+      title: 'Overview → Exterior',
+      note: 'Hanya background section Exterior di halaman Overview. Mobile kosong = gambar desktop yang sama.',
       slots: [
-        ['exterior', 'Exterior'],
-        ['exterior_mobile', 'Exterior mobile'],
-        ['design_detail_main', 'Design detail'],
-        ['design_detail_wheel', 'Detail roda'],
-        ['design_detail_rear', 'Detail belakang'],
-        ['profile', 'Profile'],
+        ['exterior', 'Desktop', 'desktop'],
+        ['exterior_mobile', 'Mobile', 'desktop'],
       ],
     },
     {
-      title: 'Interior',
-      note: 'Dipakai Overview → Interior dan Cockpit. Slot mobile adalah gambar terpisah, bukan crop desktop.',
+      title: 'Overview → Design detail',
+      note: 'Tiga gambar di komposisi Design detail. Tidak dipakai section lain.',
       slots: [
-        ['interior', 'Interior'],
-        ['interior_mobile', 'Interior mobile'],
-        ['cockpit_main', 'Cockpit'],
-        ['cockpit_detail', 'Cockpit detail'],
+        ['design_detail_main', 'Gambar utama', 'desktop'],
+        ['design_detail_wheel', 'Detail roda', 'desktop'],
+        ['design_detail_rear', 'Detail belakang', 'desktop'],
       ],
     },
     {
-      title: 'Performa, teknologi, CTA',
-      note: 'Hero utama tetap di tab Basic Info. Warna di tab Colors. Gambar fitur teknologi di tab Content → Technology.',
+      title: 'Overview → Profile',
+      note: 'Hanya background tipografi Profile.',
+      slots: [['profile', 'Desktop', 'desktop']],
+    },
+    {
+      title: 'Overview → Interior',
+      note: 'Hanya background section Interior. Mobile kosong = gambar desktop yang sama.',
       slots: [
-        ['performance', 'Performance'],
-        ['technology', 'Technology'],
-        ['tech_intelligence', 'Technology — scene kecerdasan'],
-        ['adas', 'ADAS / keselamatan'],
-        ['specs_visual', 'Specifications visual'],
-        ['final_cta', 'Final CTA'],
-        ['tech_cta', 'Technology CTA'],
+        ['interior', 'Desktop', 'desktop'],
+        ['interior_mobile', 'Mobile', 'desktop'],
       ],
+    },
+    {
+      title: 'Overview → Cockpit',
+      note: 'Gambar utama dan gambar detail yang menumpuk di section Cockpit.',
+      slots: [
+        ['cockpit_main', 'Gambar utama', 'desktop'],
+        ['cockpit_detail', 'Gambar detail', 'desktop'],
+      ],
+    },
+    {
+      title: 'Overview → Performa',
+      note: 'Hanya background section Performa. Angka performa diedit di Content → Overview.',
+      slots: [['performance', 'Desktop', 'desktop'], ['performance', 'Mobile', 'mobile']],
+    },
+    {
+      title: 'Overview → Technology',
+      note: 'Hanya gambar di samping daftar fitur pada Overview. Bukan hero halaman Technology.',
+      slots: [['technology', 'Desktop', 'desktop'], ['technology', 'Mobile', 'mobile']],
+    },
+    {
+      title: 'Overview → ADAS & Safety',
+      note: 'Hanya background section ADAS di Overview. Teks dan angka ADAS diedit di Content → Technology → ADAS, karena section itu juga dibaca halaman Technology.',
+      slots: [['adas', 'Desktop', 'desktop'], ['adas', 'Mobile', 'mobile']],
+    },
+    {
+      title: 'Overview → Spesifikasi visual',
+      note: 'Hanya background blok spesifikasi di Overview. Bukan hero halaman Specifications.',
+      slots: [['specs_visual', 'Desktop', 'desktop'], ['specs_visual', 'Mobile', 'mobile']],
+    },
+    {
+      title: 'Overview → CTA akhir',
+      note: 'Hanya background CTA di bawah Overview.',
+      slots: [['final_cta', 'Desktop', 'desktop'], ['final_cta', 'Mobile', 'mobile']],
+    },
+    {
+      title: 'Technology → Intelligence',
+      note: 'Hanya scene kecerdasan di halaman Technology. Tidak memakai gambar Overview → Technology.',
+      slots: [['tech_intelligence', 'Desktop', 'desktop'], ['tech_intelligence', 'Mobile', 'mobile']],
+    },
+    {
+      title: 'Technology → CTA',
+      note: 'Hanya CTA di bawah halaman Technology. Tidak memakai gambar CTA Overview.',
+      slots: [['tech_cta', 'Desktop', 'desktop'], ['tech_cta', 'Mobile', 'mobile']],
     },
   ]
   const [assignments,setAssignments]=useState<Array<{slot_key:string;breakpoint:string|null;media_assets?:{id:string;public_url:string|null;alt_text:string|null;focal_x:number|null;focal_y:number|null}}>>([])
   useEffect(()=>{fetch(`/api/admin/content-media?content_type=model&content_key=${encodeURIComponent(slug)}`).then(r=>r.json()).then(j=>setAssignments(j.assignments??[]))},[slug])
   return <div className={styles.section}>
-    <div className={styles.sectionHeader}><div><h2 className={styles.sectionTitle}>Image Slots</h2><p className={styles.sectionNote}>Setiap slot yang dipakai halaman model punya kontrol Media Library. Preview, ganti, dan hapus tersimpan ke content_media. Mobile opsional; kalau kosong, frontend memakai gambar desktop slot yang sama.</p></div></div>
+    <div className={styles.sectionHeader}><div><h2 className={styles.sectionTitle}>Gambar section</h2><p className={styles.sectionNote}>Satu kartu = satu section di website. Hero Overview, Technology, dan Specifications ada di tab Heroes. Gambar fitur teknologi ada di Content → Technology. Warna ada di tab Colors.</p></div></div>
     {groups.map((group) => (
       <div key={group.title} className={styles.contentBlock}>
         <div className={styles.contentBlockHeader}>
@@ -1184,11 +1231,10 @@ function ImageSlotsTab({ slug }: { slug: string }) {
         </div>
         <p className={styles.sectionNote}>{group.note}</p>
         <div className={styles.contentSectionGrid}>
-          {group.slots.map(([slot, label]) => (
-            <div key={slot} className={styles.contentBlock}>
-              <div className={styles.contentBlockHeader}><h3 className={styles.contentBlockTitle}>{label}</h3><span className={styles.contentSectionStatus}>{slot}</span></div>
-              <div className={styles.field}><MediaAssignmentField slug={slug} slot={slot} breakpoint="desktop" assignments={assignments}/></div>
-              <div className={styles.field}><MediaAssignmentField slug={slug} slot={slot} breakpoint="mobile" assignments={assignments}/></div>
+          {group.slots.map(([slot, label, breakpoint]) => (
+            <div key={`${slot}-${breakpoint}`} className={styles.contentBlock}>
+              <div className={styles.contentBlockHeader}><h3 className={styles.contentBlockTitle}>{label}</h3><span className={styles.contentSectionStatus}>{group.title}</span></div>
+              <div className={styles.field}><MediaAssignmentField slug={slug} slot={slot} breakpoint={breakpoint} assignments={assignments} fieldLabel={label}/></div>
             </div>
           ))}
         </div>
@@ -1198,7 +1244,7 @@ function ImageSlotsTab({ slug }: { slug: string }) {
   </div>
 }
 
-function MediaAssignmentField({slug,slot,breakpoint,assignments}:{slug:string;slot:string;breakpoint:'desktop'|'mobile';assignments:Array<{slot_key:string;breakpoint:string|null;media_assets?:{id:string;public_url:string|null;alt_text:string|null;focal_x:number|null;focal_y:number|null}}>}) {
+function MediaAssignmentField({slug,slot,breakpoint,assignments,fieldLabel}:{slug:string;slot:string;breakpoint:'desktop'|'mobile';assignments:Array<{slot_key:string;breakpoint:string|null;media_assets?:{id:string;public_url:string|null;alt_text:string|null;focal_x:number|null;focal_y:number|null}}>;fieldLabel?:string}) {
   const initial=assignments.find(x=>x.slot_key===slot&&x.breakpoint===breakpoint)?.media_assets
   const [asset,setAsset]=useState(initial)
   const [open,setOpen]=useState(false)
@@ -1221,7 +1267,7 @@ function MediaAssignmentField({slug,slot,breakpoint,assignments}:{slug:string;sl
     else setMessage('Gagal menghapus')
   }
   return <div>
-    <div className={styles.label}>{breakpoint} image</div>
+    <div className={styles.label}>{fieldLabel ?? `${breakpoint} image`}</div>
     {asset?.public_url
       ? <img src={asset.public_url} alt={asset.alt_text??slot} style={{width:'100%',aspectRatio:'16/7',objectFit:'cover',borderRadius:8,display:'block',margin:'8px 0'}}/>
       : <div className={styles.fieldNote}>Belum ada gambar {breakpoint}.</div>}
@@ -1252,7 +1298,7 @@ const PAGE_GROUPS: Array<{
 }> = [
   {
     title: "Overview",
-    note: "Nama, tagline, deskripsi, dan gambar hero ada di tab Basic Info. Harga ada di Variants.",
+    note: "Gambar Model Hero ada di tab Heroes. Harga ada di Variants.",
     fields: [
       { key: "hero_cta", title: "Hero — tombol", where: "Overview → Hero", withLabel: false, withHeading: false, withButtons: true },
       { key: "performance", title: "Performa", where: "Overview → Performa", withBody: true },
@@ -1274,7 +1320,7 @@ const PAGE_GROUPS: Array<{
     title: "Technology",
     note: "Headline fitur dan gambar fitur ada di blok Technology di bawah. Gambar scene ada di Image Slots.",
     fields: [
-      { key: "adas", title: "ADAS / keselamatan", where: "Overview + Technology → ADAS", withBody: true, withStat: true },
+      { key: "adas", title: "ADAS / keselamatan", where: "Gambar: Gambar section → Overview → ADAS & Safety", withBody: true, withStat: true },
       { key: "tech_intelligence", title: "Scene kecerdasan", where: "Technology → Intelligence", withBody: true },
       { key: "tech_close", title: "CTA Technology", where: "Technology → CTA akhir", withBody: true, withButtons: true },
     ],
@@ -1346,13 +1392,18 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             section: "page",
-            content: {
-              ...pageCopy,
-              highlights,
-              tech_stats: techStats,
-              meta_title: seo.meta_title,
-              meta_description: seo.meta_description,
-            },
+            content: await (async () => {
+              const latest = await fetch(`/api/admin/models/${slug}`).then((response) => response.json()).catch(() => null)
+              const current = latest?.model?.model_content?.find((item: { section: string }) => item.section === "page")?.content ?? {}
+              return {
+                ...current,
+                ...pageCopy,
+                highlights,
+                tech_stats: techStats,
+                meta_title: seo.meta_title,
+                meta_description: seo.meta_description,
+              }
+            })(),
           }),
         })
         const json = await res.json()
@@ -1687,6 +1738,110 @@ function SpecsTab({ model, slug }: { model: AdminModel; slug: string }) {
   )
 }
 
+/* ─── Heroes ───────────────────────────────────────────── */
+
+function SubpageHeroEditor({
+  model,
+  slug,
+  title,
+  slot,
+  copyKey,
+  where,
+  fallback,
+}: {
+  model: AdminModel
+  slug: string
+  title: string
+  slot: string
+  copyKey: "technology_hero" | "specifications_hero"
+  where: string
+  fallback: string
+}) {
+  const page = (model.model_content?.find((item) => item.section === "page")?.content ?? {}) as ModelPageCopy
+  const [copy, setCopy] = useState<ModelSectionCopy>(page[copyKey] ?? {})
+  const [assignments, setAssignments] = useState<Array<{ slot_key: string; breakpoint: string | null; media_assets?: { id: string; public_url: string | null; alt_text: string | null; focal_x: number | null; focal_y: number | null } }>>([])
+  const [message, setMessage] = useState("")
+  const [isPending, startTransition] = useTransition()
+
+  useEffect(() => {
+    fetch(`/api/admin/content-media?content_type=model&content_key=${encodeURIComponent(slug)}`)
+      .then((response) => response.json())
+      .then((json) => setAssignments(json.assignments ?? []))
+      .catch(() => setAssignments([]))
+  }, [slug])
+
+  function saveCopy() {
+    startTransition(async () => {
+      try {
+        const latest = await fetch(`/api/admin/models/${slug}`).then((response) => response.json())
+        const current = latest?.model?.model_content?.find((item: { section: string }) => item.section === "page")?.content ?? {}
+        const res = await fetch(`/api/admin/models/${slug}/content`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ section: "page", content: { ...current, [copyKey]: copy } }),
+        })
+        setMessage(res.ok ? "Teks hero tersimpan ✓" : "Gagal menyimpan teks hero")
+      } catch {
+        setMessage("Gagal menyimpan teks hero")
+      }
+    })
+  }
+
+  return (
+    <div className={styles.contentBlock}>
+      <div className={styles.contentBlockHeader}>
+        <h3 className={styles.contentBlockTitle}>{title}</h3>
+        <span className={styles.contentSectionStatus}>{where}</span>
+      </div>
+      <p className={styles.sectionNote}>{fallback} Gambar tersimpan langsung. Teks disimpan dengan tombol di bawah.</p>
+      <div className={styles.field}>
+        <label className={styles.label}>Eyebrow</label>
+        <input className={styles.input} value={copy.label ?? ""} onChange={(e) => setCopy((row) => ({ ...row, label: e.target.value }))} />
+      </div>
+      <div className={styles.field}>
+        <label className={styles.label}>Title</label>
+        <textarea className={styles.textarea} rows={3} value={copy.heading ?? ""} onChange={(e) => setCopy((row) => ({ ...row, heading: e.target.value }))} />
+      </div>
+      <div className={styles.field}>
+        <label className={styles.label}>Description</label>
+        <textarea className={styles.textarea} rows={3} value={copy.body ?? ""} onChange={(e) => setCopy((row) => ({ ...row, body: e.target.value }))} />
+      </div>
+      <MediaAssignmentField slug={slug} slot={slot} breakpoint="desktop" assignments={assignments} fieldLabel="Desktop image" />
+      <MediaAssignmentField slug={slug} slot={slot} breakpoint="mobile" assignments={assignments} fieldLabel="Mobile image" />
+      <div className={styles.actions}>
+        <button className={styles.btnPrimary} type="button" onClick={saveCopy} disabled={isPending}>{isPending ? "Menyimpan..." : "Simpan teks hero"}</button>
+      </div>
+      {message && <p className={styles.fieldNote}>{message}</p>}
+    </div>
+  )
+}
+
+function HeroesTab({ model, slug }: { model: AdminModel; slug: string }) {
+  return (
+    <div>
+      <BasicTab model={model} slug={slug} mode="hero" />
+      <SubpageHeroEditor
+        model={model}
+        slug={slug}
+        title="Technology Hero"
+        slot="technology_hero"
+        copyKey="technology_hero"
+        where="Halaman Technology"
+        fallback="Kalau gambar ini kosong, halaman Technology memakai Model Hero."
+      />
+      <SubpageHeroEditor
+        model={model}
+        slug={slug}
+        title="Specifications Hero"
+        slot="specifications_hero"
+        copyKey="specifications_hero"
+        where="Halaman Specifications"
+        fallback="Kalau gambar ini kosong, halaman Specifications memakai Model Hero."
+      />
+    </div>
+  )
+}
+
 /* ─── Main ModelEditor ─────────────────────────────────── */
 
 export function ModelEditor({ initialModel, slug }: ModelEditorProps) {
@@ -1694,9 +1849,10 @@ export function ModelEditor({ initialModel, slug }: ModelEditorProps) {
 
   const TABS: { id: TabId; label: string }[] = [
     { id: 'basic', label: 'Basic Info' },
+    { id: 'heroes', label: 'Heroes' },
     { id: 'variants', label: `Variants (${initialModel.model_variants?.length ?? 0})` },
     { id: 'colors', label: `Colors (${initialModel.model_colors?.length ?? 0})` },
-    { id: 'imageSlots', label: 'Image Slots' },
+    { id: 'imageSlots', label: 'Gambar section' },
     { id: 'content', label: 'Content' },
     { id: 'specs', label: 'Specifications' },
   ]
@@ -1729,12 +1885,13 @@ export function ModelEditor({ initialModel, slug }: ModelEditorProps) {
       <div className={styles.editorMap}>
         <p className={styles.editorMapTitle}>Lokasi edit — sama untuk J5, J7 SHS, J7 SIVP, dan J8</p>
         <ul>
-          <li><strong>Basic Info</strong> — nama, tagline, deskripsi, publish, gambar hero, cutout</li>
+          <li><strong>Basic Info</strong> — nama, short name, tagline, deskripsi, publish</li>
+          <li><strong>Heroes</strong> — Model Hero (Overview), Technology Hero, Specifications Hero. Hero sub-page kosong memakai Model Hero</li>
           <li><strong>Variants</strong> — harga, status harga, label varian</li>
           <li><strong>Colors</strong> — nama warna, hex, foto warna</li>
-          <li><strong>Image Slots</strong> — gambar desktop/mobile setiap section Overview, Design, Technology, CTA</li>
-          <li><strong>Content</strong> — teks Overview, Design, Technology, CTA, angka, SEO. Gambar fitur teknologi di bagian Technology</li>
-          <li><strong>Specifications</strong> — tabel dimensi, powertrain, charging, ADAS, dan angka teknis lain</li>
+          <li><strong>Gambar section</strong> — satu kartu untuk satu section frontend. Bukan hero</li>
+          <li><strong>Content</strong> — teks Overview, Design, Technology, CTA, angka, SEO</li>
+          <li><strong>Specifications</strong> — tabel angka</li>
         </ul>
       </div>
 
@@ -1755,7 +1912,8 @@ export function ModelEditor({ initialModel, slug }: ModelEditorProps) {
 
       {/* Tab content */}
       <div className={styles.tabContent}>
-        {activeTab === 'basic' && <BasicTab model={initialModel} slug={slug} />}
+        {activeTab === 'basic' && <BasicTab model={initialModel} slug={slug} mode="identity" />}
+        {activeTab === 'heroes' && <HeroesTab model={initialModel} slug={slug} />}
         {activeTab === 'variants' && <VariantsTab model={initialModel} slug={slug} />}
         {activeTab === 'colors' && <ColorsTab model={initialModel} slug={slug} />}
         {activeTab === 'imageSlots' && <ImageSlotsTab slug={slug} />}

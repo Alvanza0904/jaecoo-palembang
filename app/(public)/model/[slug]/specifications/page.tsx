@@ -24,6 +24,8 @@ import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
 import { Reveal } from "@/components/motion/Reveal";
 import { Stagger } from "@/components/motion/Stagger";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
+import { LayeredHero } from "@/components/hero/LayeredHero";
+import { resolveSubpageHero } from "@/lib/models/hero";
 import { FinanceCalculator } from "@/components/finance/FinanceCalculator";
 import { PriceDisplay } from "@/components/price/PriceDisplay";
 import { priceStatusAllowsCalculator } from "@/lib/types/model";
@@ -89,19 +91,35 @@ export default async function SpesifikasiPage({ params }: Props) {
   const specsHeading = specsCta?.heading || `Siap memesan ${model.short_name}?`;
   const specsBody = specsCta?.body || "Hubungi Alvan untuk informasi harga terkini, test drive, dan penawaran spesial dealer resmi JAECOO Palembang.";
   const specsButton = specsCta?.primary_label || "Chat dengan Alvan →";
+  const specsHeroMedia = resolveSubpageHero(model.image_slots?.specifications_hero, model.hero_media);
+  const specsHeroCopy = model.page_copy?.specifications_hero;
+  const hasSpecsHero = !!(specsHeroMedia.image?.desktop || specsHeroMedia.image?.mobile);
 
   return (
     <>
       <TransparentHeader />
 
-      <div className={styles.page}>
+      <div className={styles.heroSection}>
+        {hasSpecsHero ? (
+          <LayeredHero
+            media={specsHeroMedia}
+            heading={specsHeroCopy?.heading || model.name}
+            subheading={specsHeroCopy?.body || model.short_name}
+            tagline={specsHeroCopy?.label || "SPESIFIKASI"}
+            size="large"
+          />
+        ) : null}
+      </div>
+
+      <div className={hasSpecsHero ? styles.pageAfterHero : styles.page}>
         {/* ── HEADER ────────────────────────────────────────────────────── */}
         <section className={styles.headerSection}>
           <Container size="content">
             <Reveal variant="fade-up">
               <GoldLine width="short" className={styles.gold} />
-              <h1 className={styles.pageTitle}>{model.name}</h1>
-              <p className={styles.pageSubtitle}>Spesifikasi</p>
+              {!hasSpecsHero && <h1 className={styles.pageTitle}>{model.name}</h1>}
+              {!hasSpecsHero && <p className={styles.pageSubtitle}>Spesifikasi</p>}
+              {hasSpecsHero && <p className={styles.pageSubtitle}>Detail angka</p>}
             </Reveal>
 
             {v.price_status !== "hidden" && (

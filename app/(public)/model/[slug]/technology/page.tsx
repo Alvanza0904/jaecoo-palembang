@@ -29,6 +29,7 @@ import { LineReveal } from "@/components/motion/LineReveal";
 import { LayeredHero } from "@/components/hero/LayeredHero";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { J7ShsExploreCta } from "@/components/model/J7ShsExploreCta";
+import { resolveSubpageHero } from "@/lib/models/hero";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import { getBackgroundLayerStyle } from "@/lib/types/presentation";
@@ -155,7 +156,12 @@ export default async function TeknologiPage({ params }: Props) {
   if (!model) notFound();
 
   const { technology } = model;
-  const hasHeroImage = !!(model.hero_media?.image?.desktop);
+  const techHeroMedia = resolveSubpageHero(model.image_slots?.technology_hero, model.hero_media);
+  const techHeroCopy = model.page_copy?.technology_hero;
+  const techHeroHeading = techHeroCopy?.heading || technology.headline;
+  const techHeroEyebrow = techHeroCopy?.label || "TECHNOLOGY";
+  const techHeroBody = techHeroCopy?.body || technology.subheadline;
+  const hasHeroImage = !!(techHeroMedia.image?.desktop || techHeroMedia.image?.mobile);
 
   const whatsappUrl = buildWhatsAppUrl({
     source: "model_technology",
@@ -194,10 +200,10 @@ export default async function TeknologiPage({ params }: Props) {
       <div className={styles.heroSection}>
         {hasHeroImage ? (
           <LayeredHero
-            media={model.hero_media}
-            heading={technology.headline}
-            subheading={`${model.short_name}`}
-            tagline="TECHNOLOGY"
+            media={techHeroMedia}
+            heading={techHeroHeading}
+            subheading={techHeroBody || model.short_name}
+            tagline={techHeroEyebrow}
             size="full"
           />
         ) : (
@@ -266,7 +272,7 @@ export default async function TeknologiPage({ params }: Props) {
       <section className={styles.cinematicScene} data-theme="dark">
         <div className={styles.sceneBg} aria-hidden="true">
           <TechSceneImage
-            image={model.image_slots?.tech_intelligence ?? model.image_slots?.technology}
+            image={model.image_slots?.tech_intelligence}
             label="TECHNOLOGY — INTELLIGENT COCKPIT / DISPLAY SCREEN"
             ratio="16/9"
             className={styles.sceneBgImg}
@@ -441,7 +447,7 @@ export default async function TeknologiPage({ params }: Props) {
       <section className={styles.ctaScene} data-theme="dark">
         <div className={styles.sceneBg} aria-hidden="true">
           <TechSceneImage
-            image={model.image_slots?.tech_cta ?? model.image_slots?.final_cta}
+            image={model.image_slots?.tech_cta}
             label="TECHNOLOGY CTA — VEHICLE / DRAMATIC ANGLE"
             ratio="21/9"
             className={styles.sceneBgImg}

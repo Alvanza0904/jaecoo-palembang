@@ -16,6 +16,14 @@ function errorResponse(error: unknown) {
   );
 }
 
+function revalidateModelMedia(contentKey: string) {
+  revalidatePath("/");
+  revalidatePath("/model");
+  revalidatePath(`/model/${contentKey}`);
+  revalidatePath(`/model/${contentKey}/technology`);
+  revalidatePath(`/model/${contentKey}/specifications`);
+}
+
 export async function GET(request: Request) {
   try {
     await requireUser();
@@ -115,7 +123,7 @@ export async function PUT(request: Request) {
           .single();
 
         if (error) return NextResponse.json({ error: error.message }, { status: 400 });
-        revalidatePath('/'); revalidatePath('/model/[slug]', 'page');
+        revalidateModelMedia(contentKey);
         return NextResponse.json({ assignment: data });
       }
 
@@ -132,7 +140,7 @@ export async function PUT(request: Request) {
         .single();
 
       if (error) return NextResponse.json({ error: error.message }, { status: 400 });
-      revalidatePath('/'); revalidatePath('/model/[slug]', 'page');
+      revalidateModelMedia(contentKey);
       return NextResponse.json({ assignment: data });
     }
 
@@ -153,7 +161,7 @@ export async function PUT(request: Request) {
       .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
-    revalidatePath('/'); revalidatePath('/model/[slug]', 'page');
+    revalidateModelMedia(contentKey);
     return NextResponse.json({ assignment: data });
   } catch (error) {
     return errorResponse(error);
@@ -185,7 +193,7 @@ export async function DELETE(request: Request) {
 
     const { error } = await query;
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
-    revalidatePath('/'); revalidatePath('/model/[slug]', 'page');
+    revalidateModelMedia(contentKey);
     return NextResponse.json({ ok: true });
   } catch (error) {
     return errorResponse(error);

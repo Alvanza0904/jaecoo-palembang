@@ -5,6 +5,14 @@
   padding-top: calc(var(--header-height-mobile, 60px) + 48px);
 }
 
+.heroSection {
+  margin-top: -48px;
+}
+
+.pageAfterHero {
+  padding-top: 0;
+}
+
 @media (min-width: 1024px) {
   .page {
     padding-top: calc(var(--header-height-desktop, 80px) + 48px);

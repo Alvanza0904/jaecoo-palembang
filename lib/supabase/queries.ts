@@ -187,6 +187,8 @@ function mergePageCopy(
     "performance",
     "adas",
     "hero_cta",
+    "technology_hero",
+    "specifications_hero",
     "cta",
     "tech_intelligence",
     "tech_close",

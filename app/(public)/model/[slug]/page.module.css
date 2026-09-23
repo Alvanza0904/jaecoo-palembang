@@ -100,8 +100,9 @@
 }
 
 @media (max-width: 767px) {
-  /* On mobile: hide desktop bg, show mobile bg */
-  .cinematicBg > :first-child {
+  /* Hide the desktop frame only when this section actually has a mobile frame.
+     ADAS and other single-image scenes must keep their image on phones. */
+  .cinematicBg:has(.cinematicBgImgMobile) > :first-child {
     display: none;
   }
   .cinematicBgImgMobile {

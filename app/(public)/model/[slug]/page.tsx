@@ -70,6 +70,15 @@ function cmsImageStyle(
   );
 }
 
+function mobileFrame(primary?: ResponsiveImage, dedicated?: ResponsiveImage): ResponsiveImage | undefined {
+  const dedicatedSrc = dedicated?.desktop || dedicated?.tablet || dedicated?.mobile;
+  if (dedicated && dedicatedSrc) return dedicated;
+  if (primary?.mobile && primary.mobile !== primary.desktop) {
+    return { ...primary, desktop: primary.mobile };
+  }
+  return undefined;
+}
+
 function CmsModelImage({
   image,
   label,
@@ -329,9 +338,11 @@ export default async function ModelPage({ params }: ModelPageProps) {
         {/* Background image — full bleed */}
         <div className={styles.cinematicBg} aria-hidden="true">
           <CmsModelImage image={model.image_slots?.exterior} label="EXTERIOR — FULL BLEED" ratio="21/9" className={styles.cinematicBgImg} />
+          {mobileFrame(model.image_slots?.exterior, model.image_slots?.exterior_mobile) && (
           <div className={styles.cinematicBgImgMobile} aria-hidden="true">
-            <CmsModelImage image={model.image_slots?.exterior_mobile ?? model.image_slots?.exterior} label="EXTERIOR — MOBILE" ratio="4/5" className={styles.cinematicBgImg} />
+            <CmsModelImage image={mobileFrame(model.image_slots?.exterior, model.image_slots?.exterior_mobile)} label="EXTERIOR — MOBILE" ratio="4/5" className={styles.cinematicBgImg} />
           </div>
+          )}
           <div className={styles.cinematicOverlay} />
         </div>
 
@@ -416,9 +427,11 @@ export default async function ModelPage({ params }: ModelPageProps) {
       <section className={styles.cinematicSection} data-theme="dark">
         <div className={styles.cinematicBg} aria-hidden="true">
           <CmsModelImage image={model.image_slots?.interior} label="INTERIOR — CABIN FULL WIDTH" ratio="21/9" className={styles.cinematicBgImg} />
+          {mobileFrame(model.image_slots?.interior, model.image_slots?.interior_mobile) && (
           <div className={styles.cinematicBgImgMobile}>
-            <CmsModelImage image={model.image_slots?.interior_mobile ?? model.image_slots?.interior} label="INTERIOR — MOBILE" ratio="4/5" className={styles.cinematicBgImg} />
+            <CmsModelImage image={mobileFrame(model.image_slots?.interior, model.image_slots?.interior_mobile)} label="INTERIOR — MOBILE" ratio="4/5" className={styles.cinematicBgImg} />
           </div>
+          )}
           <div className={styles.cinematicOverlay} />
         </div>
 
@@ -571,6 +584,11 @@ export default async function ModelPage({ params }: ModelPageProps) {
       <section className={styles.cinematicSection} data-theme="dark">
         <div className={styles.cinematicBg} aria-hidden="true">
           <CmsModelImage image={model.image_slots?.adas} label="ADAS — DRIVING / SAFETY" ratio="21/9" className={styles.cinematicBgImg} />
+          {mobileFrame(model.image_slots?.adas) && (
+            <div className={styles.cinematicBgImgMobile}>
+              <CmsModelImage image={mobileFrame(model.image_slots?.adas)} label="ADAS — MOBILE" ratio="4/5" className={styles.cinematicBgImg} />
+            </div>
+          )}
           <div className={styles.cinematicOverlay} style={{ opacity: 0.55 }} />
         </div>
 
