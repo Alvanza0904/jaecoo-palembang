@@ -15,6 +15,7 @@ import styles from './editor.module.css'
 import { MediaPicker } from '@/components/admin/media/MediaPicker'
 import { VisualMediaEditor } from '@/components/admin/visual-editor'
 import { ModelStickyPreview } from '@/components/model/ModelStickyPreview'
+import overview from '@/app/(public)/model/[slug]/page.module.css'
 import type { MediaWithArtDirection } from '@/lib/types/media'
 import { MODELS } from '@/lib/data/models'
 import type { MediaAsset } from '@/lib/types/media-asset'
@@ -1739,20 +1740,30 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
       </div>
     </div>
     <div className={styles.stickyPreview}>
-      <ModelStickyPreview
-        slug={slug}
-        modelName={model.name}
-        tagline={model.tagline}
-        heroImage={heroMediaFromModel(model).image.desktop}
-        section={previewSection}
-        textEditMode={textEditMode}
-        focusedField={focusedField}
-        pageCopy={pageCopy}
-        highlights={highlights}
-        technology={technology}
-        features={features}
-        heroHeading={heroHeading}
-      />
+      {textEditMode ? (
+        <section className={overview.cinematicSection} style={{ minHeight: 420, height: 420, background: '#111' }}>
+          <div className={overview.cinematicOverlay} />
+          <div className={overview.cinematicContent}>
+            <h2 className={overview.cinematicHeading}>TITLE</h2>
+            <p className={overview.cinematicBody}>A modern driving experience designed around comfort, technology, and performance.</p>
+          </div>
+        </section>
+      ) : (
+        <ModelStickyPreview
+          slug={slug}
+          modelName={model.name}
+          tagline={model.tagline}
+          heroImage={heroMediaFromModel(model).image.desktop}
+          section={previewSection}
+          textEditMode={false}
+          focusedField={focusedField}
+          pageCopy={pageCopy}
+          highlights={highlights}
+          technology={technology}
+          features={features}
+          heroHeading={heroHeading}
+        />
+      )}
     </div>
     </div>
   )
