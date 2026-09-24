@@ -14,6 +14,19 @@
 
 .stickyPreview {
   min-width: 0;
+  position: sticky;
+  top: 4.5rem;
+  z-index: 6;
+  max-height: calc(100vh - 5.5rem);
+  overflow: auto;
+  order: -1;
+  background: var(--color-off-white, #f6f4f1);
+}
+
+.stickyPreview :global(.model-text-preview-stage) section {
+  min-height: 420px !important;
+  height: 420px !important;
+  max-height: 420px !important;
 }
 
 @media (min-width: 1100px) {
@@ -22,10 +35,9 @@
   }
 
   .stickyPreview {
-    position: sticky;
+    order: 0;
     top: 1rem;
     max-height: calc(100vh - 2rem);
-    overflow: auto;
   }
 }
 

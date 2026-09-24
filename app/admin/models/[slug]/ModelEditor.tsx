@@ -9,7 +9,7 @@
  * Semua save langsung ke Supabase via API routes (authenticated).
  */
 
-import { useState, useTransition, useCallback, useEffect } from 'react'
+import { useState, useTransition, useCallback, useEffect, type FocusEvent } from 'react'
 import Link from 'next/link'
 import styles from './editor.module.css'
 import { MediaPicker } from '@/components/admin/media/MediaPicker'
@@ -1397,11 +1397,25 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
   const [textEditMode, setTextEditMode] = useState(false)
   const [focusedField, setFocusedField] = useState<string | null>(null)
 
-  function patchSection(key: keyof ModelPageCopy, patch: Partial<ModelSectionCopy>) {
+  function patchSection(key: keyof ModelPageCopy, patch: Partial<ModelSectionCopy>, field?: string) {
     setPageCopy((current) => ({
       ...current,
       [key]: { ...(current[key] as ModelSectionCopy | undefined), ...patch },
     }))
+    setPreviewSection(String(key))
+    setTextEditMode(true)
+    if (field) setFocusedField(field)
+  }
+
+  function leaveTextPreview(event: FocusEvent<HTMLElement>) {
+    const root = event.currentTarget
+    window.setTimeout(() => {
+      const active = document.activeElement
+      if (!(active instanceof Node) || !root.contains(active) || !(active instanceof Element) || !active.closest("[data-preview-section]")) {
+        setTextEditMode(false)
+        setFocusedField(null)
+      }
+    }, 40)
   }
 
   function savePage() {
@@ -1491,13 +1505,7 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
         setTextEditMode(true)
         if (field) setFocusedField(field)
       }}
-      onBlurCapture={(event) => {
-        const next = event.relatedTarget as Node | null
-        if (!next || !event.currentTarget.contains(next)) {
-          setTextEditMode(false)
-          setFocusedField(null)
-        }
-      }}
+      onBlurCapture={leaveTextPreview}
     >
     <div className={styles.section}>
       <div className={styles.sectionHeader}>
@@ -1530,20 +1538,20 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
                 {showLabel && (
                   <div className={styles.field}>
                     <label className={styles.label}>Label</label>
-                    <input className={styles.input} data-preview-field="label" value={value.label ?? ""} onChange={(e) => patchSection(field.key, { label: e.target.value })} />
+                    <input className={styles.input} data-preview-field="label" value={value.label ?? ""} onChange={(e) => patchSection(field.key, { label: e.target.value }, "label")} />
                   </div>
                 )}
                 {showHeading && (
                   <div className={styles.field}>
                     <label className={styles.label}>Heading</label>
-                    <textarea className={styles.textarea} data-preview-field="heading" rows={3} value={value.heading ?? ""} onChange={(e) => patchSection(field.key, { heading: e.target.value })} />
+                    <textarea className={styles.textarea} data-preview-field="heading" rows={3} value={value.heading ?? ""} onChange={(e) => patchSection(field.key, { heading: e.target.value }, "heading")} />
                     <span className={styles.fieldNote}>Satu baris baru = satu baris di halaman.</span>
                   </div>
                 )}
                 {field.withBody && (
                   <div className={styles.field}>
                     <label className={styles.label}>Description</label>
-                    <textarea className={styles.textarea} data-preview-field="body" rows={3} value={value.body ?? ""} onChange={(e) => patchSection(field.key, { body: e.target.value })} />
+                    <textarea className={styles.textarea} data-preview-field="body" rows={3} value={value.body ?? ""} onChange={(e) => patchSection(field.key, { body: e.target.value }, "body")} />
                   </div>
                 )}
                 {field.withStat && (
@@ -1562,7 +1570,7 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
                   <div className={styles.fieldRow}>
                     <div className={styles.field}>
                       <label className={styles.label}>Teks tombol utama</label>
-                      <input className={styles.input} data-preview-field="primary" value={value.primary_label ?? ""} onChange={(e) => patchSection(field.key, { primary_label: e.target.value })} />
+                      <input className={styles.input} data-preview-field="primary" value={value.primary_label ?? ""} onChange={(e) => patchSection(field.key, { primary_label: e.target.value }, "primary")} />
                     </div>
                     {field.key !== "specs_cta" && (
                       <div className={styles.field}>
@@ -1653,11 +1661,11 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
         </div>
         <div className={styles.field}>
           <label className={styles.label}>Headline</label>
-          <input className={styles.input} data-preview-field="heading" value={technology.headline} onChange={(e) => setTechnology((row) => ({ ...row, headline: e.target.value }))} />
+          <input className={styles.input} data-preview-field="heading" value={technology.headline} onFocus={() => { setPreviewSection("technology"); setTextEditMode(true); setFocusedField("heading") }} onChange={(e) => { setTechnology((row) => ({ ...row, headline: e.target.value })); setPreviewSection("technology"); setTextEditMode(true); setFocusedField("heading") }} />
         </div>
         <div className={styles.field}>
           <label className={styles.label}>Subheadline</label>
-          <textarea className={styles.textarea} data-preview-field="body" rows={3} value={technology.subheadline} onChange={(e) => setTechnology((row) => ({ ...row, subheadline: e.target.value }))} />
+          <textarea className={styles.textarea} data-preview-field="body" rows={3} value={technology.subheadline} onFocus={() => { setPreviewSection("technology"); setTextEditMode(true); setFocusedField("body") }} onChange={(e) => { setTechnology((row) => ({ ...row, subheadline: e.target.value })); setPreviewSection("technology"); setTextEditMode(true); setFocusedField("body") }} />
         </div>
         {features.map((feature, index) => (
           <div key={feature.id || index} className={styles.contentBlock}>

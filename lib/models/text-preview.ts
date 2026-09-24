@@ -11,6 +11,10 @@ export interface TextPreviewDraft {
   highlights: ModelHighlight[];
 }
 
+export function stickyRenderMode(textEditMode: boolean): "text" | "model" {
+  return textEditMode ? "text" : "model";
+}
+
 const EMPTY: TextPreviewDraft = {
   label: "",
   heading: "",

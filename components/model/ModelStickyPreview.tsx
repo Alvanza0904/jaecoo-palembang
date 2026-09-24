@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type CSSProperties } from 'react'
 import type { ModelFeature, ModelHighlight, ModelPageCopy } from '@/lib/types/model'
-import { textPreviewDraft } from '@/lib/models/text-preview'
+import { stickyRenderMode, textPreviewDraft } from '@/lib/models/text-preview'
 import overview from '@/app/(public)/model/[slug]/page.module.css'
 import technologyStyles from '@/app/(public)/model/[slug]/technology/technology.module.css'
 
@@ -115,6 +115,7 @@ export function ModelStickyPreview({
   const draft = textPreviewDraft(section, pageCopy, technology, highlights)
   const image = desktopUrl(assignments, SLOT[section] || '')
   const active = (field: string) => focusedField === field
+  const mode = stickyRenderMode(textEditMode)
 
   let visual = (
     <section className={overview.cinematicSection} style={{ minHeight: 460, height: 460 }}>
@@ -129,7 +130,7 @@ export function ModelStickyPreview({
     </section>
   )
 
-  if (textEditMode && section === 'performance') {
+  if (mode === 'text' && section === 'performance') {
     visual = (
       <section className={overview.performanceSection} style={{ minHeight: 460, height: 460 }}>
         <div className={overview.performanceBg}>
@@ -151,7 +152,7 @@ export function ModelStickyPreview({
         </div>
       </section>
     )
-  } else if (textEditMode && section === 'technology') {
+  } else if (mode === 'text' && section === 'technology') {
     visual = (
       <section className={overview.techSection} style={{ minHeight: 460 }}>
         <div className={overview.techLayout}>
@@ -166,7 +167,7 @@ export function ModelStickyPreview({
         </div>
       </section>
     )
-  } else if (textEditMode && (section === 'tech_intelligence' || section === 'tech_close')) {
+  } else if (mode === 'text' && (section === 'tech_intelligence' || section === 'tech_close')) {
     visual = (
       <section className={technologyStyles.cinematicScene} style={{ minHeight: 460, height: 460 }}>
         <div className={technologyStyles.sceneBg}>
@@ -180,7 +181,7 @@ export function ModelStickyPreview({
         </div>
       </section>
     )
-  } else if (textEditMode && (section === 'cta' || section === 'hero_cta' || section === 'specs_cta')) {
+  } else if (mode === 'text' && (section === 'cta' || section === 'hero_cta' || section === 'specs_cta')) {
     visual = (
       <section className={overview.ctaSection} style={{ minHeight: 460, height: 460 }}>
         <div className={overview.ctaBg}>
@@ -198,7 +199,7 @@ export function ModelStickyPreview({
         </div>
       </section>
     )
-  } else if (textEditMode && section === 'adas') {
+  } else if (mode === 'text' && section === 'adas') {
     visual = (
       <section className={overview.cinematicSection} style={{ minHeight: 460, height: 460 }}>
         <div className={overview.cinematicBg}>
@@ -215,7 +216,7 @@ export function ModelStickyPreview({
         </div>
       </section>
     )
-  } else if (textEditMode) {
+  } else if (mode === 'text') {
     const headingClass = section === 'cockpit'
       ? overview.cockpitHeading
       : section === 'profile'
@@ -237,13 +238,17 @@ export function ModelStickyPreview({
   }
 
   return (
-    <aside aria-label={textEditMode ? `Text preview ${section}` : `Preview ${modelName}`}>
+    <aside
+      aria-label={textEditMode ? `Text preview ${section}` : `Preview ${modelName}`}
+      data-preview-mode={mode}
+      data-preview-section-active={mode === 'text' ? section : 'model'}
+    >
       <p className={overview.editorialLabel}>
         <span className={overview.editorialCat}>
-          {textEditMode ? `Text preview · ${section}` : `Preview · ${modelName}`}
+          {mode === 'text' ? `Text preview · ${section}` : `Preview · ${modelName}`}
         </span>
       </p>
-      <div style={stageStyle()}>{visual}</div>
+      <div className="model-text-preview-stage" style={stageStyle()}>{visual}</div>
     </aside>
   )
 }
