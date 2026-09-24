@@ -705,7 +705,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
         )}
 
         {/* ── Unified Canvas ───────────────────────────── */}
-        <div className={styles.canvasArea}>
+        <div className={`${styles.canvasArea} ${showTypography ? styles.canvasAreaRelease : ''}`}>
 
           {/* Preview mode pills */}
           <div className={styles.previewModeRow}>

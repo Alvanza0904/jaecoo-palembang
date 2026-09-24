@@ -205,6 +205,10 @@
   z-index: 10;
 }
 
+.canvasAreaRelease {
+  position: static;
+}
+
 .previewModeRow {
   display: flex;
   gap: 4px;
