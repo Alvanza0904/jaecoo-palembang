@@ -75,6 +75,7 @@ export function ModelStickyPreview({
   highlights,
   technology,
   features,
+  heroHeading,
 }: {
   slug: string
   modelName: string
@@ -87,6 +88,7 @@ export function ModelStickyPreview({
   highlights: ModelHighlight[]
   technology: { headline: string; subheadline: string }
   features: ModelFeature[]
+  heroHeading: string
 }) {
   const [assignments, setAssignments] = useState<Assignment[]>([])
 
@@ -106,6 +108,15 @@ export function ModelStickyPreview({
   }, [slug])
 
   const mode = stickyRenderMode(textEditMode)
+  if (mode === 'text' && section === 'hero') {
+    return (
+      <aside aria-label="Hero heading preview" data-preview-mode="text" data-preview-section-active="hero">
+        <p style={{ margin: 0, padding: '28px 18px', background: '#fff', color: '#111', fontSize: 40, fontWeight: 700, lineHeight: 1.15 }}>
+          {heroHeading}
+        </p>
+      </aside>
+    )
+  }
   const draft = textPreviewDraft(section, pageCopy, technology, highlights)
   const image = desktopUrl(assignments, SLOT[section] || '')
   const headingOn = focusedField === 'heading'

@@ -1393,6 +1393,7 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
   const [pickerIndex, setPickerIndex] = useState<number | null>(null)
   const [isPending, startTransition] = useTransition()
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; msg: string } | null>(null)
+  const [heroHeading, setHeroHeading] = useState(model.tagline || "")
   const [previewSection, setPreviewSection] = useState("exterior")
   const [textEditMode, setTextEditMode] = useState(false)
   const [focusedField, setFocusedField] = useState<string | null>(null)
@@ -1517,6 +1518,20 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
         </div>
       </div>
       {feedback && <Feedback type={feedback.type} message={feedback.msg} />}
+
+      <div className={styles.contentBlock} data-preview-section="hero">
+        <div className={styles.field}>
+          <label className={styles.label}>Hero Heading</label>
+          <textarea
+            className={styles.textarea}
+            data-preview-field="heading"
+            rows={2}
+            value={heroHeading}
+            onFocus={() => { setPreviewSection("hero"); setTextEditMode(true); setFocusedField("heading") }}
+            onChange={(e) => { setHeroHeading(e.target.value); setPreviewSection("hero"); setTextEditMode(true); setFocusedField("heading") }}
+          />
+        </div>
+      </div>
 
       {PAGE_GROUPS.map((group) => (
         <div key={group.title}>
@@ -1716,6 +1731,7 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
         highlights={highlights}
         technology={technology}
         features={features}
+        heroHeading={heroHeading}
       />
     </div>
     </div>
