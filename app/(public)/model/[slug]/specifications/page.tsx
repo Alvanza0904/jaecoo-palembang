@@ -20,7 +20,6 @@ import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { GoldLine } from "@/components/ui/GoldLine";
 import { Button } from "@/components/ui/Button";
-import { ImagePlaceholder } from "@/components/ui/ImagePlaceholder";
 import { Reveal } from "@/components/motion/Reveal";
 import { Stagger } from "@/components/motion/Stagger";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
@@ -31,23 +30,14 @@ import { PriceDisplay } from "@/components/price/PriceDisplay";
 import { priceStatusAllowsCalculator } from "@/lib/types/model";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
-import { getBackgroundLayerStyle } from "@/lib/types/presentation";
 import { J7ShsExploreCta } from "@/components/model/J7ShsExploreCta";
-import type { ResponsiveImage } from "@/lib/types/media";
-import type { CSSProperties } from "react";
 import styles from "./specifications.module.css";
 
-/** Color swatch images are decorative; apply presentation_settings so
- *  Visual Editor position/scale settings are respected here too. */
-function colorImageStyle(image: ResponsiveImage | undefined): CSSProperties {
-  if (!image?.presentation_settings) return {};
-  return getBackgroundLayerStyle(
-    image.presentation_settings,
-    "desktop",
-    image.focal_x ?? 50,
-    image.focal_y ?? 50,
-  );
-}
+const J5_CARGO = [
+  { label: "Volume bagasi", value: "480 L" },
+  { label: "Kursi baris kedua dilipat", value: "1.180 L" },
+  { label: "Bagasi depan", value: "35 L" },
+];
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -94,6 +84,14 @@ export default async function SpesifikasiPage({ params }: Props) {
   const specsHeroMedia = resolveSubpageHero(model.image_slots?.specifications_hero, model.hero_media);
   const specsHeroCopy = model.page_copy?.specifications_hero;
   const hasSpecsHero = !!(specsHeroMedia.image?.desktop || specsHeroMedia.image?.mobile);
+  const cargoFromSpecs = slug === "jaecoo-j5-ev"
+    ? model.specifications.find((category) => /bagasi|cargo/i.test(category.label))
+    : undefined;
+  const cargoSpecs = cargoFromSpecs?.specs?.length ? cargoFromSpecs.specs : (slug === "jaecoo-j5-ev" ? J5_CARGO : null);
+  const tableCategories = cargoFromSpecs
+    ? model.specifications.filter((category) => category !== cargoFromSpecs)
+    : model.specifications;
+  const cargoImage = model.image_slots?.cargo;
 
   return (
     <>
@@ -113,7 +111,7 @@ export default async function SpesifikasiPage({ params }: Props) {
 
       <div className={hasSpecsHero ? styles.pageAfterHero : styles.page}>
         {/* ── HEADER ────────────────────────────────────────────────────── */}
-        <section className={styles.headerSection}>
+        <section className={styles.headerSection} data-contrast="light">
           <Container size="content">
             <Reveal variant="fade-up">
               <GoldLine width="short" className={styles.gold} />
@@ -139,10 +137,37 @@ export default async function SpesifikasiPage({ params }: Props) {
         </section>
 
         {/* ── SPEC CATEGORIES ───────────────────────────────────────────── */}
-        <section className={styles.specsSection}>
+        <section className={styles.specsSection} data-contrast="light">
           <Container size="content">
-            <div className={styles.categories}>
-              {model.specifications.map((cat, i) => (
+            {cargoSpecs && (
+              <Reveal variant="fade-up">
+                <div className={styles.category}>
+                  {cargoImage?.desktop ? (
+                    <picture>
+                      {cargoImage.mobile ? <source media="(max-width: 767px)" srcSet={cargoImage.mobile} /> : null}
+                      <img
+                        src={cargoImage.desktop}
+                        alt={cargoImage.alt || `${model.name} bagasi`}
+                        className={styles.cargoImage}
+                      />
+                    </picture>
+                  ) : null}
+                  <h2 className={styles.categoryLabel}>Bagasi</h2>
+                  <table className={styles.table} aria-label={`Bagasi ${model.name}`}>
+                    <tbody>
+                      {cargoSpecs.map((spec) => (
+                        <tr key={spec.label} className={styles.row}>
+                          <th className={styles.rowLabel} scope="row">{spec.label}</th>
+                          <td className={styles.rowValue}>{spec.value}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Reveal>
+            )}
+            <div className={cargoSpecs ? `${styles.categories} ${styles.categoriesAfterCargo}` : styles.categories}>
+              {tableCategories.map((cat, i) => (
                 <Reveal key={cat.label} variant="fade-up" delay={i * 60}>
                   <div className={styles.category}>
                     <h2 className={styles.categoryLabel}>{cat.label}</h2>
@@ -175,58 +200,8 @@ export default async function SpesifikasiPage({ params }: Props) {
           </Container>
         </section>
 
-        {/* ── COLORS ────────────────────────────────────────────────────── */}
-        {model.colors.length > 0 && (
-          <section className={styles.colorsSection}>
-            <Container size="content">
-              <Reveal variant="fade-up">
-                <SectionHeading
-                  eyebrow="Warna Eksterior"
-                  heading="Pilihan Warna"
-                />
-              </Reveal>
-
-              <div className={styles.colorGrid}>
-                <Stagger delay={80} staggerMs={60} variant="fade-up">
-                  {model.colors.map((color) => (
-                    <div key={color.id} className={styles.colorCard}>
-                      <div className={styles.colorImgWrap}>
-                        {color.image?.desktop ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={color.image.desktop}
-                            alt={color.image.alt ?? color.name}
-                            className={styles.colorImg}
-                            style={colorImageStyle(color.image)}
-                          />
-                        ) : (
-                          <ImagePlaceholder
-                            label={`COLOR — ${color.name.toUpperCase()}`}
-                            ratio="16/9"
-                            source="Admin → Media Library"
-                            className={styles.colorImgPlaceholder}
-                          />
-                        )}
-                      </div>
-                      <div className={styles.colorMeta}>
-                        <div
-                          className={styles.colorSwatch}
-                          style={{ backgroundColor: color.hex }}
-                          aria-hidden="true"
-                        />
-                        <p className={styles.colorName}>{color.name}</p>
-                      </div>
-                    </div>
-                  ))}
-                </Stagger>
-              </div>
-            </Container>
-          </section>
-        )}
-
-        {/* ── VARIANTS ──────────────────────────────────────────────────── */}
         {model.variants.length > 1 && (
-          <section className={styles.variantsSection}>
+          <section className={styles.variantsSection} data-contrast="light">
             <Container size="content">
               <Reveal variant="fade-up">
                 <SectionHeading eyebrow="Varian" heading="Pilih Varian" />
@@ -300,7 +275,7 @@ export default async function SpesifikasiPage({ params }: Props) {
         {slug === "jaecoo-j7-sivp" && <J7ShsExploreCta />}
 
         {/* ── NAVIGATION ────────────────────────────────────────────────── */}
-        <section className={styles.navSection}>
+        <section className={styles.navSection} data-contrast="light">
           <Container size="content">
             <Reveal variant="fade-up">
               <div className={styles.navRow}>
@@ -316,7 +291,7 @@ export default async function SpesifikasiPage({ params }: Props) {
         </section>
 
         {/* ── CTA ───────────────────────────────────────────────────────── */}
-        <section className={styles.ctaSection}>
+        <section className={styles.ctaSection} data-theme="dark">
           <Container size="narrow">
             <Reveal variant="fade-up">
               <div className={styles.ctaBlock}>

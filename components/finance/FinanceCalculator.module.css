@@ -103,13 +103,13 @@
 .optionBtnActive {
   background: var(--color-gold);
   border-color: var(--color-gold);
-  color: var(--color-white);
+  color: var(--color-ink);
   font-weight: var(--weight-semibold);
 }
 
 .optionBtnActive:hover {
   background: var(--color-gold);
-  color: var(--color-white);
+  color: var(--color-ink);
 }
 
 .controlDetail {

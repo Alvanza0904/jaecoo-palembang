@@ -1209,6 +1209,13 @@ function ImageSlotsTab({ slug }: { slug: string }) {
       note: 'Hanya background CTA di bawah Overview.',
       slots: [['final_cta', 'Desktop', 'desktop'], ['final_cta', 'Mobile', 'mobile']],
     },
+    ...(slug === 'jaecoo-j5-ev'
+      ? [{
+          title: 'Specifications → Bagasi',
+          note: 'Hanya section Bagasi di halaman Specifications J5. Tidak dipakai model lain.',
+          slots: [['cargo', 'Desktop', 'desktop'], ['cargo', 'Mobile', 'mobile']] as Array<[string, string, 'desktop' | 'mobile']>,
+        }]
+      : []),
     {
       title: 'Technology → Intelligence',
       note: 'Hanya scene kecerdasan di halaman Technology. Tidak memakai gambar Overview → Technology.',

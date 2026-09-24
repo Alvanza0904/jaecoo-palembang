@@ -39,37 +39,38 @@
 
 /* Variants */
 .primary {
-  background-color: var(--color-white);
-  color: var(--color-charcoal);
+  background-color: var(--contrast-cta-bg, var(--color-white));
+  color: var(--contrast-cta-fg, var(--color-charcoal));
 }
 .primary:hover {
-  background-color: rgba(255,255,255,0.88);
+  background-color: var(--contrast-cta-bg, rgba(255,255,255,0.88));
+  filter: brightness(0.96);
 }
 
 .secondary {
   background-color: transparent;
-  color: var(--color-white);
-  border: 1px solid rgba(255,255,255,0.40);
+  color: var(--contrast-ghost, var(--color-white));
+  border: 1px solid var(--contrast-line, rgba(255,255,255,0.40));
 }
 .secondary:hover {
-  border-color: rgba(255,255,255,0.80);
+  border-color: var(--contrast-ghost, rgba(255,255,255,0.80));
 }
 
 .outline {
   background-color: transparent;
-  color: var(--color-ink);
-  border: 1px solid var(--color-border-mid);
+  color: var(--contrast-fg, var(--color-ink));
+  border: 1px solid var(--contrast-line, var(--color-border-mid));
 }
 .outline:hover {
-  border-color: var(--color-ink);
+  border-color: var(--contrast-fg, var(--color-ink));
 }
 
 .ghost {
   background-color: transparent;
-  color: var(--color-ink-muted);
+  color: var(--contrast-ghost, var(--color-ink-muted));
   padding-inline: 0;
 }
-.ghost:hover { color: var(--color-ink); }
+.ghost:hover { color: var(--contrast-fg, var(--color-ink)); }
 
 /* Dark context overrides */
 .darkPrimary {

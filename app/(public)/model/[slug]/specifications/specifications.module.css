@@ -71,6 +71,19 @@
   gap: var(--space-12);
 }
 
+.categoriesAfterCargo {
+  margin-top: var(--space-12);
+}
+
+.cargoImage {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 2px;
+  margin-bottom: var(--space-6);
+  background: var(--color-off-white);
+}
+
 /* ─── Category ────────────────────────────────────────── */
 
 .category {

@@ -146,6 +146,7 @@ export function LayeredHero({
         styles[`hero--${size}`],
         lightBackground ? styles.heroLight : styles.heroDark,
       ].join(" ")}
+      data-contrast={lightBackground ? "light" : "dark"}
       aria-label="Hero section"
       data-hero-media-asset-id={media.media_asset_id}
       data-hero-cutout-media-id={media.cutout_media_id}

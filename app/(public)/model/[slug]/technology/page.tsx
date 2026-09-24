@@ -500,7 +500,7 @@ export default async function TeknologiPage({ params }: Props) {
       {/* ══════════════════════════════════════════════════════════
           NAV — Sebelumnya / Berikutnya navigation
       ══════════════════════════════════════════════════════════ */}
-      <nav className={styles.pageNav} aria-label="Model navigation">
+      <nav className={styles.pageNav} data-contrast="light" aria-label="Model navigation">
         <Button as="link" href={`/model/${slug}`} variant="ghost" size="md">
           ← {model.short_name} Overview
         </Button>

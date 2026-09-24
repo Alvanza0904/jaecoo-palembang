@@ -258,6 +258,7 @@ export const MODEL_MEDIA_SLOTS = [
   "specifications_hero",
   "adas",
   "specs_visual",
+  "cargo",
   "final_cta",
   "tech_cta",
 ] as const;

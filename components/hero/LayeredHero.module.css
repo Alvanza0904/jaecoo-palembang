@@ -250,6 +250,11 @@
   right: 0;
   z-index: 4;
   pointer-events: none;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.18) 70%, transparent 100%);
+}
+
+.heroLight .ctaLayer {
+  background: linear-gradient(to top, rgba(245, 244, 242, 0.92) 0%, rgba(245, 244, 242, 0.35) 70%, transparent 100%);
 }
 
 .ctaInner {

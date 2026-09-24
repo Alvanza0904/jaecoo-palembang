@@ -527,7 +527,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
       {/* ══════════════════════════════════════════════════════════════════
           08 — TECHNOLOGY — Image-led with feature overlay
       ══════════════════════════════════════════════════════════════════ */}
-      <section className={styles.techSection}>
+      <section className={styles.techSection} data-contrast="light">
         <div className={styles.techLayout}>
           {/* Left: main image */}
           <div className={styles.techImageWrap}>
