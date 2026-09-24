@@ -43,6 +43,8 @@ import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import { ColorCarousel } from "@/components/model/ColorCarousel";
 import { J7ShsExploreCta } from "@/components/model/J7ShsExploreCta";
+import { CmsVideo } from "@/components/media/CmsVideo";
+import { isVideoSource, readVideoSettings } from "@/lib/types/video";
 import { getBackgroundLayerStyle } from "@/lib/types/presentation";
 import styles from "./page.module.css";
 
@@ -98,6 +100,19 @@ function CmsModelImage({
         ratio={ratio}
         source="Supabase → Media Library"
         className={className}
+      />
+    );
+  }
+
+  if (isVideoSource(image.mime_type, src)) {
+    return (
+      <CmsVideo
+        src={src}
+        poster={image.poster}
+        settings={readVideoSettings(image.presentation_settings)}
+        label={image.alt || label}
+        className={className}
+        priority={label.startsWith("EXTERIOR") || label.includes("HERO")}
       />
     );
   }

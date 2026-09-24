@@ -12,6 +12,8 @@ import { PriceDisplay } from "@/components/price/PriceDisplay";
 import { Button } from "@/components/ui/Button";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import type { ResponsiveImage } from "@/lib/types/media";
+import { CmsVideo } from "@/components/media/CmsVideo";
+import { isVideoSource, readVideoSettings } from "@/lib/types/video";
 import { getBackgroundLayerStyle, resolveBreakpointSettings, getTypographyContainerStyle, getHeadingStyle, getSubheadingStyle } from "@/lib/types/presentation";
 import { formatDate } from "@/lib/utils/format";
 import styles from "./HomeExperience.module.css";
@@ -37,6 +39,18 @@ function VisualImage({
 }) {
   if (!image?.desktop && !image?.mobile) {
     return <div className={`${styles.mediaFallback} ${className}`} aria-hidden="true" />;
+  }
+
+  if (isVideoSource(image.mime_type, image.desktop || image.mobile)) {
+    return (
+      <CmsVideo
+        src={image.desktop || image.mobile}
+        poster={image.poster}
+        settings={readVideoSettings(image.presentation_settings)}
+        label={alt}
+        className={className}
+      />
+    );
   }
 
   const desktopStyle = visualMediaStyle(image, 'desktop');

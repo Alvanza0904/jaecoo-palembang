@@ -1,0 +1,142 @@
+.editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 420px);
+  min-height: 100%;
+  background: #f6f4f1;
+  color: #1c1917;
+}
+
+.preview {
+  position: relative;
+  min-height: 360px;
+  background: #111;
+}
+
+.panel {
+  padding: 1.25rem;
+  overflow: auto;
+  max-height: 100vh;
+}
+
+.kicker {
+  margin: 0;
+  color: #a16207;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+}
+
+.title {
+  margin: 0.2rem 0 0;
+  font-size: 1.05rem;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.unsaved {
+  color: #9a3412;
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.label {
+  display: block;
+  margin: 0.75rem 0 0.3rem;
+  font-size: 0.78rem;
+  color: #57534e;
+}
+
+.presets, .row, .actions, .times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.preset, .presetOn, .fileBtn, .cancel, .save, .use {
+  border-radius: 8px;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.preset, .fileBtn, .cancel {
+  background: #fff;
+  border: 1px solid #d6d3d1;
+}
+
+.presetOn, .save, .use {
+  background: #1c1917;
+  color: #fff;
+  border: 1px solid #1c1917;
+}
+
+.use { background: #a16207; border-color: #a16207; }
+
+.block {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e7e5e4;
+}
+
+.block h3 {
+  margin: 0 0 0.55rem;
+  font-size: 0.92rem;
+}
+
+.toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0;
+  font-size: 0.88rem;
+}
+
+.select, .input {
+  width: 100%;
+  border: 1px solid #d6d3d1;
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+  background: #fff;
+}
+
+.times label {
+  flex: 1;
+  font-size: 0.78rem;
+  color: #57534e;
+}
+
+.poster {
+  width: 100%;
+  max-height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 0.45rem;
+}
+
+.bar {
+  height: 6px;
+  background: #e7e5e4;
+  border-radius: 99px;
+  margin-top: 0.45rem;
+  overflow: hidden;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  background: #a16207;
+}
+
+.note, .ok { font-size: 0.78rem; color: #57534e; }
+.error { color: #b91c1c; font-size: 0.82rem; }
+.actions { margin: 1rem 0 2rem; }
+
+@media (max-width: 860px) {
+  .editor { grid-template-columns: 1fr; }
+  .preview { min-height: 240px; }
+  .panel { max-height: none; }
+}

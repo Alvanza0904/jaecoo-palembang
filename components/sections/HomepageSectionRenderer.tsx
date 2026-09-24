@@ -165,14 +165,20 @@ function resolveHeroMedia(data: SectionRenderData) {
   // Priority 1: editor MediaAsset (sudah ada variants object)
   if (data.heroMediaAsset) {
     const asset = data.heroMediaAsset
+    const video = asset.mime_type.startsWith('video/')
+    const source = video ? asset.public_url ?? undefined : undefined
     return {
       image: {
-        desktop: asset.variants?.['1920'] ?? asset.variants?.['1440'] ?? asset.public_url ?? undefined,
-        tablet:  asset.variants?.['1024'] ?? asset.variants?.['768']  ?? asset.public_url ?? undefined,
-        mobile:  asset.variants?.['768']  ?? asset.variants?.['480']  ?? asset.public_url ?? undefined,
-        small_mobile: asset.variants?.['480'] ?? asset.public_url ?? undefined,
+        desktop: source ?? asset.variants?.['1920'] ?? asset.variants?.['1440'] ?? asset.public_url ?? undefined,
+        tablet:  source ?? asset.variants?.['1024'] ?? asset.variants?.['768']  ?? asset.public_url ?? undefined,
+        mobile:  source ?? asset.variants?.['768']  ?? asset.variants?.['480']  ?? asset.public_url ?? undefined,
+        small_mobile: source ?? asset.variants?.['480'] ?? asset.public_url ?? undefined,
         cutout: asset.cutout_url ?? undefined,
         alt: asset.alt_text ?? asset.filename ?? '',
+        mime_type: asset.mime_type,
+        poster: asset.mime_type.startsWith('video/')
+          ? asset.presentation_settings?.video?.poster_url ?? undefined
+          : undefined,
       },
       presentation_settings: asset.presentation_settings,
       media_asset_id: asset.id,
@@ -186,12 +192,14 @@ function resolveHeroMedia(data: SectionRenderData) {
     const img = data.image
     return {
       image: {
-        desktop:      img.desktop,
-        tablet:       img.tablet ?? img.desktop,
-        mobile:       img.mobile ?? img.desktop,
+        desktop: img.desktop,
+        tablet: img.tablet ?? img.desktop,
+        mobile: img.mobile ?? img.desktop,
         small_mobile: img.small_mobile ?? img.mobile ?? img.desktop,
-        cutout:       img.cutout,
-        alt:          img.alt || '',
+        cutout: img.cutout,
+        alt: img.alt || '',
+        mime_type: img.mime_type,
+        poster: img.poster,
       },
       presentation_settings: img.presentation_settings,
       cutout_presentation_settings: img.cutout_presentation_settings,

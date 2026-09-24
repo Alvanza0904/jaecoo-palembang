@@ -66,6 +66,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Media tidak ditemukan' }, { status: 404 })
   }
 
+  if (String(asset.mime_type ?? "").startsWith("video/")) {
+    return NextResponse.json({ asset, skipped: "Video tidak diproses menjadi varian gambar." })
+  }
+
   // Only process images
   if (!asset.mime_type.startsWith('image/') || asset.mime_type === 'image/gif') {
     return NextResponse.json({ error: 'Hanya gambar yang bisa diproses' }, { status: 422 })

@@ -32,6 +32,8 @@ import { J7ShsExploreCta } from "@/components/model/J7ShsExploreCta";
 import { resolveSubpageHero } from "@/lib/models/hero";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
+import { CmsVideo } from "@/components/media/CmsVideo";
+import { isVideoSource, readVideoSettings } from "@/lib/types/video";
 import { getBackgroundLayerStyle } from "@/lib/types/presentation";
 import type { ModelData, ModelFeature } from "@/lib/types/model";
 import type { ResponsiveImage } from "@/lib/types/media";
@@ -55,6 +57,17 @@ function TechSceneImage({
         label={label}
         ratio={ratio}
         source="Admin → Media Library"
+        className={className}
+      />
+    );
+  }
+  if (isVideoSource(image?.mime_type, src)) {
+    return (
+      <CmsVideo
+        src={src}
+        poster={image?.poster}
+        settings={readVideoSettings(image?.presentation_settings)}
+        label={image?.alt || label}
         className={className}
       />
     );

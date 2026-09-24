@@ -26,6 +26,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import type { MediaAsset, MediaCategory } from '@/lib/types/media-asset'
 import { MediaLibrary } from './MediaLibrary'
 import { VisualMediaEditor } from '@/components/admin/visual-editor'
+import { VideoEditor } from './VideoEditor'
 import styles from './MediaPicker.module.css'
 
 interface MediaPickerProps {
@@ -38,6 +39,9 @@ interface MediaPickerProps {
   previewHeading?: string
   previewSubheading?: string
   previewTagline?: string
+  /** Poster picker: only images, skip the image visual editor. */
+  imagesOnly?: boolean
+  directSelect?: boolean
 }
 
 type Step = 'browse' | 'visual-editor'
@@ -51,6 +55,8 @@ export function MediaPicker({
   previewHeading,
   previewSubheading,
   previewTagline,
+  imagesOnly = false,
+  directSelect = false,
 }: MediaPickerProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const [step, setStep] = useState<Step>('browse')
@@ -86,9 +92,20 @@ export function MediaPicker({
 
   // Step 1: user pilih gambar dari library → buka Visual Editor
   const handleLibrarySelect = useCallback((asset: MediaAsset) => {
+    if (asset.mime_type.startsWith('video/')) {
+      if (imagesOnly) return
+      setSelectedAsset(asset)
+      setStep('visual-editor')
+      return
+    }
+    if (directSelect) {
+      onSelect(asset)
+      onClose()
+      return
+    }
     setSelectedAsset(asset)
     setStep('visual-editor')
-  }, [])
+  }, [directSelect, imagesOnly, onClose, onSelect])
 
   // Step 2a: user klik Simpan di Visual Editor
   // → asset sudah punya presentation_settings terbaru dari Supabase
@@ -175,21 +192,29 @@ export function MediaPicker({
                 fontWeight: 600,
               }}
             >
-              Gunakan Gambar Ini →
+              Gunakan {selectedAsset.mime_type.startsWith('video/') ? 'Video' : 'Gambar'} Ini →
             </button>
           </div>
         </div>
 
         {/* Visual Editor */}
         <div style={{ flex: 1, overflow: 'auto' }}>
-          <VisualMediaEditor
-            asset={selectedAsset}
-            onClose={handleVisualEditorClose}
-            onUpdated={handleVisualEditorUpdated}
-            previewHeading={previewHeading}
-            previewSubheading={previewSubheading}
-            previewTagline={previewTagline ?? 'PREVIEW'}
-          />
+          {selectedAsset.mime_type.startsWith('video/') ? (
+            <VideoEditor
+              asset={selectedAsset}
+              onClose={handleVisualEditorClose}
+              onUpdated={handleVisualEditorUpdated}
+            />
+          ) : (
+            <VisualMediaEditor
+              asset={selectedAsset}
+              onClose={handleVisualEditorClose}
+              onUpdated={handleVisualEditorUpdated}
+              previewHeading={previewHeading}
+              previewSubheading={previewSubheading}
+              previewTagline={previewTagline ?? 'PREVIEW'}
+            />
+          )}
         </div>
       </div>
     )
@@ -229,6 +254,7 @@ export function MediaPicker({
             onSelect={handleLibrarySelect}
             defaultCategory={defaultCategory}
             compact
+            imagesOnly={imagesOnly}
           />
         </div>
       </div>

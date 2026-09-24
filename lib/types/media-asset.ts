@@ -154,13 +154,17 @@ export function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+import { MAX_VIDEO_BYTES } from "./video";
+
 /** Validate file before upload */
 export function validateFile(file: File): string | null {
   if (!ALLOWED_TYPES.includes(file.type as (typeof ALLOWED_TYPES)[number])) {
-    return `Format tidak didukung: ${file.type}. Gunakan JPG, PNG, WebP, AVIF, atau MP4.`
+    return `Format tidak didukung: ${file.type || "tidak dikenal"}. Gunakan JPG, PNG, WebP, AVIF, MP4, atau WebM.`
   }
-  if (file.size > MAX_FILE_SIZE_BYTES) {
-    return `File terlalu besar: ${formatFileSize(file.size)}. Maksimum ${MAX_FILE_SIZE_MB} MB.`
+  const video = file.type.startsWith("video/")
+  const limit = video ? MAX_VIDEO_BYTES : 10 * 1024 * 1024
+  if (file.size > limit) {
+    return `File terlalu besar: ${formatFileSize(file.size)}. Maksimum ${video ? "80 MB" : "10 MB"}.`
   }
   return null
 }

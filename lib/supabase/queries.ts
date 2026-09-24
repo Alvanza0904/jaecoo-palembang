@@ -85,6 +85,7 @@ interface SupabaseMediaRow {
   filename: string | null;
   alt_text?: string | null;
   presentation_settings: unknown;
+  mime_type?: string | null;
   cutout_url: string | null;
   focal_x: number | null;
   focal_y: number | null;
@@ -104,6 +105,7 @@ function mediaRowToImage(asset: SupabaseMediaRow | undefined, fallbackAlt: strin
       focal_x: asset.focal_x,
       focal_y: asset.focal_y,
       cutout_url: asset.cutout_url,
+      mime_type: asset.mime_type,
       // PENTING: teruskan presentation_settings agar Visual Editor settings
       // (position, scale, desktop/mobile) diterapkan di browser.
       presentation_settings: asset.presentation_settings as import("@/lib/types/presentation").PresentationSettings | undefined,
@@ -120,7 +122,7 @@ async function getMediaAssets(ids: string[]): Promise<Map<string, SupabaseMediaR
   const { data, error } = await supabase
     .from("media_assets")
     .select(
-      "id, public_url, variants, width, height, filename, alt_text, presentation_settings, cutout_url, focal_x, focal_y",
+      "id, public_url, variants, width, height, filename, alt_text, presentation_settings, cutout_url, focal_x, focal_y, mime_type",
     )
     .in("id", uniqueIds);
 
@@ -316,25 +318,34 @@ function mapModel(
   const heroMedia = heroMediaId ? mediaAssets.get(heroMediaId) : undefined;
   const cutoutMedia = cutoutMediaId ? mediaAssets.get(cutoutMediaId) : undefined;
 
+  const heroIsVideo = (heroMedia?.mime_type ?? "").startsWith("video/");
   const heroImage = heroMedia
     ? {
-        desktop:
-          heroMedia.variants?.["1920"] ??
-          heroMedia.variants?.["1440"] ??
-          heroMedia.public_url ??
-          undefined,
-        tablet:
-          heroMedia.variants?.["1024"] ??
-          heroMedia.variants?.["768"] ??
-          heroMedia.public_url ??
-          undefined,
-        mobile:
-          heroMedia.variants?.["768"] ??
-          heroMedia.variants?.["480"] ??
-          heroMedia.public_url ??
-          undefined,
-        small_mobile:
-          heroMedia.variants?.["480"] ?? heroMedia.public_url ?? undefined,
+        desktop: heroIsVideo
+          ? heroMedia.public_url ?? undefined
+          : heroMedia.variants?.["1920"] ??
+            heroMedia.variants?.["1440"] ??
+            heroMedia.public_url ??
+            undefined,
+        tablet: heroIsVideo
+          ? heroMedia.public_url ?? undefined
+          : heroMedia.variants?.["1024"] ??
+            heroMedia.variants?.["768"] ??
+            heroMedia.public_url ??
+            undefined,
+        mobile: heroIsVideo
+          ? heroMedia.public_url ?? undefined
+          : heroMedia.variants?.["768"] ??
+            heroMedia.variants?.["480"] ??
+            heroMedia.public_url ??
+            undefined,
+        small_mobile: heroIsVideo
+          ? heroMedia.public_url ?? undefined
+          : heroMedia.variants?.["480"] ?? heroMedia.public_url ?? undefined,
+        mime_type: heroMedia.mime_type ?? undefined,
+        poster: heroIsVideo
+          ? (heroMedia.presentation_settings as { video?: { poster_url?: string } } | null)?.video?.poster_url
+          : undefined,
         alt:
           (storedImage.alt as string | undefined) ??
           heroMedia.alt_text ??

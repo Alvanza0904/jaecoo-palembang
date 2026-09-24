@@ -41,6 +41,8 @@ export interface ResponsiveImage {
   small_mobile?: string;
   /** Video poster fallback */
   poster?: string;
+  /** MIME when the slot is a video asset. */
+  mime_type?: string;
   /** Alt text — required for accessibility */
   alt: string;
   /** Width of source image */

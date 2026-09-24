@@ -10,6 +10,8 @@
  * There must be NO duplicate formulas in consumer files.
  */
 
+import type { VideoPlaybackSettings } from "./video";
+
 export type BreakpointKey = 'desktop' | 'tablet' | 'mobile' | 'small_mobile'
 export type PresentationMode = 'auto' | 'custom' | 'inherited'
 export type ObjectFit = 'cover' | 'contain'
@@ -121,6 +123,8 @@ export interface PresentationSettings {
   tablet?: Partial<BreakpointSettings>
   mobile?: Partial<BreakpointSettings>
   small_mobile?: Partial<BreakpointSettings>
+  /** Playback for video assets. Images ignore this key. */
+  video?: VideoPlaybackSettings
 }
 
 // ─── Typography Constants (SINGLE SOURCE OF TRUTH) ────────────────────────

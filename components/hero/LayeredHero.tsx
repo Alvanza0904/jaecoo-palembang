@@ -19,6 +19,8 @@
 
 import Image from "next/image";
 import type { MediaWithArtDirection, ResponsiveVideo } from "@/lib/types/media";
+import { CmsVideo } from "@/components/media/CmsVideo";
+import { isVideoSource, readVideoSettings } from "@/lib/types/video";
 import {
   BREAKPOINT_ORDER,
   resolveBreakpointSettings,
@@ -137,7 +139,9 @@ export function LayeredHero({
   const cutoutMeta = (cutoutPresentationSettings as (PresentationSettings & { _meta?: PresentationMeta }) | undefined)?._meta;
   const cutoutBboxHPct = cutoutMeta?.cutout_bbox?.h_pct;
 
-  const hasCutout = !!image.cutout;
+  const hasCutout = !!image.cutout && !isVideoSource(image.mime_type, image.desktop);
+  const playback = readVideoSettings(presentationSettings);
+  const assetIsVideo = isVideoSource(image.mime_type, image.desktop || image.mobile);
 
   return (
     <section
@@ -153,7 +157,16 @@ export function LayeredHero({
     >
       {/* ── Background layer ── */}
       <div className={styles.bg} aria-hidden="true">
-        {video ? (
+        {assetIsVideo ? (
+          <CmsVideo
+            src={image.desktop || image.mobile}
+            poster={image.poster || playback.poster_url}
+            settings={playback}
+            priority
+            label={image.alt}
+            className={styles.videoFill}
+          />
+        ) : video ? (
           <VideoBackground video={video} />
         ) : (
           <div className={styles.bgImages}>

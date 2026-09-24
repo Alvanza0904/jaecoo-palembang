@@ -22,6 +22,7 @@ import {
   PROCESSING_STATUS_LABEL,
   PROCESSING_STATUS_COLOR,
 } from '@/lib/types/media-asset'
+import { uploadToStorage, registerUploadedMedia } from '@/lib/media/direct-upload'
 import { MediaDetail } from './MediaDetail'
 import styles from './MediaLibrary.module.css'
 
@@ -70,15 +71,31 @@ function UploadZone({ category, onUploaded }: UploadZoneProps) {
     }
     setProgress(30)
 
-    const fd = new FormData()
-    fd.append('file', file)
-    fd.append('category', category)
-    if (width)  fd.append('width', String(width))
-    if (height) fd.append('height', String(height))
-
-    setProgress(50)
-
+    const video = file.type.startsWith('video/')
     try {
+      if (video) {
+        const path = await uploadToStorage(file, category, setProgress)
+        const asset = await registerUploadedMedia({
+          storage_path: path,
+          filename: file.name,
+          mime_type: file.type,
+          size_bytes: file.size,
+          category,
+        })
+        setProgress(100)
+        setStatus('success')
+        onUploaded(asset)
+        setTimeout(() => { setStatus('idle'); setProgress(0) }, 2000)
+        return
+      }
+
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('category', category)
+      if (width)  fd.append('width', String(width))
+      if (height) fd.append('height', String(height))
+
+      setProgress(50)
       const res = await fetch('/api/admin/media/upload', { method: 'POST', body: fd })
       setProgress(90)
       const json = await res.json()
@@ -87,8 +104,8 @@ function UploadZone({ category, onUploaded }: UploadZoneProps) {
       setStatus('success')
       onUploaded(json.asset)
       setTimeout(() => { setStatus('idle'); setProgress(0) }, 2000)
-    } catch {
-      setError('Koneksi gagal. Periksa internet dan coba lagi.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Koneksi gagal. Periksa internet dan coba lagi.')
       setStatus('error')
     }
   }
@@ -117,7 +134,7 @@ function UploadZone({ category, onUploaded }: UploadZoneProps) {
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/avif,video/mp4"
+        accept="image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm"
         onChange={onInputChange}
         style={{ display: 'none' }}
       />
@@ -127,7 +144,7 @@ function UploadZone({ category, onUploaded }: UploadZoneProps) {
           <div className={styles.uploadIcon}>↑</div>
           <div className={styles.uploadTitle}>Upload Media</div>
           <div className={styles.uploadSub}>Klik atau seret file ke sini</div>
-          <div className={styles.uploadHint}>JPG · PNG · WebP · AVIF · MP4 — max 20 MB</div>
+          <div className={styles.uploadHint}>JPG · PNG · WebP · AVIF · MP4 · WebM</div>
         </>
       )}
 
@@ -216,6 +233,8 @@ function MediaCard({ asset, onDeleted, onSelect, selectable, onOpenDetail }: Med
         {isImg && url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={url} alt={asset.filename} className={styles.thumbImg} loading="lazy" />
+        ) : asset.mime_type.startsWith('video/') && url ? (
+          <video src={url} className={styles.thumbImg} muted playsInline preload="metadata" />
         ) : (
           <div className={styles.thumbPlaceholder}>
             {asset.mime_type.startsWith('video/') ? '▶' : '◈'}
@@ -299,9 +318,10 @@ interface MediaLibraryProps {
   onSelect?: (asset: MediaAsset) => void
   defaultCategory?: MediaCategory
   compact?: boolean
+  imagesOnly?: boolean
 }
 
-export function MediaLibrary({ onSelect, defaultCategory, compact }: MediaLibraryProps) {
+export function MediaLibrary({ onSelect, defaultCategory, compact, imagesOnly = false }: MediaLibraryProps) {
   const [assets, setAssets] = useState<MediaAsset[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -439,7 +459,7 @@ export function MediaLibrary({ onSelect, defaultCategory, compact }: MediaLibrar
 
       {!loading && assets.length > 0 && (
         <div className={styles.grid}>
-          {assets.map((asset) => (
+          {(imagesOnly ? assets.filter((asset) => asset.mime_type.startsWith('image/')) : assets).map((asset) => (
             <MediaCard
               key={asset.id}
               asset={asset}

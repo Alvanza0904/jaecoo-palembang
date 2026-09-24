@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from "./server";
 import type { ResponsiveImage } from "@/lib/types/media";
+import { isVideoMime, readVideoSettings } from "@/lib/types/video";
 
 export interface ContentMediaAssignment {
   content_type: string;
@@ -20,6 +21,7 @@ export interface ResolvedMediaAsset {
   focal_x: number | null;
   focal_y: number | null;
   cutout_url: string | null;
+  mime_type?: string | null;
   presentation_settings?: import("@/lib/types/presentation").PresentationSettings;
 }
 
@@ -33,11 +35,15 @@ export function mediaAssetToImage(
 
   const variants = asset.variants ?? {};
   const base = asset.public_url ?? undefined;
+  const video = isVideoMime(asset.mime_type);
+  const playback = video ? readVideoSettings(asset.presentation_settings) : null;
   const image: ResponsiveImage = {
-    desktop: variants["1920"] ?? variants["1440"] ?? base,
-    tablet: variants["1024"] ?? variants["768"] ?? base,
-    mobile: variants["768"] ?? variants["480"] ?? base,
-    small_mobile: variants["480"] ?? base,
+    desktop: video ? base : (variants["1920"] ?? variants["1440"] ?? base),
+    tablet: video ? base : (variants["1024"] ?? variants["768"] ?? base),
+    mobile: video ? base : (variants["768"] ?? variants["480"] ?? base),
+    small_mobile: video ? base : (variants["480"] ?? base),
+    poster: playback?.poster_url ?? undefined,
+    mime_type: asset.mime_type ?? undefined,
     alt: asset.alt_text ?? asset.filename ?? altFallback,
     width: asset.width ?? undefined,
     height: asset.height ?? undefined,
@@ -112,7 +118,7 @@ export async function getContentMedia(
     const { data: mediaRows, error: mediaError } = await supabase
       .from("media_assets")
       .select(
-        "id,public_url,variants,filename,width,height,alt_text,focal_x,focal_y,cutout_url,presentation_settings",
+        "id,public_url,variants,filename,width,height,alt_text,focal_x,focal_y,cutout_url,presentation_settings,mime_type",
       )
       .in("id", ids);
 
