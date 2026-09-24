@@ -131,7 +131,7 @@ export default async function SpesifikasiPage({ params }: Props) {
           </Container>
         </section>
 
-        {cargoStats && (
+        {cargoStats && (cargoImage?.desktop || cargoImage?.mobile) && (
           <CargoEditorial
             desktop={cargoImage?.desktop}
             mobile={cargoImage?.mobile}

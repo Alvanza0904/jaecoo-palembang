@@ -14,7 +14,6 @@ import Link from 'next/link'
 import styles from './editor.module.css'
 import { MediaPicker } from '@/components/admin/media/MediaPicker'
 import { VisualMediaEditor } from '@/components/admin/visual-editor'
-import { CargoEditorial } from '@/components/model/CargoEditorial'
 import { MODELS } from '@/lib/data/models'
 import type { MediaAsset } from '@/lib/types/media-asset'
 import type { ModelFeature, ModelHighlight, ModelPageCopy, ModelSectionCopy } from '@/lib/types/model'
@@ -1226,14 +1225,7 @@ function ImageSlotsTab({ slug }: { slug: string }) {
     },
   ]
   const [assignments,setAssignments]=useState<Array<{slot_key:string;breakpoint:string|null;media_assets?:{id:string;public_url:string|null;alt_text:string|null;focal_x:number|null;focal_y:number|null}}>>([])
-  const [liveMedia,setLiveMedia]=useState<Record<string,{url:string|null;focalX:number|null;focalY:number|null}>>({})
   useEffect(()=>{fetch(`/api/admin/content-media?content_type=model&content_key=${encodeURIComponent(slug)}`).then(r=>r.json()).then(j=>setAssignments(j.assignments??[]))},[slug])
-  function mediaFor(slot:string,breakpoint:string){
-    const key=`${slot}:${breakpoint}`
-    if (liveMedia[key]) return liveMedia[key]
-    const row=assignments.find(item=>item.slot_key===slot&&item.breakpoint===breakpoint)?.media_assets
-    return {url:row?.public_url??null,focalX:row?.focal_x??null,focalY:row?.focal_y??null}
-  }
   return <div className={styles.section}>
     <div className={styles.sectionHeader}><div><h2 className={styles.sectionTitle}>Gambar section</h2><p className={styles.sectionNote}>Satu kartu = satu section di website. Hero Overview, Technology, dan Specifications ada di tab Heroes. Gambar fitur teknologi ada di Content → Technology. Warna ada di tab Colors.</p></div></div>
     {groups.map((group) => (
@@ -1245,20 +1237,22 @@ function ImageSlotsTab({ slug }: { slug: string }) {
           </div>
         </div>
         <p className={styles.sectionNote}>{group.note}</p>
-        {group.slots[0]?.[0] === 'cargo' && (
-          <CargoEditorial
-            desktop={mediaFor('cargo', 'desktop').url}
-            mobile={mediaFor('cargo', 'mobile').url}
-            focalX={mediaFor('cargo', 'desktop').focalX}
-            focalY={mediaFor('cargo', 'desktop').focalY}
-            alt="Bagasi JAECOO J5"
-          />
-        )}
         <div className={styles.contentSectionGrid}>
           {group.slots.map(([slot, label, breakpoint]) => (
             <div key={`${slot}-${breakpoint}`} className={styles.contentBlock}>
               <div className={styles.contentBlockHeader}><h3 className={styles.contentBlockTitle}>{label}</h3><span className={styles.contentSectionStatus}>{group.title}</span></div>
-              <div className={styles.field}><MediaAssignmentField slug={slug} slot={slot} breakpoint={breakpoint} assignments={assignments} fieldLabel={label} hideImage={slot === 'cargo'} onChange={(next)=>setLiveMedia((current)=>({...current,[`${slot}:${breakpoint}`]:{url:next?.public_url??null,focalX:next?.focal_x??null,focalY:next?.focal_y??null}}))}/></div>
+              <div className={styles.field}>
+                <MediaAssignmentField
+                  slug={slug}
+                  slot={slot}
+                  breakpoint={breakpoint}
+                  assignments={assignments}
+                  fieldLabel={label}
+                  previewHeading={slot === 'cargo' ? '480 L' : undefined}
+                  previewSubheading={slot === 'cargo' ? 'Kapasitas bagasi' : undefined}
+                  previewTagline={slot === 'cargo' ? 'BAGASI' : undefined}
+                />
+              </div>
             </div>
           ))}
         </div>
