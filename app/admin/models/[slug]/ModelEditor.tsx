@@ -15,6 +15,7 @@ import styles from './editor.module.css'
 import { MediaPicker } from '@/components/admin/media/MediaPicker'
 import { VisualMediaEditor } from '@/components/admin/visual-editor'
 import { ModelStickyPreview } from '@/components/model/ModelStickyPreview'
+import { CargoEditorial } from '@/components/model/CargoEditorial'
 import overview from '@/app/(public)/model/[slug]/page.module.css'
 import type { MediaWithArtDirection } from '@/lib/types/media'
 import { MODELS } from '@/lib/data/models'
@@ -1228,7 +1229,14 @@ function ImageSlotsTab({ slug }: { slug: string }) {
     },
   ]
   const [assignments,setAssignments]=useState<Array<{slot_key:string;breakpoint:string|null;media_assets?:{id:string;public_url:string|null;alt_text:string|null;focal_x:number|null;focal_y:number|null}}>>([])
+  const [liveMedia,setLiveMedia]=useState<Record<string,{url:string|null;focalX:number|null;focalY:number|null}>>({})
   useEffect(()=>{fetch(`/api/admin/content-media?content_type=model&content_key=${encodeURIComponent(slug)}`).then(r=>r.json()).then(j=>setAssignments(j.assignments??[]))},[slug])
+  function mediaFor(slot:string,breakpoint:string){
+    const key=`${slot}:${breakpoint}`
+    if (liveMedia[key]) return liveMedia[key]
+    const row=assignments.find(item=>item.slot_key===slot&&item.breakpoint===breakpoint)?.media_assets
+    return {url:row?.public_url??null,focalX:row?.focal_x??null,focalY:row?.focal_y??null}
+  }
   return <div className={styles.section}>
     <div className={styles.sectionHeader}><div><h2 className={styles.sectionTitle}>Gambar section</h2><p className={styles.sectionNote}>Satu kartu = satu section di website. Hero Overview, Technology, dan Specifications ada di tab Heroes. Gambar fitur teknologi ada di Content → Technology. Warna ada di tab Colors.</p></div></div>
     {groups.map((group) => (
@@ -1240,11 +1248,20 @@ function ImageSlotsTab({ slug }: { slug: string }) {
           </div>
         </div>
         <p className={styles.sectionNote}>{group.note}</p>
+        {group.slots[0]?.[0] === 'cargo' && (
+          <CargoEditorial
+            desktop={mediaFor('cargo', 'desktop').url}
+            mobile={mediaFor('cargo', 'mobile').url}
+            focalX={mediaFor('cargo', 'desktop').focalX}
+            focalY={mediaFor('cargo', 'desktop').focalY}
+            alt="Bagasi JAECOO J5"
+          />
+        )}
         <div className={styles.contentSectionGrid}>
           {group.slots.map(([slot, label, breakpoint]) => (
             <div key={`${slot}-${breakpoint}`} className={styles.contentBlock}>
               <div className={styles.contentBlockHeader}><h3 className={styles.contentBlockTitle}>{label}</h3><span className={styles.contentSectionStatus}>{group.title}</span></div>
-              <div className={styles.field}><MediaAssignmentField slug={slug} slot={slot} breakpoint={breakpoint} assignments={assignments} fieldLabel={label}/></div>
+              <div className={styles.field}><MediaAssignmentField slug={slug} slot={slot} breakpoint={breakpoint} assignments={assignments} fieldLabel={label} hideImage={slot === 'cargo'} onChange={(next)=>setLiveMedia((current)=>({...current,[`${slot}:${breakpoint}`]:{url:next?.public_url??null,focalX:next?.focal_x??null,focalY:next?.focal_y??null}}))}/></div>
             </div>
           ))}
         </div>
@@ -1254,7 +1271,7 @@ function ImageSlotsTab({ slug }: { slug: string }) {
   </div>
 }
 
-function MediaAssignmentField({slug,slot,breakpoint,assignments,fieldLabel,previewHeading,previewSubheading,previewTagline}:{slug:string;slot:string;breakpoint:'desktop'|'mobile';assignments:Array<{slot_key:string;breakpoint:string|null;media_assets?:{id:string;public_url:string|null;alt_text:string|null;focal_x:number|null;focal_y:number|null}}>;fieldLabel?:string;previewHeading?:string;previewSubheading?:string;previewTagline?:string}) {
+function MediaAssignmentField({slug,slot,breakpoint,assignments,fieldLabel,previewHeading,previewSubheading,previewTagline,hideImage,onChange}:{slug:string;slot:string;breakpoint:'desktop'|'mobile';assignments:Array<{slot_key:string;breakpoint:string|null;media_assets?:{id:string;public_url:string|null;alt_text:string|null;focal_x:number|null;focal_y:number|null}}>;fieldLabel?:string;previewHeading?:string;previewSubheading?:string;previewTagline?:string;hideImage?:boolean;onChange?:(asset?:{public_url:string|null;focal_x:number|null;focal_y:number|null})=>void}) {
   const initial=assignments.find(x=>x.slot_key===slot&&x.breakpoint===breakpoint)?.media_assets
   const [asset,setAsset]=useState(initial)
   const [open,setOpen]=useState(false)
@@ -1264,7 +1281,9 @@ function MediaAssignmentField({slug,slot,breakpoint,assignments,fieldLabel,previ
     setOpen(false); setMessage('')
     const r=await fetch('/api/admin/content-media',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({content_type:'model',content_key:slug,slot_key:slot,breakpoint,media_asset_id:next.id})})
     if (r.ok) {
-      setAsset({ id: next.id, public_url: next.public_url, alt_text: next.alt_text, focal_x: next.focal_x, focal_y: next.focal_y })
+      const saved={ id: next.id, public_url: next.public_url, alt_text: next.alt_text, focal_x: next.focal_x, focal_y: next.focal_y }
+      setAsset(saved)
+      onChange?.(saved)
       setMessage('Tersimpan ✓')
     } else {
       setMessage((await r.json()).error||'Gagal')
@@ -1273,14 +1292,14 @@ function MediaAssignmentField({slug,slot,breakpoint,assignments,fieldLabel,previ
   async function remove(){
     const p=new URLSearchParams({content_type:'model',content_key:slug,slot_key:slot,breakpoint})
     const r=await fetch(`/api/admin/content-media?${p}`,{method:'DELETE'})
-    if (r.ok) { setAsset(undefined); setMessage('Gambar dikosongkan ✓') }
+    if (r.ok) { setAsset(undefined); onChange?.(); setMessage('Gambar dikosongkan ✓') }
     else setMessage('Gagal menghapus')
   }
   return <div>
     <div className={styles.label}>{fieldLabel ?? `${breakpoint} image`}</div>
-    {asset?.public_url
+    {asset?.public_url && !hideImage
       ? <img src={asset.public_url} alt={asset.alt_text??slot} style={{width:'100%',aspectRatio:'16/7',objectFit:'cover',borderRadius:8,display:'block',margin:'8px 0'}}/>
-      : <div className={styles.fieldNote}>Belum ada gambar {breakpoint}.</div>}
+      : !hideImage ? <div className={styles.fieldNote}>Belum ada gambar {breakpoint}.</div> : null}
     <div className={styles.rowActions}>
       <button className={styles.btnSecondary} type="button" onClick={()=>setOpen(true)}>{asset ? 'Ganti dari Media Library' : 'Pilih dari Media Library'}</button>
       {asset && <button className={styles.btnSecondary} type="button" onClick={remove}>Hapus</button>}

@@ -31,13 +31,8 @@ import { priceStatusAllowsCalculator } from "@/lib/types/model";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import { J7ShsExploreCta } from "@/components/model/J7ShsExploreCta";
+import { CargoEditorial, J5_CARGO_STATS } from "@/components/model/CargoEditorial";
 import styles from "./specifications.module.css";
-
-const J5_CARGO = [
-  { label: "Volume bagasi", value: "480 L" },
-  { label: "Kursi baris kedua dilipat", value: "1.180 L" },
-  { label: "Bagasi depan", value: "35 L" },
-];
 
 interface Props { params: Promise<{ slug: string }> }
 
@@ -87,7 +82,7 @@ export default async function SpesifikasiPage({ params }: Props) {
   const cargoFromSpecs = slug === "jaecoo-j5-ev"
     ? model.specifications.find((category) => /bagasi|cargo/i.test(category.label))
     : undefined;
-  const cargoSpecs = cargoFromSpecs?.specs?.length ? cargoFromSpecs.specs : (slug === "jaecoo-j5-ev" ? J5_CARGO : null);
+  const cargoStats = slug === "jaecoo-j5-ev" ? [...J5_CARGO_STATS] : null;
   const tableCategories = cargoFromSpecs
     ? model.specifications.filter((category) => category !== cargoFromSpecs)
     : model.specifications;
@@ -136,37 +131,21 @@ export default async function SpesifikasiPage({ params }: Props) {
           </Container>
         </section>
 
+        {cargoStats && (
+          <CargoEditorial
+            desktop={cargoImage?.desktop}
+            mobile={cargoImage?.mobile}
+            alt={cargoImage?.alt || `${model.name} bagasi`}
+            focalX={cargoImage?.focal_x}
+            focalY={cargoImage?.focal_y}
+            stats={cargoStats}
+          />
+        )}
+
         {/* ── SPEC CATEGORIES ───────────────────────────────────────────── */}
         <section className={styles.specsSection} data-contrast="light">
           <Container size="content">
-            {cargoSpecs && (
-              <Reveal variant="fade-up">
-                <div className={styles.category}>
-                  {cargoImage?.desktop ? (
-                    <picture>
-                      {cargoImage.mobile ? <source media="(max-width: 767px)" srcSet={cargoImage.mobile} /> : null}
-                      <img
-                        src={cargoImage.desktop}
-                        alt={cargoImage.alt || `${model.name} bagasi`}
-                        className={styles.cargoImage}
-                      />
-                    </picture>
-                  ) : null}
-                  <h2 className={styles.categoryLabel}>Bagasi</h2>
-                  <table className={styles.table} aria-label={`Bagasi ${model.name}`}>
-                    <tbody>
-                      {cargoSpecs.map((spec) => (
-                        <tr key={spec.label} className={styles.row}>
-                          <th className={styles.rowLabel} scope="row">{spec.label}</th>
-                          <td className={styles.rowValue}>{spec.value}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </Reveal>
-            )}
-            <div className={cargoSpecs ? `${styles.categories} ${styles.categoriesAfterCargo}` : styles.categories}>
+            <div className={styles.categories}>
               {tableCategories.map((cat, i) => (
                 <Reveal key={cat.label} variant="fade-up" delay={i * 60}>
                   <div className={styles.category}>

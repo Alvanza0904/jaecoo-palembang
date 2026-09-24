@@ -207,9 +207,9 @@ export const MODELS: ModelData[] = [
       {
         label: "Bagasi",
         specs: [
-          { label: "Volume bagasi", value: "480 L" },
-          { label: "Kursi baris kedua dilipat", value: "1.180 L" },
-          { label: "Bagasi depan", value: "35 L" },
+          { label: "Kapasitas bagasi", value: "480 L" },
+          { label: "Dengan kursi belakang dilipat", value: "1.180 L" },
+          { label: "Front trunk / bagasi depan", value: "35 L" },
         ],
       },
       {
