@@ -205,14 +205,42 @@ export function focalToObjectPosition(focal_x = 50, focal_y = 50): string {
   return `${focal_x}% ${focal_y}%`
 }
 
+/** Filename stem shared by an original and its resized variants. */
+export function mediaStem(url?: string | null): string {
+  if (!url) return ""
+  const file = decodeURIComponent(url.split("?")[0].split("/").pop() || "")
+  return file
+    .replace(/__(?:\d+w|thumb|cutout|og)\.webp$/i, "")
+    .replace(/\.(jpe?g|png|webp|avif)$/i, "")
+    .toLowerCase()
+}
+
+/** A variant is usable only when it was generated from the current original. */
+export function variantMatchesSource(publicUrl?: string | null, variantUrl?: string | null): boolean {
+  if (!variantUrl) return false
+  const source = mediaStem(publicUrl)
+  if (!source) return true
+  return mediaStem(variantUrl) === source
+}
+
+export function pickOwnedUrl(
+  publicUrl: string | null | undefined,
+  variants: MediaVariants | Record<string, string> | null | undefined,
+  keys: string[],
+): string | undefined {
+  for (const key of keys) {
+    const url = variants?.[key as keyof MediaVariants]
+    if (url && variantMatchesSource(publicUrl, url)) return url
+  }
+  return publicUrl ?? undefined
+}
+
 /** Get best available URL for a media asset (variant → original) */
 export function getBestUrl(
   asset: MediaAsset,
   preferredWidth: 1920 | 1440 | 1024 | 768 | 480 | 'thumb' = 1440
 ): string {
-  const key = String(preferredWidth) as keyof MediaVariants
-  if (asset.variants?.[key]) return asset.variants[key]!
-  return asset.public_url ?? ''
+  return pickOwnedUrl(asset.public_url, asset.variants, [String(preferredWidth), "1440", "1920"]) ?? ""
 }
 
 /** Check if an asset has a cutout available */

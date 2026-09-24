@@ -24,7 +24,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { MediaPicker } from '@/components/admin/media/MediaPicker'
 import AIReadyField from '@/components/admin/ai/AIReadyField'
-import type { MediaAsset } from '@/lib/types/media-asset'
+import { pickOwnedUrl, type MediaAsset } from '@/lib/types/media-asset'
 import type { ResponsiveImage } from '@/lib/types/media'
 import type { HomepageContent } from '@/types/homepage-content'
 import type { SectionId as SharedSectionId, SectionRenderData } from '@/components/sections/HomepageSectionRenderer'
@@ -147,10 +147,10 @@ function mediaAssetToResponsiveImage(asset: MediaAsset): ResponsiveImage {
   const variants = asset.variants ?? {}
   const base = asset.public_url ?? undefined
   return {
-    desktop:      variants['1920'] ?? variants['1440'] ?? base,
-    tablet:       variants['1024'] ?? variants['768']  ?? base,
-    mobile:       variants['768']  ?? variants['480']  ?? base,
-    small_mobile: variants['480']  ?? base,
+    desktop: pickOwnedUrl(base, variants, ['1920', '1440']),
+    tablet: pickOwnedUrl(base, variants, ['1024', '768']),
+    mobile: pickOwnedUrl(base, variants, ['768', '480']),
+    small_mobile: pickOwnedUrl(base, variants, ['480']),
     alt:          asset.alt_text ?? asset.filename ?? '',
     width:        asset.width    ?? undefined,
     height:       asset.height   ?? undefined,

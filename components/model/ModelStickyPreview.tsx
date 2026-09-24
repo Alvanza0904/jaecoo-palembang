@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import type { ModelFeature, ModelHighlight, ModelPageCopy } from '@/lib/types/model'
 import { stickyRenderMode, textPreviewDraft } from '@/lib/models/text-preview'
+import { pickOwnedUrl } from '@/lib/types/media-asset'
 import overview from '@/app/(public)/model/[slug]/page.module.css'
 
 type Assignment = {
@@ -39,8 +40,7 @@ function desktopUrl(rows: Assignment[], slot: string): string {
     ?? matching[0]
   const asset = desktop?.media_assets
   if (!asset?.public_url) return ''
-  const variants = asset.variants ?? {}
-  return variants['1920'] ?? variants['1440'] ?? asset.public_url
+  return pickOwnedUrl(asset.public_url, asset.variants, ['1920', '1440']) ?? ''
 }
 
 function HeadingLines({ text, className, active }: { text: string; className: string; active?: boolean }) {

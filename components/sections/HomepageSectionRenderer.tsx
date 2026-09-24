@@ -57,6 +57,7 @@ import { HomeDealerLocation } from '@/components/sections/HomeDealerLocation'
 import { buildWhatsAppUrl } from '@/lib/utils/whatsapp'
 import type { ResponsiveImage } from '@/lib/types/media'
 import type { MediaAsset } from '@/lib/types/media-asset'
+import { pickOwnedUrl } from '@/lib/types/media-asset'
 
 export type SectionId =
   | 'hero'
@@ -169,10 +170,10 @@ function resolveHeroMedia(data: SectionRenderData) {
     const source = video ? asset.public_url ?? undefined : undefined
     return {
       image: {
-        desktop: source ?? asset.variants?.['1920'] ?? asset.variants?.['1440'] ?? asset.public_url ?? undefined,
-        tablet:  source ?? asset.variants?.['1024'] ?? asset.variants?.['768']  ?? asset.public_url ?? undefined,
-        mobile:  source ?? asset.variants?.['768']  ?? asset.variants?.['480']  ?? asset.public_url ?? undefined,
-        small_mobile: source ?? asset.variants?.['480'] ?? asset.public_url ?? undefined,
+        desktop: source ?? pickOwnedUrl(asset.public_url, asset.variants, ['1920', '1440']),
+        tablet: source ?? pickOwnedUrl(asset.public_url, asset.variants, ['1024', '768']),
+        mobile: source ?? pickOwnedUrl(asset.public_url, asset.variants, ['768', '480']),
+        small_mobile: source ?? pickOwnedUrl(asset.public_url, asset.variants, ['480']),
         cutout: asset.cutout_url ?? undefined,
         alt: asset.alt_text ?? asset.filename ?? '',
         mime_type: asset.mime_type,

@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from "./server";
 import type { ResponsiveImage } from "@/lib/types/media";
 import { isVideoMime, readVideoSettings } from "@/lib/types/video";
+import { pickOwnedUrl } from "@/lib/types/media-asset";
 
 export interface ContentMediaAssignment {
   content_type: string;
@@ -37,11 +38,12 @@ export function mediaAssetToImage(
   const base = asset.public_url ?? undefined;
   const video = isVideoMime(asset.mime_type);
   const playback = video ? readVideoSettings(asset.presentation_settings) : null;
+  const owned = (keys: string[]) => video ? base : pickOwnedUrl(base, variants, keys);
   const image: ResponsiveImage = {
-    desktop: video ? base : (variants["1920"] ?? variants["1440"] ?? base),
-    tablet: video ? base : (variants["1024"] ?? variants["768"] ?? base),
-    mobile: video ? base : (variants["768"] ?? variants["480"] ?? base),
-    small_mobile: video ? base : (variants["480"] ?? base),
+    desktop: owned(["1920", "1440"]),
+    tablet: owned(["1024", "768"]),
+    mobile: owned(["768", "480"]),
+    small_mobile: owned(["480"]),
     poster: playback?.poster_url ?? undefined,
     mime_type: asset.mime_type ?? undefined,
     alt: asset.alt_text ?? asset.filename ?? altFallback,

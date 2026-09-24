@@ -26,7 +26,7 @@ import {
   type ChangeEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import type { MediaAsset } from '@/lib/types/media-asset'
+import { pickOwnedUrl, type MediaAsset } from '@/lib/types/media-asset'
 import {
   type BreakpointKey,
   type PresentationMode,
@@ -197,17 +197,10 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
   // Sama dengan logika di queries.ts → mapModel() → heroImage.
   const variants = asset.variants as Record<string, string> | null | undefined
   const previewUrl = (() => {
-    if (activeBp === 'desktop') {
-      return variants?.['1920'] ?? variants?.['1440'] ?? asset.public_url ?? ''
-    }
-    if (activeBp === 'tablet') {
-      return variants?.['1024'] ?? variants?.['768'] ?? asset.public_url ?? ''
-    }
-    if (activeBp === 'mobile') {
-      return variants?.['768'] ?? variants?.['480'] ?? asset.public_url ?? ''
-    }
-    // small_mobile
-    return variants?.['480'] ?? asset.public_url ?? ''
+    if (activeBp === 'desktop') return pickOwnedUrl(asset.public_url, variants, ['1920', '1440']) ?? ''
+    if (activeBp === 'tablet') return pickOwnedUrl(asset.public_url, variants, ['1024', '768']) ?? ''
+    if (activeBp === 'mobile') return pickOwnedUrl(asset.public_url, variants, ['768', '480']) ?? ''
+    return pickOwnedUrl(asset.public_url, variants, ['480']) ?? ''
   })()
   const cutoutUrl = cutoutSourceAsset.cutout_url ?? ''
 

@@ -46,6 +46,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         public_url: publicData.publicUrl,
         mime_type: mime,
         size_bytes: size,
+        variants: {},
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)

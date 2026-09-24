@@ -12,6 +12,7 @@ import type {
 } from "@/lib/types/model";
 import type { PresentationSettings } from "@/lib/types/presentation";
 import type { ResponsiveImage } from "@/lib/types/media";
+import { pickOwnedUrl } from "@/lib/types/media-asset";
 import {
   contentMediaKey,
   getContentMedia,
@@ -319,29 +320,13 @@ function mapModel(
   const cutoutMedia = cutoutMediaId ? mediaAssets.get(cutoutMediaId) : undefined;
 
   const heroIsVideo = (heroMedia?.mime_type ?? "").startsWith("video/");
+  const heroSource = heroMedia?.public_url;
   const heroImage = heroMedia
     ? {
-        desktop: heroIsVideo
-          ? heroMedia.public_url ?? undefined
-          : heroMedia.variants?.["1920"] ??
-            heroMedia.variants?.["1440"] ??
-            heroMedia.public_url ??
-            undefined,
-        tablet: heroIsVideo
-          ? heroMedia.public_url ?? undefined
-          : heroMedia.variants?.["1024"] ??
-            heroMedia.variants?.["768"] ??
-            heroMedia.public_url ??
-            undefined,
-        mobile: heroIsVideo
-          ? heroMedia.public_url ?? undefined
-          : heroMedia.variants?.["768"] ??
-            heroMedia.variants?.["480"] ??
-            heroMedia.public_url ??
-            undefined,
-        small_mobile: heroIsVideo
-          ? heroMedia.public_url ?? undefined
-          : heroMedia.variants?.["480"] ?? heroMedia.public_url ?? undefined,
+        desktop: heroIsVideo ? heroSource ?? undefined : pickOwnedUrl(heroSource, heroMedia.variants, ["1920", "1440"]),
+        tablet: heroIsVideo ? heroSource ?? undefined : pickOwnedUrl(heroSource, heroMedia.variants, ["1024", "768"]),
+        mobile: heroIsVideo ? heroSource ?? undefined : pickOwnedUrl(heroSource, heroMedia.variants, ["768", "480"]),
+        small_mobile: heroIsVideo ? heroSource ?? undefined : pickOwnedUrl(heroSource, heroMedia.variants, ["480"]),
         mime_type: heroMedia.mime_type ?? undefined,
         poster: heroIsVideo
           ? (heroMedia.presentation_settings as { video?: { poster_url?: string } } | null)?.video?.poster_url
