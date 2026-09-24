@@ -14,10 +14,7 @@ import Link from 'next/link'
 import styles from './editor.module.css'
 import { MediaPicker } from '@/components/admin/media/MediaPicker'
 import { VisualMediaEditor } from '@/components/admin/visual-editor'
-import { ModelStickyPreview } from '@/components/model/ModelStickyPreview'
 import { CargoEditorial } from '@/components/model/CargoEditorial'
-import overview from '@/app/(public)/model/[slug]/page.module.css'
-import type { MediaWithArtDirection } from '@/lib/types/media'
 import { MODELS } from '@/lib/data/models'
 import type { MediaAsset } from '@/lib/types/media-asset'
 import type { ModelFeature, ModelHighlight, ModelPageCopy, ModelSectionCopy } from '@/lib/types/model'
@@ -1363,21 +1360,6 @@ const PAGE_GROUPS: Array<{
   },
 ]
 
-function heroMediaFromModel(model: AdminModel): MediaWithArtDirection {
-  const hero = model.model_content?.find((item) => item.section === "hero")?.content as Record<string, unknown> | undefined
-  const image = (hero?.image as Record<string, string> | undefined) ?? {}
-  const desktop = image.desktop || ""
-  return {
-    image: {
-      desktop,
-      tablet: image.tablet || desktop,
-      mobile: image.mobile || desktop,
-      alt: image.alt || model.name,
-    },
-    media_asset_id: typeof hero?.media_asset_id === "string" ? hero.media_asset_id : undefined,
-  }
-}
-
 function emptyFeature(): ModelFeature {
   return { id: `feature-${Date.now()}`, title: "", description: "", tag: "" }
 }
@@ -1764,32 +1746,6 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
         </div>
         <MediaPicker open={pickerIndex !== null} onClose={() => setPickerIndex(null)} onSelect={assignFeatureImage} title="Pilih gambar fitur" />
       </div>
-    </div>
-    <div className={styles.stickyPreview}>
-      {textEditMode ? (
-        <section className={overview.cinematicSection} style={{ minHeight: 420, height: 420, background: '#111' }}>
-          <div className={overview.cinematicOverlay} />
-          <div className={overview.cinematicContent}>
-            <h2 className={overview.cinematicHeading}>TITLE</h2>
-            <p className={overview.cinematicBody}>A modern driving experience designed around comfort, technology, and performance.</p>
-          </div>
-        </section>
-      ) : (
-        <ModelStickyPreview
-          slug={slug}
-          modelName={model.name}
-          tagline={model.tagline}
-          heroImage={heroMediaFromModel(model).image.desktop}
-          section={previewSection}
-          textEditMode={false}
-          focusedField={focusedField}
-          pageCopy={pageCopy}
-          highlights={highlights}
-          technology={technology}
-          features={features}
-          heroHeading={heroHeading}
-        />
-      )}
     </div>
     </div>
   )
