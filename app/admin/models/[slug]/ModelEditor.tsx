@@ -1247,7 +1247,7 @@ function ImageSlotsTab({ slug }: { slug: string }) {
   </div>
 }
 
-function MediaAssignmentField({slug,slot,breakpoint,assignments,fieldLabel}:{slug:string;slot:string;breakpoint:'desktop'|'mobile';assignments:Array<{slot_key:string;breakpoint:string|null;media_assets?:{id:string;public_url:string|null;alt_text:string|null;focal_x:number|null;focal_y:number|null}}>;fieldLabel?:string}) {
+function MediaAssignmentField({slug,slot,breakpoint,assignments,fieldLabel,previewHeading,previewSubheading,previewTagline}:{slug:string;slot:string;breakpoint:'desktop'|'mobile';assignments:Array<{slot_key:string;breakpoint:string|null;media_assets?:{id:string;public_url:string|null;alt_text:string|null;focal_x:number|null;focal_y:number|null}}>;fieldLabel?:string;previewHeading?:string;previewSubheading?:string;previewTagline?:string}) {
   const initial=assignments.find(x=>x.slot_key===slot&&x.breakpoint===breakpoint)?.media_assets
   const [asset,setAsset]=useState(initial)
   const [open,setOpen]=useState(false)
@@ -1279,7 +1279,7 @@ function MediaAssignmentField({slug,slot,breakpoint,assignments,fieldLabel}:{slu
       {asset && <button className={styles.btnSecondary} type="button" onClick={remove}>Hapus</button>}
     </div>
     {message&&<div className={styles.fieldNote}>{message}</div>}
-    <MediaPicker open={open} onClose={()=>setOpen(false)} onSelect={choose} title={`Pilih ${breakpoint} — ${slot}`}/>
+    <MediaPicker open={open} onClose={()=>setOpen(false)} onSelect={choose} title={`Pilih ${breakpoint} — ${slot}`} previewHeading={previewHeading} previewSubheading={previewSubheading} previewTagline={previewTagline}/>
   </div>
 }
 
@@ -1916,8 +1916,8 @@ function SubpageHeroEditor({
         <label className={styles.label}>Description</label>
         <textarea className={styles.textarea} rows={3} value={copy.body ?? ""} onChange={(e) => setCopy((row) => ({ ...row, body: e.target.value }))} />
       </div>
-      <MediaAssignmentField slug={slug} slot={slot} breakpoint="desktop" assignments={assignments} fieldLabel="Desktop image" />
-      <MediaAssignmentField slug={slug} slot={slot} breakpoint="mobile" assignments={assignments} fieldLabel="Mobile image" />
+      <MediaAssignmentField slug={slug} slot={slot} breakpoint="desktop" assignments={assignments} fieldLabel="Desktop image" previewHeading={copy.heading} previewSubheading={copy.body} previewTagline={copy.label} />
+      <MediaAssignmentField slug={slug} slot={slot} breakpoint="mobile" assignments={assignments} fieldLabel="Mobile image" previewHeading={copy.heading} previewSubheading={copy.body} previewTagline={copy.label} />
       <div className={styles.actions}>
         <button className={styles.btnPrimary} type="button" onClick={saveCopy} disabled={isPending}>{isPending ? "Menyimpan..." : "Simpan teks hero"}</button>
       </div>

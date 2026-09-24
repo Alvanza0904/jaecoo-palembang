@@ -1211,8 +1211,10 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
 
                   // Use the real Hero text flow to estimate CTA overlap. The actual
                   // text DOM below is the same structure/classes as LayeredHero.
-                  const headingStyle = getHeadingStyle(typo)
-                  const subheadingStyle = getSubheadingStyle(typo)
+                  const headingText = previewHeading?.trim() || 'TITLE'
+                  const subheadingText = previewSubheading?.trim() || 'A modern driving experience designed around comfort, technology, and performance.'
+                  const headingStyle = { ...getHeadingStyle(typo), color: '#fff' }
+                  const subheadingStyle = { ...getSubheadingStyle(typo), color: 'rgba(255,255,255,0.72)' }
                   const estimatedHeadingPx = getHeadingFontSizeRem(typo.font_size) * 16
                   const estimatedSubPx = getSubheadingFontSizeRem(typo.font_size) * 16
                   const estimatedTypoHeight = (previewTagline ? 16 * 1.2 + 12 : 0) +
@@ -1297,13 +1299,11 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                               {previewTagline && <p className={heroStyles.tagline}>{previewTagline}</p>}
                               <div className={heroStyles.headingBlock}>
                                 <h1 className={heroStyles.heading} style={headingStyle}>
-                                  {previewHeading || ''}
+                                  {headingText}
                                 </h1>
-                                {previewSubheading && (
-                                  <p className={heroStyles.subheading} style={subheadingStyle}>
-                                    {previewSubheading}
-                                  </p>
-                                )}
+                                <p className={heroStyles.subheading} style={subheadingStyle}>
+                                  {subheadingText}
+                                </p>
                               </div>
                             </div>
                           </div>
