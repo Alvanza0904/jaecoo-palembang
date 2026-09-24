@@ -23,12 +23,6 @@
   background: var(--color-off-white, #f6f4f1);
 }
 
-.stickyPreview :global(.model-text-preview-stage) section {
-  min-height: 420px !important;
-  height: 420px !important;
-  max-height: 420px !important;
-}
-
 @media (min-width: 1100px) {
   .previewLayout {
     grid-template-columns: minmax(0, 1fr) 380px;

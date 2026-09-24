@@ -1,17 +1,17 @@
 'use client'
 
 import { useEffect, useState, type CSSProperties } from 'react'
+import { Button } from '@/components/ui/Button'
+import { Container } from '@/components/ui/Container'
 import type { ModelFeature, ModelHighlight, ModelPageCopy } from '@/lib/types/model'
 import { stickyRenderMode, textPreviewDraft } from '@/lib/models/text-preview'
 import overview from '@/app/(public)/model/[slug]/page.module.css'
-import technologyStyles from '@/app/(public)/model/[slug]/technology/technology.module.css'
 
 type Assignment = {
   slot_key: string
   breakpoint: string | null
   media_assets?: {
     public_url?: string | null
-    alt_text?: string | null
     variants?: Record<string, string> | null
   } | null
 }
@@ -43,15 +43,13 @@ function desktopUrl(rows: Assignment[], slot: string): string {
   return variants['1920'] ?? variants['1440'] ?? asset.public_url
 }
 
-function Lines({ text, className, active }: { text: string; className: string; active?: boolean }) {
+function HeadingLines({ text, className, active }: { text: string; className: string; active?: boolean }) {
   if (!text) return null
-  const style: CSSProperties | undefined = active
-    ? { outline: '2px solid #C9A84C', outlineOffset: 6 }
-    : undefined
+  const style: CSSProperties | undefined = active ? { outline: '2px solid #C9A84C', outlineOffset: 4 } : undefined
   return (
     <h2 className={className} style={style}>
       {text.split('\n').map((line, index) => (
-        <span key={`${index}-${line}`}>
+        <span key={index}>
           {index > 0 && <br />}
           {line}
         </span>
@@ -60,14 +58,9 @@ function Lines({ text, className, active }: { text: string; className: string; a
   )
 }
 
-function stageStyle(): CSSProperties {
-  return {
-    position: 'relative',
-    height: 460,
-    overflow: 'hidden',
-    borderRadius: 8,
-    background: '#111',
-  }
+function Bg({ src, className }: { src: string; className: string }) {
+  if (!src) return null
+  return <img src={src} alt="" className={className} />
 }
 
 export function ModelStickyPreview({
@@ -112,15 +105,15 @@ export function ModelStickyPreview({
     }
   }, [slug])
 
+  const mode = stickyRenderMode(textEditMode)
   const draft = textPreviewDraft(section, pageCopy, technology, highlights)
   const image = desktopUrl(assignments, SLOT[section] || '')
-  const active = (field: string) => focusedField === field
-  const mode = stickyRenderMode(textEditMode)
+  const headingOn = focusedField === 'heading'
 
   let visual = (
-    <section className={overview.cinematicSection} style={{ minHeight: 460, height: 460 }}>
+    <section className={overview.cinematicSection} style={{ minHeight: 420, height: 420 }}>
       <div className={overview.cinematicBg}>
-        {heroImage ? <img src={heroImage} alt="" className={overview.cinematicBgImg} /> : null}
+        <Bg src={heroImage || ''} className={overview.cinematicBgImg} />
         <div className={overview.cinematicOverlay} />
       </div>
       <div className={overview.cinematicContent}>
@@ -132,105 +125,127 @@ export function ModelStickyPreview({
 
   if (mode === 'text' && section === 'performance') {
     visual = (
-      <section className={overview.performanceSection} style={{ minHeight: 460, height: 460 }}>
+      <section className={overview.performanceSection} data-live-section="performance" style={{ minHeight: 520 }}>
         <div className={overview.performanceBg}>
-          {image ? <img src={image} alt="" className={overview.performanceBgImg} /> : null}
-          <div className={overview.cinematicOverlay} />
+          <Bg src={image} className={overview.performanceBgImg} />
+          <div className={overview.cinematicOverlay} style={{ opacity: 0.6 }} />
         </div>
-        <div className={overview.performanceContent}>
-          {draft.label ? <p className={overview.editorialLabel}><span className={overview.editorialCat}>{draft.label}</span></p> : null}
-          <Lines text={draft.heading} className={overview.performanceHeading} active={active('heading')} />
-          {draft.body ? <p className={overview.cinematicBody} style={active('body') ? { outline: '2px solid #C9A84C' } : undefined}>{draft.body}</p> : null}
-          <div className={overview.performanceStats}>
-            {draft.highlights.map((item) => (
-              <div key={`${item.value}-${item.label}`} className={overview.performanceStat}>
-                <span className={overview.performanceStatTag}>{item.value}</span>
-                <span className={overview.performanceStatLabel}>{item.label}</span>
-              </div>
-            ))}
+        <Container size="wide">
+          <div className={overview.performanceContent} style={{ gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 0.8fr)' }}>
+            <div>
+              <p className={overview.editorialLabel}>
+                <span className={overview.editorialNum}>06</span>
+                <span className={overview.editorialCat}>{draft.label}</span>
+              </p>
+              <HeadingLines text={draft.heading} className={overview.performanceHeading} active={headingOn} />
+              {draft.body ? <p className={overview.cinematicBody}>{draft.body}</p> : null}
+            </div>
+            <div className={overview.performanceStats}>
+              {highlights.map((item) => (
+                <div key={`${item.value}-${item.label}`} className={overview.performanceStat}>
+                  <span className={overview.performanceStatTag}>{item.value}</span>
+                  <span className={overview.performanceStatLabel}>{item.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        </Container>
       </section>
     )
   } else if (mode === 'text' && section === 'technology') {
     visual = (
-      <section className={overview.techSection} style={{ minHeight: 460 }}>
-        <div className={overview.techLayout}>
-          {image ? <img src={image} alt="" className={overview.techMainImg} /> : null}
-          <div>
-            <Lines text={draft.heading} className={overview.techHeading} active={active('heading')} />
-            {draft.body ? <p className={overview.techSubheadline}>{draft.body}</p> : null}
-            {features.slice(0, 4).map((feature) => (
-              <p key={feature.id} className={overview.techFeatureTitle}>{feature.title}</p>
-            ))}
+      <section className={overview.techSection} data-live-section="technology">
+        <div className={overview.techLayout} style={{ gridTemplateColumns: 'minmax(0, 0.9fr) minmax(0, 1.1fr)', minHeight: 520 }}>
+          <div className={overview.techImageWrap}>
+            <Bg src={image} className={overview.techMainImg} />
           </div>
-        </div>
-      </section>
-    )
-  } else if (mode === 'text' && (section === 'tech_intelligence' || section === 'tech_close')) {
-    visual = (
-      <section className={technologyStyles.cinematicScene} style={{ minHeight: 460, height: 460 }}>
-        <div className={technologyStyles.sceneBg}>
-          {image ? <img src={image} alt="" className={technologyStyles.sceneBgImg} /> : null}
-        </div>
-        <div className={technologyStyles.sceneContent}>
-          {draft.label ? <p className={technologyStyles.sceneEyebrow}>{draft.label}</p> : null}
-          <Lines text={draft.heading} className={technologyStyles.cinematicHeading} active={active('heading')} />
-          {draft.body ? <p className={technologyStyles.sceneSupportText}>{draft.body}</p> : null}
-          {draft.primary ? <p className={overview.editorialCat}>{draft.primary}</p> : null}
-        </div>
-      </section>
-    )
-  } else if (mode === 'text' && (section === 'cta' || section === 'hero_cta' || section === 'specs_cta')) {
-    visual = (
-      <section className={overview.ctaSection} style={{ minHeight: 460, height: 460 }}>
-        <div className={overview.ctaBg}>
-          {image ? <img src={image} alt="" className={overview.ctaBgImg} /> : null}
-          <div className={overview.cinematicOverlay} />
-        </div>
-        <div className={overview.ctaContent}>
-          {draft.label ? <p className={overview.ctaEyebrow}>{draft.label}</p> : null}
-          <Lines text={draft.heading} className={overview.ctaHeading} active={active('heading')} />
-          {draft.body ? <p className={overview.ctaBody}>{draft.body}</p> : null}
-          <div className={overview.ctaActions}>
-            {draft.primary ? <span className={overview.editorialCat}>{draft.primary}</span> : null}
-            {draft.secondary ? <span className={overview.editorialCat}>{draft.secondary}</span> : null}
+          <div className={overview.techContent}>
+            <p className={overview.editorialLabel}>
+              <span className={overview.editorialNum}>07</span>
+              <span className={overview.editorialCat}>Teknologi</span>
+            </p>
+            <HeadingLines text={draft.heading} className={overview.techHeading} active={headingOn} />
+            {draft.body ? <p className={overview.techSubheadline}>{draft.body}</p> : null}
+            {features.slice(0, 4).map((feature, index) => (
+              <div key={feature.id || index} className={overview.techFeature}>
+                <span className={overview.techFeatureNum}>{String(index + 1).padStart(2, '0')}</span>
+                <div>
+                  {feature.tag ? <p className={overview.techFeatureTag}>{feature.tag}</p> : null}
+                  <p className={overview.techFeatureTitle}>{feature.title}</p>
+                </div>
+              </div>
+            ))}
+            <Button as="button" type="button" variant="secondary" size="md" className={overview.techCta}>
+              Jelajahi Teknologi →
+            </Button>
           </div>
         </div>
       </section>
     )
   } else if (mode === 'text' && section === 'adas') {
     visual = (
-      <section className={overview.cinematicSection} style={{ minHeight: 460, height: 460 }}>
+      <section className={overview.cinematicSection} data-live-section="adas" style={{ minHeight: 520 }}>
         <div className={overview.cinematicBg}>
-          {image ? <img src={image} alt="" className={overview.cinematicBgImg} /> : null}
-          <div className={overview.cinematicOverlay} />
+          <Bg src={image} className={overview.cinematicBgImg} />
+          <div className={overview.cinematicOverlay} style={{ opacity: 0.55 }} />
         </div>
-        <div className={overview.adasContent}>
-          {draft.label ? <p className={overview.editorialLabel}><span className={overview.editorialCat}>{draft.label}</span></p> : null}
-          {(draft.stat || draft.unit) && (
-            <p className={overview.performanceStatTag}>{[draft.stat, draft.unit].filter(Boolean).join(' ')}</p>
-          )}
-          <Lines text={draft.heading} className={overview.adasHeading} active={active('heading')} />
-          {draft.body ? <p className={overview.cinematicBody}>{draft.body}</p> : null}
+        <Container size="wide">
+          <div className={overview.adasContent}>
+            <p className={overview.editorialLabel}>
+              <span className={overview.editorialNum}>08</span>
+              <span className={overview.editorialCat}>{draft.label}</span>
+            </p>
+            {(draft.stat || draft.unit) && (
+              <div className={overview.adasStat}>
+                <span className={overview.adasStatNumber}>{draft.stat}</span>
+                <span className={overview.adasStatUnit}>{draft.unit}</span>
+              </div>
+            )}
+            <HeadingLines text={draft.heading} className={overview.adasHeading} active={headingOn} />
+            {draft.body ? <p className={overview.cinematicBody}>{draft.body}</p> : null}
+          </div>
+        </Container>
+      </section>
+    )
+  } else if (mode === 'text' && (section === 'cta' || section === 'hero_cta' || section === 'specs_cta' || section === 'tech_close')) {
+    visual = (
+      <section className={overview.ctaSection} data-live-section="cta" style={{ minHeight: 520 }}>
+        <div className={overview.ctaBg}>
+          <Bg src={image} className={overview.ctaBgImg} />
+          <div className={overview.cinematicOverlay} style={{ opacity: 0.65 }} />
         </div>
+        <Container size="narrow">
+          <div className={overview.ctaContent}>
+            {draft.label ? <p className={overview.ctaEyebrow}>{draft.label}</p> : null}
+            <HeadingLines text={draft.heading} className={overview.ctaHeading} active={headingOn} />
+            {draft.body ? <p className={overview.ctaBody}>{draft.body}</p> : null}
+            <div className={overview.ctaActions}>
+              {draft.primary ? (
+                <Button as="button" type="button" variant="primary" size="lg">{draft.primary}</Button>
+              ) : null}
+              {draft.secondary ? (
+                <Button as="button" type="button" variant="ghost" size="lg">{draft.secondary}</Button>
+              ) : null}
+            </div>
+          </div>
+        </Container>
       </section>
     )
   } else if (mode === 'text') {
-    const headingClass = section === 'cockpit'
-      ? overview.cockpitHeading
-      : section === 'profile'
-        ? overview.presenceHeading
-        : overview.cinematicHeading
+    const number = section === 'interior' ? '04' : section === 'cockpit' ? '05' : section === 'profile' ? '03' : section === 'design' ? '02' : '01'
+    const headingClass = section === 'cockpit' ? overview.cockpitHeading : section === 'profile' ? overview.presenceHeading : section === 'design' ? overview.detailHeading : overview.cinematicHeading
     visual = (
-      <section className={overview.cinematicSection} style={{ minHeight: 460, height: 460 }}>
+      <section className={overview.cinematicSection} data-live-section={section} style={{ minHeight: 520 }}>
         <div className={overview.cinematicBg}>
-          {image ? <img src={image} alt="" className={overview.cinematicBgImg} /> : null}
+          <Bg src={image} className={overview.cinematicBgImg} />
           <div className={overview.cinematicOverlay} />
         </div>
-        <div className={overview.cinematicContent}>
-          {draft.label ? <p className={overview.editorialLabel}><span className={overview.editorialCat}>{draft.label}</span></p> : null}
-          <Lines text={draft.heading} className={headingClass} active={active('heading')} />
+        <div className={overview.cinematicContent} data-position={section === 'interior' ? 'bottom-right' : 'bottom-left'}>
+          <p className={overview.editorialLabel}>
+            <span className={overview.editorialNum}>{number}</span>
+            <span className={overview.editorialCat}>{draft.label}</span>
+          </p>
+          <HeadingLines text={draft.heading} className={headingClass} active={headingOn} />
           {draft.body ? <p className={section === 'cockpit' ? overview.cockpitBody : overview.cinematicBody}>{draft.body}</p> : null}
         </div>
       </section>
@@ -238,17 +253,8 @@ export function ModelStickyPreview({
   }
 
   return (
-    <aside
-      aria-label={textEditMode ? `Text preview ${section}` : `Preview ${modelName}`}
-      data-preview-mode={mode}
-      data-preview-section-active={mode === 'text' ? section : 'model'}
-    >
-      <p className={overview.editorialLabel}>
-        <span className={overview.editorialCat}>
-          {mode === 'text' ? `Text preview · ${section}` : `Preview · ${modelName}`}
-        </span>
-      </p>
-      <div className="model-text-preview-stage" style={stageStyle()}>{visual}</div>
+    <aside aria-label={mode === 'text' ? `Section ${section}` : modelName} data-preview-mode={mode} data-preview-section-active={mode === 'text' ? section : 'model'}>
+      {visual}
     </aside>
   )
 }
