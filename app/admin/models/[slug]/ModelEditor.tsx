@@ -1398,6 +1398,29 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
   const [textEditMode, setTextEditMode] = useState(false)
   const [focusedField, setFocusedField] = useState<string | null>(null)
 
+  useEffect(() => {
+    function onPointerDown(event: PointerEvent) {
+      const target = event.target
+      if (!(target instanceof Element)) {
+        setTextEditMode(false)
+        setFocusedField(null)
+        return
+      }
+      const field = target.closest("[data-preview-field]")
+      const section = field?.closest("[data-preview-section]")?.getAttribute("data-preview-section")
+      if (field && section) {
+        setPreviewSection(section)
+        setTextEditMode(true)
+        setFocusedField(field.getAttribute("data-preview-field"))
+        return
+      }
+      setTextEditMode(false)
+      setFocusedField(null)
+    }
+    document.addEventListener("pointerdown", onPointerDown)
+    return () => document.removeEventListener("pointerdown", onPointerDown)
+  }, [])
+
   function patchSection(key: keyof ModelPageCopy, patch: Partial<ModelSectionCopy>, field?: string) {
     setPageCopy((current) => ({
       ...current,
@@ -1409,14 +1432,11 @@ function ContentTab({ model, slug }: { model: AdminModel; slug: string }) {
   }
 
   function leaveTextPreview(event: FocusEvent<HTMLElement>) {
-    const root = event.currentTarget
-    window.setTimeout(() => {
-      const active = document.activeElement
-      if (!(active instanceof Node) || !root.contains(active) || !(active instanceof Element) || !active.closest("[data-preview-section]")) {
-        setTextEditMode(false)
-        setFocusedField(null)
-      }
-    }, 40)
+    const next = event.relatedTarget
+    if (!(next instanceof Element)) return
+    if (next.closest("[data-preview-field]")) return
+    setTextEditMode(false)
+    setFocusedField(null)
   }
 
   function savePage() {
