@@ -55,6 +55,24 @@ export function mediaAssetToImage(
 }
 
 /**
+ * Slots edited as one image in Admin (the Mobile control is a separate slot,
+ * saved on breakpoint "desktop"). A leftover breakpoint="mobile" row must not
+ * override the file the admin thumbnail shows.
+ */
+export const DESKTOP_ONLY_MEDIA_SLOTS = new Set([
+  "exterior",
+  "exterior_mobile",
+  "design_detail_main",
+  "design_detail_wheel",
+  "design_detail_rear",
+  "profile",
+  "interior",
+  "interior_mobile",
+  "cockpit_main",
+  "cockpit_detail",
+]);
+
+/**
  * Central resolver for CMS image assignments.
  *
  * content_media is deliberately only a relation table: the binary and its
@@ -120,6 +138,13 @@ export async function getContentMedia(
       for (const row of matching) {
         const asset = assets.get(row.media_asset_id);
         if (asset) byBreakpoint.set(row.breakpoint, asset);
+      }
+
+      if (DESKTOP_ONLY_MEDIA_SLOTS.has(request.slot_key)) {
+        const only = byBreakpoint.get("desktop") ?? byBreakpoint.get(null) ?? byBreakpoint.values().next().value;
+        const image = mediaAssetToImage(only);
+        if (image) result[`${request.content_type}:${request.content_key}:${request.slot_key}`] = image;
+        continue;
       }
 
       const universal = byBreakpoint.get(null);

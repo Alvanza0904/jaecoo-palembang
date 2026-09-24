@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient, getServerUser } from "@/lib/supabase/server";
+import { DESKTOP_ONLY_MEDIA_SLOTS } from "@/lib/supabase/media";
 
 async function requireUser() {
   const user = await getServerUser();
@@ -22,6 +23,22 @@ function revalidateModelMedia(contentKey: string) {
   revalidatePath(`/model/${contentKey}`);
   revalidatePath(`/model/${contentKey}/technology`);
   revalidatePath(`/model/${contentKey}/specifications`);
+}
+
+async function clearStaleBreakpoints(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  contentType: string,
+  contentKey: string,
+  slotKey: string,
+) {
+  if (!DESKTOP_ONLY_MEDIA_SLOTS.has(slotKey)) return;
+  await supabase
+    .from("content_media")
+    .delete()
+    .eq("content_type", contentType)
+    .eq("content_key", contentKey)
+    .eq("slot_key", slotKey)
+    .or("breakpoint.is.null,breakpoint.eq.mobile,breakpoint.eq.tablet,breakpoint.eq.small_mobile");
 }
 
 export async function GET(request: Request) {
@@ -123,6 +140,7 @@ export async function PUT(request: Request) {
           .single();
 
         if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+        await clearStaleBreakpoints(supabase, contentType, contentKey, slotKey);
         revalidateModelMedia(contentKey);
         return NextResponse.json({ assignment: data });
       }
@@ -161,6 +179,9 @@ export async function PUT(request: Request) {
       .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    if (breakpoint === "desktop") {
+      await clearStaleBreakpoints(supabase, contentType, contentKey, slotKey);
+    }
     revalidateModelMedia(contentKey);
     return NextResponse.json({ assignment: data });
   } catch (error) {
