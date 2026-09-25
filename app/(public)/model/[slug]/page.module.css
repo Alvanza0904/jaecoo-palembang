@@ -376,20 +376,32 @@
   width: 100%;
 }
 
-/* Floating detail image — bottom-right overlap */
+/* Floating detail image stays on the photo, not on the heading. */
 .cockpitFloatingWrap {
   position: absolute;
-  bottom: -var(--space-8);
-  right: -var(--space-4);
-  width: 42%;
-  z-index: 10;
+  bottom: var(--space-4);
+  right: var(--space-4);
+  width: 36%;
+  z-index: 1;
 }
 
 @media (min-width: 1024px) {
   .cockpitFloatingWrap {
-    bottom: calc(-1 * var(--space-10));
-    right: calc(-1 * var(--space-8));
-    width: 38%;
+    bottom: var(--space-6);
+    right: var(--space-6);
+    width: 32%;
+  }
+}
+
+@media (max-width: 767px) {
+  .cockpitFloatingWrap {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: min(48%, 220px);
+    margin-top: calc(-1 * var(--space-8));
+    margin-bottom: var(--space-6);
+    margin-left: var(--space-4);
   }
 }
 
@@ -399,7 +411,9 @@
 }
 
 .cockpitText {
-  padding-top: var(--space-8);
+  position: relative;
+  z-index: 2;
+  padding-top: var(--space-6);
 }
 
 @media (min-width: 768px) {
