@@ -711,7 +711,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                 {pm === 'overlay' ? 'Overlay' : pm === 'bg' ? 'BG' : 'Cutout'}
               </button>
             ))}
-            <span className={styles.canvasDims}>{dims.width}×{dims.height}</span>
+            <span className={styles.canvasDims}>{previewW}×{previewH}</span>
           </div>
 
           {/* Canvas */}
@@ -776,6 +776,42 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                   transition: 'outline 0.15s',
                 }}
               />
+            )}
+
+            {/* Live hero overlay + typography. Pointer events stay on the canvas
+                so background and cutout dragging is unchanged. */}
+            {previewMode === 'overlay' && (
+              <>
+                <div className={styles.typoCanvasOverlay} />
+                <div
+                  className={styles.typoCanvasWorld}
+                  style={{
+                    width: getTypographyPreviewCoordinateSpace(activeBp).width,
+                    height: getTypographyPreviewCoordinateSpace(activeBp).height,
+                    transform: `scale(${getTypographyPreviewScale(activeBp, previewW)})`,
+                  }}
+                >
+                  <div
+                    className={heroStyles.typographyContainer}
+                    style={{
+                      ...getTypographyContainerStyle(effectiveSettings.typography),
+                      display: 'flex',
+                    }}
+                  >
+                    {previewTagline && <p className={heroStyles.tagline}>{previewTagline}</p>}
+                    <div className={heroStyles.headingBlock}>
+                      <h1 className={heroStyles.heading} style={{ ...getHeadingStyle(effectiveSettings.typography), color: '#fff' }}>
+                        {previewHeading?.trim() || 'TITLE'}
+                      </h1>
+                      {previewSubheading && (
+                        <p className={heroStyles.subheading} style={{ ...getSubheadingStyle(effectiveSettings.typography), color: 'rgba(255,255,255,0.72)' }}>
+                          {previewSubheading}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
 
             {/* Focal marker — hanya saat BG aktif dan custom */}

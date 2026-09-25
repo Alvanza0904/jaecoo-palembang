@@ -146,14 +146,15 @@ export const TYPOGRAPHY_BASE_REM = 4
 export const SUBHEADING_BASE_REM = 1.375
 
 /**
- * Canonical aspect ratios for each breakpoint preview canvas.
- * These define the W:H ratio of the preview container in the editor.
+ * Aspect ratios of the public hero, which is always full-bleed 100svh.
+ * Mobile and small mobile follow a phone viewport, not a 9:16 card.
+ * Desktop and tablet stay at the frames already used by the editor.
  */
 export const BREAKPOINT_ASPECT_RATIO: Record<BreakpointKey, number> = {
   desktop:      16 / 9,
   tablet:       4 / 3,
-  mobile:       9 / 16,
-  small_mobile: 9 / 18,
+  mobile:       390 / 844,
+  small_mobile: 375 / 812,
 }
 
 /**
@@ -174,8 +175,8 @@ export const BREAKPOINT_DESIGN_WIDTH: Record<BreakpointKey, number> = {
 export const BREAKPOINT_PREVIEW_DIMS: Record<BreakpointKey, { width: number; height: number }> = {
   desktop:      { width: 320, height: 180 },
   tablet:       { width: 240, height: 180 },
-  mobile:       { width: 160, height: 284 },
-  small_mobile: { width: 130, height: 260 },
+  mobile:       { width: 160, height: 346 },
+  small_mobile: { width: 130, height: 281 },
 }
 
 /** Default auto settings per breakpoint */
