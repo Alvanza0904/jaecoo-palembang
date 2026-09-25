@@ -78,7 +78,9 @@
   .cinematicSection,
   .presenceSection,
   .performanceSection {
-    min-height: 100svh;
+    min-height: 0;
+    height: auto;
+    aspect-ratio: 16 / 9;
   }
 }
 
