@@ -1,4 +1,5 @@
-import { createSupabaseServerClient } from "./server";
+import { cache } from "react";
+import { createSupabasePublicClient } from "./server";
 import type {
   ModelData,
   ModelVariant,
@@ -119,7 +120,7 @@ async function getMediaAssets(ids: string[]): Promise<Map<string, SupabaseMediaR
   const uniqueIds = Array.from(new Set(ids.filter(Boolean)));
   if (!uniqueIds.length) return new Map();
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicClient();
   const { data, error } = await supabase
     .from("media_assets")
     .select(
@@ -455,25 +456,31 @@ const MODEL_SELECT = `
   model_content(section, content)
 `;
 
+async function hydrateModels(models: ModelData[]): Promise<ModelData[]> {
+  const requests = models.flatMap((model) =>
+    MODEL_MEDIA_SLOTS.map((slot) => ({
+      content_type: "model",
+      content_key: model.slug,
+      slot_key: slot,
+    })),
+  );
+  const resolved = await getContentMedia(requests);
+  return models.map((model) => {
+    const image_slots = { ...(model.image_slots ?? {}) };
+    for (const slot of MODEL_MEDIA_SLOTS) {
+      const image = resolved[contentMediaKey("model", model.slug, slot)];
+      if (image) image_slots[slot] = image;
+    }
+    return { ...model, image_slots };
+  });
+}
+
 async function hydrateModelImages(
   model: ModelData,
   slug: string,
 ): Promise<ModelData> {
-  const requests = MODEL_MEDIA_SLOTS.map((slot) => ({
-    content_type: "model",
-    content_key: slug,
-    slot_key: slot,
-  }));
-
-  const resolved = await getContentMedia(requests);
-  const image_slots = { ...(model.image_slots ?? {}) };
-
-  for (const slot of MODEL_MEDIA_SLOTS) {
-    const image = resolved[contentMediaKey("model", slug, slot)];
-    if (image) image_slots[slot] = image;
-  }
-
-  return { ...model, image_slots };
+  const [hydrated] = await hydrateModels([{ ...model, slug: slug as ModelData["slug"] }]);
+  return hydrated ?? model;
 }
 
 async function buildModelsFromRows(rows: SupabaseModel[]): Promise<ModelData[]> {
@@ -504,9 +511,7 @@ async function buildModelsFromRows(rows: SupabaseModel[]): Promise<ModelData[]> 
     return mapModel(row, fallback, assets);
   });
 
-  const hydrated = await Promise.all(
-    mapped.map((model) => hydrateModelImages(model, model.slug)),
-  );
+  const hydrated = await hydrateModels(mapped);
 
   const merged = applySharedJ7Specifications([...hydrated, ...missingStaticModels(hydrated)]);
   const lineup = ["jaecoo-j5-ev", "jaecoo-j7-shs", "jaecoo-j7-sivp", "jaecoo-j8-shs"];
@@ -534,9 +539,9 @@ function applySharedJ7Specifications(models: ModelData[]): ModelData[] {
   );
 }
 
-export async function getModels(): Promise<ModelData[]> {
+export const getModels = cache(async function getModels(): Promise<ModelData[]> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const { data, error } = await supabase
       .from("models")
       .select(MODEL_SELECT)
@@ -551,13 +556,13 @@ export async function getModels(): Promise<ModelData[]> {
     console.warn("[Supabase] getModels() failed — using image-safe static fallback:", err);
     return getStaticModels();
   }
-}
+});
 
-export async function getModelBySlug(
+export const getModelBySlug = cache(async function getModelBySlug(
   slug: string,
 ): Promise<ModelData | undefined> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const { data, error } = await supabase
       .from("models")
       .select(MODEL_SELECT)
@@ -602,11 +607,11 @@ export async function getModelBySlug(
     console.warn(`[Supabase] getModelBySlug(${slug}) failed — using image-safe static fallback:`, err);
     return getStaticModelBySlug(slug);
   }
-}
+});
 
 export async function getModelSlugs(): Promise<string[]> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const { data, error } = await supabase
       .from("models")
       .select("slug")
@@ -627,7 +632,7 @@ export async function getModelSlugs(): Promise<string[]> {
 
 export async function testConnection(): Promise<{ ok: boolean; error?: string }> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const { error } = await supabase.from("models").select("slug").limit(1);
     if (error) throw error;
     return { ok: true };

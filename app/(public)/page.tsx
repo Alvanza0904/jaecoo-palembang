@@ -37,7 +37,7 @@ import { HomeModelSlider } from "@/components/sections/HomeModelSlider";
 import { HomePromoSection, HomeJournalSection } from "@/components/sections/HomeExperience";
 import { HomepageSectionRenderer } from "@/components/sections/HomepageSectionRenderer";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "JAECOO Palembang — Dealer Resmi JAECOO",

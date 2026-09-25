@@ -4,8 +4,9 @@
  * Fallback: static mock data
  */
 
+import { cache } from "react";
 import type { NewsData } from "@/lib/types/news";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicClient } from "@/lib/supabase/server";
 import { getEntityMedia } from "@/lib/supabase/media";
 
 // Static fallback — used when Supabase is unavailable
@@ -30,7 +31,7 @@ const FALLBACK_NEWS: Omit<NewsData, "cover">[] = [
  */
 async function fetchNewsFromSupabase(limit?: number): Promise<NewsData[] | null> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     let query = supabase
       .from("news")
       .select("id, slug, title, excerpt, body_html, category, published_at, updated_at, published, cover_url, meta_title, meta_description")
@@ -65,7 +66,7 @@ async function fetchNewsFromSupabase(limit?: number): Promise<NewsData[] | null>
   }
 }
 
-export async function getPublishedNews(limit?: number): Promise<NewsData[]> {
+export const getPublishedNews = cache(async function getPublishedNews(limit?: number): Promise<NewsData[]> {
   // Try Supabase first
   const supabaseData = await fetchNewsFromSupabase(limit);
   if (supabaseData && supabaseData.length > 0) return supabaseData;
@@ -82,12 +83,12 @@ export async function getPublishedNews(limit?: number): Promise<NewsData[]> {
       cover: (await getEntityMedia("news", news.id, "cover")) ?? { alt: news.title },
     }))
   );
-}
+});
 
 export async function getNewsBySlug(slug: string): Promise<NewsData | undefined> {
   // Try Supabase first
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const { data, error } = await supabase
       .from("news")
       .select("id, slug, title, excerpt, body_html, category, published_at, updated_at, published, cover_url, meta_title, meta_description")
@@ -131,7 +132,7 @@ export async function getNewsBySlug(slug: string): Promise<NewsData | undefined>
 // For generateStaticParams
 export async function getAllNewsSlugs(): Promise<string[]> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const { data } = await supabase
       .from("news")
       .select("slug")

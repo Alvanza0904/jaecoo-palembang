@@ -22,7 +22,7 @@
  *   + Finance Calculator (minimal, integrated)
  */
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";

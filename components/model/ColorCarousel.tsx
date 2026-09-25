@@ -66,9 +66,8 @@ export function ColorCarousel({ colors, modelName }: ColorCarouselProps) {
               src={activeColor.image.desktop}
               alt={activeColor.image.alt ?? `${modelName} ${activeColor.name}`}
               fill
-              priority
               className={styles.vehicleImg}
-              sizes="100vw"
+              sizes="(max-width: 768px) 100vw, 80vw"
               style={Object.keys(imgStyle).length > 0 ? imgStyle : undefined}
             />
           );

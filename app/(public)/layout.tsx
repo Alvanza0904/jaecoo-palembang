@@ -8,6 +8,8 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { getSiteBrandAssets } from "@/lib/supabase/media";
 
+export const revalidate = 60;
+
 export default async function PublicLayout({
   children,
 }: {

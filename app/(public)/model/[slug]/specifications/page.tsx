@@ -11,7 +11,7 @@
  * - Navigation back to Overview
  */
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";

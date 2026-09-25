@@ -143,6 +143,25 @@ export function LayeredHero({
   const playback = readVideoSettings(presentationSettings);
   const assetIsVideo = isVideoSource(image.mime_type, image.desktop || image.mobile);
 
+  function cutoutVars(): React.CSSProperties {
+    const styleFor = (breakpoint: BreakpointKey) => {
+      const effective = resolveBreakpointSettings(
+        cutoutPresentationSettings ?? {},
+        breakpoint,
+        cutoutFocalX,
+        cutoutFocalY,
+        cutoutBboxHPct,
+      );
+      return getCutoutLayerStyle(effective.cutout);
+    };
+    return {
+      "--cutout-transform": styleFor("mobile").transform,
+      "--cutout-sm-transform": styleFor("small_mobile").transform,
+      "--cutout-tablet-transform": styleFor("tablet").transform,
+      "--cutout-desktop-transform": styleFor("desktop").transform,
+    } as React.CSSProperties;
+  }
+
   return (
     <section
       className={[
@@ -169,67 +188,43 @@ export function LayeredHero({
         ) : video ? (
           <VideoBackground video={video} />
         ) : (
-          <div className={styles.bgImages}>
-            {image.small_mobile && (
-              <div className={styles.bgImageSmallMobile}>
-                <Image
-                  src={image.small_mobile}
-                  alt=""
-                  fill
-                  priority
-                  quality={90}
-                  style={getBackgroundStyle("small_mobile")}
-                  className={styles.bgImg}
-                  sizes="100vw"
-                />
-              </div>
-            )}
-            {image.mobile && (
-              <div className={styles.bgImageMobile}>
-                <Image
-                  src={image.mobile}
-                  alt=""
-                  fill
-                  priority
-                  quality={90}
-                  style={getBackgroundStyle("mobile")}
-                  className={styles.bgImg}
-                  sizes="100vw"
-                />
-              </div>
+          <picture className={styles.bgPicture}>
+            {image.desktop && (
+              <source media="(min-width: 1024px)" srcSet={image.desktop} />
             )}
             {image.tablet && (
-              <div className={styles.bgImageTablet}>
-                <Image
-                  src={image.tablet}
-                  alt=""
-                  fill
-                  priority
-                  quality={90}
-                  style={getBackgroundStyle("tablet")}
-                  className={styles.bgImg}
-                  sizes="100vw"
-                />
-              </div>
+              <source media="(min-width: 768px)" srcSet={image.tablet} />
             )}
-            {image.desktop && (
-              <div className={styles.bgImageDesktop}>
-                <Image
-                  src={image.desktop}
-                  alt=""
-                  fill
-                  priority
-                  quality={90}
-                  style={getBackgroundStyle("desktop")}
-                  className={styles.bgImg}
-                  sizes="100vw"
-                />
-              </div>
+            {image.small_mobile && image.small_mobile !== (image.mobile || image.desktop) && (
+              <source media="(max-width: 389px)" srcSet={image.small_mobile} />
             )}
-            {!image.desktop && !image.mobile && (
-              <div className={styles.bgPlaceholder} />
-            )}
-          </div>
+            {/* One request. Breakpoint crop still comes from presentation_settings. */}
+            <img
+              src={image.mobile || image.tablet || image.desktop || ""}
+              alt=""
+              className={`${styles.bgImg} ${styles.bgPictureImg}`}
+              fetchPriority="high"
+              decoding="async"
+              style={{
+                "--hero-fit": getBackgroundStyle("mobile").objectFit,
+                "--hero-pos": getBackgroundStyle("mobile").objectPosition,
+                "--hero-transform": getBackgroundStyle("mobile").transform,
+                "--hero-origin": getBackgroundStyle("mobile").transformOrigin,
+                "--hero-sm-fit": getBackgroundStyle("small_mobile").objectFit,
+                "--hero-sm-pos": getBackgroundStyle("small_mobile").objectPosition,
+                "--hero-sm-transform": getBackgroundStyle("small_mobile").transform,
+                "--hero-sm-origin": getBackgroundStyle("small_mobile").transformOrigin,
+                "--hero-tablet-fit": getBackgroundStyle("tablet").objectFit,
+                "--hero-tablet-pos": getBackgroundStyle("tablet").objectPosition,
+                "--hero-tablet-transform": getBackgroundStyle("tablet").transform,
+                "--hero-tablet-origin": getBackgroundStyle("tablet").transformOrigin,
+                "--hero-desktop-fit": getBackgroundStyle("desktop").objectFit,
+                "--hero-desktop-pos": getBackgroundStyle("desktop").objectPosition,
+                "--hero-desktop-transform": getBackgroundStyle("desktop").transform,
+                "--hero-desktop-origin": getBackgroundStyle("desktop").transformOrigin,
+              } as React.CSSProperties}
+            />
+          </picture>
         )}
         <div
           className={styles.overlay}
@@ -295,34 +290,14 @@ export function LayeredHero({
       {/* ── Vehicle cutout layer (foreground) ── */}
       {hasCutout && (
         <div className={styles.cutout} aria-hidden="true" data-cutout-layer>
-          {BREAKPOINT_ORDER.map((breakpoint) => {
-            const effective = resolveBreakpointSettings(
-              cutoutPresentationSettings ?? {},
-              breakpoint,
-              cutoutFocalX,
-              cutoutFocalY,
-              cutoutBboxHPct,
-            );
-            // Uses shared getCutoutLayerStyle() from presentation.ts — same as Editor Preview
-            const cutoutStyle = getCutoutLayerStyle(effective.cutout);
-            return (
-              <Image
-                key={breakpoint}
-                src={image.cutout!}
-                alt={image.alt}
-                fill
-                priority
-                className={`${styles.cutoutImg} ${styles[`cutoutImg--${breakpoint}`]}`}
-                style={cutoutStyle}
-                data-cutout-breakpoint={breakpoint}
-                data-cutout-mode={effective.mode}
-                data-cutout-position-x={effective.cutout.position_x}
-                data-cutout-position-y={effective.cutout.position_y}
-                data-cutout-scale={effective.cutout.scale}
-                sizes="100vw"
-              />
-            );
-          })}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={image.cutout}
+            alt={image.alt}
+            className={styles.cutoutSingle}
+            decoding="async"
+            style={cutoutVars()}
+          />
         </div>
       )}
 
@@ -343,6 +318,7 @@ function VideoBackground({ video }: { video: ResponsiveVideo }) {
         loop
         playsInline
         poster={video.poster}
+        preload="metadata"
         aria-hidden="true"
       >
         {video.mobile && (

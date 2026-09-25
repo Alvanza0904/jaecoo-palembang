@@ -34,7 +34,9 @@ function validSrc(src?: string | null): boolean {
 export function HomeModelSlider({ models }: Props) {
   const list = sorted(models);
   const [current, setCurrent] = useState(0);
+  const [inView, setInView] = useState(true);
   const touchStart = useRef<number | null>(null);
+  const sectionRef = useRef<HTMLElement>(null);
 
   const prev = useCallback(() => setCurrent((c) => (c - 1 + list.length) % list.length), [list.length]);
   const next = useCallback(() => setCurrent((c) => (c + 1) % list.length), [list.length]);
@@ -49,16 +51,29 @@ export function HomeModelSlider({ models }: Props) {
     return () => window.removeEventListener("keydown", handler);
   }, [prev, next]);
 
-  // Auto-advance
   useEffect(() => {
+    const node = sectionRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { rootMargin: "200px 0px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  // Auto-advance only while the slider is near the viewport.
+  useEffect(() => {
+    if (!inView) return;
     const timer = setInterval(next, 7000);
     return () => clearInterval(timer);
-  }, [next]);
+  }, [next, inView]);
 
   if (!list.length) return null;
 
   return (
     <section
+      ref={sectionRef}
       className={styles.section}
       onTouchStart={(e) => { touchStart.current = e.touches[0].clientX; }}
       onTouchEnd={(e) => {
@@ -91,19 +106,22 @@ export function HomeModelSlider({ models }: Props) {
             "--slider-mobile-origin":    mobileImgStyle.transformOrigin,
           } as CSSProperties;
 
+          const nearby = isActive || i === (current + 1) % list.length || i === (current - 1 + list.length) % list.length;
+
           return (
             <div
               key={model.slug}
               className={[styles.slide, isActive ? styles.slideActive : ""].join(" ")}
               aria-hidden={!isActive}
             >
-              {validSrc(src) ? (
+              {nearby && validSrc(src) ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={src!}
                   alt={model.name}
                   className={styles.slideImg}
-                  loading={i === 0 ? "eager" : "lazy"}
+                  loading={isActive ? "eager" : "lazy"}
+                  fetchPriority={isActive ? "high" : "low"}
                   decoding="async"
                   style={Object.keys(desktopImgStyle).length > 0 ? slideImgStyle : undefined}
                 />

@@ -6,6 +6,8 @@ import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { formatDate } from "@/lib/utils/format";
 import styles from "./berita.module.css";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "JAECOO Journal — Berita & Artikel",
   description: "Berita, artikel, tips, review, promo dan update terbaru seputar JAECOO Palembang.",

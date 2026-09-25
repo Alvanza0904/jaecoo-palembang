@@ -13,6 +13,8 @@ import { buildWhatsAppUrl } from '@/lib/utils/whatsapp';
 import { formatDate } from '@/lib/utils/format';
 import styles from './promo.module.css';
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: 'Promo JAECOO Palembang — Penawaran Terkini',
   description: 'Cashback, DP murah, bunga 0%, dan penawaran eksklusif untuk JAECOO J5, J7, dan J8 di Palembang.',

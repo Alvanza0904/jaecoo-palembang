@@ -34,9 +34,29 @@
   inset: 0;
 }
 
-.bgImages {
+.bgPicture {
   position: absolute;
   inset: 0;
+}
+
+.bgPictureImg {
+  width: 100%;
+  height: 100%;
+  object-fit: var(--hero-fit, cover);
+  object-position: var(--hero-pos, 50% 50%);
+  transform: var(--hero-transform, none);
+  transform-origin: var(--hero-origin, 50% 50%);
+}
+
+.cutoutSingle {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: 50% 50%;
+  transform: var(--cutout-transform, none);
+  transform-origin: 50% 50%;
 }
 
 /* Responsive image containers */
@@ -70,6 +90,15 @@
   object-fit: cover;
   object-position: center;
   transition: transform var(--duration-cinematic) var(--ease-cinema);
+}
+
+.bgImg.bgPictureImg {
+  width: 100%;
+  height: 100%;
+  object-fit: var(--hero-fit, cover);
+  object-position: var(--hero-pos, 50% 50%);
+  transform: var(--hero-transform, none);
+  transform-origin: var(--hero-origin, 50% 50%);
 }
 
 /* Placeholder when no image */
@@ -338,7 +367,41 @@
   .cutoutImg--desktop { display: block; }
 }
 
-/* ─── Reduced motion ──────────────────────────────────── */
+@media (max-width: 389px) {
+  .bgImg.bgPictureImg {
+    object-fit: var(--hero-sm-fit, var(--hero-fit, cover));
+    object-position: var(--hero-sm-pos, var(--hero-pos, 50% 50%));
+    transform: var(--hero-sm-transform, var(--hero-transform, none));
+    transform-origin: var(--hero-sm-origin, var(--hero-origin, 50% 50%));
+  }
+  .cutoutSingle {
+    transform: var(--cutout-sm-transform, var(--cutout-transform, none));
+  }
+}
+
+@media (min-width: 768px) {
+  .bgImg.bgPictureImg {
+    object-fit: var(--hero-tablet-fit, var(--hero-fit, cover));
+    object-position: var(--hero-tablet-pos, var(--hero-pos, 50% 50%));
+    transform: var(--hero-tablet-transform, var(--hero-transform, none));
+    transform-origin: var(--hero-tablet-origin, var(--hero-origin, 50% 50%));
+  }
+  .cutoutSingle {
+    transform: var(--cutout-tablet-transform, var(--cutout-transform, none));
+  }
+}
+
+@media (min-width: 1024px) {
+  .bgImg.bgPictureImg {
+    object-fit: var(--hero-desktop-fit, cover);
+    object-position: var(--hero-desktop-pos, 50% 50%);
+    transform: var(--hero-desktop-transform, none);
+    transform-origin: var(--hero-desktop-origin, 50% 50%);
+  }
+  .cutoutSingle {
+    transform: var(--cutout-desktop-transform, var(--cutout-transform, none));
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .bgImg {

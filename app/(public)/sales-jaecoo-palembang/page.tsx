@@ -4,7 +4,7 @@
  * Personal Automotive Consultant experience.
  */
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/Button";

@@ -12,6 +12,8 @@ import { buildWhatsAppUrl } from '@/lib/utils/whatsapp';
 import { formatDate } from '@/lib/utils/format';
 import styles from './promo-detail.module.css';
 
+export const revalidate = 60;
+
 interface Props { params: Promise<{ slug: string }> }
 
 export async function generateStaticParams() {

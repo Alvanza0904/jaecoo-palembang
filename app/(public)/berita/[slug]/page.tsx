@@ -11,6 +11,8 @@ import { Container } from "@/components/ui/Container";
 import { formatDate } from "@/lib/utils/format";
 import styles from "./berita-detail.module.css";
 
+export const revalidate = 60;
+
 interface Props { params: Promise<{ slug: string }> }
 
 export async function generateStaticParams() {

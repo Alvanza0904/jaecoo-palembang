@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/Button";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import styles from "./gallery.module.css";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Gallery JAECOO Palembang — Foto & Detail",
   description: "Eksplorasi desain, interior, dan detail JAECOO J5 EV, J7 SHS, dan J8 ARDIS SHS di Palembang.",

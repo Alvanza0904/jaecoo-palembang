@@ -4,13 +4,14 @@
  * Static data dihapus; semua query langsung ke tabel promos.
  */
 
-import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { cache } from 'react';
+import { createSupabasePublicClient } from '@/lib/supabase/server';
 import type { Promo } from '@/lib/types/promo';
 
 /** Ambil semua promo berstatus published untuk public page */
-export async function getActivePromos(): Promise<Promo[]> {
+export const getActivePromos = cache(async function getActivePromos(): Promise<Promo[]> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const { data, error } = await supabase
       .from('promos')
       .select('*, models(id, name, slug)')
@@ -24,12 +25,12 @@ export async function getActivePromos(): Promise<Promo[]> {
     console.error('[getActivePromos]', err);
     return [];
   }
-}
+});
 
 /** Ambil satu promo berdasarkan slug (published saja) */
 export async function getPromoBySlug(slug: string): Promise<Promo | null> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const { data, error } = await supabase
       .from('promos')
       .select('*, models(id, name, slug)')
@@ -47,7 +48,7 @@ export async function getPromoBySlug(slug: string): Promise<Promo | null> {
 /** Ambil slug semua promo published (untuk generateStaticParams) */
 export async function getAllPromoSlugs(): Promise<string[]> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const { data } = await supabase
       .from('promos')
       .select('slug')

@@ -1,4 +1,5 @@
-import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { cache } from 'react';
+import { createSupabasePublicClient } from '@/lib/supabase/server';
 import { HomepageContent } from '@/types/homepage-content';
 
 // STATIC FALLBACK: Website tetap hidup jika Supabase tidak tersedia
@@ -49,9 +50,9 @@ export const FALLBACK_CONTENT: Omit<HomepageContent, 'id'> = {
   }
 };
 
-export async function getHomepageContent(): Promise<HomepageContent> {
+export const getHomepageContent = cache(async function getHomepageContent(): Promise<HomepageContent> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const { data, error } = await supabase
       .from('homepage_content')
       .select('*')
@@ -80,4 +81,4 @@ export async function getHomepageContent(): Promise<HomepageContent> {
     console.error("Error fetching homepage content:", error);
     return { id: '11111111-1111-1111-1111-111111111111', ...FALLBACK_CONTENT };
   }
-}
+});

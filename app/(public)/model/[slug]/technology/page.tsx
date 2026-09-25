@@ -74,7 +74,7 @@ function TechSceneImage({
   }
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={src} alt={image?.alt || label} className={className} />
+    <img src={src} alt={image?.alt || label} className={className} loading="lazy" decoding="async" />
   );
 }
 
@@ -90,6 +90,8 @@ function featureImageStyle(image: ResponsiveImage | undefined): CSSProperties {
 }
 
 interface Props { params: Promise<{ slug: string }> }
+
+export const revalidate = 60;
 
 function hasText(feature: ModelFeature) {
   return Boolean((feature.title || feature.description || "").trim());
@@ -352,6 +354,8 @@ export default async function TeknologiPage({ params }: Props) {
                       alt={feature.media.image.alt ?? feature.title}
                       className={styles.featureImg}
                       style={featureImageStyle(feature.media.image)}
+                      loading="lazy"
+                      decoding="async"
                     />
                   ) : (
                     <ImagePlaceholder

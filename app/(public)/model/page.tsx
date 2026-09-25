@@ -5,7 +5,7 @@ import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import type { ModelData } from "@/lib/types/model";
 import styles from "./model-listing.module.css";
 
-export const revalidate = 0;
+export const revalidate = 60;
 export const metadata: Metadata = {
   title: "Model JAECOO Palembang — J5 EV, J7 SHS, J7 SIVP, J8 SHS-P ARDIS",
   description:

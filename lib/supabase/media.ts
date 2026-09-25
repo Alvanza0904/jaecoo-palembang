@@ -1,4 +1,5 @@
-import { createSupabaseServerClient } from "./server";
+import { cache } from "react";
+import { createSupabasePublicClient } from "./server";
 import type { ResponsiveImage } from "@/lib/types/media";
 import { isVideoMime, readVideoSettings } from "@/lib/types/video";
 import { pickOwnedUrl } from "@/lib/types/media-asset";
@@ -97,19 +98,32 @@ export async function getContentMedia(
   if (!assignments.length) return {};
 
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
 
-    const orFilter = assignments
-      .map(
-        (a) =>
-          `and(content_type.eq.${a.content_type},content_key.eq.${a.content_key},slot_key.eq.${a.slot_key})`,
-      )
-      .join(",");
+    const contentTypes = Array.from(new Set(assignments.map((a) => a.content_type)));
+    const contentKeys = Array.from(new Set(assignments.map((a) => a.content_key)));
+    const slotKeys = Array.from(new Set(assignments.map((a) => a.slot_key)));
 
-    const { data, error } = await supabase
+    let mediaQuery = supabase
       .from("content_media")
-      .select("content_type,content_key,slot_key,breakpoint,media_asset_id")
-      .or(orFilter);
+      .select("content_type,content_key,slot_key,breakpoint,media_asset_id");
+
+    if (contentTypes.length === 1 && contentKeys.length <= 12) {
+      mediaQuery = mediaQuery
+        .eq("content_type", contentTypes[0])
+        .in("content_key", contentKeys)
+        .in("slot_key", slotKeys);
+    } else {
+      const orFilter = assignments
+        .map(
+          (a) =>
+            `and(content_type.eq.${a.content_type},content_key.eq.${a.content_key},slot_key.eq.${a.slot_key})`,
+        )
+        .join(",");
+      mediaQuery = mediaQuery.or(orFilter);
+    }
+
+    const { data, error } = await mediaQuery;
 
     if (error) throw error;
 
@@ -201,14 +215,14 @@ export async function getContentMedia(
   }
 }
 
-export async function getHomeMedia(): Promise<Record<string, ResponsiveImage>> {
+export const getHomeMedia = cache(async function getHomeMedia(): Promise<Record<string, ResponsiveImage>> {
   const requests = HOME_MEDIA_SLOTS.map((slot) => ({
     content_type: "home",
     content_key: "home",
     slot_key: slot,
   }));
   return getContentMedia(requests);
-}
+});
 
 export interface SiteBrandAssets {
   logo?: ResponsiveImage;
@@ -221,7 +235,7 @@ export interface SiteBrandAssets {
  * Header and Footer consume the same resolved object so logo assignment is
  * controlled from one Supabase/data-layer namespace.
  */
-export async function getSiteBrandAssets(): Promise<SiteBrandAssets> {
+export const getSiteBrandAssets = cache(async function getSiteBrandAssets(): Promise<SiteBrandAssets> {
   const result = await getContentMedia(
     GLOBAL_MEDIA_SLOTS.map((slot) => ({
       content_type: "global",
@@ -235,7 +249,7 @@ export async function getSiteBrandAssets(): Promise<SiteBrandAssets> {
     logoLight: result[contentMediaKey("global", "site", "logo_light")],
     logoDark: result[contentMediaKey("global", "site", "logo_dark")],
   };
-}
+});
 
 export async function getEntityMedia(
   contentType: "promo" | "news" | "global",
