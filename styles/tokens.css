@@ -140,3 +140,16 @@
     --container-padding: var(--space-12);
   }
 }
+
+@media (min-width: 1440px) {
+  :root {
+    --container-max: 1600px;
+    --container-content: 1280px;
+  }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --container-max: 1760px;
+  }
+}

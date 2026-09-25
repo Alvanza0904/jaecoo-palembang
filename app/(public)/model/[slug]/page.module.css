@@ -75,8 +75,10 @@
 }
 
 @media (min-width: 1024px) {
-  .cinematicSection {
-    min-height: 90svh;
+  .cinematicSection,
+  .presenceSection,
+  .performanceSection {
+    min-height: 100svh;
   }
 }
 
@@ -163,7 +165,26 @@
 @media (min-width: 1280px) {
   .cinematicHeading {
     font-size: var(--text-5xl);
-    max-width: 600px;
+    max-width: 12ch;
+  }
+}
+
+@media (min-width: 1440px) {
+  .cinematicContent,
+  .presenceContent {
+    max-width: 1680px;
+    padding-inline: clamp(3rem, 6vw, 6rem);
+  }
+
+  .cinematicHeading,
+  .presenceHeading {
+    max-width: 14ch;
+    font-size: clamp(4.75rem, 5.2vw, 7rem);
+  }
+
+  .cinematicBody {
+    max-width: 38rem;
+    font-size: 1.125rem;
   }
 }
 
