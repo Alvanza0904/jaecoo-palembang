@@ -6,7 +6,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useLayoutEffect, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import styles from "./MobileMenuToggle.module.css";
 import { WHATSAPP_NUMBER } from "@/lib/utils/whatsapp";
@@ -16,23 +16,45 @@ interface Props { navLinks: NavLink[]; inverted?: boolean; }
 
 export function MobileMenuToggle({ navLinks, inverted = false }: Props) {
   const [open, setOpen] = useState(false);
+  const scrollY = useRef(0);
+  const locked = useRef(false);
 
   const close = useCallback(() => setOpen(false), []);
 
-  // Body lock — prevents background scroll on iOS
-  useEffect(() => {
+  // Lock the page while the menu is open. Restore the exact scroll
+  // position before paint, and do not use the global smooth scroll.
+  useLayoutEffect(() => {
     if (open) {
-      const y = window.scrollY;
+      scrollY.current = window.scrollY;
       document.body.style.position = "fixed";
-      document.body.style.top = `-${y}px`;
+      document.body.style.top = `-${scrollY.current}px`;
+      document.body.style.left = "0";
+      document.body.style.right = "0";
       document.body.style.width = "100%";
-    } else {
-      const y = parseInt(document.body.style.top || "0") * -1;
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.width = "";
-      window.scrollTo(0, y);
+      locked.current = true;
+      return;
     }
+
+    if (!locked.current) return;
+
+    const menu = document.getElementById("mobile-menu");
+    if (document.activeElement instanceof HTMLElement && menu?.contains(document.activeElement)) {
+      document.activeElement.blur();
+    }
+
+    const y = scrollY.current;
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.left = "";
+    document.body.style.right = "";
+    document.body.style.width = "";
+
+    const root = document.documentElement;
+    const previous = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    window.scrollTo(0, y);
+    root.style.scrollBehavior = previous;
+    locked.current = false;
   }, [open]);
 
   // Close on Escape
