@@ -17,10 +17,20 @@
 .slide {
   position: absolute;
   inset: 0;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
   opacity: 0;
   transition: opacity 700ms var(--ease-cinema);
   pointer-events: none;
 }
+
+.slide:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.85);
+  outline-offset: -6px;
+}
+
+.slide:hover .slideLink { border-color: rgba(255, 255, 255, 0.7); }
 
 .slideActive {
   opacity: 1;

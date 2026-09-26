@@ -36,20 +36,26 @@ export function HomeModelSlider({ models }: Props) {
   const [current, setCurrent] = useState(0);
   const [inView, setInView] = useState(true);
   const touchStart = useRef<number | null>(null);
+  const swiped = useRef(false);
   const sectionRef = useRef<HTMLElement>(null);
+  const [epoch, setEpoch] = useState(0);
 
   const prev = useCallback(() => setCurrent((c) => (c - 1 + list.length) % list.length), [list.length]);
   const next = useCallback(() => setCurrent((c) => (c + 1) % list.length), [list.length]);
+  const manual = useCallback((action: () => void) => {
+    action();
+    setEpoch((value) => value + 1);
+  }, []);
 
   // Keyboard nav
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") prev();
-      if (e.key === "ArrowRight") next();
+      if (e.key === "ArrowLeft") manual(prev);
+      if (e.key === "ArrowRight") manual(next);
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [prev, next]);
+  }, [prev, next, manual]);
 
   useEffect(() => {
     const node = sectionRef.current;
@@ -64,10 +70,10 @@ export function HomeModelSlider({ models }: Props) {
 
   // Auto-advance only while the slider is near the viewport.
   useEffect(() => {
-    if (!inView) return;
-    const timer = setInterval(next, 7000);
+    if (!inView || list.length < 2) return;
+    const timer = setInterval(() => setCurrent((c) => (c + 1) % list.length), 8000);
     return () => clearInterval(timer);
-  }, [next, inView]);
+  }, [inView, epoch, list.length]);
 
   if (!list.length) return null;
 
@@ -79,7 +85,10 @@ export function HomeModelSlider({ models }: Props) {
       onTouchEnd={(e) => {
         if (touchStart.current === null) return;
         const diff = touchStart.current - e.changedTouches[0].clientX;
-        if (Math.abs(diff) > 44) { if (diff > 0) { next(); } else { prev(); } }
+        if (Math.abs(diff) > 44) {
+          swiped.current = true;
+          manual(diff > 0 ? next : prev);
+        }
         touchStart.current = null;
       }}
     >
@@ -109,10 +118,19 @@ export function HomeModelSlider({ models }: Props) {
           const nearby = isActive || i === (current + 1) % list.length || i === (current - 1 + list.length) % list.length;
 
           return (
-            <div
+            <Link
               key={model.slug}
+              href={`/model/${model.slug}`}
               className={[styles.slide, isActive ? styles.slideActive : ""].join(" ")}
+              aria-label={`Lihat ${model.name}`}
               aria-hidden={!isActive}
+              tabIndex={isActive ? 0 : -1}
+              onClick={(event) => {
+                if (!isActive || swiped.current) {
+                  event.preventDefault();
+                  swiped.current = false;
+                }
+              }}
             >
               {nearby && validSrc(src) ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -141,9 +159,9 @@ export function HomeModelSlider({ models }: Props) {
                 <p className={styles.slideDescription}>{model.description}</p>
 
                 <div className={styles.slideActions}>
-                  <Link href={`/model/${model.slug}`} className={styles.slideLink}>
+                  <span className={styles.slideLink}>
                     Jelajahi {SLUG_LABEL[model.slug] ?? model.short_name} →
-                  </Link>
+                  </span>
                   <span className={styles.slidePrice}>
                     <PriceDisplay
                       price_status={model.default_variant.price_status}
@@ -155,7 +173,7 @@ export function HomeModelSlider({ models }: Props) {
                   </span>
                 </div>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
@@ -167,13 +185,13 @@ export function HomeModelSlider({ models }: Props) {
             <button
               key={m.slug}
               className={[styles.dot, i === current ? styles.dotActive : ""].join(" ")}
-              onClick={() => setCurrent(i)}
+              onClick={() => manual(() => setCurrent(i))}
               aria-label={`Model ${i + 1}`}
             />
           ))}
         </div>
-        <button className={styles.navBtn} onClick={prev} aria-label="Sebelumnya">←</button>
-        <button className={styles.navBtn} onClick={next} aria-label="Berikutnya">→</button>
+        <button className={styles.navBtn} onClick={() => manual(prev)} aria-label="Sebelumnya">←</button>
+        <button className={styles.navBtn} onClick={() => manual(next)} aria-label="Berikutnya">→</button>
       </div>
     </section>
   );
