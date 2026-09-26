@@ -256,9 +256,26 @@ function mapModel(
     price_region: v.price_region,
   }));
 
-  const defaultVariant =
-    variantRows.find((v) => v.is_default) ??
-    variantRows[0];
+  const defaultVariant = (() => {
+    const marked = variantRows.filter((variant) => variant.is_default);
+    if (row.slug === "jaecoo-j8-shs" && marked.length !== 1) {
+      return (
+        variantRows.find((variant) => variant.variant_key === "j8-ardis-shs-standard") ??
+        marked[0] ??
+        variantRows[0]
+      );
+    }
+    return marked[0] ?? variantRows[0];
+  })();
+
+  if (row.slug === "jaecoo-j8-shs") {
+    const order = ["j8-ardis-shs-standard", "jaecoo-j8-ardis"];
+    variants.sort((a, b) => {
+      const left = order.indexOf(a.id);
+      const right = order.indexOf(b.id);
+      return (left === -1 ? 99 : left) - (right === -1 ? 99 : right);
+    });
+  }
 
   const colors: ModelColor[] = (row.model_colors ?? [])
     .sort((a, b) => a.sort_order - b.sort_order)

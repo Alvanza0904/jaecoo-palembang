@@ -243,6 +243,20 @@
   border-bottom: 1px solid var(--color-border);
 }
 
+.variantItemActive {
+  border-bottom-color: var(--color-ink);
+}
+
+.variantPick {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
 .variantTop {
   display: flex;
   flex-direction: column;

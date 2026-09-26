@@ -622,6 +622,15 @@ export const MODELS: ModelData[] = [
         price_display: "Rp865.000.000",
         price_region: "OTR Palembang",
       },
+      {
+        id: "jaecoo-j8-ardis",
+        name: "JAECOO J8 ARDIS",
+        label: "2.0T",
+        price_status: "official",
+        price_idr: 719_900_000,
+        price_display: "Rp719.900.000",
+        price_region: "OTR Palembang",
+      },
     ],
     colors: [
       { id: "j8-stone", name: "Stone Grey", hex: "#8A8D8F", image: emptyImage("JAECOO J8 Stone Grey") },
@@ -703,6 +712,66 @@ export const MODELS: ModelData[] = [
           { label: "Kamera", value: "540° HD" },
           { label: "Airbag", value: "10 airbag" },
           { label: "Wireless charging", value: "50 W" },
+        ],
+      },
+      {
+        label: "J8 ARDIS — Dimensi & Berat",
+        specs: [
+          { label: "P × L × T", value: "4.820 × 1.930 × 1.710 mm" },
+          { label: "Wheelbase", value: "2.820 mm" },
+          { label: "Ground clearance", value: "190 mm" },
+          { label: "Berat kosong", value: "1.929 kg" },
+          { label: "Kapasitas", value: "6 penumpang" },
+          { label: "Kapasitas bagasi", value: "738 L / maksimal 2.021 L" },
+          { label: "Kapasitas tangki", value: "70 L" },
+        ],
+      },
+      {
+        label: "J8 ARDIS — Powertrain",
+        specs: [
+          { label: "Tipe sistem", value: "2.0L Turbo · 8-speed AT" },
+          { label: "Tenaga", value: "245 HP" },
+          { label: "Torsi", value: "385 Nm" },
+          { label: "Transmisi", value: "8-speed AT" },
+          { label: "0–100 km/jam", value: "8,8 detik" },
+          { label: "Sistem penggerak", value: "AWD · ARDIS" },
+          { label: "Driving Modes", value: "7 mode" },
+        ],
+      },
+      {
+        label: "J8 ARDIS — Suspensi & Handling",
+        specs: [
+          { label: "Suspensi depan", value: "CDC Magnetic Suspension · Double wishbone" },
+          { label: "Suspensi belakang", value: "CDC Magnetic Suspension · Multi-link" },
+          { label: "Rem depan / belakang", value: "Disc / Disc" },
+          { label: "Ukuran ban", value: "265/45 R20" },
+          { label: "Velg", value: "20 inci" },
+        ],
+      },
+      {
+        label: "J8 ARDIS — Keselamatan",
+        specs: [
+          { label: "Airbag", value: "10 airbag" },
+          { label: "ADAS", value: "19 fitur" },
+          { label: "Kamera", value: "540° HD" },
+          { label: "ABS / EBD / ESC", value: "Standar" },
+        ],
+      },
+      {
+        label: "J8 ARDIS — Kenyamanan & Konektivitas",
+        specs: [
+          { label: "Wireless charging", value: "50 W" },
+          { label: "Kursi baris 1", value: "Elektrik · Ventilasi · Pemanas" },
+          { label: "Panoramic Sunroof", value: "Ada" },
+        ],
+      },
+      {
+        label: "J8 ARDIS — Warna",
+        specs: [
+          { label: "Stone Gray", value: "Tersedia" },
+          { label: "Pristine White Two Tone", value: "Tersedia" },
+          { label: "Lunar Silver", value: "Tersedia" },
+          { label: "Jet Black", value: "Tersedia" },
         ],
       },
     ],

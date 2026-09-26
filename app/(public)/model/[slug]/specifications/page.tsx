@@ -32,6 +32,7 @@ import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { buildPageTitle } from "@/lib/utils/seo";
 import { J7ShsExploreCta } from "@/components/model/J7ShsExploreCta";
 import { CargoEditorial, J5_CARGO_STATS } from "@/components/model/CargoEditorial";
+import { VariantSpecPanel } from "./VariantSpecPanel";
 import styles from "./specifications.module.css";
 
 interface Props { params: Promise<{ slug: string }> }
@@ -142,6 +143,15 @@ export default async function SpesifikasiPage({ params }: Props) {
           />
         )}
 
+        {slug === "jaecoo-j8-shs" && model.variants.length > 1 ? (
+          <VariantSpecPanel
+            variants={model.variants}
+            categories={tableCategories}
+            defaultVariantId={v.id}
+            slug={slug}
+          />
+        ) : (
+        <>
         {/* ── SPEC CATEGORIES ───────────────────────────────────────────── */}
         <section className={styles.specsSection} data-contrast="light">
           <Container size="content">
@@ -226,6 +236,8 @@ export default async function SpesifikasiPage({ params }: Props) {
               </div>
             </Container>
           </section>
+        )}
+        </>
         )}
 
         {/* ── FINANCE CALCULATOR ────────────────────────────────────────── */}
