@@ -289,6 +289,28 @@
   overflow: hidden;
 }
 
+/* Side profile is a wide photograph. A tall phone box crops the car
+   down to a slice and drops the heading on the livery. */
+@media (max-width: 767px) {
+  .presenceSection {
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+    align-items: flex-end;
+  }
+
+  .presenceContent {
+    padding: var(--space-6) var(--space-5) var(--space-5);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .presenceSection {
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+    align-items: flex-end;
+  }
+}
+
 .presenceBg {
   position: absolute;
   inset: 0;
@@ -336,17 +358,19 @@
 }
 
 .presenceHeading {
-  font-size: var(--text-3xl);
+  font-size: clamp(1.7rem, 7vw, 2.15rem);
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-tight);
   line-height: var(--leading-tight);
   color: var(--color-white);
   text-align: right;
+  max-width: 12ch;
 }
 
 @media (min-width: 768px) {
   .presenceHeading {
     font-size: var(--text-4xl);
+    max-width: 14ch;
   }
 }
 

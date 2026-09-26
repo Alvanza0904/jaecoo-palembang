@@ -21,7 +21,7 @@ const FRAMES: Record<string, Partial<Record<BreakpointKey, Frame>>> = {
   exterior: { desktop: view(0.9), tablet: view(0.8), mobile: view(0.8), small_mobile: view(0.8) },
   interior: { desktop: view(0.9), tablet: view(0.8), mobile: view(0.8), small_mobile: view(0.8) },
   adas: { desktop: view(0.9), tablet: view(0.8), mobile: view(0.8), small_mobile: view(0.8) },
-  profile: { desktop: view(0.75), tablet: view(0.75), mobile: view(0.75), small_mobile: view(0.75) },
+  profile: { desktop: view(0.75), tablet: ratio(16 / 9), mobile: ratio(4 / 3), small_mobile: ratio(4 / 3) },
   performance: { desktop: view(0.85), tablet: view(0.85), mobile: view(0.85), small_mobile: view(0.85) },
   specs_visual: { desktop: view(0.7), tablet: view(0.7), mobile: view(0.7), small_mobile: view(0.7) },
   final_cta: { desktop: view(0.8), tablet: view(0.8), mobile: view(0.8), small_mobile: view(0.8) },
@@ -42,6 +42,12 @@ const FRAMES: Record<string, Partial<Record<BreakpointKey, Frame>>> = {
   "home:final_cta": { desktop: view(0.6), tablet: view(0.6), mobile: view(0.6), small_mobile: view(0.6) },
 };
 
+const DEVICE_VIEWPORT: Record<Exclude<BreakpointKey, "desktop">, { width: number; height: number }> = {
+  tablet: { width: 834, height: 1112 },
+  mobile: { width: 390, height: 844 },
+  small_mobile: { width: 375, height: 812 },
+};
+
 export function sectionFrameAspect(
   slot: string | undefined,
   breakpoint: BreakpointKey,
@@ -50,7 +56,10 @@ export function sectionFrameAspect(
   const frame = slot ? FRAMES[slot]?.[breakpoint] ?? FRAMES[slot]?.desktop : undefined;
   if (!frame) return BREAKPOINT_ASPECT_RATIO[breakpoint];
   if ("ratio" in frame) return frame.ratio;
-  const width = viewport.width * (frame.vw ?? 1);
-  const height = Math.max(1, viewport.height * frame.vh);
+  const device = breakpoint === "desktop"
+    ? (viewport.width >= 1024 ? viewport : { width: 1440, height: 900 })
+    : DEVICE_VIEWPORT[breakpoint];
+  const width = device.width * (frame.vw ?? 1);
+  const height = Math.max(1, device.height * frame.vh);
   return width / height;
 }
