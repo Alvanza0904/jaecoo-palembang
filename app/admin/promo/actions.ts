@@ -43,6 +43,7 @@ export async function savePromo(id: string | null, formData: PromoFormData) {
 
     revalidatePath('/admin/promo');
     revalidatePath('/promo');
+    revalidatePath('/sitemap.xml');
     return { success: true };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Gagal menyimpan promo.';
@@ -66,6 +67,7 @@ export async function deletePromo(id: string) {
 
     revalidatePath('/admin/promo');
     revalidatePath('/promo');
+    revalidatePath('/sitemap.xml');
     return { success: true };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Gagal menghapus promo.';

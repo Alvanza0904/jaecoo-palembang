@@ -133,11 +133,14 @@ export async function getNewsBySlug(slug: string): Promise<NewsData | undefined>
 export async function getAllNewsSlugs(): Promise<string[]> {
   try {
     const supabase = createSupabasePublicClient();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("news")
       .select("slug")
       .eq("published", true);
-    if (data && data.length > 0) return data.map((r: { slug: string }) => r.slug);
+    if (error) throw error;
+    return (data ?? [])
+      .map((row: { slug: string | null }) => row.slug?.trim() ?? "")
+      .filter((slug) => slug.length > 0);
   } catch {
     // fallthrough
   }

@@ -50,6 +50,7 @@ export async function saveNews(id: string | null, formData: NewsFormData) {
 
     revalidatePath('/admin/news');
     revalidatePath('/berita');
+    revalidatePath('/sitemap.xml');
     return { success: true };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : (typeof err === 'object' ? JSON.stringify(err) : String(err));
@@ -65,6 +66,7 @@ export async function deleteNews(id: string) {
 
     revalidatePath('/admin/news');
     revalidatePath('/berita');
+    revalidatePath('/sitemap.xml');
     return { success: true };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : (typeof err === 'object' ? JSON.stringify(err) : String(err));
