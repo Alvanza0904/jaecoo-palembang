@@ -25,6 +25,7 @@ import {
   getModelBySlug as getStaticModelBySlug,
   getModelSlugs as getStaticModelSlugs,
 } from "@/lib/data/models";
+import { localizePhrase } from "@/lib/copy/public-indonesian";
 
 interface SupabaseModel {
   id: string;
@@ -156,7 +157,7 @@ function asSectionCopy(value: unknown) {
   const row = value as Record<string, unknown>;
   const copy: ModelSectionCopy = {};
   for (const key of ["label", "heading", "body", "stat", "unit", "primary_label", "secondary_label"] as const) {
-    if (typeof row[key] === "string") copy[key] = row[key];
+    if (typeof row[key] === "string") copy[key] = localizePhrase(row[key]) ?? row[key];
   }
   return Object.keys(copy).length ? copy : undefined;
 }
@@ -321,8 +322,8 @@ function mapModel(
   const staticTechnology = staticFallback?.technology;
   const dbFeatures = technologyRaw.features ?? [];
   const technologyBase: ModelTechnologySection = {
-    headline: technologyRaw.headline || staticTechnology?.headline || "",
-    subheadline: technologyRaw.subheadline || staticTechnology?.subheadline,
+    headline: localizePhrase(technologyRaw.headline) || localizePhrase(staticTechnology?.headline) || "",
+    subheadline: localizePhrase(technologyRaw.subheadline) || localizePhrase(staticTechnology?.subheadline),
     features: dbFeatures.length > 0 ? dbFeatures : staticTechnology?.features ?? [],
   };
   const technology = mapTechnologyMedia(technologyBase, mediaAssets);
@@ -429,7 +430,7 @@ function mapModel(
     sort_order: row.sort_order,
     name: row.name,
     short_name: row.short_name?.trim() || staticFallback?.short_name || row.name,
-    tagline: row.tagline?.trim() || staticFallback?.tagline || row.name,
+    tagline: localizePhrase(row.tagline) || staticFallback?.tagline || row.name,
     description,
     hero_media,
     image_slots,

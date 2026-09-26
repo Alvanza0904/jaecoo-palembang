@@ -40,7 +40,7 @@ import { FinanceCalculator } from "@/components/finance/FinanceCalculator";
 import { PriceDisplay } from "@/components/price/PriceDisplay";
 import { priceStatusAllowsCalculator, type ModelSectionCopy } from "@/lib/types/model";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
-import { buildPageTitle } from "@/lib/utils/seo";
+import { buildPageTitle, MODEL_PAGE_SEO } from "@/lib/utils/seo";
 import { ColorCarousel } from "@/components/model/ColorCarousel";
 import { J7ShsExploreCta } from "@/components/model/J7ShsExploreCta";
 import { CmsVideo } from "@/components/media/CmsVideo";
@@ -198,14 +198,19 @@ export async function generateMetadata({ params }: ModelPageProps): Promise<Meta
   const model = await getModelBySlug(slug);
   if (!model) return {};
 
+  const seo = MODEL_PAGE_SEO[slug];
+  const title = seo?.title ?? model.meta_title ?? buildPageTitle(model.name);
+  const description = seo?.description ?? model.meta_description ?? model.description;
   return {
-    title: model.meta_title ?? buildPageTitle(model.name),
-    description: model.meta_description,
+    title: { absolute: title },
+    description,
     alternates: { canonical: `/model/${slug}` },
     openGraph: {
-      url: `/model/${slug}`,
-      title: model.meta_title ?? model.name,
-      description: model.meta_description ?? model.description,
+      url: `https://jaecoopalembang.web.id/model/${slug}`,
+      title,
+      description,
+      locale: "id_ID",
+      siteName: "JAECOO Palembang",
     },
   };
 }

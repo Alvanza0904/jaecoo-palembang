@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const article = await getNewsBySlug(slug);
   if (!article) return {};
   return {
-    title: article.meta_title ?? `${article.title} — JAECOO Journal`,
+    title: article.meta_title ?? `${article.title} | Berita JAECOO Palembang`,
     description: article.meta_description ?? article.excerpt,
     alternates: { canonical: `/berita/${slug}` },
     openGraph: {
@@ -47,7 +47,7 @@ export default async function BeritaDetailPage({ params }: Props) {
       <Container size="narrow">
         {/* Breadcrumb */}
         <nav className={styles.breadcrumb} aria-label="Breadcrumb">
-          <Link href="/berita" className={styles.breadcrumbLink}>← JAECOO Journal</Link>
+          <Link href="/berita" className={styles.breadcrumbLink}>← Berita JAECOO</Link>
         </nav>
 
         {/* Cover */}

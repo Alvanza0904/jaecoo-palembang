@@ -31,7 +31,7 @@ import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { J7ShsExploreCta } from "@/components/model/J7ShsExploreCta";
 import { resolveSubpageHero } from "@/lib/models/hero";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
-import { buildPageTitle } from "@/lib/utils/seo";
+import { MODEL_PAGE_SEO } from "@/lib/utils/seo";
 import { CmsVideo } from "@/components/media/CmsVideo";
 import { isVideoSource, readVideoSettings } from "@/lib/types/video";
 import { getBackgroundLayerStyle } from "@/lib/types/presentation";
@@ -160,12 +160,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const model = await getModelBySlug(slug);
   if (!model) return {};
+  const seo = MODEL_PAGE_SEO[slug];
+  const title = seo ? `${seo.title.split("|")[0].trim()} | Teknologi` : `${model.name} | Teknologi`;
+  const description = model.technology.subheadline ?? seo?.description ?? `Teknologi pada ${model.name}.`;
   return {
-    title: buildPageTitle(`${model.name} — Teknologi`),
+    title: { absolute: title },
     alternates: { canonical: `/model/${slug}/technology` },
-    description:
-      model.technology.subheadline ??
-      `Teknologi terdepan pada ${model.name}.`,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `https://jaecoopalembang.web.id/model/${slug}/technology`,
+      locale: "id_ID",
+      siteName: "JAECOO Palembang",
+    },
   };
 }
 
@@ -547,7 +555,7 @@ export default async function TeknologiPage({ params }: Props) {
       ══════════════════════════════════════════════════════════ */}
       <nav className={styles.pageNav} data-contrast="light" aria-label="Model navigation">
         <Button as="link" href={`/model/${slug}`} variant="ghost" size="md">
-          ← {model.short_name} Overview
+          ← {model.short_name} Ikhtisar
         </Button>
         <Button as="link" href={`/model/${slug}/specifications`} variant="secondary" size="md">
           Spesifikasi Lengkap →

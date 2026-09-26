@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — JAECOO Palembang",
+  title: { absolute: "Kebijakan Privasi | JAECOO Palembang" },
   description: "Kebijakan privasi JAECOO Palembang.",
   alternates: { canonical: "/privacy-policy" },
   robots: { index: false, follow: false },
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
           color: "var(--color-gold)",
           marginBottom: "var(--space-4)"
         }}>
-          Legal
+          Informasi
         </p>
         <h1 style={{
           fontSize: "clamp(var(--text-2xl), 5vw, var(--text-3xl))",
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
           borderBottom: "1px solid var(--color-border)",
           paddingBottom: "var(--space-8)"
         }}>
-          Privacy Policy
+          Kebijakan Privasi
         </h1>
         <div style={{ fontSize: "var(--text-base)", color: "var(--color-ink-muted)", lineHeight: "var(--leading-normal)", display: "flex", flexDirection: "column", gap: "var(--space-6)" }}>
           <p>JAECOO Palembang berkomitmen untuk melindungi privasi Anda. Halaman ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi Anda.</p>

@@ -11,11 +11,11 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   metadataBase: new URL("https://jaecoopalembang.web.id"),
   title: {
-    default: "JAECOO Palembang — Dealer Resmi JAECOO",
-    template: "%s — JAECOO Palembang",
+    default: "JAECOO Palembang | SUV Listrik & Hybrid",
+    template: "%s | JAECOO Palembang",
   },
   description:
-    "Dealer Resmi OMODA JAECOO Palembang. Temukan JAECOO J5 EV, J7 SHS, dan J8 SHS. Konsultasi, test drive, dan promo eksklusif bersama Alvan.",
+    "JAECOO di Palembang: SUV listrik J5 EV, SUV hybrid J7 SHS dan J7 SIVP, serta J8 ARDIS dan J8 SHS-P ARDIS. Harga OTR dan test drive bersama Alvan.",
   keywords: ["JAECOO", "OMODA JAECOO Palembang", "dealer JAECOO Palembang", "SUV Palembang"],
   openGraph: {
     siteName: "JAECOO Palembang",

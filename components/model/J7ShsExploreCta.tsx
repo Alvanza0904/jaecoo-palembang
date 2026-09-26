@@ -30,9 +30,9 @@ export async function J7ShsExploreCta() {
       <div className={styles.copy}>
         <p className={styles.kicker}>JAECOO</p>
         <h2 className={styles.title}>JAECOO J7 SHS</h2>
-        <p className={styles.line}>Explore J7 SHS</p>
+        <p className={styles.line}>Lihat J7 SHS</p>
         <Button as="link" href="/model/jaecoo-j7-shs" variant="primary" size="lg">
-          Explore J7 SHS
+          Lihat J7 SHS
         </Button>
       </div>
     </section>

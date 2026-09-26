@@ -57,7 +57,7 @@ export function ModelNavigation({ slug, modelName }: ModelNavigationProps) {
   } as React.CSSProperties;
 
   const tabs = [
-    { label: "Overview", href: `/model/${slug}` },
+    { label: "Ikhtisar", href: `/model/${slug}` },
     { label: "Teknologi", href: `/model/${slug}/technology` },
     { label: "Spesifikasi", href: `/model/${slug}/specifications` },
   ];

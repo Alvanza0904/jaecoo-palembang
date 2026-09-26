@@ -14,8 +14,8 @@ import styles from "./gallery.module.css";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Gallery JAECOO Palembang — Foto & Detail",
-  description: "Eksplorasi desain, interior, dan detail JAECOO J5 EV, J7 SHS, dan J8 ARDIS SHS di Palembang.",
+  title: { absolute: "Galeri JAECOO Palembang | Foto Model" },
+  description: "Foto desain, interior, dan detail JAECOO J5 EV, J7 SHS, J7 SIVP, dan J8 di Palembang.",
   alternates: { canonical: "/gallery" },
 };
 
@@ -27,9 +27,9 @@ export default async function GalleryPage() {
     <>
       <TransparentHeader />
       <HeroPlaceholder
-        tagline="VISUAL GALLERY"
-        heading="Every angle. Every detail."
-        subheading="Eksplorasi visual JAECOO dari setiap sudut."
+        tagline="GALERI"
+        heading="Setiap sudut. Setiap detail."
+        subheading="Lihat JAECOO dari dekat, dari eksterior sampai kabin."
         size="medium"
       />
 

@@ -40,13 +40,14 @@ import { HomepageSectionRenderer } from "@/components/sections/HomepageSectionRe
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "JAECOO Palembang — Dealer Resmi JAECOO",
+  title: { absolute: "JAECOO Palembang | SUV Listrik & Hybrid | Harga & Test Drive" },
   description:
-    "Jelajahi JAECOO J5 EV, J7 SHS, dan J8 Ardis SHS di Palembang. Konsultasi, test drive, simulasi kredit, promo dan informasi terbaru bersama Alvan — Dealer Resmi Omoda Jaecoo Palembang.",
+    "Temukan SUV listrik dan SUV hybrid JAECOO di Palembang. J5 EV, J7 SHS, J7 SIVP, serta J8 ARDIS dan J8 SHS-P ARDIS. Lihat harga dan jadwalkan test drive.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "JAECOO Palembang — Dealer Resmi JAECOO",
-    description: "JAECOO J5 EV, J7 SHS, J8 Ardis SHS di Palembang. Test drive & promo eksklusif bersama Alvan.",
+    title: "JAECOO Palembang | SUV Listrik & Hybrid | Harga & Test Drive",
+    description:
+      "SUV listrik dan hybrid JAECOO di Palembang: J5 EV, J7 SHS, J7 SIVP, J8 ARDIS, dan J8 SHS-P ARDIS.",
     url: "https://jaecoopalembang.web.id/",
     siteName: "JAECOO Palembang",
     locale: "id_ID",

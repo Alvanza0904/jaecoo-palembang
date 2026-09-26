@@ -1,6 +1,7 @@
 import { cache } from 'react';
 import { createSupabasePublicClient } from '@/lib/supabase/server';
 import { HomepageContent } from '@/types/homepage-content';
+import { localizePhrase } from '@/lib/copy/public-indonesian';
 
 // STATIC FALLBACK: Website tetap hidup jika Supabase tidak tersedia
 export const FALLBACK_CONTENT: Omit<HomepageContent, 'id'> = {
@@ -64,8 +65,7 @@ export const getHomepageContent = cache(async function getHomepageContent(): Pro
       return { id: '11111111-1111-1111-1111-111111111111', ...FALLBACK_CONTENT };
     }
 
-    // Merge dengan fallback untuk field yang kosong di DB
-    return {
+    const content = {
       ...data,
       hero: { ...FALLBACK_CONTENT.hero, ...data.hero },
       experience: { ...FALLBACK_CONTENT.experience, ...data.experience },
@@ -77,6 +77,16 @@ export const getHomepageContent = cache(async function getHomepageContent(): Pro
       final_cta: { ...FALLBACK_CONTENT.final_cta, ...data.final_cta },
       seo: { ...FALLBACK_CONTENT.seo, ...data.seo },
     } as HomepageContent;
+
+    content.hero.ctaText = localizePhrase(content.hero.ctaText) ?? content.hero.ctaText;
+    content.hero.eyebrow = localizePhrase(content.hero.eyebrow) ?? content.hero.eyebrow;
+    content.hero.headline = localizePhrase(content.hero.headline) ?? content.hero.headline;
+    content.experience.title = localizePhrase(content.experience.title) ?? content.experience.title;
+    content.experience.description = localizePhrase(content.experience.description) ?? content.experience.description;
+    content.technology.title = localizePhrase(content.technology.title) ?? content.technology.title;
+    content.dealer_location.description = localizePhrase(content.dealer_location.description) ?? content.dealer_location.description;
+    content.seo.metaTitle = localizePhrase(content.seo.metaTitle) ?? content.seo.metaTitle;
+    return content;
   } catch (error) {
     console.error("Error fetching homepage content:", error);
     return { id: '11111111-1111-1111-1111-111111111111', ...FALLBACK_CONTENT };

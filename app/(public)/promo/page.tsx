@@ -16,7 +16,7 @@ import styles from './promo.module.css';
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: 'Promo JAECOO Palembang — Penawaran Terkini',
+  title: { absolute: "Promo JAECOO Palembang | Penawaran Terkini" },
   description: 'Cashback, DP murah, bunga 0%, dan penawaran eksklusif untuk JAECOO J5, J7, dan J8 di Palembang.',
   alternates: { canonical: '/promo' },
 };
@@ -30,7 +30,7 @@ export default async function PromoPage() {
       <TransparentHeader />
       <HeroPlaceholder
         tagline="PENAWARAN EKSKLUSIF"
-        heading="Offers worth exploring."
+        heading="Penawaran yang layak dilihat."
         subheading="Promo terbaru JAECOO Palembang — cashback, DP ringan, bunga spesial."
         size="medium"
       />

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
 
 export const metadata: Metadata = {
-  title: "Syarat & Ketentuan — JAECOO Palembang",
+  title: { absolute: "Syarat & Ketentuan | JAECOO Palembang" },
   description: "Syarat dan ketentuan penggunaan website JAECOO Palembang.",
   alternates: { canonical: "/terms" },
   robots: { index: false, follow: false },
@@ -24,7 +24,7 @@ export default function TermsPage() {
           color: "var(--color-gold)",
           marginBottom: "var(--space-4)"
         }}>
-          Legal
+          Informasi
         </p>
         <h1 style={{
           fontSize: "clamp(var(--text-2xl), 5vw, var(--text-3xl))",

@@ -11,11 +11,11 @@ import type { SiteBrandAssets } from "@/lib/supabase/media";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 
 export const NAV_LINKS = [
-  { label: "MODELS", href: "/model" },
+  { label: "MODEL", href: "/model" },
   { label: "PROMO", href: "/promo" },
   { label: "BERITA", href: "/berita" },
-  { label: "GALLERY", href: "/gallery" },
-  { label: "SALES ALVAN", href: "/sales-jaecoo-palembang" },
+  { label: "GALERI", href: "/gallery" },
+  { label: "ALVAN", href: "/sales-jaecoo-palembang" },
 ];
 
 export function Header({ brand }: { brand: SiteBrandAssets }) {

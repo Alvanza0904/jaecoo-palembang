@@ -36,8 +36,8 @@ const SOCIAL_LINKS = [
 ];
 
 const LEGAL_LINKS = [
-  { label: "Privacy Policy", href: "/privacy-policy" },
-  { label: "Terms", href: "/terms" },
+  { label: "Kebijakan Privasi", href: "/privacy-policy" },
+  { label: "Ketentuan", href: "/terms" },
 ];
 
 export function Footer({ brand }: { brand: SiteBrandAssets }) {
@@ -88,7 +88,7 @@ export function Footer({ brand }: { brand: SiteBrandAssets }) {
         {/* Bottom bar */}
         <div className={styles.bottom}>
           <p className={styles.copy}>
-            © {year} {SITE_SETTINGS.brandName}
+            © {year} {SITE_SETTINGS.brandName} · Palembang, Sumatera Selatan
           </p>
           <div className={styles.legal}>
             {LEGAL_LINKS.map((link) => (

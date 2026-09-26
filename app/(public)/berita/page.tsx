@@ -9,8 +9,8 @@ import styles from "./berita.module.css";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "JAECOO Journal — Berita & Artikel",
-  description: "Berita, artikel, tips, review, promo dan update terbaru seputar JAECOO Palembang.",
+  title: { absolute: "Berita JAECOO Palembang | Informasi Terbaru" },
+  description: "Berita dan informasi terbaru seputar JAECOO di Palembang, dari produk hingga aktivitas dealer.",
   alternates: { canonical: "/berita" },
 };
 
@@ -22,9 +22,9 @@ export default async function BeritaPage() {
     <>
       <TransparentHeader />
       <HeroPlaceholder
-        tagline="JAECOO JOURNAL"
-        heading="Stories from the Road."
-        subheading="News, insights, tips, review dan update JAECOO Palembang."
+        tagline="BERITA"
+        heading="Cerita dari perjalanan."
+        subheading="Informasi, tips, dan kabar terbaru JAECOO Palembang."
         size="medium"
       />
 
@@ -32,7 +32,7 @@ export default async function BeritaPage() {
         <div className={styles.container}>
           <div className={styles.header}>
             <span className={styles.eyebrow}>Berita & Informasi</span>
-            <h1 className={styles.heading}>Berita &amp; Artikel</h1>
+            <h2 className={styles.heading}>Berita &amp; Artikel</h2>
           </div>
 
           {!featured ? (

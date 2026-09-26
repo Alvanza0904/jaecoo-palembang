@@ -29,7 +29,7 @@ import { FinanceCalculator } from "@/components/finance/FinanceCalculator";
 import { PriceDisplay } from "@/components/price/PriceDisplay";
 import { priceStatusAllowsCalculator } from "@/lib/types/model";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
-import { buildPageTitle } from "@/lib/utils/seo";
+import { MODEL_PAGE_SEO } from "@/lib/utils/seo";
 import { J7ShsExploreCta } from "@/components/model/J7ShsExploreCta";
 import { CargoEditorial, J5_CARGO_STATS } from "@/components/model/CargoEditorial";
 import { VariantSpecPanel } from "./VariantSpecPanel";
@@ -52,10 +52,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? (v.price_display ? `. ${v.price_display} ${v.price_region}` : "")
       : "";
 
+  const seo = MODEL_PAGE_SEO[slug];
+  const title = seo ? `${seo.title.split("|")[0].trim()} | Spesifikasi` : `${model.name} | Spesifikasi`;
   return {
-    title: buildPageTitle(`${model.name} — Spesifikasi`),
+    title: { absolute: title },
     alternates: { canonical: `/model/${slug}/specifications` },
-    description: `Spesifikasi lengkap ${model.name}${priceText}.`,
+    description: seo
+      ? `Spesifikasi ${seo.title.split("|")[0].trim()}. ${seo.description}`
+      : `Spesifikasi lengkap ${model.name}${priceText}.`,
+    openGraph: {
+      title,
+      description: seo?.description,
+      url: `https://jaecoopalembang.web.id/model/${slug}/specifications`,
+      locale: "id_ID",
+      siteName: "JAECOO Palembang",
+    },
   };
 }
 
@@ -271,7 +282,7 @@ export default async function SpesifikasiPage({ params }: Props) {
             <Reveal variant="fade-up">
               <div className={styles.navRow}>
                 <Button as="link" href={`/model/${slug}`} variant="ghost" size="md">
-                  ← {model.short_name} Overview
+                  ← {model.short_name} Ikhtisar
                 </Button>
                 <Button as="link" href={`/model/${slug}/technology`} variant="ghost" size="md">
                   Teknologi →

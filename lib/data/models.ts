@@ -125,7 +125,7 @@ export const MODELS: ModelData[] = [
       },
       tech_intelligence: {
         label: "Teknologi",
-        heading: "Smart where\nit matters.",
+        heading: "Teknologi yang\nterasa dekat.",
         body: "J5 memadukan antarmuka digital dengan berkendara listrik yang praktis: AC wall mount 7.700 W dan pengisian DC hingga 130 kW, sekitar 28 menit.",
       },
       tech_stats: [
@@ -160,7 +160,7 @@ export const MODELS: ModelData[] = [
       { id: "j5-black", name: "Jet Black", hex: "#111111", image: emptyImage("JAECOO J5 EV Jet Black") },
     ],
     technology: {
-      headline: "Smart where it matters.",
+      headline: "Teknologi yang terasa dekat.",
       subheadline:
         "Teknologi yang terasa dekat dengan pengemudi — dari antarmuka digital sampai berkendara listrik yang praktis.",
       features: [
@@ -235,9 +235,9 @@ export const MODELS: ModelData[] = [
         ],
       },
     ],
-    meta_title: "JAECOO J5 EV — Harga & Spesifikasi | JAECOO Palembang",
+    meta_title: "JAECOO J5 EV Palembang | SUV Listrik, Harga & Spesifikasi",
     meta_description:
-      "JAECOO J5 EV Rp354.900.000 OTR Palembang. Baterai 60,9 kWh, 461 km NEDC, 130 kW / 210 PS, 17 fitur ADAS.",
+      "Kenali JAECOO J5 EV di Palembang, SUV listrik untuk perjalanan harian. Lihat harga OTR, spesifikasi, dan jadwalkan test drive.",
     published: true,
     updated_at: "2026-09-23T00:00:00Z",
   },
@@ -272,12 +272,12 @@ export const MODELS: ModelData[] = [
       },
       design: {
         label: "Detail",
-        heading: "Crafted in\nevery detail.",
+        heading: "Detail yang\ndikerjakan rapi.",
         body: "Grille horizontal, lampu LED signature, dan garis bodi yang mengalir. Wheelbase 2.672 mm dan ground clearance 200 mm.",
       },
       profile: {
         label: "Karakter",
-        heading: "Sculpted\nin motion.",
+        heading: "Garis yang\nterasa bergerak.",
       },
       interior: {
         label: "Interior",
@@ -286,12 +286,12 @@ export const MODELS: ModelData[] = [
       },
       cockpit: {
         label: "Kokpit",
-        heading: "Intelligence at\nyour fingertips.",
+        heading: "Kontrol di\njung jari.",
         body: "Layout kokpit J7 SHS menempatkan layar dan kontrol agar perhatian tetap ke jalan. Bukan sistem valet parking SIVP.",
       },
       performance: {
         label: "Performa",
-        heading: "Super hybrid.\nSuper experience.",
+        heading: "Super Hybrid.\nNyaman dipakai.",
       },
       adas: {
         label: "Keselamatan",
@@ -307,7 +307,7 @@ export const MODELS: ModelData[] = [
       },
       tech_intelligence: {
         label: "Teknologi",
-        heading: "Intelligence,\nin every detail.",
+        heading: "Detail yang\nterasa pintar.",
         body: "19 fitur ADAS dan kamera 540° HD bekerja mendukung pengemudi. Pengemudi tetap bertanggung jawab penuh atas kendaraan.",
       },
       tech_stats: [
@@ -378,9 +378,9 @@ export const MODELS: ModelData[] = [
       ],
     },
     specifications: J7_SHS_SPECIFICATIONS,
-    meta_title: "JAECOO J7 SHS — Harga & Spesifikasi | JAECOO Palembang",
+    meta_title: "JAECOO J7 SHS Palembang | SUV Plug-in Hybrid & Spesifikasi",
     meta_description:
-      "JAECOO J7 SHS Rp534.900.000 OTR Palembang. Super Hybrid 1.5TGDI, EV range 100 km, jarak kombinasi 1.300 km, 19 ADAS. Bukan varian SIVP.",
+      "JAECOO J7 SHS di Palembang adalah SUV plug-in hybrid dengan Super Hybrid System. Lihat harga, spesifikasi, dan jadwalkan test drive.",
     published: true,
     updated_at: "2026-09-23T00:00:00Z",
   },
@@ -410,17 +410,17 @@ export const MODELS: ModelData[] = [
     page_copy: {
       exterior: {
         label: "SIVP",
-        heading: "Your SUV.\nYour personal valet.",
+        heading: "SUV Anda.\nValet pribadinya.",
         body: "J7 mencari tempat parkir, memarkirkan diri, lalu datang kembali saat dipanggil. Tanpa pengemudi. Tanpa khawatir.",
       },
       design: {
         label: "Cara kerja",
-        heading: "Find.\nPark.\nLeave.",
+        heading: "Cari.\nParkir.\nTinggalkan.",
         body: "Pilih area parkir dari smartphone, lalu turun. Sistem mendeteksi pejalan kaki dan hambatan, dan manuver dilakukan otomatis sampai posisi parkir.",
       },
       profile: {
         label: "Persepsi",
-        heading: "Intelligence\nthat sees.",
+        heading: "Persepsi yang\nmembaca sekitar.",
       },
       interior: {
         label: "Kendali",
@@ -429,28 +429,28 @@ export const MODELS: ModelData[] = [
       },
       cockpit: {
         label: "Keputusan",
-        heading: "See.\nUnderstand.\nAct.",
+        heading: "Melihat.\nMemahami.\nBertindak.",
         body: "Intelligent Driving Domain Controller memproses sensor secara bersamaan dan menghitung jalur parkir. Kemudi, gas, dan rem dieksekusi tanpa intervensi pengemudi.",
       },
       performance: {
         label: "Platform",
-        heading: "Plug-in hybrid.\nIntelligent by design.",
+        heading: "Plug-in hybrid\nyang tenang dipakai.",
       },
       adas: {
         label: "Persepsi",
         stat: "27",
         unit: "SENSOR",
-        heading: "Built to\nperceive.",
+        heading: "Dibangun untuk\nmembaca sekitar.",
         body: "27 sensor dan kamera, LiDAR 128-channel dToF, radar, dan kamera 540°. Ini paket SIVP, bukan daftar fitur J7 SHS standar.",
       },
       cta: {
         label: "JAECOO J7 SIVP · Palembang",
-        heading: "Ready to\nexperience SIVP?",
+        heading: "Siap mencoba\nSIVP?",
         body: "Harga resmi J7 SIVP belum diumumkan di halaman referensi — status pre-book. Hubungi Alvan untuk informasi dan test drive di Palembang.",
       },
       tech_intelligence: {
         label: "SIVP",
-        heading: "Intelligence\nin confined spaces.",
+        heading: "Cerdas di\nruang sempit.",
         body: "Basement sempit, tikungan ketat, dan pilar yang menyempit justru menjadi area kerja SIVP. Sistem yang sama juga tetap beroperasi di ruang terbuka.",
       },
       tech_stats: [
@@ -522,9 +522,9 @@ export const MODELS: ModelData[] = [
       ],
     },
     specifications: J7_SHS_SPECIFICATIONS,
-    meta_title: "JAECOO J7 SIVP — Super Intelligent Valet Parking | JAECOO Palembang",
+    meta_title: "JAECOO J7 SIVP Palembang | Smart Valet Parking & Spesifikasi",
     meta_description:
-      "JAECOO J7 SHS-P SIVP di Palembang. 27 sensor dan kamera, LiDAR 128-channel, kamera 540°. Harga resmi menyusul — pre-book.",
+      "JAECOO J7 SIVP di Palembang menambahkan Smart Valet Parking pada platform hybrid J7. Lihat cara kerjanya dan spesifikasi lengkapnya.",
     published: true,
     updated_at: "2026-09-23T00:00:00Z",
   },
@@ -775,9 +775,9 @@ export const MODELS: ModelData[] = [
         ],
       },
     ],
-    meta_title: "JAECOO J8 SHS-P ARDIS — Harga & Spesifikasi | JAECOO Palembang",
+    meta_title: "JAECOO J8 Palembang | ARDIS & SHS-P ARDIS",
     meta_description:
-      "JAECOO J8 SHS-P ARDIS Rp865.000.000 OTR Palembang. 530 PS, 650 Nm, 0–100 km/jam 5,4 detik, EV range hingga 180 km, 7 penumpang.",
+      "JAECOO J8 di Palembang hadir sebagai J8 ARDIS bensin dan J8 SHS-P ARDIS plug-in hybrid, keduanya dengan AWD ARDIS. Lihat harga dan spesifikasi.",
     published: true,
     updated_at: "2026-09-23T00:00:00Z",
   },
