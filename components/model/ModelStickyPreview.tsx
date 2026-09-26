@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import type { ModelFeature, ModelHighlight, ModelPageCopy } from '@/lib/types/model'
@@ -55,6 +55,44 @@ function HeadingLines({ text, className, active }: { text: string; className: st
         </span>
       ))}
     </h2>
+  )
+}
+
+function LiveScale({ watch, children }: { watch: string; children: ReactNode }) {
+  const hostRef = useRef<HTMLDivElement>(null)
+  const innerRef = useRef<HTMLDivElement>(null)
+  const [liveW, setLiveW] = useState(1280)
+  const [scale, setScale] = useState(1)
+  const [height, setHeight] = useState(0)
+
+  useEffect(() => {
+    const host = hostRef.current
+    const inner = innerRef.current
+    if (!host || !inner) return
+    const measure = () => {
+      const width = window.innerWidth
+      const nextScale = host.clientWidth > 0 ? host.clientWidth / width : 1
+      setLiveW(width)
+      setScale(nextScale)
+      setHeight(inner.offsetHeight * nextScale)
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(host)
+    observer.observe(inner)
+    window.addEventListener('resize', measure)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', measure)
+    }
+  }, [watch])
+
+  return (
+    <div ref={hostRef} style={{ width: '100%', height, overflow: 'hidden' }}>
+      <div ref={innerRef} style={{ width: liveW, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+        {children}
+      </div>
+    </div>
   )
 }
 
@@ -122,7 +160,7 @@ export function ModelStickyPreview({
   const headingOn = focusedField === 'heading'
 
   let visual = (
-    <section className={overview.cinematicSection} style={{ minHeight: 420, height: 420 }}>
+    <section className={overview.cinematicSection}>
       <div className={overview.cinematicBg}>
         <Bg src={heroImage || ''} className={overview.cinematicBgImg} />
         <div className={overview.cinematicOverlay} />
@@ -136,13 +174,13 @@ export function ModelStickyPreview({
 
   if (mode === 'text' && section === 'performance') {
     visual = (
-      <section className={overview.performanceSection} data-live-section="performance" style={{ minHeight: 520 }}>
+      <section className={overview.performanceSection} data-live-section="performance">
         <div className={overview.performanceBg}>
           <Bg src={image} className={overview.performanceBgImg} />
           <div className={overview.cinematicOverlay} style={{ opacity: 0.6 }} />
         </div>
         <Container size="wide">
-          <div className={overview.performanceContent} style={{ gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 0.8fr)' }}>
+          <div className={overview.performanceContent}>
             <div>
               <p className={overview.editorialLabel}>
                 <span className={overview.editorialNum}>06</span>
@@ -166,7 +204,7 @@ export function ModelStickyPreview({
   } else if (mode === 'text' && section === 'technology') {
     visual = (
       <section className={overview.techSection} data-live-section="technology">
-        <div className={overview.techLayout} style={{ gridTemplateColumns: 'minmax(0, 0.9fr) minmax(0, 1.1fr)', minHeight: 520 }}>
+        <div className={overview.techLayout}>
           <div className={overview.techImageWrap}>
             <Bg src={image} className={overview.techMainImg} />
           </div>
@@ -195,7 +233,7 @@ export function ModelStickyPreview({
     )
   } else if (mode === 'text' && section === 'adas') {
     visual = (
-      <section className={overview.cinematicSection} data-live-section="adas" style={{ minHeight: 520 }}>
+      <section className={overview.cinematicSection} data-live-section="adas">
         <div className={overview.cinematicBg}>
           <Bg src={image} className={overview.cinematicBgImg} />
           <div className={overview.cinematicOverlay} style={{ opacity: 0.55 }} />
@@ -220,7 +258,7 @@ export function ModelStickyPreview({
     )
   } else if (mode === 'text' && (section === 'cta' || section === 'hero_cta' || section === 'specs_cta' || section === 'tech_close')) {
     visual = (
-      <section className={overview.ctaSection} data-live-section="cta" style={{ minHeight: 520 }}>
+      <section className={overview.ctaSection} data-live-section="cta">
         <div className={overview.ctaBg}>
           <Bg src={image} className={overview.ctaBgImg} />
           <div className={overview.cinematicOverlay} style={{ opacity: 0.65 }} />
@@ -246,7 +284,7 @@ export function ModelStickyPreview({
     const number = section === 'interior' ? '04' : section === 'cockpit' ? '05' : section === 'profile' ? '03' : section === 'design' ? '02' : '01'
     const headingClass = section === 'cockpit' ? overview.cockpitHeading : section === 'profile' ? overview.presenceHeading : section === 'design' ? overview.detailHeading : overview.cinematicHeading
     visual = (
-      <section className={overview.cinematicSection} data-live-section={section} style={{ minHeight: 520 }}>
+      <section className={overview.cinematicSection} data-live-section={section}>
         <div className={overview.cinematicBg}>
           <Bg src={image} className={overview.cinematicBgImg} />
           <div className={overview.cinematicOverlay} />
@@ -265,7 +303,9 @@ export function ModelStickyPreview({
 
   return (
     <aside aria-label={mode === 'text' ? `Section ${section}` : modelName} data-preview-mode={mode} data-preview-section-active={mode === 'text' ? section : 'model'}>
-      {visual}
+      <LiveScale watch={`${mode}:${section}:${heroImage ?? ''}:${image}`}>
+        {visual}
+      </LiveScale>
     </aside>
   )
 }

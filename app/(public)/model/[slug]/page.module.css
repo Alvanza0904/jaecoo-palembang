@@ -75,12 +75,8 @@
 }
 
 @media (min-width: 1024px) {
-  .cinematicSection,
-  .presenceSection,
-  .performanceSection {
-    min-height: 0;
-    height: auto;
-    aspect-ratio: 16 / 9;
+  .cinematicSection {
+    min-height: 90svh;
   }
 }
 

@@ -17,10 +17,9 @@ interface Props {
 /**
  * Real browser viewport preview menggunakan iframe.
  *
- * KENAPA IFRAME?
- * CSS media queries dievaluasi terhadap lebar iframe (390px / full),
- * bukan lebar browser admin. Mobile toggle benar-benar 390px viewport.
- * Tidak ada transform/scale yang mengacaukan font-size atau layout.
+ * The iframe is laid out at the real browser viewport (or 390×844 on mobile).
+ * Only the outer stage is scaled to fit the admin panel, so section
+ * width, height, and media queries stay identical to the live site.
  *
  * ARSITEKTUR:
  * 1. iframe load /admin-preview/homepage (page.tsx → HomepagePreviewClient)
@@ -42,7 +41,30 @@ export function HomepagePreviewFrame({
   textEditMode = false,
   focusedFieldId = null,
 }: Props) {
+  const stageRef = useRef<HTMLDivElement | null>(null)
   const iframeRef = useRef<HTMLIFrameElement | null>(null)
+  const [stageSize, setStageSize] = useState({ w: 0, h: 0 })
+  const [viewport, setViewport] = useState({ w: 1440, h: 900 })
+
+  useEffect(() => {
+    const measure = () => {
+      setViewport({ w: window.innerWidth, h: window.innerHeight })
+      const stage = stageRef.current
+      if (stage) setStageSize({ w: stage.clientWidth, h: stage.clientHeight })
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    const observer = new ResizeObserver(measure)
+    if (stageRef.current) observer.observe(stageRef.current)
+    return () => {
+      window.removeEventListener('resize', measure)
+      observer.disconnect()
+    }
+  }, [])
+
+  const logicalW = device === 'mobile' ? 390 : viewport.w
+  const logicalH = device === 'mobile' ? 844 : viewport.h
+  const scale = stageSize.w > 0 ? Math.min(1, stageSize.w / logicalW) : 1
   const [loadError, setLoadError] = useState(false)
   const [iframeKey, setIframeKey] = useState(0) // force remount on retry
   const [iframeReady, setIframeReady] = useState(false)
@@ -135,15 +157,25 @@ export function HomepagePreviewFrame({
   }
 
   return (
-    <iframe
-      key={iframeKey}
-      ref={iframeRef}
-      title="Homepage visual preview"
-      src="/admin-preview/homepage"
-      className={`${styles.previewFrame} ${device === 'mobile' ? styles.previewFrameMobile : styles.previewFrameDesktop}`}
-      onLoad={handleLoad}
-      onError={handleError}
-      scrolling="yes"
-    />
+    <div ref={stageRef} className={styles.previewStage}>
+      <div style={{ width: logicalW * scale, height: logicalH * scale }}>
+        <iframe
+          key={iframeKey}
+          ref={iframeRef}
+          title="Homepage visual preview"
+          src="/admin-preview/homepage"
+          className={styles.previewFrame}
+          scrolling="yes"
+          onLoad={handleLoad}
+          onError={handleError}
+          style={{
+            width: logicalW,
+            height: logicalH,
+            transform: `scale(${scale})`,
+            transformOrigin: 'top left',
+          }}
+        />
+      </div>
+    </div>
   )
 }
