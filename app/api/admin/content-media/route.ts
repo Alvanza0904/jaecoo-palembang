@@ -19,6 +19,7 @@ function errorResponse(error: unknown) {
 
 function revalidateModelMedia(contentKey: string) {
   revalidatePath("/");
+  revalidatePath("/sales-jaecoo-palembang");
   revalidatePath("/model");
   revalidatePath(`/model/${contentKey}`);
   revalidatePath(`/model/${contentKey}/technology`);

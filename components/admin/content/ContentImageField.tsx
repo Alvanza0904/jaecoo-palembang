@@ -15,9 +15,10 @@ interface Props {
   slotKey: string
   breakpoint?: 'desktop' | 'mobile'
   initial?: { id?: string; url?: string; alt?: string | null; focal_x?: number | null; focal_y?: number | null }
+  onChange?: (asset: { id?: string; url?: string; alt?: string | null; focal_x?: number | null; focal_y?: number | null } | null) => void
 }
 
-export function ContentImageField({ label, contentType, contentKey, slotKey, breakpoint, initial }: Props) {
+export function ContentImageField({ label, contentType, contentKey, slotKey, breakpoint, initial, onChange }: Props) {
   const [asset, setAsset] = useState(initial)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -38,6 +39,7 @@ export function ContentImageField({ label, contentType, contentKey, slotKey, bre
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Gagal menyimpan image.')
       setAsset({ id: next.id, url: next.public_url ?? undefined, alt: next.alt_text, focal_x: next.focal_x, focal_y: next.focal_y })
+      onChange?.({ id: next.id, url: next.public_url ?? undefined, alt: next.alt_text, focal_x: next.focal_x, focal_y: next.focal_y })
       setMessage('Tersimpan ✓')
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Gagal menyimpan.')
@@ -53,6 +55,7 @@ export function ContentImageField({ label, contentType, contentKey, slotKey, bre
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Gagal melepas image.')
       setAsset(undefined); setMessage('Dilepas — fallback aktif ✓')
+      onChange?.(null)
     } catch (e) { setMessage(e instanceof Error ? e.message : 'Gagal melepas image.') }
     finally { setSaving(false) }
   }

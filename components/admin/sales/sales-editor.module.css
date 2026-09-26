@@ -1,0 +1,13 @@
+.page { max-width: 1100px; margin: 0 auto; }
+.eyebrow { font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--color-ink-subtle); font-weight: 700; }
+.page h1 { font-size: clamp(1.7rem, 6vw, 2.4rem); margin: .35rem 0; }
+.lead { color: var(--color-ink-subtle); font-size: .9rem; line-height: 1.5; max-width: 62ch; }
+.grid { display: grid; gap: 12px; margin-top: 18px; }
+.card { background: var(--color-white); border: 1px solid var(--color-border); border-radius: 14px; padding: 16px; }
+.card h2 { font-size: 1rem; margin: 0 0 10px; }
+.previewLabel { margin: 28px 0 10px; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-subtle); }
+.preview { border: 1px solid var(--color-border); background: var(--color-off-white); overflow: hidden; }
+
+@media (min-width: 800px) {
+  .grid { grid-template-columns: 1fr 1fr; }
+}

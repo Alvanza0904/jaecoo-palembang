@@ -42,6 +42,7 @@ export default async function AdminDashboardPage() {
         { title: 'News & Journal', description: 'Artikel, berita, dan rilis pers', href: '/admin/news', live: true, stat: `${stats.newsCount}` },
         { title: 'Promotions', description: 'Banner, penawaran, dan promo eksklusif', href: '/admin/promo', live: true, stat: `${stats.promosCount}` },
         { title: 'Gallery', description: 'Foto event dan galeri JAECOO Palembang', href: '/admin/gallery', live: true, stat: null },
+        { title: 'Sales Alvan', description: 'Foto dan preview halaman Sales JAECOO Palembang', href: '/admin/sales', live: true, stat: null },
       ],
     },
     {

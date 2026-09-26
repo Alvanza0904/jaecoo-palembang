@@ -33,6 +33,7 @@ const NAV_ITEMS = [
   { href: '/admin/media',         label: 'Media',        icon: '▧' },
   { href: '/admin/gallery',       label: 'Gallery',      icon: '▨' },
   { href: '/admin/brand-assets',  label: 'Brand Assets', icon: '◇' },
+  { href: '/admin/sales',         label: 'Sales',        icon: '◐' },
   { href: '/admin/leads',         label: 'Leads',        icon: '◌' },
   { href: '/admin/settings',      label: 'Settings',     icon: '⚙' },
 ]

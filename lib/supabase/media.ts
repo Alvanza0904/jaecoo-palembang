@@ -271,6 +271,33 @@ export function contentMediaKey(
   return `${contentType}:${contentKey}:${slotKey}`;
 }
 
+export const SALES_MEDIA_SLOTS = [
+  "hero_portrait",
+  "about",
+  "statement",
+  "place_order",
+  "final_cta",
+] as const;
+
+export const getSalesMedia = cache(async function getSalesMedia() {
+  const result = await getContentMedia(
+    SALES_MEDIA_SLOTS.map((slot) => ({
+      content_type: "page",
+      content_key: "sales",
+      slot_key: slot,
+    })),
+  );
+  const slot = (key: (typeof SALES_MEDIA_SLOTS)[number]) =>
+    result[contentMediaKey("page", "sales", key)];
+  return {
+    hero: slot("hero_portrait"),
+    about: slot("about"),
+    statement: slot("statement"),
+    placeOrder: slot("place_order"),
+    finalCta: slot("final_cta"),
+  };
+});
+
 export const GLOBAL_MEDIA_SLOTS = [
   "logo",
   "logo_light",
