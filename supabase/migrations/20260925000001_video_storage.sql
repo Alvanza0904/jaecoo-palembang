@@ -1,10 +1,10 @@
 -- Allow cinematic video uploads in the existing jaecoo-media bucket.
--- Images stay limited to 10 MB by the application. Videos may be up to 80 MB.
+-- 50 MB stays within the project global file-size cap. 80 MB is rejected.
 -- Playback settings live in media_assets.presentation_settings.video
 -- so no parallel media table is created.
 
 update storage.buckets
-set file_size_limit = 83886080,
+set file_size_limit = 52428800,
     allowed_mime_types = array[
       'image/jpeg',
       'image/png',

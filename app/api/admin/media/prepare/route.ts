@@ -2,7 +2,17 @@ import { NextResponse } from "next/server";
 import { createSupabaseAdminClient, getServerUser } from "@/lib/supabase/server";
 
 const BUCKET = "jaecoo-media";
-const VIDEO_LIMIT = 80 * 1024 * 1024;
+const MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/avif",
+  "video/mp4",
+  "video/webm",
+];
+// 80 MB is above this project's global cap, so the bucket update itself is rejected.
+// 50 MB is the usual project maximum. 20 MB still accepts the 14 MB video.
+const LIMITS = [50 * 1024 * 1024, 20 * 1024 * 1024];
 
 export async function POST() {
   const user = await getServerUser();
@@ -10,22 +20,28 @@ export async function POST() {
 
   try {
     const admin = createSupabaseAdminClient();
-    const { error } = await admin.storage.updateBucket(BUCKET, {
-      public: true,
-      fileSizeLimit: VIDEO_LIMIT,
-      allowedMimeTypes: [
-        "image/jpeg",
-        "image/png",
-        "image/webp",
-        "image/avif",
-        "video/mp4",
-        "video/webm",
-      ],
-    });
-    if (error) {
-      return NextResponse.json({ error: `Batas storage gagal dinaikkan: ${error.message}` }, { status: 400 });
+    const existing = await admin.storage.getBucket(BUCKET);
+    const current = Number(existing.data?.file_size_limit ?? 0);
+    if (current >= LIMITS[1]) {
+      return NextResponse.json({ ok: true, file_size_limit: current });
     }
-    return NextResponse.json({ ok: true, file_size_limit: VIDEO_LIMIT });
+
+    let lastError = "batas tidak berubah";
+    for (const limit of LIMITS) {
+      const { error } = await admin.storage.updateBucket(BUCKET, {
+        public: true,
+        fileSizeLimit: limit,
+        allowedMimeTypes: MIME_TYPES,
+      });
+      if (!error) return NextResponse.json({ ok: true, file_size_limit: limit });
+      lastError = error.message;
+      if (!error.message.toLowerCase().includes("maximum allowed size")) break;
+    }
+
+    return NextResponse.json(
+      { error: `Batas storage gagal dinaikkan: ${lastError}` },
+      { status: 400 },
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Batas storage gagal dinaikkan.";
     return NextResponse.json({ error: message }, { status: 500 });

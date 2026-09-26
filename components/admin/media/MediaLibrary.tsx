@@ -145,7 +145,7 @@ function UploadZone({ category, onUploaded }: UploadZoneProps) {
           <div className={styles.uploadIcon}>↑</div>
           <div className={styles.uploadTitle}>Upload Media</div>
           <div className={styles.uploadSub}>Klik atau seret file ke sini</div>
-          <div className={styles.uploadHint}>Gambar maks. 10 MB · Video MP4/WebM maks. 80 MB</div>
+          <div className={styles.uploadHint}>Gambar maks. 10 MB · Video MP4/WebM maks. 50 MB</div>
         </>
       )}
 

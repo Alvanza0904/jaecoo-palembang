@@ -164,7 +164,7 @@ export function validateFile(file: File): string | null {
   const video = file.type.startsWith("video/")
   const limit = video ? MAX_VIDEO_BYTES : 10 * 1024 * 1024
   if (file.size > limit) {
-    return `File terlalu besar: ${formatFileSize(file.size)}. Maksimum ${video ? "80 MB" : "10 MB"}.`
+    return `File terlalu besar: ${formatFileSize(file.size)}. Maksimum ${video ? "50 MB" : "10 MB"}.`
   }
   return null
 }
