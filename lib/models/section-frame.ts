@@ -43,7 +43,8 @@ const FRAMES: Record<string, Partial<Record<BreakpointKey, Frame>>> = {
 };
 
 const DEVICE_VIEWPORT: Record<Exclude<BreakpointKey, "desktop">, { width: number; height: number }> = {
-  tablet: { width: 834, height: 1112 },
+  // Landscape 4:3. A portrait phone window must not become the tablet frame.
+  tablet: { width: 1024, height: 768 },
   mobile: { width: 390, height: 844 },
   small_mobile: { width: 375, height: 812 },
 };

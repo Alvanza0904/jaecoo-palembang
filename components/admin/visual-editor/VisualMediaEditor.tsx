@@ -193,16 +193,21 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
   const isInherited = effectiveSettings.mode === 'inherited'
 
   // ── Preview dimensions ─────────────────────────────────
-  // Canvas aspect follows the live section frame for this slot and viewport.
-  // The panel only scales that frame down; it does not invent a second height.
+  // Canvas aspect follows the live section on that device.
+  // The panel only scales the frame down so it stays inside the editor.
   const dims = BREAKPOINT_PREVIEW_DIMS[activeBp as BreakpointKey]
   const canonicalRatio = sectionFrameAspect(frameSlot, activeBp, viewport)
 
-  // Fit within panel — canvas kecil by design agar muat di editor panel.
-  // Parity live dicapai lewat revalidatePath, bukan ukuran canvas.
-  const maxW = 320
-  const previewW = Math.min(dims.width, maxW)
-  const previewH = Math.round(previewW / canonicalRatio)
+  // Keep the live aspect, but shrink the whole canvas so a tall frame
+  // never becomes a strip taller than the editor panel.
+  const maxW = Math.min(dims.width, 320)
+  const maxH = Math.max(220, Math.round(viewport.height * 0.46))
+  let previewW = maxW
+  let previewH = Math.max(1, Math.round(previewW / canonicalRatio))
+  if (previewH > maxH) {
+    previewH = maxH
+    previewW = Math.max(1, Math.round(maxH * canonicalRatio))
+  }
 
   // Image URLs — dipilih berdasarkan activeBp agar preview editor
   // cocok dengan image yang benar-benar dirender di live per breakpoint.
