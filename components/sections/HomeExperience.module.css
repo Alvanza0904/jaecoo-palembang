@@ -440,7 +440,7 @@
   /* object-fit / object-position / transform come from presentation_settings
      inline style (VisualImage). Fallback only when no settings are present. */
   object-fit: cover;
-  opacity: 0.3;
+  opacity: 1;
 }
 
 /* Mobile presentation_settings override for finalCtaImg */
@@ -456,7 +456,7 @@
 .finalCtaOverlay {
   position: absolute;
   inset: 0;
-  background: rgba(14,14,14,0.70);
+  background: rgba(14, 14, 14, 0.40);
 }
 
 .finalCtaInner {
