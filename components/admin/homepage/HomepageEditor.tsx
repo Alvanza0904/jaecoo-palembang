@@ -597,6 +597,7 @@ export function HomepageEditor({ initialData }: HomepageEditorProps) {
         previewHeading={(sectionStates[activeSection]?.headline as string) || (sectionStates[activeSection]?.title as string) || 'JAECOO J5'}
         previewSubheading={(sectionStates[activeSection]?.description as string) || 'THIS IS THE REAL SUV.'}
         previewTagline={(sectionStates[activeSection]?.eyebrow as string) || section.label.toUpperCase()}
+        frameSlot={`home:${activeSection}`}
       />
     </>
   )

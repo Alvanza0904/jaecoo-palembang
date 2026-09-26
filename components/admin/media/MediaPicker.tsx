@@ -39,6 +39,8 @@ interface MediaPickerProps {
   previewHeading?: string
   previewSubheading?: string
   previewTagline?: string
+  /** Live section frame, for example `exterior` or `home:experience`. */
+  frameSlot?: string
   /** Poster picker: only images, skip the image visual editor. */
   imagesOnly?: boolean
   directSelect?: boolean
@@ -55,6 +57,7 @@ export function MediaPicker({
   previewHeading,
   previewSubheading,
   previewTagline,
+  frameSlot,
   imagesOnly = false,
   directSelect = false,
 }: MediaPickerProps) {
@@ -213,6 +216,7 @@ export function MediaPicker({
               previewHeading={previewHeading}
               previewSubheading={previewSubheading}
               previewTagline={previewTagline ?? 'PREVIEW'}
+              frameSlot={frameSlot}
             />
           )}
         </div>

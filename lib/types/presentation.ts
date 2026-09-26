@@ -482,9 +482,10 @@ export function getTypographyContainerStyle(typo: TypographyPlacement): Typograp
  */
 export function getTypographyPreviewCoordinateSpace(
   breakpoint: BreakpointKey,
+  aspectRatio = BREAKPOINT_ASPECT_RATIO[breakpoint],
 ): { width: number; height: number } {
   const width = BREAKPOINT_DESIGN_WIDTH[breakpoint]
-  const height = width / BREAKPOINT_ASPECT_RATIO[breakpoint]
+  const height = width / aspectRatio
   return { width, height }
 }
 

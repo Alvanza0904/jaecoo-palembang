@@ -56,6 +56,7 @@ import {
   resolveTypographyFontFamily,
 } from '@/lib/types/presentation'
 import { detectCutoutBBox } from '@/lib/utils/cutout-bbox'
+import { sectionFrameAspect } from '@/lib/models/section-frame'
 import styles from './VisualMediaEditor.module.css'
 import heroStyles from '@/components/hero/LayeredHero.module.css'
 
@@ -95,6 +96,11 @@ interface Props {
   previewSubheading?: string
   /** Preview eyebrow/tagline rendered exactly like the public Hero. */
   previewTagline?: string
+  /**
+   * Live section this image belongs to. The canvas uses that section's
+   * frame instead of one shared aspect ratio.
+   */
+  frameSlot?: string
 }
 
 // ─── Helpers ─────────────────────────────────────────────
@@ -124,10 +130,17 @@ function tabModeClass(mode: PresentationMode, s: typeof styles): string {
 
 // ─── Component ───────────────────────────────────────────
 
-export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, previewHeading, previewSubheading, previewTagline = 'OVERVIEW' }: Props) {
+export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, previewHeading, previewSubheading, previewTagline = 'OVERVIEW', frameSlot }: Props) {
 
   // ── Core state ─────────────────────────────────────────
   const [activeBp, setActiveBp] = useState<BreakpointKey>('desktop')
+  const [viewport, setViewport] = useState({ width: 1440, height: 900 })
+  useEffect(() => {
+    const read = () => setViewport({ width: window.innerWidth, height: window.innerHeight })
+    read()
+    window.addEventListener('resize', read)
+    return () => window.removeEventListener('resize', read)
+  }, [])
   const [settings, setSettings] = useState<PresentationSettings>(() => getStoredSettings(asset))
   const [cutoutAssetSettings, setCutoutAssetSettings] = useState<PresentationSettings>(() =>
     getStoredSettings(cutoutAsset ?? asset),
@@ -180,11 +193,10 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
   const isInherited = effectiveSettings.mode === 'inherited'
 
   // ── Preview dimensions ─────────────────────────────────
-  // The canvas keeps the exact Hero aspect ratio. Typography itself is not
-  // re-calculated for this small canvas; it is rendered in a breakpoint design
-  // coordinate space and the whole typography world is scaled down as one unit.
+  // Canvas aspect follows the live section frame for this slot and viewport.
+  // The panel only scales that frame down; it does not invent a second height.
   const dims = BREAKPOINT_PREVIEW_DIMS[activeBp as BreakpointKey]
-  const canonicalRatio = BREAKPOINT_ASPECT_RATIO[activeBp as BreakpointKey]
+  const canonicalRatio = sectionFrameAspect(frameSlot, activeBp, viewport)
 
   // Fit within panel — canvas kecil by design agar muat di editor panel.
   // Parity live dicapai lewat revalidatePath, bukan ukuran canvas.
@@ -786,8 +798,8 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                 <div
                   className={styles.typoCanvasWorld}
                   style={{
-                    width: getTypographyPreviewCoordinateSpace(activeBp).width,
-                    height: getTypographyPreviewCoordinateSpace(activeBp).height,
+                    width: getTypographyPreviewCoordinateSpace(activeBp, canonicalRatio).width,
+                    height: getTypographyPreviewCoordinateSpace(activeBp, canonicalRatio).height,
                     transform: `scale(${getTypographyPreviewScale(activeBp, previewW)})`,
                   }}
                 >
@@ -1234,7 +1246,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
                   // Typography is rendered in the SAME coordinate space as the
                   // public Hero, not recreated with a second px/font-size formula.
                   // The coordinate space is then scaled as one unit to the editor canvas.
-                  const typoSpace = getTypographyPreviewCoordinateSpace(bp)
+                  const typoSpace = getTypographyPreviewCoordinateSpace(bp, canonicalRatio)
                   const typoScale = getTypographyPreviewScale(bp, previewW)
                   const ctaSafeAreaPx = Math.round(previewH * CTA_SAFE_AREA_FRACTION)
 

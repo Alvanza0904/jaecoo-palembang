@@ -437,6 +437,7 @@ function BasicTab({ model, slug, mode = 'identity' }: { model: AdminModel; slug:
         onClose={() => setPickerOpen(false)}
         title="Pilih Hero Image"
         defaultCategory="models"
+        frameSlot="hero"
         onSelect={async (asset: MediaAsset) => {
           setPickerOpen(false)
           setHeroImageUrl(asset.public_url ?? '')
@@ -472,6 +473,7 @@ function BasicTab({ model, slug, mode = 'identity' }: { model: AdminModel; slug:
         onClose={() => setCutoutPickerOpen(false)}
         title="Pilih Media dengan Cutout"
         defaultCategory="models"
+        frameSlot="hero"
         onSelect={handleCutoutSelect}
       />
 
@@ -481,6 +483,7 @@ function BasicTab({ model, slug, mode = 'identity' }: { model: AdminModel; slug:
           cutoutAsset={visualEditorCutoutAsset}
           previewHeading={model.tagline || model.name}
           previewSubheading={model.name}
+          frameSlot="hero"
           onClose={() => {
             setVisualEditorAsset(null)
             setVisualEditorCutoutAsset(null)
@@ -1007,6 +1010,7 @@ function ColorRow({
         onClose={() => setColorPickerOpen(false)}
         title={`Pilih Gambar — ${color.name}`}
         defaultCategory="models"
+        frameSlot="colors"
         onSelect={async (asset: MediaAsset) => {
           setColorPickerOpen(false)
           setColorImageUrl(asset.public_url ?? '')
@@ -1296,7 +1300,7 @@ function MediaAssignmentField({slug,slot,breakpoint,assignments,fieldLabel,previ
       {asset && <button className={styles.btnSecondary} type="button" onClick={remove}>Hapus</button>}
     </div>
     {message&&<div className={styles.fieldNote}>{message}</div>}
-    <MediaPicker open={open} onClose={()=>setOpen(false)} onSelect={choose} title={`Pilih ${breakpoint} — ${slot}`} previewHeading={previewHeading} previewSubheading={previewSubheading} previewTagline={previewTagline}/>
+    <MediaPicker open={open} onClose={()=>setOpen(false)} onSelect={choose} title={`Pilih ${breakpoint} — ${slot}`} previewHeading={previewHeading} previewSubheading={previewSubheading} previewTagline={previewTagline} frameSlot={slot}/>
   </div>
 }
 
