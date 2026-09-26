@@ -456,7 +456,7 @@
 .finalCtaOverlay {
   position: absolute;
   inset: 0;
-  background: rgba(14, 14, 14, 0.40);
+  background: rgba(14, 14, 14, 0.52);
 }
 
 .finalCtaInner {
