@@ -107,7 +107,8 @@
 .about,
 .help,
 .whatsapp,
-.order {
+.order,
+.delivery {
   padding: var(--section-gap-md) var(--container-padding);
 }
 
@@ -126,7 +127,8 @@
 
 .about h2,
 .help h2,
-.whatsapp h2 {
+.whatsapp h2,
+.delivery h2 {
   margin: 0 0 var(--space-5);
   font-size: clamp(2rem, 5vw, 3.6rem);
   letter-spacing: var(--tracking-tight);
@@ -226,6 +228,110 @@
 }
 
 .orderCaption { margin-top: var(--space-6); }
+
+.delivery {
+  max-width: 1180px;
+  margin-inline: auto;
+}
+
+.deliveryIntro {
+  max-width: 38rem;
+  margin-bottom: var(--space-8);
+}
+
+.deliveryIntro p:last-child {
+  margin: var(--space-4) 0 0;
+  color: var(--color-ink-muted);
+  line-height: 1.7;
+}
+
+.deliveryStage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.deliveryFeature,
+.deliveryTile {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #141414;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+}
+
+.deliveryFeature { aspect-ratio: 4 / 5; }
+.deliveryTile { aspect-ratio: 4 / 3; }
+
+.deliveryFeature img,
+.deliveryTile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s ease;
+}
+
+.deliveryFeature figcaption,
+.deliveryTile figcaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 2.4rem 1.1rem 1rem;
+  color: white;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0));
+}
+
+.deliveryFeature strong,
+.deliveryTile strong {
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+.deliveryFeature span,
+.deliveryTile span,
+.deliveryFeature em,
+.deliveryTile em {
+  font-style: normal;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.deliveryMore {
+  margin-top: var(--space-6);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-ink);
+  font: inherit;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .deliveryFeature:hover img,
+  .deliveryTile:hover img { transform: scale(1.03); }
+}
+
+@media (min-width: 800px) {
+  .deliveryFeature { aspect-ratio: 16 / 10; }
+  .deliveryRest {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap: var(--space-4);
+  }
+  .deliveryRest .deliveryTile:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    aspect-ratio: 16 / 7;
+  }
+}
 
 .whatsapp {
   max-width: 760px;

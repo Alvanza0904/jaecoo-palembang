@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/Button";
 import type { ResponsiveImage } from "@/lib/types/media";
+import type { SalesDelivery } from "@/lib/sales/deliveries";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
+import { DeliverySection } from "./DeliverySection";
 import styles from "./SalesPage.module.css";
 
 export interface SalesImages {
@@ -63,7 +65,7 @@ function Photo({
   );
 }
 
-export function SalesPageView({ images }: { images: SalesImages }) {
+export function SalesPageView({ images, deliveries = [] }: { images: SalesImages; deliveries?: SalesDelivery[] }) {
   const whatsapp = buildWhatsAppUrl({ source: "sales_page", source_cta: "sales_page_cta" });
 
   return (
@@ -129,6 +131,8 @@ export function SalesPageView({ images }: { images: SalesImages }) {
           <p>Mendampingi setiap proses, sampai kendaraan siap menjadi bagian dari perjalanan Anda.</p>
         </div>
       </section>
+
+      <DeliverySection deliveries={deliveries} />
 
       <section className={styles.whatsapp}>
         <p className={styles.kickerDark}>Konsultasi</p>

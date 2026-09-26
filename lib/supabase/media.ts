@@ -3,6 +3,7 @@ import { createSupabasePublicClient } from "./server";
 import type { ResponsiveImage } from "@/lib/types/media";
 import { isVideoMime, readVideoSettings } from "@/lib/types/video";
 import { pickOwnedUrl } from "@/lib/types/media-asset";
+import { decodeDeliverySlot, deliveryAlt, type SalesDelivery } from "@/lib/sales/deliveries";
 
 export interface ContentMediaAssignment {
   content_type: string;
@@ -296,6 +297,38 @@ export const getSalesMedia = cache(async function getSalesMedia() {
     placeOrder: slot("place_order"),
     finalCta: slot("final_cta"),
   };
+});
+
+export const getSalesDeliveries = cache(async function getSalesDeliveries(): Promise<SalesDelivery[]> {
+  try {
+    const supabase = createSupabasePublicClient();
+    const { data, error } = await supabase
+      .from("content_media")
+      .select("slot_key, media_asset_id, media_assets(public_url, alt_text, focal_x, focal_y, width, height)")
+      .eq("content_type", "page")
+      .eq("content_key", "sales")
+      .like("slot_key", "delivery:%");
+    if (error || !data) return [];
+    return data.flatMap((row) => {
+      const meta = decodeDeliverySlot(row.slot_key);
+      if (!meta || !meta.published) return [];
+      const asset = Array.isArray(row.media_assets) ? row.media_assets[0] : row.media_assets;
+      const url = asset?.public_url;
+      if (!url) return [];
+      const image: ResponsiveImage = {
+        desktop: url,
+        mobile: url,
+        alt: deliveryAlt(meta),
+        focal_x: asset.focal_x ?? undefined,
+        focal_y: asset.focal_y ?? undefined,
+        width: asset.width ?? undefined,
+        height: asset.height ?? undefined,
+      };
+      return [{ ...meta, media_asset_id: row.media_asset_id, image }];
+    }).sort((a, b) => a.sort - b.sort);
+  } catch {
+    return [];
+  }
 });
 
 export const GLOBAL_MEDIA_SLOTS = [

@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { ContentImageField } from '@/components/admin/content/ContentImageField'
 import { SalesPageView, type SalesImages } from '@/components/sales/SalesPage'
+import { DeliveryEditor } from './DeliveryEditor'
+import type { SalesDelivery } from '@/lib/sales/deliveries'
 import type { ResponsiveImage } from '@/lib/types/media'
 import styles from './sales-editor.module.css'
 
@@ -36,6 +38,7 @@ function toImage(asset?: Asset | null): ResponsiveImage | undefined {
 export function SalesEditor() {
   const [rows, setRows] = useState<Row[]>([])
   const [images, setImages] = useState<SalesImages>({})
+  const [deliveries, setDeliveries] = useState<SalesDelivery[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -89,9 +92,10 @@ export function SalesEditor() {
           ))}
         </div>
       )}
+      <DeliveryEditor onChange={setDeliveries} />
       <p className={styles.previewLabel}>Preview live</p>
       <div className={styles.preview}>
-        <SalesPageView images={images} />
+        <SalesPageView images={images} deliveries={deliveries} />
       </div>
     </div>
   )

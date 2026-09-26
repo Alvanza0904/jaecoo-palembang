@@ -8,12 +8,12 @@ export const revalidate = 60;
 import type { Metadata } from "next";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { SalesPageView } from "@/components/sales/SalesPage";
-import { getSalesMedia } from "@/lib/supabase/media";
+import { getSalesDeliveries, getSalesMedia } from "@/lib/supabase/media";
 import { SITE_URL } from "@/lib/utils/seo";
 
 const title = "Sales JAECOO Palembang — Alvan";
 const description =
-  "Alvan, Sales Consultant JAECOO Palembang. Konsultasi personal untuk mengenal JAECOO dan menemukan kendaraan yang sesuai, langsung via WhatsApp.";
+  "Alvan, Sales Consultant JAECOO Palembang. Konsultasi untuk JAECOO J5 EV, J7 SHS, J7 SIVP, dan J8, termasuk momen serah terima bersama pelanggan.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const images = await getSalesMedia();
@@ -35,11 +35,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SalesPage() {
-  const images = await getSalesMedia();
+  const [images, deliveries] = await Promise.all([getSalesMedia(), getSalesDeliveries()]);
   return (
     <>
       <TransparentHeader />
-      <SalesPageView images={images} />
+      <SalesPageView images={images} deliveries={deliveries} />
     </>
   );
 }
