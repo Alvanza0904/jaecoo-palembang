@@ -15,6 +15,8 @@ interface CmsVideoProps {
   priority?: boolean;
   className?: string;
   label?: string;
+  /** Show a play control. Background videos stay cinematic unless this is set. */
+  playable?: boolean;
 }
 
 export function CmsVideo({
@@ -24,12 +26,26 @@ export function CmsVideo({
   priority = false,
   className,
   label = "Video",
+  playable = false,
 }: CmsVideoProps) {
   const playback = readVideoSettings(settings && typeof settings === "object" && "autoplay" in (settings as object) ? { video: settings } : settings);
+  const canControl = playable || playback.controls;
   const videoRef = useRef<HTMLVideoElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const [failed, setFailed] = useState(false);
   const [inView, setInView] = useState(priority);
+  const [playing, setPlaying] = useState(false);
+
+  function togglePlay() {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      video.muted = playback.autoplay ? true : playback.muted;
+      void video.play().catch(() => undefined);
+    } else {
+      video.pause();
+    }
+  }
 
   useEffect(() => {
     setFailed(false);
@@ -96,7 +112,7 @@ export function CmsVideo({
           autoPlay={playback.autoplay && inView}
           muted={playback.autoplay ? true : playback.muted}
           loop={playback.loop && playback.end_time == null}
-          controls={playback.controls}
+          controls={canControl}
           playsInline={playback.plays_inline}
           preload={priority ? playback.preload : inView ? playback.preload : "none"}
           style={{
@@ -104,6 +120,9 @@ export function CmsVideo({
             objectPosition: videoPositionToCss(playback.position),
           }}
           aria-label={playback.title || label}
+          onClick={canControl ? togglePlay : undefined}
+          onPlay={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
           onError={() => setFailed(true)}
           onLoadedMetadata={(event) => {
             if (playback.start_time != null) {
@@ -112,6 +131,11 @@ export function CmsVideo({
           }}
           onTimeUpdate={onTimeUpdate}
         />
+      )}
+      {canControl && src && !failed && !playing && (
+        <button type="button" className={styles.playButton} onClick={togglePlay} aria-label="Putar video">
+          <span className={styles.playIcon} />
+        </button>
       )}
     </div>
   );

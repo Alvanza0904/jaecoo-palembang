@@ -44,11 +44,13 @@ function TechSceneImage({
   label,
   ratio,
   className,
+  playable = false,
 }: {
   image?: ResponsiveImage;
   label: string;
   ratio: string;
   className?: string;
+  playable?: boolean;
 }) {
   const src = image?.desktop ?? image?.tablet ?? image?.mobile;
   if (!src) {
@@ -62,13 +64,15 @@ function TechSceneImage({
     );
   }
   if (isVideoSource(image?.mime_type, src)) {
+    const playback = readVideoSettings(image?.presentation_settings);
     return (
       <CmsVideo
         src={src}
         poster={image?.poster}
-        settings={readVideoSettings(image?.presentation_settings)}
+        settings={playable ? { ...playback, controls: true, plays_inline: true } : playback}
         label={image?.alt || label}
         className={className}
+        playable={playable}
       />
     );
   }
@@ -285,12 +289,16 @@ export default async function TeknologiPage({ params }: Props) {
           Full-bleed dark scene, text overlays bottom-left
       ══════════════════════════════════════════════════════════ */}
       <section className={styles.cinematicScene} data-theme="dark">
-        <div className={styles.sceneBg} aria-hidden="true">
+        <div
+          className={styles.sceneBg}
+          aria-hidden={isVideoSource(model.image_slots?.tech_intelligence?.mime_type, model.image_slots?.tech_intelligence?.desktop) ? undefined : true}
+        >
           <TechSceneImage
             image={model.image_slots?.tech_intelligence}
             label="TECHNOLOGY — INTELLIGENT COCKPIT / DISPLAY SCREEN"
             ratio="16/9"
             className={styles.sceneBgImg}
+            playable
           />
           <div className={styles.sceneOverlay} data-gradient="bottom" />
         </div>
@@ -347,24 +355,44 @@ export default async function TeknologiPage({ params }: Props) {
               {/* Image side */}
               <div className={styles.featureImageWrap}>
                 <Reveal variant={imgVariant} threshold={0.08}>
-                  {feature.media?.image?.desktop ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={feature.media.image.desktop}
-                      alt={feature.media.image.alt ?? feature.title}
-                      className={styles.featureImg}
-                      style={featureImageStyle(feature.media.image)}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  ) : (
-                    <ImagePlaceholder
-                      label={`TECHNOLOGY — ${(feature.tag ?? feature.title).toUpperCase()}`}
-                      ratio="4/3"
-                      source="Admin → Media Library"
-                      className={styles.featureImg}
-                    />
-                  )}
+                  {(() => {
+                    const image = feature.media?.image;
+                    const src = image?.desktop ?? image?.tablet ?? image?.mobile;
+                    if (src && isVideoSource(image?.mime_type, src)) {
+                      const playback = readVideoSettings(image?.presentation_settings);
+                      return (
+                        <CmsVideo
+                          src={src}
+                          poster={image?.poster}
+                          settings={{ ...playback, controls: true, plays_inline: true }}
+                          label={image?.alt ?? feature.title}
+                          className={styles.featureVideo}
+                          playable
+                        />
+                      );
+                    }
+                    if (src) {
+                      return (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={src}
+                          alt={image?.alt ?? feature.title}
+                          className={styles.featureImg}
+                          style={featureImageStyle(image)}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      );
+                    }
+                    return (
+                      <ImagePlaceholder
+                        label={`TECHNOLOGY — ${(feature.tag ?? feature.title).toUpperCase()}`}
+                        ratio="4/3"
+                        source="Admin → Media Library"
+                        className={styles.featureImg}
+                      />
+                    );
+                  })()}
                 </Reveal>
               </div>
 

@@ -63,6 +63,7 @@
 .sceneOverlay {
   position: absolute;
   inset: 0;
+  pointer-events: none;
   background: linear-gradient(
     to top,
     rgba(10, 10, 10, 0.80) 0%,
@@ -180,6 +181,7 @@
   max-width: var(--container-max);
   margin: 0 auto;
   width: 100%;
+  pointer-events: none;
 }
 
 .sceneContent[data-position="bottom-left"] {
@@ -312,6 +314,13 @@
   display: block;
   /* Subtle entrance scale — resets on scroll-in via Reveal */
   transition: transform var(--duration-cinematic) var(--ease-cinema);
+}
+
+.featureVideo {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  min-height: 220px;
 }
 
 /* Text panel */
