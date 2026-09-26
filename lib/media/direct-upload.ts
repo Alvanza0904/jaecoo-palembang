@@ -42,10 +42,20 @@ export function uploadToStorage(
 function readStorageError(xhr: XMLHttpRequest) {
   try {
     const json = JSON.parse(xhr.responseText);
-    return json.message || json.error || json.error_description;
+    const message = String(json.message || json.error || json.error_description || "");
+    if (message.toLowerCase().includes("maximum allowed size")) {
+      return "Storage masih membatasi file di bawah ukuran video ini. Batas bucket belum naik. Coba upload sekali lagi.";
+    }
+    return message;
   } catch {
     return xhr.responseText?.slice(0, 180);
   }
+}
+
+export async function prepareStorageUpload() {
+  const res = await fetch("/api/admin/media/prepare", { method: "POST" });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.error || "Batas storage belum bisa dinaikkan.");
 }
 
 export async function registerUploadedMedia(input: {

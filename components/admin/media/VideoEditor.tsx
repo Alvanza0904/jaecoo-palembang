@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CmsVideo } from "@/components/media/CmsVideo";
 import { MediaPicker } from "./MediaPicker";
-import { replaceMediaFile, uploadToStorage } from "@/lib/media/direct-upload";
+import { replaceMediaFile, uploadToStorage, prepareStorageUpload } from "@/lib/media/direct-upload";
 import type { MediaAsset } from "@/lib/types/media-asset";
 import { validateFile } from "@/lib/types/media-asset";
 import {
@@ -104,6 +104,7 @@ export function VideoEditor({ asset, onClose, onUpdated }: VideoEditorProps) {
     setError("");
     setProgress(0);
     try {
+      await prepareStorageUpload();
       const path = await uploadToStorage(file, current.category, setProgress);
       try {
         const updated = await replaceMediaFile(current.id, {

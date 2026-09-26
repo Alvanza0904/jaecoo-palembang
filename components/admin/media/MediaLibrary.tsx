@@ -22,7 +22,7 @@ import {
   PROCESSING_STATUS_LABEL,
   PROCESSING_STATUS_COLOR,
 } from '@/lib/types/media-asset'
-import { uploadToStorage, registerUploadedMedia } from '@/lib/media/direct-upload'
+import { uploadToStorage, registerUploadedMedia, prepareStorageUpload } from '@/lib/media/direct-upload'
 import { MediaDetail } from './MediaDetail'
 import styles from './MediaLibrary.module.css'
 
@@ -74,6 +74,7 @@ function UploadZone({ category, onUploaded }: UploadZoneProps) {
     const video = file.type.startsWith('video/')
     try {
       if (video) {
+        await prepareStorageUpload()
         const path = await uploadToStorage(file, category, setProgress)
         const asset = await registerUploadedMedia({
           storage_path: path,
@@ -144,7 +145,7 @@ function UploadZone({ category, onUploaded }: UploadZoneProps) {
           <div className={styles.uploadIcon}>↑</div>
           <div className={styles.uploadTitle}>Upload Media</div>
           <div className={styles.uploadSub}>Klik atau seret file ke sini</div>
-          <div className={styles.uploadHint}>JPG · PNG · WebP · AVIF · MP4 · WebM</div>
+          <div className={styles.uploadHint}>Gambar maks. 10 MB · Video MP4/WebM maks. 80 MB</div>
         </>
       )}
 
