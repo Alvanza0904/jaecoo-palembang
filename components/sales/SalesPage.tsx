@@ -137,7 +137,7 @@ export function SalesPageView({ images }: { images: SalesImages }) {
           Saya siap membantu, baik untuk sekadar mengenal produk maupun berdiskusi mengenai pilihan kendaraan yang sesuai.
         </p>
         <Button as="a" href={whatsapp} variant="darkPrimary" size="lg" target="_blank" rel="noopener noreferrer">
-          Hai, saya Alvan
+          Hubungi Alvan
         </Button>
       </section>
 
