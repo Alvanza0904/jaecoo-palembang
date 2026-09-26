@@ -42,8 +42,9 @@ const FRAMES: Record<string, Partial<Record<BreakpointKey, Frame>>> = {
   "home:final_cta": { desktop: view(0.6), tablet: view(0.6), mobile: view(0.6), small_mobile: view(0.6) },
 };
 
-const DEVICE_VIEWPORT: Record<Exclude<BreakpointKey, "desktop">, { width: number; height: number }> = {
-  // Landscape 4:3. A portrait phone window must not become the tablet frame.
+const DEVICE_VIEWPORT: Record<BreakpointKey, { width: number; height: number }> = {
+  // Fixed frames. The editor window must not become the section size.
+  desktop: { width: 1920, height: 1080 },
   tablet: { width: 1024, height: 768 },
   mobile: { width: 390, height: 844 },
   small_mobile: { width: 375, height: 812 },
@@ -52,14 +53,11 @@ const DEVICE_VIEWPORT: Record<Exclude<BreakpointKey, "desktop">, { width: number
 export function sectionFrameAspect(
   slot: string | undefined,
   breakpoint: BreakpointKey,
-  viewport: { width: number; height: number },
 ): number {
   const frame = slot ? FRAMES[slot]?.[breakpoint] ?? FRAMES[slot]?.desktop : undefined;
   if (!frame) return BREAKPOINT_ASPECT_RATIO[breakpoint];
   if ("ratio" in frame) return frame.ratio;
-  const device = breakpoint === "desktop"
-    ? (viewport.width >= 1024 ? viewport : { width: 1440, height: 900 })
-    : DEVICE_VIEWPORT[breakpoint];
+  const device = DEVICE_VIEWPORT[breakpoint];
   const width = device.width * (frame.vw ?? 1);
   const height = Math.max(1, device.height * frame.vh);
   return width / height;

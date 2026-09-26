@@ -196,7 +196,7 @@ export function VisualMediaEditor({ asset, cutoutAsset, onClose, onUpdated, prev
   // Canvas aspect follows the live section on that device.
   // The panel only scales the frame down so it stays inside the editor.
   const dims = BREAKPOINT_PREVIEW_DIMS[activeBp as BreakpointKey]
-  const canonicalRatio = sectionFrameAspect(frameSlot, activeBp, viewport)
+  const canonicalRatio = sectionFrameAspect(frameSlot, activeBp)
 
   // Keep the live aspect, but shrink the whole canvas so a tall frame
   // never becomes a strip taller than the editor panel.
