@@ -107,7 +107,6 @@ export function MobileMenuToggle({ navLinks, inverted = false }: Props) {
                 href={link.href}
                 className={styles.navItem}
                 onClick={close}
-                style={{ animationDelay: open ? `${i * 60 + 100}ms` : "0ms" }}
                 tabIndex={open ? 0 : -1}
               >
                 <span className={styles.navIndex}>0{i + 1}</span>
