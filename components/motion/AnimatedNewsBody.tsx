@@ -62,8 +62,22 @@ function getTagDelay(tag: string, index: number): number {
   return (index % 3) * 70;
 }
 
+/** Wrap plain text in paragraph tags if no HTML tags detected */
+function ensureHtml(html: string): string {
+  const hasHtmlTags = /<[a-z][\s\S]*>/i.test(html);
+  if (hasHtmlTags) return html;
+  // Plain text — split by double newline into paragraphs
+  return html
+    .split(/\n\n+/)
+    .map(p => p.trim())
+    .filter(Boolean)
+    .map(p => `<p>${p.replace(/\n/g, ' ')}</p>`)
+    .join('\n');
+}
+
 /** Parse HTML string menjadi array block HTML */
 function parseBlocks(html: string): Array<{ tag: string; html: string }> {
+  html = ensureHtml(html);
   try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
