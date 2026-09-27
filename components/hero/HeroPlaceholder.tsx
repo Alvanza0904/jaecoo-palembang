@@ -50,7 +50,6 @@ export function HeroPlaceholder({
                 aria-hidden="true"
                 className={styles.bgImg}
                 style={{ display: "none" }}
-                aria-hidden="true"
               />
             )}
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -60,7 +59,6 @@ export function HeroPlaceholder({
               role="presentation"
               aria-hidden="true"
               className={styles.bgImg}
-              aria-hidden="true"
               fetchPriority="high"
               decoding="async"
             />
