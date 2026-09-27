@@ -24,42 +24,47 @@ interface Props {
 }
 
 function renderAddressWithWaLinks(text: string) {
-  const phoneRegex = /(\+?62|0)[0-9]{8,12}/g;
-  const parts = text.split(phoneRegex);
-  const matches = text.match(phoneRegex) || [];
-
+  const phoneRegex = /(?:\+62|62|0)[0-9]{8,13}/g;
   const result: React.ReactNode[] = [];
-  let matchIndex = 0;
+  let last = 0;
+  let index = 0;
 
-  parts.forEach((part, i) => {
-    part.split("\n").forEach((line, j) => {
-      if (j > 0) result.push(<br key={`br-${i}-${j}`} />);
+  const pushText = (value: string, key: string) => {
+    value.split("\n").forEach((line, lineIndex) => {
+      if (lineIndex > 0) result.push(<br key={`${key}-br-${lineIndex}`} />);
       if (line) result.push(line);
     });
+  };
 
-    if (matchIndex < matches.length && i < parts.length - 1) {
-      const raw = matches[matchIndex];
-      const normalized = raw.startsWith("0")
-        ? "62" + raw.slice(1)
-        : raw.replace("+", "");
-      const waText = encodeURIComponent(
-        "Halo, saya ingin melakukan test drive di showroom OMODA JAECOO Palembang. Mohon informasi jadwal yang tersedia. Terima kasih!"
-      );
-      result.push(
-        <a
-          key={`wa-${matchIndex}`}
-          href={`https://wa.me/${normalized}?text=${waText}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.phoneLink}
-        >
-          {raw}
-        </a>
-      );
-      matchIndex++;
-    }
-  });
+  for (const match of text.matchAll(phoneRegex)) {
+    const start = match.index ?? 0;
+    const raw = match[0];
+    if (start > last) pushText(text.slice(last, start), `t-${index}`);
 
+    const normalized = raw.startsWith("+")
+      ? raw.slice(1)
+      : raw.startsWith("0")
+        ? `62${raw.slice(1)}`
+        : raw;
+    const waText = encodeURIComponent(
+      "Halo, saya ingin melakukan test drive di showroom OMODA JAECOO Palembang. Mohon informasi jadwal yang tersedia. Terima kasih!",
+    );
+    result.push(
+      <a
+        key={`wa-${index}`}
+        href={`https://wa.me/${normalized}?text=${waText}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={styles.phoneLink}
+      >
+        {raw}
+      </a>,
+    );
+    last = start + raw.length;
+    index += 1;
+  }
+
+  if (last < text.length) pushText(text.slice(last), "tail");
   return result;
 }
 
