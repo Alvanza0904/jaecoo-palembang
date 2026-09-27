@@ -46,6 +46,8 @@ export function HeroPlaceholder({
               <img
                 src={backgroundImageMobile}
                 alt=""
+                role="presentation"
+                aria-hidden="true"
                 className={styles.bgImg}
                 style={{ display: "none" }}
                 aria-hidden="true"
@@ -55,6 +57,8 @@ export function HeroPlaceholder({
             <img
               src={backgroundImage}
               alt=""
+              role="presentation"
+              aria-hidden="true"
               className={styles.bgImg}
               aria-hidden="true"
               fetchPriority="high"

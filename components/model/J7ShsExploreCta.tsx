@@ -20,7 +20,7 @@ export async function J7ShsExploreCta() {
       <div className={styles.media} aria-hidden="true">
         {src ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={src} alt="" className={styles.image} />
+          <img src={src} alt="" role="presentation" className={styles.image} />
         ) : (
           <div className={styles.fallback} />
         )}

@@ -122,7 +122,7 @@ export default async function ModelIndexPage() {
                     <img
                       className={styles.modelImg}
                       src={desktopSrc}
-                      alt=""
+                      alt={`${model.name} — JAECOO Palembang`}
                       loading={idx === 0 ? "eager" : "lazy"}
                       decoding="async"
                     />

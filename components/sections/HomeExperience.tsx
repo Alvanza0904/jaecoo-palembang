@@ -217,7 +217,7 @@ export function HomeExperienceSection({
   return (
     <section className={styles.experience} aria-labelledby="experience-title">
       {image?.desktop || image?.mobile ? (
-        <VisualImage image={image} alt="" className={styles.experienceMedia} />
+        <VisualImage image={image} alt="JAECOO Palembang — Pengalaman Berkendara" className={styles.experienceMedia} />
       ) : (
         <div className={styles.experienceMedia} aria-hidden="true" />
       )}
@@ -251,7 +251,7 @@ export function HomeTeknologiSection({
   return (
     <section className={styles.technology} aria-labelledby="technology-title">
       {image?.desktop || image?.mobile ? (
-        <VisualImage image={image} alt="" className={styles.technologyMedia} />
+        <VisualImage image={image} alt="Teknologi JAECOO — SUV Listrik dan Hybrid" className={styles.technologyMedia} />
       ) : (
         <div className={styles.technologyMedia} aria-hidden="true" />
       )}
@@ -414,7 +414,7 @@ export function HomeFinalCTA({
   const wa = buildWhatsAppUrl({ source: "homepage_final_cta", source_cta: "final_cta" });
   return (
     <section className={styles.finalCta} aria-labelledby="final-cta-title">
-      {image?.desktop && <VisualImage image={image} alt="" className={styles.finalCtaImg} />}
+      {image?.desktop && <VisualImage image={image} alt="JAECOO Palembang — Temukan SUV Anda" className={styles.finalCtaImg} />}
       <div className={styles.finalCtaOverlay} aria-hidden="true" />
       <div
         className={styles.finalCtaInner}

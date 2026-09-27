@@ -102,6 +102,7 @@ export function HomeDealerLocation({ backgroundImage, cms, textFocusAttr }: Prop
           <img
             src={backgroundImage.desktop}
             alt=""
+            role="presentation"
             className={styles.bgImg}
             aria-hidden="true"
             loading="lazy"

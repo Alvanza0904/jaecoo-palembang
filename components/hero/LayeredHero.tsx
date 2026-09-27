@@ -202,6 +202,8 @@ export function LayeredHero({
             <img
               src={image.mobile || image.tablet || image.desktop || ""}
               alt=""
+              role="presentation"
+              aria-hidden="true"
               className={`${styles.bgImg} ${styles.bgPictureImg}`}
               fetchPriority="high"
               decoding="async"
@@ -237,7 +239,7 @@ export function LayeredHero({
       {(presentationSettings || mobilePresentation) ? (
         <>
           <div className={styles.typographyLayer} aria-hidden="false">
-            {BREAKPOINT_ORDER.map((breakpoint) => {
+            {BREAKPOINT_ORDER.map((breakpoint, bpIndex) => {
               const typo = resolveTypography(
                 settingsFor(breakpoint) ?? {},
                 breakpoint,
@@ -245,17 +247,28 @@ export function LayeredHero({
                 focalY,
               );
               // Uses shared helpers from presentation.ts — same as Editor Preview
+              // SEO FIX: only the first breakpoint (desktop) renders a real <h1>.
+              // Other breakpoints are visually identical but use aria-hidden duplicates
+              // to avoid "more than one h1" SEO error — they are hidden via CSS anyway.
+              const isSemanticHeading = bpIndex === 0;
               return (
                 <div
                   key={breakpoint}
                   className={`${styles.typographyContainer} ${styles[`typographyContainer--${breakpoint}`]}`}
                   style={getTypographyContainerStyle(typo)}
+                  aria-hidden={!isSemanticHeading ? true : undefined}
                 >
                   {tagline && <p className={styles.tagline}>{tagline}</p>}
                   <div className={styles.headingBlock}>
-                    <h1 className={styles.heading} style={getHeadingStyle(typo)}>
-                      {heading}
-                    </h1>
+                    {isSemanticHeading ? (
+                      <h1 className={styles.heading} style={getHeadingStyle(typo)}>
+                        {heading}
+                      </h1>
+                    ) : (
+                      <p className={styles.heading} style={getHeadingStyle(typo)}>
+                        {heading}
+                      </p>
+                    )}
                     {subheading && (
                       <p className={styles.subheading} style={getSubheadingStyle(typo)}>
                         {subheading}

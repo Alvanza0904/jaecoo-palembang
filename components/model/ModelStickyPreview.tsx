@@ -98,7 +98,7 @@ function LiveScale({ watch, children }: { watch: string; children: ReactNode }) 
 
 function Bg({ src, className }: { src: string; className: string }) {
   if (!src) return null
-  return <img src={src} alt="" className={className} />
+  return <img src={src} alt="" role="presentation" aria-hidden="true" className={className} />
 }
 
 export function ModelStickyPreview({
