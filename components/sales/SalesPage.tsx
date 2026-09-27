@@ -61,7 +61,8 @@ function Photo({
         <img src={src} alt={alt} style={{ objectPosition: position }} />
       ) : (
         <div className={styles.empty} role="img" aria-label={alt}>
-          Foto diatur dari Admin → Sales
+          <span>📷</span>
+          <span>Upload foto di Admin → Sales</span>
         </div>
       )}
     </div>
@@ -76,9 +77,7 @@ export function SalesPageView({ images, deliveries = [] }: { images: SalesImages
   return (
     <article>
       <section className={styles.hero}>
-        <Reveal variant="scale" threshold={0}>
-          <Photo image={images.hero} alt="Alvan, Sales Consultant JAECOO Palembang" shade="hero" className={styles.heroMedia} />
-        </Reveal>
+        <Photo image={images.hero} alt="Alvan, Sales Consultant JAECOO Palembang" shade="hero" className={styles.heroMedia} />
         <div className={styles.heroCopy}>
           <Reveal variant="fade-up" delay={60} threshold={0}>
             <p className={styles.kicker}>Sales Consultant</p>
@@ -98,9 +97,7 @@ export function SalesPageView({ images, deliveries = [] }: { images: SalesImages
       </section>
 
       <section className={styles.about}>
-        <Reveal variant="fade-up">
-          <Photo image={images.about} alt="Alvan di JAECOO Palembang" shade="edge" className={styles.aboutPhoto} />
-        </Reveal>
+        <Photo image={images.about} alt="Alvan di JAECOO Palembang" shade="edge" className={styles.aboutPhoto} />
         <div>
           <Reveal variant="fade-up" delay={0}>
             <p className={styles.kickerDark}>Tentang saya</p>
@@ -146,9 +143,7 @@ export function SalesPageView({ images, deliveries = [] }: { images: SalesImages
       </section>
 
       <section className={styles.statement}>
-        <Reveal variant="fade-up">
-          <Photo image={images.statement} alt="Alvan mendampingi customer JAECOO" shade="bottom" className={styles.statementMedia} />
-        </Reveal>
+        <Photo image={images.statement} alt="Alvan mendampingi customer JAECOO" shade="bottom" className={styles.statementMedia} />
         <div className={styles.statementCopy}>
           <Reveal variant="blur" delay={60}>
             <h2>Setiap perjalanan dimulai dari pilihan yang tepat.</h2>
@@ -162,9 +157,7 @@ export function SalesPageView({ images, deliveries = [] }: { images: SalesImages
       </section>
 
       <section className={styles.order}>
-        <Reveal variant="scale">
-          <Photo image={images.placeOrder} alt="Alvan mendampingi proses pemesanan kendaraan" shade="edge" className={styles.orderPhoto} />
-        </Reveal>
+        <Photo image={images.placeOrder} alt="Alvan mendampingi proses pemesanan kendaraan" shade="edge" className={styles.orderPhoto} />
         <div className={styles.orderCaption}>
           <Reveal variant="fade-up" delay={60}>
             <p className={styles.kickerDark}>Place Order</p>
@@ -197,9 +190,7 @@ export function SalesPageView({ images, deliveries = [] }: { images: SalesImages
       </section>
 
       <section className={styles.finale}>
-        <Reveal variant="fade-up">
-          <Photo image={images.finalCta} alt="JAECOO" shade="bottom" className={styles.finaleMedia} />
-        </Reveal>
+        <Photo image={images.finalCta} alt="JAECOO" shade="bottom" className={styles.finaleMedia} />
         <div className={styles.finaleCopy}>
           <Reveal variant="blur" delay={80}>
             <h2>Temukan JAECOO Anda.</h2>
