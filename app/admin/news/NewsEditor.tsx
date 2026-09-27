@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useRef, useCallback } from 'react';
+import { useState, useTransition, useRef, useCallback, useEffect } from 'react';
 import { saveNews, deleteNews, type NewsFormData } from './actions';
 import { MediaPicker } from '@/components/admin/media/MediaPicker';
 import type { MediaAsset } from '@/lib/types/media-asset';
@@ -23,80 +23,6 @@ interface NewsRow {
 
 const CATEGORIES = ['Brand', 'Produk', 'Promo', 'Event', 'Tips', 'Teknologi'];
 
-// ── Markdown → HTML converter (no external deps) ──────────────────
-function markdownToHtml(md: string): string {
-  const lines = md.split('\n');
-  const output: string[] = [];
-  let i = 0;
-
-  while (i < lines.length) {
-    const line = lines[i];
-
-    // Heading 1 → <h2>
-    if (/^# (.+)/.test(line)) {
-      output.push(`<h2>${inlineConvert(line.replace(/^# /, ''))}</h2>`);
-      i++;
-      continue;
-    }
-
-    // Heading 2 → <h3>
-    if (/^## (.+)/.test(line)) {
-      output.push(`<h3>${inlineConvert(line.replace(/^## /, ''))}</h3>`);
-      i++;
-      continue;
-    }
-
-    // Heading 3+ → <h4>
-    if (/^#{3,} (.+)/.test(line)) {
-      output.push(`<h4>${inlineConvert(line.replace(/^#{3,} /, ''))}</h4>`);
-      i++;
-      continue;
-    }
-
-    // Unordered list — kumpulkan baris * atau - berurutan
-    if (/^[*-] (.+)/.test(line)) {
-      const items: string[] = [];
-      while (i < lines.length && /^[*-] (.+)/.test(lines[i])) {
-        items.push(`  <li>${inlineConvert(lines[i].replace(/^[*-] /, ''))}</li>`);
-        i++;
-      }
-      output.push(`<ul>\n${items.join('\n')}\n</ul>`);
-      continue;
-    }
-
-    // Ordered list — kumpulkan baris 1. 2. dst berurutan
-    if (/^\d+\. (.+)/.test(line)) {
-      const items: string[] = [];
-      while (i < lines.length && /^\d+\. (.+)/.test(lines[i])) {
-        items.push(`  <li>${inlineConvert(lines[i].replace(/^\d+\. /, ''))}</li>`);
-        i++;
-      }
-      output.push(`<ol>\n${items.join('\n')}\n</ol>`);
-      continue;
-    }
-
-    // Baris kosong → skip (pemisah paragraf)
-    if (line.trim() === '') {
-      i++;
-      continue;
-    }
-
-    // Teks biasa → <p>
-    output.push(`<p>${inlineConvert(line)}</p>`);
-    i++;
-  }
-
-  return output.join('\n');
-}
-
-/** Konversi inline: **bold**, *italic*, `code` */
-function inlineConvert(text: string): string {
-  return text
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/`(.+?)`/g, '<code>$1</code>');
-}
-
 const EMPTY_FORM: NewsFormData = {
   title: '',
   slug: '',
@@ -110,93 +36,96 @@ const EMPTY_FORM: NewsFormData = {
   meta_description: '',
 };
 
-// ── Rich Text Toolbar ──────────────────────────────────────────────
+// ── WYSIWYG Toolbar ────────────────────────────────────────────────
 interface ToolbarProps {
-  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
-  onChange: (val: string) => void;
-  value: string;
+  editorRef: React.RefObject<HTMLDivElement | null>;
+  onChange: (html: string) => void;
 }
 
-function RichToolbar({ textareaRef, onChange, value }: ToolbarProps) {
-  const wrap = useCallback((before: string, after: string, placeholder: string) => {
-    const el = textareaRef.current;
-    if (!el) return;
-    const start = el.selectionStart;
-    const end = el.selectionEnd;
-    const selected = value.slice(start, end) || placeholder;
-    const newVal = value.slice(0, start) + before + selected + after + value.slice(end);
-    onChange(newVal);
-    // Restore cursor after tag
+function RichToolbar({ editorRef, onChange }: ToolbarProps) {
+  const exec = useCallback((command: string, value?: string) => {
+    editorRef.current?.focus();
+    document.execCommand(command, false, value);
+    // Ambil HTML terbaru setelah eksekusi
     setTimeout(() => {
-      el.focus();
-      const pos = start + before.length + selected.length + after.length;
-      el.setSelectionRange(pos, pos);
+      if (editorRef.current) onChange(editorRef.current.innerHTML);
     }, 0);
-  }, [textareaRef, onChange, value]);
+  }, [editorRef, onChange]);
 
-  const insertBlock = useCallback((tag: string, placeholder: string) => {
-    const el = textareaRef.current;
-    if (!el) return;
-    const start = el.selectionStart;
-    const selected = value.slice(el.selectionStart, el.selectionEnd) || placeholder;
-    const block = `\n<${tag}>${selected}</${tag}>\n`;
-    const newVal = value.slice(0, start) + block + value.slice(el.selectionEnd);
-    onChange(newVal);
-    setTimeout(() => { el.focus(); }, 0);
-  }, [textareaRef, onChange, value]);
+  const insertBlock = useCallback((tag: string) => {
+    editorRef.current?.focus();
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    const text = sel.toString() || 'Judul section';
+    const el = document.createElement(tag);
+    el.textContent = text;
+    range.deleteContents();
+    range.insertNode(el);
+    // Pindah kursor ke setelah elemen
+    range.setStartAfter(el);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    setTimeout(() => {
+      if (editorRef.current) onChange(editorRef.current.innerHTML);
+    }, 0);
+  }, [editorRef, onChange]);
 
   const insertList = useCallback((tag: 'ul' | 'ol') => {
-    const el = textareaRef.current;
-    if (!el) return;
-    const start = el.selectionStart;
-    const selected = value.slice(el.selectionStart, el.selectionEnd);
-    // Split selected text by newline jadi list items
-    const items = selected
-      ? selected.split('\n').filter(Boolean).map(l => `  <li>${l.trim()}</li>`).join('\n')
-      : '  <li>Item pertama</li>\n  <li>Item kedua</li>';
-    const block = `\n<${tag}>\n${items}\n</${tag}>\n`;
-    const newVal = value.slice(0, start) + block + value.slice(el.selectionEnd);
-    onChange(newVal);
-    setTimeout(() => { el.focus(); }, 0);
-  }, [textareaRef, onChange, value]);
+    editorRef.current?.focus();
+    document.execCommand(tag === 'ul' ? 'insertUnorderedList' : 'insertOrderedList', false);
+    setTimeout(() => {
+      if (editorRef.current) onChange(editorRef.current.innerHTML);
+    }, 0);
+  }, [editorRef, onChange]);
 
   const insertDivider = useCallback(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    const start = el.selectionStart;
-    const newVal = value.slice(0, start) + '\n<hr>\n' + value.slice(start);
-    onChange(newVal);
-    setTimeout(() => { el.focus(); }, 0);
-  }, [textareaRef, onChange, value]);
+    editorRef.current?.focus();
+    document.execCommand('insertHorizontalRule', false);
+    setTimeout(() => {
+      if (editorRef.current) onChange(editorRef.current.innerHTML);
+    }, 0);
+  }, [editorRef, onChange]);
 
   const insertBlockquote = useCallback(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    const start = el.selectionStart;
-    const selected = value.slice(el.selectionStart, el.selectionEnd) || 'Kutipan penting di sini...';
-    const block = `\n<blockquote>${selected}</blockquote>\n`;
-    const newVal = value.slice(0, start) + block + value.slice(el.selectionEnd);
-    onChange(newVal);
-    setTimeout(() => { el.focus(); }, 0);
-  }, [textareaRef, onChange, value]);
+    editorRef.current?.focus();
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    const text = sel.toString() || 'Kutipan penting di sini...';
+    const bq = document.createElement('blockquote');
+    bq.textContent = text;
+    range.deleteContents();
+    range.insertNode(bq);
+    range.setStartAfter(bq);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    setTimeout(() => {
+      if (editorRef.current) onChange(editorRef.current.innerHTML);
+    }, 0);
+  }, [editorRef, onChange]);
 
   return (
     <div className={editorStyles.toolbar}>
       <div className={editorStyles.toolbarGroup}>
         <span className={editorStyles.toolbarLabel}>Heading</span>
-        <button type="button" className={editorStyles.toolBtn} title="Heading 2" onClick={() => insertBlock('h2', 'Judul Section')}>H2</button>
-        <button type="button" className={editorStyles.toolBtn} title="Heading 3" onClick={() => insertBlock('h3', 'Sub-judul')}>H3</button>
+        <button type="button" className={editorStyles.toolBtn} title="Heading 2" onClick={() => insertBlock('h2')}>H2</button>
+        <button type="button" className={editorStyles.toolBtn} title="Heading 3" onClick={() => insertBlock('h3')}>H3</button>
       </div>
       <div className={editorStyles.toolbarDivider} />
       <div className={editorStyles.toolbarGroup}>
         <span className={editorStyles.toolbarLabel}>Format</span>
-        <button type="button" className={editorStyles.toolBtn} title="Bold — pilih teks lalu klik" onClick={() => wrap('<strong>', '</strong>', 'teks tebal')}>
+        <button type="button" className={editorStyles.toolBtn} title="Bold — pilih teks lalu klik" onClick={() => exec('bold')}>
           <strong>B</strong>
         </button>
-        <button type="button" className={editorStyles.toolBtn} title="Italic — pilih teks lalu klik" onClick={() => wrap('<em>', '</em>', 'teks miring')}>
+        <button type="button" className={editorStyles.toolBtn} title="Italic — pilih teks lalu klik" onClick={() => exec('italic')}>
           <em>I</em>
         </button>
-        <button type="button" className={editorStyles.toolBtn} title="Paragraf baru" onClick={() => insertBlock('p', 'Isi paragraf...')}>¶</button>
+        <button type="button" className={editorStyles.toolBtn} title="Underline" onClick={() => exec('underline')}>
+          <u>U</u>
+        </button>
       </div>
       <div className={editorStyles.toolbarDivider} />
       <div className={editorStyles.toolbarGroup}>
@@ -214,6 +143,63 @@ function RichToolbar({ textareaRef, onChange, value }: ToolbarProps) {
   );
 }
 
+// ── WYSIWYG Editor ─────────────────────────────────────────────────
+interface WysiwygEditorProps {
+  value: string;
+  onChange: (html: string) => void;
+}
+
+function WysiwygEditor({ value, onChange }: WysiwygEditorProps) {
+  const editorRef = useRef<HTMLDivElement>(null);
+  // Track apakah sedang user yang ngetik (bukan update dari luar)
+  const isUserEditing = useRef(false);
+
+  // Sync value dari luar ke editor (misal saat buka artikel lama)
+  useEffect(() => {
+    if (editorRef.current && !isUserEditing.current) {
+      if (editorRef.current.innerHTML !== value) {
+        editorRef.current.innerHTML = value ?? '';
+      }
+    }
+  }, [value]);
+
+  const handleInput = useCallback(() => {
+    isUserEditing.current = true;
+    if (editorRef.current) onChange(editorRef.current.innerHTML);
+    // Reset flag setelah selesai
+    setTimeout(() => { isUserEditing.current = false; }, 100);
+  }, [onChange]);
+
+  // Paste: strip formatting dari luar, hanya ambil plain text
+  const handlePaste = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData('text/plain');
+    document.execCommand('insertText', false, text);
+    setTimeout(() => {
+      if (editorRef.current) onChange(editorRef.current.innerHTML);
+    }, 0);
+  }, [onChange]);
+
+  return (
+    <div className={editorStyles.bodyEditorWrap}>
+      <RichToolbar editorRef={editorRef} onChange={onChange} />
+      <div
+        ref={editorRef}
+        className={editorStyles.wysiwygEditor}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={handleInput}
+        onPaste={handlePaste}
+        data-placeholder="Ketik isi artikel di sini... Pilih teks lalu klik toolbar untuk format."
+        spellCheck={false}
+      />
+      <p className={editorStyles.bodyHint}>
+        💡 Pilih teks → klik <strong>B</strong>, <strong>I</strong>, <strong>H2</strong>, dll di toolbar. Enter untuk paragraf baru.
+      </p>
+    </div>
+  );
+}
+
 // ── Main Component ─────────────────────────────────────────────────
 export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
   const [news, setNews] = useState<NewsRow[]>(initialNews);
@@ -225,7 +211,6 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [previewHtml, setPreviewHtml] = useState(false);
-  const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   function openNew() {
     setEditing(null);
@@ -272,24 +257,6 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
 
   function handleBodyChange(val: string) {
     setForm(prev => ({ ...prev, body_html: val }));
-  }
-
-  function handleBodyPaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
-    const text = e.clipboardData.getData('text/plain');
-    // Deteksi apakah teks mengandung sintaks Markdown
-    const hasMarkdown = /^#{1,6} |^\*\*|^\* |^- |^\d+\. |\*\*.*\*\*/.test(text);
-    if (!hasMarkdown) return; // biarkan paste normal jika bukan Markdown
-
-    e.preventDefault();
-    const html = markdownToHtml(text);
-
-    // Sisipkan di posisi kursor jika ada teks sebelumnya
-    const el = e.currentTarget;
-    const start = el.selectionStart;
-    const end = el.selectionEnd;
-    const current = form.body_html ?? '';
-    const newVal = current.slice(0, start) + (current && start > 0 ? '\n' : '') + html + current.slice(end);
-    handleBodyChange(newVal);
   }
 
   function handleMediaSelect(asset: MediaAsset) {
@@ -416,7 +383,7 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
             <textarea className={editorStyles.textarea} name="excerpt" value={form.excerpt} onChange={handleChange} rows={3} placeholder="Ringkasan artikel yang muncul di homepage dan listing..." />
           </div>
 
-          {/* Body dengan toolbar */}
+          {/* Body WYSIWYG */}
           <div className={editorStyles.field}>
             <div className={editorStyles.bodyLabelRow}>
               <label className={editorStyles.label}>Isi Artikel</label>
@@ -430,27 +397,7 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
             </div>
 
             {!previewHtml ? (
-              <div className={editorStyles.bodyEditorWrap}>
-                <RichToolbar
-                  textareaRef={bodyRef}
-                  onChange={handleBodyChange}
-                  value={form.body_html ?? ''}
-                />
-                <textarea
-                  ref={bodyRef}
-                  className={editorStyles.bodyTextarea}
-                  name="body_html"
-                  value={form.body_html ?? ''}
-                  onChange={e => handleBodyChange(e.target.value)}
-                  onPaste={handleBodyPaste}
-                  rows={18}
-                  placeholder="Klik tombol di toolbar untuk insert format, atau ketik HTML langsung..."
-                  spellCheck={false}
-                />
-                <p className={editorStyles.bodyHint}>
-                  💡 Pilih teks lalu klik <strong>B</strong> atau <strong>I</strong> untuk format. Klik <strong>H2 / H3</strong> untuk judul section. <strong>Preview</strong> untuk lihat hasil. Paste teks Markdown dari ChatGPT → otomatis dikonversi ke HTML.
-                </p>
-              </div>
+              <WysiwygEditor value={form.body_html ?? ''} onChange={handleBodyChange} />
             ) : (
               <div
                 className={editorStyles.bodyPreview}
