@@ -310,6 +310,11 @@
   pointer-events: none;
 }
 
+.cutoutStage {
+  position: absolute;
+  inset: 0;
+}
+
 /* Cutout fills the exact hero coordinate space. All placement and scale come
    from presentation_settings; there is no bottom/right/width/height override. */
 /* Cutout image fills the hero coordinate space.
@@ -400,6 +405,54 @@
   }
   .cutoutSingle {
     transform: var(--cutout-desktop-transform, var(--cutout-transform, none));
+  }
+}
+
+/* Landscape phones are wide enough to match the tablet breakpoint, but the
+   hero is only as tall as a phone. Keep the phone composition, then fit the
+   cutout to the short viewport so the authored scale cannot overflow it. */
+@media (orientation: landscape) and (max-height: 540px) {
+  .bgImg.bgPictureImg {
+    object-fit: var(--hero-fit, cover);
+    object-position: var(--hero-pos, 50% 50%);
+    transform: var(--hero-transform, none);
+    transform-origin: var(--hero-origin, 50% 50%);
+  }
+
+  .cutoutSingle {
+    transform: var(--cutout-transform, none);
+  }
+
+  .cutoutStage {
+    width: min(100%, calc(100svh * 1.65));
+    height: 100%;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) scale(min(1, 100svh / 78vw));
+    transform-origin: 50% 62%;
+  }
+}
+
+/* Tablet landscape crosses the desktop breakpoint while the stage is still
+   short. Keep the tablet composition instead of the desktop scale. */
+@media (orientation: landscape) and (min-width: 1024px) and (max-width: 1210px) and (max-height: 860px) {
+  .bgImg.bgPictureImg {
+    object-fit: var(--hero-tablet-fit, var(--hero-fit, cover));
+    object-position: var(--hero-tablet-pos, var(--hero-pos, 50% 50%));
+    transform: var(--hero-tablet-transform, var(--hero-transform, none));
+    transform-origin: var(--hero-tablet-origin, var(--hero-origin, 50% 50%));
+  }
+
+  .cutoutSingle {
+    transform: var(--cutout-tablet-transform, var(--cutout-transform, none));
+  }
+
+  .cutoutStage {
+    width: min(100%, calc(100svh * 1.45));
+    height: 100%;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
   }
 }
 

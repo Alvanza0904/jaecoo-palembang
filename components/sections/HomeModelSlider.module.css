@@ -201,3 +201,10 @@
     transform-origin: var(--slider-mobile-origin, 50% 50%) !important;
   }
 }
+
+@media (orientation: landscape) and (max-height: 540px) {
+  .track {
+    height: 100svh;
+    min-height: 0;
+  }
+}

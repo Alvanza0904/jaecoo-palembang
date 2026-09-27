@@ -444,6 +444,13 @@
   }
 }
 
+@media (orientation: landscape) and (max-height: 540px) {
+  .modelSection {
+    height: 100svh;
+    min-height: 0;
+  }
+}
+
 .imagePicture {
   position: absolute;
   inset: 0;

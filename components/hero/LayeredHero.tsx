@@ -290,14 +290,16 @@ export function LayeredHero({
       {/* ── Vehicle cutout layer (foreground) ── */}
       {hasCutout && (
         <div className={styles.cutout} aria-hidden="true" data-cutout-layer>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={image.cutout}
-            alt={image.alt}
-            className={styles.cutoutSingle}
-            decoding="async"
-            style={cutoutVars()}
-          />
+          <div className={styles.cutoutStage}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={image.cutout}
+              alt={image.alt}
+              className={styles.cutoutSingle}
+              decoding="async"
+              style={cutoutVars()}
+            />
+          </div>
         </div>
       )}
 

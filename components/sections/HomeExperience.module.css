@@ -583,3 +583,11 @@
     top: calc(var(--visual-mobile-top, 50%) + 30%);
   }
 }
+
+@media (orientation: landscape) and (max-height: 540px) {
+  .experience,
+  .technology {
+    min-height: 100svh;
+    height: 100svh;
+  }
+}
