@@ -1,51 +1,22 @@
-/**
- * JAECOO Palembang — Footer
- *
- * Minimal dark charcoal footer.
- * Social links + legal — no giant nav columns.
- */
-
 import Link from "next/link";
-import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { SITE_SETTINGS } from "@/lib/data/site";
 import styles from "./Footer.module.css";
 import type { SiteBrandAssets } from "@/lib/supabase/media";
 import Image from "next/image";
 
 const SOCIAL_LINKS = [
-  {
-    label: "Instagram",
-    href: SITE_SETTINGS.instagram,
-    external: true,
-  },
-  {
-    label: "TikTok",
-    href: SITE_SETTINGS.tiktok,
-    external: true,
-  },
-  {
-    label: "Facebook",
-    href: SITE_SETTINGS.facebook,
-    external: true,
-  },
-  {
-    label: "WhatsApp",
-    href: `https://wa.me/${SITE_SETTINGS.whatsappNumber}`,
-    external: true,
-  },
+  { label: "Instagram", href: SITE_SETTINGS.instagram },
+  { label: "TikTok", href: SITE_SETTINGS.tiktok },
+  { label: "Facebook", href: SITE_SETTINGS.facebook },
+  { label: "WhatsApp", href: `https://wa.me/${SITE_SETTINGS.whatsappNumber}` },
 ];
 
 const PAGE_LINKS = [
-  { label: "Harga JAECOO Palembang", href: "/model" },
-  { label: "Promo JAECOO Palembang", href: "/promo" },
-  { label: "Test Drive", href: buildWhatsAppUrl({ source: "footer", source_cta: "footer_test_drive" }), external: true },
+  { label: "Model", href: "/model" },
+  { label: "Promo", href: "/promo" },
   { label: "Sales JAECOO Palembang", href: "/sales-jaecoo-palembang" },
-  { label: "JAECOO J5", href: "/model/jaecoo-j5-ev" },
-  { label: "JAECOO J7 SHS", href: "/model/jaecoo-j7-shs" },
-  { label: "JAECOO J7 SIVP", href: "/model/jaecoo-j7-sivp" },
-  { label: "JAECOO J8 SHS ARDIS", href: "/model/jaecoo-j8-shs" },
   { label: "Berita", href: "/berita" },
-] as const;
+];
 
 const LEGAL_LINKS = [
   { label: "Kebijakan Privasi", href: "/privacy-policy" },
@@ -55,11 +26,11 @@ const LEGAL_LINKS = [
 export function Footer({ brand }: { brand: SiteBrandAssets }) {
   const logo = brand.logoDark ?? brand.logo;
   const year = new Date().getFullYear();
+  const street = `${SITE_SETTINGS.dealerAddress.lines[0]}, ${SITE_SETTINGS.dealerAddress.lines[1]}`;
 
   return (
     <footer className={styles.footer} aria-label="Footer JAECOO Palembang">
       <div className={styles.inner}>
-        {/* Brand */}
         <div className={styles.brand}>
           {logo ? (
             <Image
@@ -76,8 +47,9 @@ export function Footer({ brand }: { brand: SiteBrandAssets }) {
               <p className={styles.brandSub}>Palembang</p>
             </>
           )}
+          <p className={styles.kicker}>Sales JAECOO Palembang</p>
           <p className={styles.brandText}>
-            Sales JAECOO Palembang untuk informasi harga, promo, spesifikasi, test drive, dan konsultasi pembelian mobil JAECOO.
+            Informasi harga, promo, spesifikasi, test drive, dan konsultasi pembelian JAECOO.
           </p>
         </div>
 
@@ -85,32 +57,19 @@ export function Footer({ brand }: { brand: SiteBrandAssets }) {
 
         <section className={styles.local} aria-label="JAECOO di Palembang">
           <p className={styles.kicker}>JAECOO di Palembang</p>
-          <p className={styles.localCopy}>
-            JAECOO Palembang melayani kebutuhan informasi dan pembelian mobil JAECOO untuk pelanggan di Kota Palembang dan wilayah Sumatera Selatan.
-          </p>
-          <address>
-            {SITE_SETTINGS.dealerAddress.lines.map((line) => (
-              <span key={line}>{line}</span>
-            ))}
-          </address>
+          <p className={styles.place}>Palembang, {SITE_SETTINGS.dealerAddress.region}</p>
+          <address>{street}</address>
           <p className={styles.hours}>{SITE_SETTINGS.openingHours}</p>
         </section>
 
         <nav className={styles.links} aria-label="Halaman JAECOO Palembang">
           {PAGE_LINKS.map((link) => (
-            "external" in link ? (
-              <a key={link.label} href={link.href} className={styles.pageLink} target="_blank" rel="noopener noreferrer">
-                {link.label}
-              </a>
-            ) : (
-              <Link key={link.label} href={link.href} className={styles.pageLink}>
-                {link.label}
-              </Link>
-            )
+            <Link key={link.href} href={link.href} className={styles.pageLink}>
+              {link.label}
+            </Link>
           ))}
         </nav>
 
-        {/* Social */}
         <nav className={styles.social} aria-label="Media sosial JAECOO Palembang">
           {SOCIAL_LINKS.map((link) => (
             <a
@@ -126,7 +85,6 @@ export function Footer({ brand }: { brand: SiteBrandAssets }) {
           ))}
         </nav>
 
-        {/* Bottom bar */}
         <div className={styles.bottom}>
           <p className={styles.copy}>
             © {year} {SITE_SETTINGS.brandName} · Palembang, Sumatera Selatan
