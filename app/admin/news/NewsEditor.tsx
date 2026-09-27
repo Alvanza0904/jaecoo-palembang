@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useRef, useCallback } from 'react';
 import { saveNews, deleteNews, type NewsFormData } from './actions';
 import { MediaPicker } from '@/components/admin/media/MediaPicker';
 import type { MediaAsset } from '@/lib/types/media-asset';
@@ -36,6 +36,111 @@ const EMPTY_FORM: NewsFormData = {
   meta_description: '',
 };
 
+// ── Rich Text Toolbar ──────────────────────────────────────────────
+interface ToolbarProps {
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
+  onChange: (val: string) => void;
+  value: string;
+}
+
+function RichToolbar({ textareaRef, onChange, value }: ToolbarProps) {
+  const wrap = useCallback((before: string, after: string, placeholder: string) => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const selected = value.slice(start, end) || placeholder;
+    const newVal = value.slice(0, start) + before + selected + after + value.slice(end);
+    onChange(newVal);
+    // Restore cursor after tag
+    setTimeout(() => {
+      el.focus();
+      const pos = start + before.length + selected.length + after.length;
+      el.setSelectionRange(pos, pos);
+    }, 0);
+  }, [textareaRef, onChange, value]);
+
+  const insertBlock = useCallback((tag: string, placeholder: string) => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const selected = value.slice(el.selectionStart, el.selectionEnd) || placeholder;
+    const block = `\n<${tag}>${selected}</${tag}>\n`;
+    const newVal = value.slice(0, start) + block + value.slice(el.selectionEnd);
+    onChange(newVal);
+    setTimeout(() => { el.focus(); }, 0);
+  }, [textareaRef, onChange, value]);
+
+  const insertList = useCallback((tag: 'ul' | 'ol') => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const selected = value.slice(el.selectionStart, el.selectionEnd);
+    // Split selected text by newline jadi list items
+    const items = selected
+      ? selected.split('\n').filter(Boolean).map(l => `  <li>${l.trim()}</li>`).join('\n')
+      : '  <li>Item pertama</li>\n  <li>Item kedua</li>';
+    const block = `\n<${tag}>\n${items}\n</${tag}>\n`;
+    const newVal = value.slice(0, start) + block + value.slice(el.selectionEnd);
+    onChange(newVal);
+    setTimeout(() => { el.focus(); }, 0);
+  }, [textareaRef, onChange, value]);
+
+  const insertDivider = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const newVal = value.slice(0, start) + '\n<hr>\n' + value.slice(start);
+    onChange(newVal);
+    setTimeout(() => { el.focus(); }, 0);
+  }, [textareaRef, onChange, value]);
+
+  const insertBlockquote = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const selected = value.slice(el.selectionStart, el.selectionEnd) || 'Kutipan penting di sini...';
+    const block = `\n<blockquote>${selected}</blockquote>\n`;
+    const newVal = value.slice(0, start) + block + value.slice(el.selectionEnd);
+    onChange(newVal);
+    setTimeout(() => { el.focus(); }, 0);
+  }, [textareaRef, onChange, value]);
+
+  return (
+    <div className={editorStyles.toolbar}>
+      <div className={editorStyles.toolbarGroup}>
+        <span className={editorStyles.toolbarLabel}>Heading</span>
+        <button type="button" className={editorStyles.toolBtn} title="Heading 2" onClick={() => insertBlock('h2', 'Judul Section')}>H2</button>
+        <button type="button" className={editorStyles.toolBtn} title="Heading 3" onClick={() => insertBlock('h3', 'Sub-judul')}>H3</button>
+      </div>
+      <div className={editorStyles.toolbarDivider} />
+      <div className={editorStyles.toolbarGroup}>
+        <span className={editorStyles.toolbarLabel}>Format</span>
+        <button type="button" className={editorStyles.toolBtn} title="Bold — pilih teks lalu klik" onClick={() => wrap('<strong>', '</strong>', 'teks tebal')}>
+          <strong>B</strong>
+        </button>
+        <button type="button" className={editorStyles.toolBtn} title="Italic — pilih teks lalu klik" onClick={() => wrap('<em>', '</em>', 'teks miring')}>
+          <em>I</em>
+        </button>
+        <button type="button" className={editorStyles.toolBtn} title="Paragraf baru" onClick={() => insertBlock('p', 'Isi paragraf...')}>¶</button>
+      </div>
+      <div className={editorStyles.toolbarDivider} />
+      <div className={editorStyles.toolbarGroup}>
+        <span className={editorStyles.toolbarLabel}>List</span>
+        <button type="button" className={editorStyles.toolBtn} title="Bullet list" onClick={() => insertList('ul')}>• List</button>
+        <button type="button" className={editorStyles.toolBtn} title="Numbered list" onClick={() => insertList('ol')}>1. List</button>
+      </div>
+      <div className={editorStyles.toolbarDivider} />
+      <div className={editorStyles.toolbarGroup}>
+        <span className={editorStyles.toolbarLabel}>Lainnya</span>
+        <button type="button" className={editorStyles.toolBtn} title="Blockquote / kutipan" onClick={insertBlockquote}>&ldquo;&rdquo;</button>
+        <button type="button" className={editorStyles.toolBtn} title="Garis pemisah" onClick={insertDivider}>─</button>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Component ─────────────────────────────────────────────────
 export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
   const [news, setNews] = useState<NewsRow[]>(initialNews);
   const [editing, setEditing] = useState<NewsRow | null>(null);
@@ -45,12 +150,15 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
   const [isPending, startTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState(false);
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   function openNew() {
     setEditing(null);
     setIsNew(true);
     setForm(EMPTY_FORM);
     setMessage(null);
+    setPreviewHtml(false);
   }
 
   function openEdit(item: NewsRow) {
@@ -69,6 +177,7 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
       meta_description: item.meta_description ?? '',
     });
     setMessage(null);
+    setPreviewHtml(false);
   }
 
   function closeForm() {
@@ -76,6 +185,7 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
     setIsNew(false);
     setForm(EMPTY_FORM);
     setMessage(null);
+    setPreviewHtml(false);
   }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
@@ -84,6 +194,10 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
+  }
+
+  function handleBodyChange(val: string) {
+    setForm(prev => ({ ...prev, body_html: val }));
   }
 
   function handleMediaSelect(asset: MediaAsset) {
@@ -123,7 +237,6 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
 
   return (
     <div>
-      {/* Media Picker Modal */}
       <MediaPicker
         open={pickerOpen}
         onClose={() => setPickerOpen(false)}
@@ -182,7 +295,7 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
             </div>
           </div>
 
-          {/* Cover Image — pakai MediaPicker */}
+          {/* Cover */}
           <div className={editorStyles.field}>
             <label className={editorStyles.label}>Foto Cover</label>
             <div className={editorStyles.coverWrap}>
@@ -191,12 +304,8 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={form.cover_url} alt="Cover preview" className={editorStyles.coverImg} />
                   <div className={editorStyles.coverActions}>
-                    <button type="button" className={editorStyles.btnGhost} onClick={() => setPickerOpen(true)}>
-                      Ganti Foto
-                    </button>
-                    <button type="button" className={editorStyles.btnDanger} onClick={() => setForm(p => ({ ...p, cover_url: '' }))}>
-                      Hapus
-                    </button>
+                    <button type="button" className={editorStyles.btnGhost} onClick={() => setPickerOpen(true)}>Ganti Foto</button>
+                    <button type="button" className={editorStyles.btnDanger} onClick={() => setForm(p => ({ ...p, cover_url: '' }))}>Hapus</button>
                   </div>
                 </div>
               ) : (
@@ -209,16 +318,55 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
             </div>
           </div>
 
+          {/* Excerpt */}
           <div className={editorStyles.field}>
             <label className={editorStyles.label}>Excerpt (ringkasan singkat) *</label>
             <textarea className={editorStyles.textarea} name="excerpt" value={form.excerpt} onChange={handleChange} rows={3} placeholder="Ringkasan artikel yang muncul di homepage dan listing..." />
           </div>
 
+          {/* Body dengan toolbar */}
           <div className={editorStyles.field}>
-            <label className={editorStyles.label}>Isi Artikel (HTML)</label>
-            <textarea className={editorStyles.textarea} name="body_html" value={form.body_html} onChange={handleChange} rows={12} placeholder="<p>Isi artikel dalam format HTML...</p>" style={{ fontFamily: 'monospace', fontSize: '13px' }} />
+            <div className={editorStyles.bodyLabelRow}>
+              <label className={editorStyles.label}>Isi Artikel</label>
+              <button
+                type="button"
+                className={editorStyles.previewToggle}
+                onClick={() => setPreviewHtml(p => !p)}
+              >
+                {previewHtml ? '✏️ Edit' : '👁 Preview'}
+              </button>
+            </div>
+
+            {!previewHtml ? (
+              <div className={editorStyles.bodyEditorWrap}>
+                <RichToolbar
+                  textareaRef={bodyRef}
+                  onChange={handleBodyChange}
+                  value={form.body_html ?? ''}
+                />
+                <textarea
+                  ref={bodyRef}
+                  className={editorStyles.bodyTextarea}
+                  name="body_html"
+                  value={form.body_html ?? ''}
+                  onChange={e => handleBodyChange(e.target.value)}
+                  rows={18}
+                  placeholder="Klik tombol di toolbar untuk insert format, atau ketik HTML langsung..."
+                  spellCheck={false}
+                />
+                <p className={editorStyles.bodyHint}>
+                  💡 Pilih teks lalu klik <strong>B</strong> atau <strong>I</strong> untuk format. Klik <strong>H2 / H3</strong> untuk judul section. <strong>Preview</strong> untuk lihat hasil.
+                </p>
+              </div>
+            ) : (
+              <div
+                className={editorStyles.bodyPreview}
+                dangerouslySetInnerHTML={{ __html: form.body_html ?? '<em>Belum ada konten.</em>' }}
+              />
+            )}
           </div>
 
+          {/* Published */}
           <div className={editorStyles.fieldRow}>
             <label className={editorStyles.checkLabel}>
               <input type="checkbox" name="published" checked={form.published} onChange={handleChange} className={editorStyles.checkbox} />
@@ -231,9 +379,7 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
               <button className={editorStyles.btnPrimary} onClick={handleSubmit} disabled={isPending}>
                 {isPending ? 'Menyimpan...' : 'Simpan Artikel'}
               </button>
-              <button className={editorStyles.btnGhost} onClick={closeForm} disabled={isPending}>
-                Batal
-              </button>
+              <button className={editorStyles.btnGhost} onClick={closeForm} disabled={isPending}>Batal</button>
             </div>
             {editing && (
               confirmDelete === editing.id ? (
