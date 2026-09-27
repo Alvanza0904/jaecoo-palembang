@@ -19,5 +19,12 @@ export const SITE_SETTINGS = {
     locality: "9 Ilir, Kec. Ilir Tim. II, Kota Palembang",
     region: "Sumatera Selatan",
     postalCode: "30113",
+    lines: [
+      "Komp. Graha Maju",
+      "Jl. Mayor HM. Rasyad Nawawi No. 506–509",
+      "9 Ilir, Ilir Timur II",
+      "Palembang, Sumatera Selatan 30113",
+    ],
   },
+  openingHours: "Setiap hari · 07.00–17.00",
 } as const;

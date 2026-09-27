@@ -32,10 +32,17 @@ export default async function PublicLayout({
       postalCode: SITE_SETTINGS.dealerAddress.postalCode,
       addressCountry: "ID",
     },
-    areaServed: {
-      "@type": "City",
-      name: "Palembang",
+    areaServed: [
+      { "@type": "City", name: "Palembang" },
+      { "@type": "AdministrativeArea", name: "Sumatera Selatan" },
+    ],
+    openingHoursSpecification: {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+      opens: "07:00",
+      closes: "17:00",
     },
+    sameAs: [SITE_SETTINGS.instagram, SITE_SETTINGS.tiktok, SITE_SETTINGS.facebook],
   };
 
   return (

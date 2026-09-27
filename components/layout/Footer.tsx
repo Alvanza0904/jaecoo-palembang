@@ -6,7 +6,7 @@
  */
 
 import Link from "next/link";
-import { WHATSAPP_NUMBER } from "@/lib/utils/whatsapp";
+import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 import { SITE_SETTINGS } from "@/lib/data/site";
 import styles from "./Footer.module.css";
 import type { SiteBrandAssets } from "@/lib/supabase/media";
@@ -30,10 +30,22 @@ const SOCIAL_LINKS = [
   },
   {
     label: "WhatsApp",
-    href: `https://wa.me/${WHATSAPP_NUMBER}`,
+    href: `https://wa.me/${SITE_SETTINGS.whatsappNumber}`,
     external: true,
   },
 ];
+
+const PAGE_LINKS = [
+  { label: "Harga JAECOO Palembang", href: "/model" },
+  { label: "Promo JAECOO Palembang", href: "/promo" },
+  { label: "Test Drive", href: buildWhatsAppUrl({ source: "footer", source_cta: "footer_test_drive" }), external: true },
+  { label: "Sales JAECOO Palembang", href: "/sales-jaecoo-palembang" },
+  { label: "JAECOO J5", href: "/model/jaecoo-j5-ev" },
+  { label: "JAECOO J7 SHS", href: "/model/jaecoo-j7-shs" },
+  { label: "JAECOO J7 SIVP", href: "/model/jaecoo-j7-sivp" },
+  { label: "JAECOO J8 SHS ARDIS", href: "/model/jaecoo-j8-shs" },
+  { label: "Berita", href: "/berita" },
+] as const;
 
 const LEGAL_LINKS = [
   { label: "Kebijakan Privasi", href: "/privacy-policy" },
@@ -64,10 +76,39 @@ export function Footer({ brand }: { brand: SiteBrandAssets }) {
               <p className={styles.brandSub}>Palembang</p>
             </>
           )}
+          <p className={styles.brandText}>
+            Sales JAECOO Palembang untuk informasi harga, promo, spesifikasi, test drive, dan konsultasi pembelian mobil JAECOO.
+          </p>
         </div>
 
-        {/* Gold divider */}
         <div className={styles.divider} aria-hidden="true" />
+
+        <section className={styles.local} aria-label="JAECOO di Palembang">
+          <p className={styles.kicker}>JAECOO di Palembang</p>
+          <p className={styles.localCopy}>
+            JAECOO Palembang melayani kebutuhan informasi dan pembelian mobil JAECOO untuk pelanggan di Kota Palembang dan wilayah Sumatera Selatan.
+          </p>
+          <address>
+            {SITE_SETTINGS.dealerAddress.lines.map((line) => (
+              <span key={line}>{line}</span>
+            ))}
+          </address>
+          <p className={styles.hours}>{SITE_SETTINGS.openingHours}</p>
+        </section>
+
+        <nav className={styles.links} aria-label="Halaman JAECOO Palembang">
+          {PAGE_LINKS.map((link) => (
+            "external" in link ? (
+              <a key={link.label} href={link.href} className={styles.pageLink} target="_blank" rel="noopener noreferrer">
+                {link.label}
+              </a>
+            ) : (
+              <Link key={link.label} href={link.href} className={styles.pageLink}>
+                {link.label}
+              </Link>
+            )
+          ))}
+        </nav>
 
         {/* Social */}
         <nav className={styles.social} aria-label="Media sosial JAECOO Palembang">
