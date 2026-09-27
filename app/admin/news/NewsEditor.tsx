@@ -23,6 +23,80 @@ interface NewsRow {
 
 const CATEGORIES = ['Brand', 'Produk', 'Promo', 'Event', 'Tips', 'Teknologi'];
 
+// ── Markdown → HTML converter (no external deps) ──────────────────
+function markdownToHtml(md: string): string {
+  const lines = md.split('\n');
+  const output: string[] = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Heading 1 → <h2>
+    if (/^# (.+)/.test(line)) {
+      output.push(`<h2>${inlineConvert(line.replace(/^# /, ''))}</h2>`);
+      i++;
+      continue;
+    }
+
+    // Heading 2 → <h3>
+    if (/^## (.+)/.test(line)) {
+      output.push(`<h3>${inlineConvert(line.replace(/^## /, ''))}</h3>`);
+      i++;
+      continue;
+    }
+
+    // Heading 3+ → <h4>
+    if (/^#{3,} (.+)/.test(line)) {
+      output.push(`<h4>${inlineConvert(line.replace(/^#{3,} /, ''))}</h4>`);
+      i++;
+      continue;
+    }
+
+    // Unordered list — kumpulkan baris * atau - berurutan
+    if (/^[*-] (.+)/.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && /^[*-] (.+)/.test(lines[i])) {
+        items.push(`  <li>${inlineConvert(lines[i].replace(/^[*-] /, ''))}</li>`);
+        i++;
+      }
+      output.push(`<ul>\n${items.join('\n')}\n</ul>`);
+      continue;
+    }
+
+    // Ordered list — kumpulkan baris 1. 2. dst berurutan
+    if (/^\d+\. (.+)/.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && /^\d+\. (.+)/.test(lines[i])) {
+        items.push(`  <li>${inlineConvert(lines[i].replace(/^\d+\. /, ''))}</li>`);
+        i++;
+      }
+      output.push(`<ol>\n${items.join('\n')}\n</ol>`);
+      continue;
+    }
+
+    // Baris kosong → skip (pemisah paragraf)
+    if (line.trim() === '') {
+      i++;
+      continue;
+    }
+
+    // Teks biasa → <p>
+    output.push(`<p>${inlineConvert(line)}</p>`);
+    i++;
+  }
+
+  return output.join('\n');
+}
+
+/** Konversi inline: **bold**, *italic*, `code` */
+function inlineConvert(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`(.+?)`/g, '<code>$1</code>');
+}
+
 const EMPTY_FORM: NewsFormData = {
   title: '',
   slug: '',
@@ -200,6 +274,24 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
     setForm(prev => ({ ...prev, body_html: val }));
   }
 
+  function handleBodyPaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
+    const text = e.clipboardData.getData('text/plain');
+    // Deteksi apakah teks mengandung sintaks Markdown
+    const hasMarkdown = /^#{1,6} |^\*\*|^\* |^- |^\d+\. |\*\*.*\*\*/.test(text);
+    if (!hasMarkdown) return; // biarkan paste normal jika bukan Markdown
+
+    e.preventDefault();
+    const html = markdownToHtml(text);
+
+    // Sisipkan di posisi kursor jika ada teks sebelumnya
+    const el = e.currentTarget;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const current = form.body_html ?? '';
+    const newVal = current.slice(0, start) + (current && start > 0 ? '\n' : '') + html + current.slice(end);
+    handleBodyChange(newVal);
+  }
+
   function handleMediaSelect(asset: MediaAsset) {
     setForm(prev => ({ ...prev, cover_url: asset.public_url ?? '' }));
   }
@@ -350,12 +442,13 @@ export function NewsEditor({ initialNews }: { initialNews: NewsRow[] }) {
                   name="body_html"
                   value={form.body_html ?? ''}
                   onChange={e => handleBodyChange(e.target.value)}
+                  onPaste={handleBodyPaste}
                   rows={18}
                   placeholder="Klik tombol di toolbar untuk insert format, atau ketik HTML langsung..."
                   spellCheck={false}
                 />
                 <p className={editorStyles.bodyHint}>
-                  💡 Pilih teks lalu klik <strong>B</strong> atau <strong>I</strong> untuk format. Klik <strong>H2 / H3</strong> untuk judul section. <strong>Preview</strong> untuk lihat hasil.
+                  💡 Pilih teks lalu klik <strong>B</strong> atau <strong>I</strong> untuk format. Klik <strong>H2 / H3</strong> untuk judul section. <strong>Preview</strong> untuk lihat hasil. Paste teks Markdown dari ChatGPT → otomatis dikonversi ke HTML.
                 </p>
               </div>
             ) : (
