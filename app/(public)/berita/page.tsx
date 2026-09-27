@@ -3,6 +3,8 @@ import Link from "next/link";
 import { getPublishedNews } from "@/lib/data/news";
 import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
+import { Reveal } from "@/components/motion/Reveal";
+import type { RevealVariant } from "@/components/motion/Reveal";
 import { formatDate } from "@/lib/utils/format";
 import styles from "./berita.module.css";
 
@@ -13,6 +15,13 @@ export const metadata: Metadata = {
   description: "Berita dan informasi terbaru seputar JAECOO di Palembang, dari produk hingga aktivitas dealer.",
   alternates: { canonical: "/berita" },
 };
+
+// Deterministik — index modulo pool length. Stabil antar render.
+const GRID_VARIANTS: RevealVariant[] = ["fade-up", "slide-left", "fade", "slide-right", "fade-down", "scale"];
+
+function gridVariant(i: number): RevealVariant {
+  return GRID_VARIANTS[i % GRID_VARIANTS.length];
+}
 
 export default async function BeritaPage() {
   const news = await getPublishedNews();
@@ -31,58 +40,68 @@ export default async function BeritaPage() {
       <section className={styles.section}>
         <div className={styles.container}>
           <div className={styles.header}>
-            <span className={styles.eyebrow}>Berita & Informasi</span>
-            <h2 className={styles.heading}>Berita &amp; Artikel</h2>
+            <Reveal variant="fade-up" delay={0}>
+              <span className={styles.eyebrow}>Berita &amp; Informasi</span>
+            </Reveal>
+            <Reveal variant="mask" delay={80}>
+              <h2 className={styles.heading}>Berita &amp; Artikel</h2>
+            </Reveal>
           </div>
 
           {!featured ? (
-            <div className={styles.empty}><p>Belum ada artikel yang dipublikasikan.</p></div>
+            <Reveal variant="fade-up">
+              <div className={styles.empty}><p>Belum ada artikel yang dipublikasikan.</p></div>
+            </Reveal>
           ) : (
             <>
               {/* Featured */}
-              <Link href={`/berita/${featured.slug}`} className={styles.featured}>
-                {featured.cover?.desktop ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={featured.cover.desktop}
-                    alt={featured.cover.alt ?? featured.title}
-                    className={styles.featuredImg}
-                  />
-                ) : (
-                  <div className={styles.featuredImgPlaceholder} aria-hidden="true" />
-                )}
-                <div>
-                  <div className={styles.featuredMeta}>
-                    <span className={styles.cat}>{featured.category}</span>
-                    <span className={styles.date}>{formatDate(featured.published_at)}</span>
+              <Reveal variant="fade-up" delay={100}>
+                <Link href={`/berita/${featured.slug}`} className={styles.featured}>
+                  {featured.cover?.desktop ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={featured.cover.desktop}
+                      alt={featured.cover.alt ?? featured.title}
+                      className={styles.featuredImg}
+                    />
+                  ) : (
+                    <div className={styles.featuredImgPlaceholder} aria-hidden="true" />
+                  )}
+                  <div>
+                    <div className={styles.featuredMeta}>
+                      <span className={styles.cat}>{featured.category}</span>
+                      <span className={styles.date}>{formatDate(featured.published_at)}</span>
+                    </div>
+                    <h2 className={styles.featuredTitle}>{featured.title}</h2>
+                    <p className={styles.featuredExcerpt}>{featured.excerpt}</p>
+                    <span className={styles.readMore}>Baca selengkapnya →</span>
                   </div>
-                  <h2 className={styles.featuredTitle}>{featured.title}</h2>
-                  <p className={styles.featuredExcerpt}>{featured.excerpt}</p>
-                  <span className={styles.readMore}>Baca selengkapnya →</span>
-                </div>
-              </Link>
+                </Link>
+              </Reveal>
 
               {/* Grid */}
               {rest.length > 0 && (
                 <div className={styles.grid}>
-                  {rest.map((item) => (
-                    <Link key={item.id} href={`/berita/${item.slug}`} className={styles.article}>
-                      {item.cover?.desktop && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={item.cover.desktop}
-                          alt={item.cover.alt ?? item.title}
-                          className={styles.articleImg}
-                          loading="lazy"
-                        />
-                      )}
-                      <div className={styles.featuredMeta}>
-                        <span className={styles.cat}>{item.category}</span>
-                        <span className={styles.date}>{formatDate(item.published_at)}</span>
-                      </div>
-                      <h3 className={styles.articleTitle}>{item.title}</h3>
-                      <p className={styles.articleExcerpt}>{item.excerpt}</p>
-                    </Link>
+                  {rest.map((item, i) => (
+                    <Reveal key={item.id} variant={gridVariant(i)} delay={(i % 3) * 70}>
+                      <Link href={`/berita/${item.slug}`} className={styles.article}>
+                        {item.cover?.desktop && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={item.cover.desktop}
+                            alt={item.cover.alt ?? item.title}
+                            className={styles.articleImg}
+                            loading="lazy"
+                          />
+                        )}
+                        <div className={styles.featuredMeta}>
+                          <span className={styles.cat}>{item.category}</span>
+                          <span className={styles.date}>{formatDate(item.published_at)}</span>
+                        </div>
+                        <h3 className={styles.articleTitle}>{item.title}</h3>
+                        <p className={styles.articleExcerpt}>{item.excerpt}</p>
+                      </Link>
+                    </Reveal>
                   ))}
                 </div>
               )}

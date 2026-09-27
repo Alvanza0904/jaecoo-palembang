@@ -128,7 +128,7 @@ export default async function SpesifikasiPage({ params }: Props) {
             </Reveal>
 
             {v.price_status !== "hidden" && (
-              <Reveal variant="fade-up" delay={80}>
+              <Reveal variant="slide-left" delay={80}>
                 <div className={styles.priceRow}>
                   <PriceDisplay
                     price_status={v.price_status}
@@ -203,7 +203,7 @@ export default async function SpesifikasiPage({ params }: Props) {
         {model.variants.length > 1 && (
           <section className={styles.variantsSection} data-contrast="light">
             <Container size="content">
-              <Reveal variant="fade-up">
+              <Reveal variant="fade">
                 <SectionHeading eyebrow="Varian" heading="Pilih Varian" />
               </Reveal>
 
@@ -255,14 +255,14 @@ export default async function SpesifikasiPage({ params }: Props) {
         {showCalculator && (
           <section className={styles.calcSection}>
             <Container size="narrow">
-              <Reveal variant="fade-up" threshold={0}>
+              <Reveal variant="fade-down" threshold={0}>
                 <SectionHeading
                   eyebrow="Simulasi Kredit"
                   heading="Hitung Cicilan Anda."
                   subheading="Estimasi angsuran dengan bunga flat 10%/tahun. Hubungi kami untuk simulasi resmi."
                 />
               </Reveal>
-              <Reveal variant="fade-up" delay={100} threshold={0}>
+              <Reveal variant="scale" delay={100} threshold={0}>
                 <div className={styles.calcWrapper}>
                   <FinanceCalculator
                     price={v.price_idr!}
@@ -279,7 +279,7 @@ export default async function SpesifikasiPage({ params }: Props) {
         {/* ── NAVIGATION ────────────────────────────────────────────────── */}
         <section className={styles.navSection} data-contrast="light">
           <Container size="content">
-            <Reveal variant="fade-up">
+            <Reveal variant="blur">
               <div className={styles.navRow}>
                 <Button as="link" href={`/model/${slug}`} variant="ghost" size="md">
                   ← {model.short_name} Ikhtisar
@@ -295,7 +295,7 @@ export default async function SpesifikasiPage({ params }: Props) {
         {/* ── CTA ───────────────────────────────────────────────────────── */}
         <section className={styles.ctaSection} data-theme="dark">
           <Container size="narrow">
-            <Reveal variant="fade-up">
+            <Reveal variant="slide-right">
               <div className={styles.ctaBlock}>
                 <GoldLine width="short" />
                 <h2 className={styles.ctaHeading}>

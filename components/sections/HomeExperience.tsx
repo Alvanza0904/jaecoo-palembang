@@ -3,6 +3,8 @@
  * Image-led editorial homepage sections.
  */
 
+"use client";
+
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import type { ModelData } from "@/lib/types/model";
@@ -16,6 +18,7 @@ import { CmsVideo } from "@/components/media/CmsVideo";
 import { isVideoSource, readVideoSettings } from "@/lib/types/video";
 import { getBackgroundLayerStyle, resolveBreakpointSettings, getTypographyContainerStyle, getHeadingStyle, getSubheadingStyle } from "@/lib/types/presentation";
 import { formatDate } from "@/lib/utils/format";
+import { Reveal } from "@/components/motion/Reveal";
 import styles from "./HomeExperience.module.css";
 
 function visualMediaStyle(image: ResponsiveImage | undefined, breakpoint: 'desktop' | 'mobile'): CSSProperties {
@@ -165,9 +168,15 @@ function VisualCopy({
       style={style}
       {...(textFocusAttr ? { 'data-text-focus': textFocusAttr } : {})}
     >
-      <span className={styles.eyebrow}>{eyebrow}</span>
-      <h2 id={titleId} className={titleClassName}>{title}</h2>
-      <p className={descriptionClassName}>{description}</p>
+      <Reveal variant="fade-up" delay={0} threshold={0.08}>
+        <span className={styles.eyebrow}>{eyebrow}</span>
+      </Reveal>
+      <Reveal variant="mask" delay={80} threshold={0.08}>
+        <h2 id={titleId} className={titleClassName}>{title}</h2>
+      </Reveal>
+      <Reveal variant="fade-up" delay={160} threshold={0.08}>
+        <p className={descriptionClassName}>{description}</p>
+      </Reveal>
     </div>
   );
 }
@@ -262,31 +271,39 @@ export function HomeTeknologiSection({
 }
 
 // ── Promo ───────────────────────────────────────────────────
+const PROMO_CARD_VARIANTS = ["fade-up", "fade", "slide-right"] as const;
+
 export function HomePromoSection({ promos }: { promos: Promo[] }) {
   if (!promos.length) return null;
   return (
     <section className={styles.promo} aria-labelledby="promo-title">
       <div className={styles.promoInner}>
         <div className={styles.promoHeader}>
-          <span className={styles.eyebrow}>Penawaran</span>
-          <h2 id="promo-title" className={styles.promoTitle}>Penawaran Terkini</h2>
+          <Reveal variant="fade-up" delay={0}>
+            <span className={styles.eyebrow}>Penawaran</span>
+          </Reveal>
+          <Reveal variant="mask" delay={80}>
+            <h2 id="promo-title" className={styles.promoTitle}>Penawaran Terkini</h2>
+          </Reveal>
         </div>
         <div className={styles.promoGrid}>
-          {promos.slice(0, 3).map((promo) => (
-            <Link key={promo.id} href={`/promo/${promo.slug}`} className={styles.promoCard}>
-              {promo.image_url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={promo.image_url}
-                  alt={promo.title}
-                  className={styles.promoCardImg}
-                  loading="lazy"
-                />
-              )}
-              <p className={styles.promoCardEyebrow}>{promo.promo_type || "Promo"}</p>
-              <h3 className={styles.promoCardTitle}>{promo.title}</h3>
-              <p className={styles.promoCardDesc}>{promo.short_description ?? ""}</p>
-            </Link>
+          {promos.slice(0, 3).map((promo, i) => (
+            <Reveal key={promo.id} variant={PROMO_CARD_VARIANTS[i % PROMO_CARD_VARIANTS.length]} delay={i * 80}>
+              <Link href={`/promo/${promo.slug}`} className={styles.promoCard}>
+                {promo.image_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={promo.image_url}
+                    alt={promo.title}
+                    className={styles.promoCardImg}
+                    loading="lazy"
+                  />
+                )}
+                <p className={styles.promoCardEyebrow}>{promo.promo_type || "Promo"}</p>
+                <h3 className={styles.promoCardTitle}>{promo.title}</h3>
+                <p className={styles.promoCardDesc}>{promo.short_description ?? ""}</p>
+              </Link>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -313,14 +330,22 @@ export function HomeAboutSection({
           className={styles.aboutCopy}
           {...(textFocusAttr ? { 'data-text-focus': textFocusAttr } : {})}
         >
-          <span className={styles.eyebrow}>Dealer Resmi</span>
-          <h2 id="about-title" className={styles.aboutTitle}>
-            {cms?.title || "OMODA JAECOO\nPalembang."}
-          </h2>
-          <p className={styles.aboutDesc}>
-            {cms?.description || "Dealer resmi OMODA JAECOO Palembang — menghadirkan lineup SUV premium terbaru. Dari konsultasi hingga test drive, kami hadir untuk Anda."}
-          </p>
-          <Link href="/sales-jaecoo-palembang" className={styles.aboutLink}>Hubungi Alvan →</Link>
+          <Reveal variant="fade-up" delay={0}>
+            <span className={styles.eyebrow}>Dealer Resmi</span>
+          </Reveal>
+          <Reveal variant="slide-left" delay={80}>
+            <h2 id="about-title" className={styles.aboutTitle}>
+              {cms?.title || "OMODA JAECOO\nPalembang."}
+            </h2>
+          </Reveal>
+          <Reveal variant="fade-up" delay={160}>
+            <p className={styles.aboutDesc}>
+              {cms?.description || "Dealer resmi OMODA JAECOO Palembang — menghadirkan lineup SUV premium terbaru. Dari konsultasi hingga test drive, kami hadir untuk Anda."}
+            </p>
+          </Reveal>
+          <Reveal variant="fade" delay={220}>
+            <Link href="/sales-jaecoo-palembang" className={styles.aboutLink}>Hubungi Alvan →</Link>
+          </Reveal>
         </div>
       </div>
     </section>
@@ -333,16 +358,21 @@ export function HomeJournalSection({ news }: { news: NewsData[] }) {
     <section className={styles.journal} aria-labelledby="journal-title">
       <div className={styles.journalInner}>
         <div className={styles.journalHeader}>
-          <h2 id="journal-title" className={styles.journalTitle}>Berita & Informasi JAECOO</h2>
-          <Link href="/berita" className={styles.textLink}>Lihat semua →</Link>
+          <Reveal variant="mask" delay={0}>
+            <h2 id="journal-title" className={styles.journalTitle}>Berita &amp; Informasi JAECOO</h2>
+          </Reveal>
+          <Reveal variant="fade" delay={100}>
+            <Link href="/berita" className={styles.textLink}>Lihat semua →</Link>
+          </Reveal>
         </div>
 
         {!news.length ? (
-          <p className={styles.journalEmpty}>Belum ada artikel.</p>
+          <Reveal variant="fade-up"><p className={styles.journalEmpty}>Belum ada artikel.</p></Reveal>
         ) : (
           <div className={styles.journalGrid}>
-            {news.map((item) => (
-              <Link key={item.id} href={`/berita/${item.slug}`} className={styles.newsCard}>
+            {news.map((item, i) => (
+              <Reveal key={item.id} variant={["fade-up", "slide-left", "fade", "slide-right"][i % 4] as "fade-up" | "slide-left" | "fade" | "slide-right"} delay={(i % 3) * 70}>
+              <Link href={`/berita/${item.slug}`} className={styles.newsCard}>
                 {item.cover?.desktop && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -361,6 +391,7 @@ export function HomeJournalSection({ news }: { news: NewsData[] }) {
                   <p className={styles.newsCardExcerpt}>{item.excerpt}</p>
                 </div>
               </Link>
+              </Reveal>
             ))}
           </div>
         )}
@@ -389,23 +420,31 @@ export function HomeFinalCTA({
         className={styles.finalCtaInner}
         {...(textFocusAttr ? { 'data-text-focus': textFocusAttr } : {})}
       >
-        <span className={styles.finalCtaEyebrow}>JAECOO Palembang</span>
-        <h2 id="final-cta-title" className={styles.finalCtaTitle}>
-          {cms?.title || "Siap memulai perjalanan Anda?"}
-        </h2>
-        <p className={styles.finalCtaDesc}>
-          {cms?.description || "Hubungi Alvan sekarang untuk konsultasi gratis, test drive, dan penawaran eksklusif."}
-        </p>
-        <Button
-          as="a"
-          href={cms?.ctaUrl || wa}
-          variant="primary"
-          size="lg"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {cms?.ctaText || "Chat dengan Alvan →"}
-        </Button>
+        <Reveal variant="fade-up" delay={0} threshold={0.08}>
+          <span className={styles.finalCtaEyebrow}>JAECOO Palembang</span>
+        </Reveal>
+        <Reveal variant="blur" delay={80} threshold={0.08}>
+          <h2 id="final-cta-title" className={styles.finalCtaTitle}>
+            {cms?.title || "Siap memulai perjalanan Anda?"}
+          </h2>
+        </Reveal>
+        <Reveal variant="fade-up" delay={160} threshold={0.08}>
+          <p className={styles.finalCtaDesc}>
+            {cms?.description || "Hubungi Alvan sekarang untuk konsultasi gratis, test drive, dan penawaran eksklusif."}
+          </p>
+        </Reveal>
+        <Reveal variant="scale" delay={240} threshold={0.08}>
+          <Button
+            as="a"
+            href={cms?.ctaUrl || wa}
+            variant="primary"
+            size="lg"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {cms?.ctaText || "Chat dengan Alvan →"}
+          </Button>
+        </Reveal>
       </div>
     </section>
   );

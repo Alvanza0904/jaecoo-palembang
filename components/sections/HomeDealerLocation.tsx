@@ -3,10 +3,13 @@
  * Nomor HP dalam text address otomatis jadi link WhatsApp.
  */
 
+"use client";
+
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import { SITE_SETTINGS } from "@/lib/data/site";
 import { getBackgroundLayerStyle } from "@/lib/types/presentation";
+import { Reveal } from "@/components/motion/Reveal";
 import styles from "./HomeDealerLocation.module.css";
 import type { ResponsiveImage } from "@/lib/types/media";
 
@@ -111,18 +114,26 @@ export function HomeDealerLocation({ backgroundImage, cms, textFocusAttr }: Prop
         className={styles.inner}
         {...(textFocusAttr ? { 'data-text-focus': textFocusAttr } : {})}
       >
-        <span className={styles.eyebrow}>Dealer Resmi</span>
-        <h2 id="dealer-title" className={styles.title}>
-          {title.split("\n").map((line, i, arr) => (
-            <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
-          ))}
-        </h2>
-        <address className={styles.address} style={{ fontStyle: "normal" }}>
-          {renderAddressWithWaLinks(address)}
-        </address>
-        <Link href="/sales-jaecoo-palembang" className={styles.cta}>
-          Konsultasi dengan Alvan →
-        </Link>
+        <Reveal variant="fade-up" delay={0} threshold={0.08}>
+          <span className={styles.eyebrow}>Dealer Resmi</span>
+        </Reveal>
+        <Reveal variant="mask" delay={80} threshold={0.08}>
+          <h2 id="dealer-title" className={styles.title}>
+            {title.split("\n").map((line, i, arr) => (
+              <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+            ))}
+          </h2>
+        </Reveal>
+        <Reveal variant="fade-up" delay={160} threshold={0.08}>
+          <address className={styles.address} style={{ fontStyle: "normal" }}>
+            {renderAddressWithWaLinks(address)}
+          </address>
+        </Reveal>
+        <Reveal variant="fade" delay={220} threshold={0.08}>
+          <Link href="/sales-jaecoo-palembang" className={styles.cta}>
+            Konsultasi dengan Alvan →
+          </Link>
+        </Reveal>
       </div>
     </section>
   );

@@ -16,7 +16,6 @@ export const NAV_LINKS = [
   { label: "BERITA", href: "/berita" },
   { label: "GALERI", href: "/gallery" },
   { label: "ALVAN", href: "/sales-jaecoo-palembang" },
-  { label: "OMODA", href: "https://omodajaecoopalembang.web.id/" },
 ];
 
 export function Header({ brand }: { brand: SiteBrandAssets }) {

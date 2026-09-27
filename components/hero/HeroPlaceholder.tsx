@@ -3,7 +3,10 @@
  * Cinematic hero with full-bleed background image.
  */
 
+"use client";
+
 import type { ReactNode } from "react";
+import { Reveal } from "@/components/motion/Reveal";
 import styles from "./HeroPlaceholder.module.css";
 
 interface HeroPlaceholderProps {
@@ -72,10 +75,26 @@ export function HeroPlaceholder({
 
       {/* Content */}
       <div className={styles.content}>
-        {tagline && <span className={styles.tagline}>{tagline}</span>}
-        {heading  && <h1 className={styles.heading}>{heading}</h1>}
-        {subheading && <p className={styles.subheading}>{subheading}</p>}
-        {cta && <div className={styles.cta}>{cta}</div>}
+        {tagline && (
+          <Reveal variant="fade-up" delay={0} threshold={0}>
+            <span className={styles.tagline}>{tagline}</span>
+          </Reveal>
+        )}
+        {heading && (
+          <Reveal variant="mask" delay={80} threshold={0}>
+            <h1 className={styles.heading}>{heading}</h1>
+          </Reveal>
+        )}
+        {subheading && (
+          <Reveal variant="fade-up" delay={160} threshold={0}>
+            <p className={styles.subheading}>{subheading}</p>
+          </Reveal>
+        )}
+        {cta && (
+          <Reveal variant="scale" delay={240} threshold={0}>
+            <div className={styles.cta}>{cta}</div>
+          </Reveal>
+        )}
       </div>
 
       {/* Scroll indicator */}

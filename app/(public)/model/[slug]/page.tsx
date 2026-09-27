@@ -368,7 +368,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
 
         {/* Editorial text — positioned bottom-left inside image */}
         <div className={styles.cinematicContent} data-position="bottom-left">
-          <Reveal variant="fade-up">
+          <Reveal variant="slide-left">
             <p className={styles.editorialLabel}>
               <span className={styles.editorialNum}>01</span>
               <span className={styles.editorialCat}>{exterior.label}</span>
@@ -395,7 +395,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
 
           {/* Editorial text — right column */}
           <div className={styles.detailTextWrap}>
-            <Reveal variant="fade-up" delay={120}>
+            <Reveal variant="slide-right" delay={120}>
               <p className={styles.editorialLabel}>
                 <span className={styles.editorialNum}>02</span>
                 <span className={styles.editorialCat}>{design.label}</span>
@@ -408,10 +408,10 @@ export default async function ModelPage({ params }: ModelPageProps) {
 
             {/* Secondary detail images stacked */}
             <div className={styles.detailSecondaryImgs}>
-              <Reveal variant="fade-up" delay={200}>
+              <Reveal variant="scale" delay={200}>
                 <CmsModelImage image={model.image_slots?.design_detail_wheel} label="DETAIL — WHEEL / RIM" ratio="1/1" className={styles.detailSecondaryImg} />
               </Reveal>
-              <Reveal variant="fade-up" delay={280}>
+              <Reveal variant="blur" delay={280}>
                 <CmsModelImage image={model.image_slots?.design_detail_rear} label="DETAIL — REAR / BADGE" ratio="1/1" className={styles.detailSecondaryImg} />
               </Reveal>
             </div>
@@ -429,7 +429,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
         </div>
 
         <div className={styles.presenceContent}>
-          <Reveal variant="fade-up">
+          <Reveal variant="mask">
             <p className={styles.presenceLabel}>
               <span className={styles.editorialNum}>03</span>
               <span className={styles.editorialCat}>{profile.label}</span>
@@ -456,7 +456,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
         </div>
 
         <div className={styles.cinematicContent} data-position="bottom-right">
-          <Reveal variant="fade-up">
+          <Reveal variant="fade-down">
             <p className={styles.editorialLabel}>
               <span className={styles.editorialNum}>04</span>
               <span className={styles.editorialCat}>{interior.label}</span>
@@ -491,7 +491,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
 
             {/* Editorial text */}
             <div className={styles.cockpitText}>
-              <Reveal variant="fade-up" delay={80}>
+              <Reveal variant="slide-right" delay={80}>
                 <p className={styles.editorialLabel}>
                   <span className={styles.editorialNum}>05</span>
                   <span className={styles.editorialCat}>{cockpit.label}</span>
@@ -517,7 +517,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
 
         <Container size="wide">
           <div className={styles.performanceContent}>
-            <Reveal variant="fade-up">
+            <Reveal variant="blur">
               <p className={styles.editorialLabel}>
                 <span className={styles.editorialNum}>06</span>
                 <span className={styles.editorialCat}>{performance.label}</span>
@@ -558,7 +558,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
 
           {/* Right: editorial text + features */}
           <div className={styles.techContent}>
-            <Reveal variant="fade-up">
+            <Reveal variant="slide-left">
               <p className={styles.editorialLabel}>
                 <span className={styles.editorialNum}>07</span>
                 <span className={styles.editorialCat}>Teknologi</span>
@@ -614,7 +614,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
 
         <Container size="wide">
           <div className={styles.adasContent}>
-            <Reveal variant="fade-up">
+            <Reveal variant="fade-down">
               <p className={styles.editorialLabel}>
                 <span className={styles.editorialNum}>08</span>
                 <span className={styles.editorialCat}>{adas.label}</span>
@@ -639,7 +639,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
       {model.colors.length > 0 && (
         <section className={styles.colorsSection}>
           <div className={styles.colorsSectionHeader}>
-            <Reveal variant="fade-up">
+            <Reveal variant="scale">
               <p className={styles.colorsEyebrow}>Pilihan Warna</p>
               <h2 className={styles.colorsHeading}>Pilih JAECOO Anda</h2>
             </Reveal>
@@ -660,7 +660,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
 
         <Container size="wide">
           <div className={styles.specsContent}>
-            <Reveal variant="fade-up">
+            <Reveal variant="mask">
               <p className={styles.editorialLabel}>
                 <span className={styles.editorialNum}>09</span>
                 <span className={styles.editorialCat}>Spesifikasi</span>
@@ -737,7 +737,7 @@ export default async function ModelPage({ params }: ModelPageProps) {
 
         <Container size="narrow">
           <div className={styles.ctaContent}>
-            <Reveal variant="fade-up">
+            <Reveal variant="blur">
               <p className={styles.ctaEyebrow}>{cta.label}</p>
               <h2 className={styles.ctaHeading}>
                 <HeadingLines text={cta.heading} fallback="" />

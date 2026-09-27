@@ -1,6 +1,10 @@
 /**
  * JAECOO Palembang — Berita Detail Page
  * Route: /berita/[slug]
+ *
+ * ANIMASI OTOMATIS: Semua konten artikel — judul, excerpt, body_html —
+ * dibungkus AnimatedNewsBody yang parse dan animasikan setiap block.
+ * Artikel baru dari Supabase otomatis mendapat animasi tanpa edit kode.
  */
 
 import type { Metadata } from "next";
@@ -8,6 +12,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getNewsBySlug, getAllNewsSlugs } from "@/lib/data/news";
 import { Container } from "@/components/ui/Container";
+import { Reveal } from "@/components/motion/Reveal";
+import { AnimatedNewsBody } from "@/components/motion/AnimatedNewsBody";
 import { formatDate } from "@/lib/utils/format";
 import styles from "./berita-detail.module.css";
 
@@ -46,54 +52,73 @@ export default async function BeritaDetailPage({ params }: Props) {
     <section className={styles.section}>
       <Container size="narrow">
         {/* Breadcrumb */}
-        <nav className={styles.breadcrumb} aria-label="Breadcrumb">
-          <Link href="/berita" className={styles.breadcrumbLink}>← Berita JAECOO</Link>
-        </nav>
+        <Reveal variant="fade" threshold={0}>
+          <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+            <Link href="/berita" className={styles.breadcrumbLink}>← Berita JAECOO</Link>
+          </nav>
+        </Reveal>
 
         {/* Cover */}
         {article.cover?.desktop && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={article.cover.desktop}
-            alt={article.cover.alt ?? article.title}
-            style={{
-              width: "100%",
-              aspectRatio: "16/9",
-              objectFit: "cover",
-              display: "block",
-              marginBottom: "var(--space-10)",
-              background: "var(--color-border)"
-            }}
-          />
+          <Reveal variant="scale" delay={60}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={article.cover.desktop}
+              alt={article.cover.alt ?? article.title}
+              style={{
+                width: "100%",
+                aspectRatio: "16/9",
+                objectFit: "cover",
+                display: "block",
+                marginBottom: "var(--space-10)",
+                background: "var(--color-border)"
+              }}
+            />
+          </Reveal>
         )}
 
         <header className={styles.header}>
-          <div className={styles.meta}>
-            <span className={styles.category}>{article.category}</span>
-            <span className={styles.date}>{formatDate(article.published_at)}</span>
-          </div>
-          <hr className={styles.gold} />
-          <h1 className={styles.title}>{article.title}</h1>
-          <p className={styles.excerpt}>{article.excerpt}</p>
+          <Reveal variant="fade-up" delay={0}>
+            <div className={styles.meta}>
+              <span className={styles.category}>{article.category}</span>
+              <span className={styles.date}>{formatDate(article.published_at)}</span>
+            </div>
+            <hr className={styles.gold} />
+          </Reveal>
+
+          <Reveal variant="mask" delay={80}>
+            <h1 className={styles.title}>{article.title}</h1>
+          </Reveal>
+
+          <Reveal variant="fade-up" delay={160}>
+            <p className={styles.excerpt}>{article.excerpt}</p>
+          </Reveal>
         </header>
 
-        {/* Body */}
+        {/* Body — AnimatedNewsBody: semua artikel baru otomatis mendapat animasi */}
         <div className={styles.body}>
           {article.body_html ? (
-            <div dangerouslySetInnerHTML={{ __html: article.body_html }} />
+            <AnimatedNewsBody
+              html={article.body_html}
+              className={styles.bodyAnimated}
+            />
           ) : (
-            <p className={styles.bodyPlaceholder}>
-              Konten artikel lengkap akan tersedia segera.
-            </p>
+            <Reveal variant="fade-up">
+              <p className={styles.bodyPlaceholder}>
+                Konten artikel lengkap akan tersedia segera.
+              </p>
+            </Reveal>
           )}
         </div>
 
         {/* Back */}
-        <div style={{ marginTop: "var(--space-16)", paddingTop: "var(--space-8)", borderTop: "1px solid var(--color-border)" }}>
-          <Link href="/berita" className={styles.breadcrumbLink}>
-            ← Semua Artikel
-          </Link>
-        </div>
+        <Reveal variant="fade" delay={0}>
+          <div style={{ marginTop: "var(--space-16)", paddingTop: "var(--space-8)", borderTop: "1px solid var(--color-border)" }}>
+            <Link href="/berita" className={styles.breadcrumbLink}>
+              ← Semua Artikel
+            </Link>
+          </div>
+        </Reveal>
       </Container>
     </section>
   );

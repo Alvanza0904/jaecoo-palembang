@@ -140,3 +140,47 @@
   padding: var(--space-10);
   text-align: center;
 }
+
+/* AnimatedNewsBody wrapper — inherit body typography */
+.bodyAnimated h2, .bodyAnimated h3 {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-ink);
+  letter-spacing: var(--tracking-snug);
+  margin-top: var(--space-10);
+  margin-bottom: var(--space-3);
+}
+
+.bodyAnimated h3 { font-size: var(--text-lg); }
+
+.bodyAnimated p { margin-bottom: var(--space-5); }
+
+.bodyAnimated ul, .bodyAnimated ol {
+  padding-left: var(--space-6);
+  margin-bottom: var(--space-5);
+}
+
+.bodyAnimated li { margin-bottom: var(--space-2); }
+
+.bodyAnimated img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  display: block;
+  margin-block: var(--space-8);
+}
+
+.bodyAnimated a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.bodyAnimated blockquote {
+  border-left: 3px solid var(--color-gold);
+  padding-left: var(--space-5);
+  margin: var(--space-8) 0;
+  font-size: var(--text-md);
+  color: var(--color-ink-muted);
+  font-style: italic;
+}

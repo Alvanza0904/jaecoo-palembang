@@ -2,8 +2,17 @@ import type { Metadata } from "next";
 import { getModels } from "@/lib/supabase/queries";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
+import { Reveal } from "@/components/motion/Reveal";
+import type { RevealVariant } from "@/components/motion/Reveal";
 import type { ModelData } from "@/lib/types/model";
 import styles from "./model-listing.module.css";
+
+// Deterministik variant pool untuk text overlay model
+const TEXT_VARIANTS: RevealVariant[] = ["fade-up", "slide-left", "fade-down", "slide-right"];
+const CTA_VARIANTS: RevealVariant[] = ["scale", "fade", "blur", "fade-up"];
+
+function textVariant(i: number): RevealVariant { return TEXT_VARIANTS[i % TEXT_VARIANTS.length]; }
+function ctaVariant(i: number): RevealVariant { return CTA_VARIANTS[i % CTA_VARIANTS.length]; }
 
 export const revalidate = 60;
 export const metadata: Metadata = {
@@ -71,11 +80,15 @@ export default async function ModelIndexPage() {
 
       {/* ── Page Header ───────────────────────────────────────── */}
       <header className={styles.pageHeader}>
-        <p className={styles.pageEyebrow}>THE RANGE</p>
-        <h1 className={styles.pageTitle}>
-          Pilih<br />
-          <em>JAECOO.</em>
-        </h1>
+        <Reveal variant="fade-up" threshold={0}>
+          <p className={styles.pageEyebrow}>THE RANGE</p>
+        </Reveal>
+        <Reveal variant="mask" delay={80} threshold={0}>
+          <h1 className={styles.pageTitle}>
+            Pilih<br />
+            <em>JAECOO.</em>
+          </h1>
+        </Reveal>
       </header>
 
       {/* ── Cinematic Model Sections ──────────────────────────── */}
@@ -122,35 +135,39 @@ export default async function ModelIndexPage() {
 
               {/* Text content — overlay */}
               <div className={[styles.textBlock, styles[cfg.textPosition.replace(/-/g, "_")]].join(" ")}>
-                <p className={styles.modelEyebrow}>
-                  JAECOO <span className={styles.modelNumber}>0{idx + 1}</span>
-                </p>
-                <h2
-                  id={`model-title-${model.slug}`}
-                  className={styles.modelName}
-                >
-                  {cfg.displayLabel}
-                </h2>
-                {model.tagline && (
-                  <p className={styles.modelTagline}>{model.tagline}</p>
-                )}
-                <div className={styles.modelActions}>
-                  <a
-                    href={`/model/${model.slug}`}
-                    className={styles.modelCta}
-                    aria-label={cfg.ctaLabel}
+                <Reveal variant={textVariant(idx)} delay={60} threshold={0.05}>
+                  <p className={styles.modelEyebrow}>
+                    JAECOO <span className={styles.modelNumber}>0{idx + 1}</span>
+                  </p>
+                  <h2
+                    id={`model-title-${model.slug}`}
+                    className={styles.modelName}
                   >
-                    {cfg.ctaLabel}
-                    <span className={styles.ctaArrow} aria-hidden="true">→</span>
-                  </a>
-                  <a
-                    href={`/model/${model.slug}/specifications`}
-                    className={styles.modelCtaGhost}
-                    aria-label={`Lihat spesifikasi ${model.name}`}
-                  >
-                    SPECS
-                  </a>
-                </div>
+                    {cfg.displayLabel}
+                  </h2>
+                  {model.tagline && (
+                    <p className={styles.modelTagline}>{model.tagline}</p>
+                  )}
+                </Reveal>
+                <Reveal variant={ctaVariant(idx)} delay={160} threshold={0.05}>
+                  <div className={styles.modelActions}>
+                    <a
+                      href={`/model/${model.slug}`}
+                      className={styles.modelCta}
+                      aria-label={cfg.ctaLabel}
+                    >
+                      {cfg.ctaLabel}
+                      <span className={styles.ctaArrow} aria-hidden="true">→</span>
+                    </a>
+                    <a
+                      href={`/model/${model.slug}/specifications`}
+                      className={styles.modelCtaGhost}
+                      aria-label={`Lihat spesifikasi ${model.name}`}
+                    >
+                      SPECS
+                    </a>
+                  </div>
+                </Reveal>
               </div>
 
               {/* Model index number — large decorative */}
@@ -164,19 +181,25 @@ export default async function ModelIndexPage() {
 
       {/* ── Bottom CTA ────────────────────────────────────────── */}
       <footer className={styles.bottomCta}>
-        <p className={styles.bottomEyebrow}>MAKE IT YOURS</p>
-        <h2 className={styles.bottomTitle}>
-          Which JAECOO<br />
-          <em>is yours?</em>
-        </h2>
-        <a
-          href={wa}
-          className={styles.bottomLink}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Chat dengan Alvan →
-        </a>
+        <Reveal variant="fade-up" delay={0}>
+          <p className={styles.bottomEyebrow}>MAKE IT YOURS</p>
+        </Reveal>
+        <Reveal variant="blur" delay={80}>
+          <h2 className={styles.bottomTitle}>
+            Which JAECOO<br />
+            <em>is yours?</em>
+          </h2>
+        </Reveal>
+        <Reveal variant="scale" delay={160}>
+          <a
+            href={wa}
+            className={styles.bottomLink}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Chat dengan Alvan →
+          </a>
+        </Reveal>
       </footer>
     </>
   );
