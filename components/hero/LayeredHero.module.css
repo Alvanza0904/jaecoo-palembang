@@ -9,8 +9,13 @@
 }
 
 /* Size variants */
+/* Full heroes use the large viewport, same 390×844 / 1920×1080 frame
+   the visual editor composes against. 100svh is shorter while the browser
+   bar is open, which made a contain-fit cutout render larger than the cover
+   background and larger than the editor preview. */
 .hero--full {
-  min-height: 100svh;
+  min-height: 100vh;
+  min-height: 100lvh;
 }
 
 .hero--large {
