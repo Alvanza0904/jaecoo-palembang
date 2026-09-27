@@ -1,0 +1,117 @@
+.wrap {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  pointer-events: none;
+}
+
+.button {
+  pointer-events: auto;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--color-charcoal);
+  color: var(--color-white);
+  border: 1px solid rgba(200, 169, 110, 0.45);
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
+}
+
+.button:hover,
+.button:focus-visible {
+  background: #1c1c1c;
+  border-color: var(--color-gold);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.button:focus-visible {
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.22),
+    0 0 0 2px var(--color-off-white),
+    0 0 0 4px var(--color-gold);
+}
+
+.icon {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.hint,
+.hintVisible {
+  pointer-events: none;
+  position: absolute;
+  right: calc(100% + 0.7rem);
+  top: 50%;
+  margin: 0;
+  max-width: 14rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(20, 20, 20, 0.92);
+  color: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(200, 169, 110, 0.28);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(4px, -50%);
+  transition:
+    opacity var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
+}
+
+.hintVisible {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+@media (min-width: 768px) {
+  .wrap {
+    right: max(1.5rem, env(safe-area-inset-right));
+    bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+
+  .button {
+    width: 3.25rem;
+    height: 3.25rem;
+  }
+
+  .icon {
+    width: 1.45rem;
+    height: 1.45rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hint,
+  .hintVisible {
+    max-width: 11.5rem;
+    white-space: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .hint,
+  .hintVisible {
+    transition: none;
+  }
+
+  .button:hover,
+  .button:focus-visible {
+    transform: none;
+  }
+}

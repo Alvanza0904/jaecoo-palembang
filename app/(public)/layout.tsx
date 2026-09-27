@@ -6,6 +6,7 @@
 
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { FloatingWhatsApp } from "@/components/layout/FloatingWhatsApp";
 import { getSiteBrandAssets } from "@/lib/supabase/media";
 import { SITE_SETTINGS } from "@/lib/data/site";
 import { SITE_URL } from "@/lib/utils/seo";
@@ -51,6 +52,7 @@ export default async function PublicLayout({
       <Header brand={brand} />
       <main id="main-content">{children}</main>
       <Footer brand={brand} />
+      <FloatingWhatsApp />
     </>
   );
 }
