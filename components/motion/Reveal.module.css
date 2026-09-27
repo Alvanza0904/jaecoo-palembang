@@ -2,6 +2,14 @@
 
 .reveal {
   will-change: opacity, transform;
+  /* Prevent slide-left/slide-right from causing horizontal scroll */
+  max-width: 100%;
+}
+
+/* Clip slide variants so translateX doesn't bleed outside viewport */
+.reveal--slide-left,
+.reveal--slide-right {
+  overflow: clip;
 }
 
 /* Transform-based variants — use transition */

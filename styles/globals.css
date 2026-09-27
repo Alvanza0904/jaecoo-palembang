@@ -12,6 +12,7 @@ html {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  overflow-x: hidden; /* prevent slide animations from creating horizontal scroll */
 }
 
 body {
