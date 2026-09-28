@@ -22,9 +22,8 @@
 
 .hero {
   width: 100%;
-  aspect-ratio: 16/9;
-  object-fit: cover;
-  background: var(--color-charcoal-mid);
+  height: auto;
+  object-fit: contain;
   display: block;
   margin-bottom: var(--space-10);
 }

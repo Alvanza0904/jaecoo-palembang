@@ -65,14 +65,7 @@ export default async function BeritaDetailPage({ params }: Props) {
             <img
               src={article.cover.desktop}
               alt={article.cover.alt ?? article.title}
-              style={{
-                width: "100%",
-                aspectRatio: "16/9",
-                objectFit: "cover",
-                display: "block",
-                marginBottom: "var(--space-10)",
-                background: "var(--color-border)"
-              }}
+              className={styles.cover}
             />
           </Reveal>
         )}
