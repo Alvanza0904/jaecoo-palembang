@@ -143,6 +143,237 @@ function RichToolbar({ editorRef, onChange }: ToolbarProps) {
   );
 }
 
+
+// ── Markdown → HTML converter (no external deps) ─────────────────────────────
+// Digunakan saat paste: mengonversi Markdown dari clipboard (AI tools, dll)
+// menjadi HTML yang setara, lalu disanitasi sebelum dimasukkan ke editor.
+function markdownToHtml(md: string): string {
+  // Normalisasi line endings
+  let s = md.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+  // Escape HTML entities yang ada di input supaya tidak jadi raw HTML
+  // (keamanan: user tidak bisa inject arbitrary tag via plain-text paste)
+  const escapeHtml = (t: string) =>
+    t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  // Pisah per blok (paragraf dipisah double newline)
+  // Tapi jaga heading, list, blockquote agar tidak dipecah lebih dulu
+  const lines = s.split('\n');
+  const htmlLines: string[] = [];
+  let i = 0;
+  let inList: 'ul' | 'ol' | null = null;
+
+  const closeList = () => {
+    if (inList) {
+      htmlLines.push(inList === 'ul' ? '</ul>' : '</ol>');
+      inList = null;
+    }
+  };
+
+  // Inline formatting (dipanggil pada konten dalam blok)
+  const inlineFmt = (t: string): string => {
+    // Escape HTML dulu pada raw text
+    t = escapeHtml(t);
+    // bold+italic: ***text*** atau ___text___
+    t = t.replace(/\*{3}(.+?)\*{3}/g, '<strong><em>$1</em></strong>');
+    t = t.replace(/_{3}(.+?)_{3}/g, '<strong><em>$1</em></strong>');
+    // bold: **text** atau __text__
+    t = t.replace(/\*{2}(.+?)\*{2}/g, '<strong>$1</strong>');
+    t = t.replace(/_{2}(.+?)_{2}/g, '<strong>$1</strong>');
+    // italic: *text* atau _text_
+    t = t.replace(/\*([^*]+?)\*/g, '<em>$1</em>');
+    t = t.replace(/_([^_]+?)_/g, '<em>$1</em>');
+    // strikethrough: ~~text~~
+    t = t.replace(/~~(.+?)~~/g, '<s>$1</s>');
+    // inline code: `code`
+    t = t.replace(/`([^`]+?)`/g, '<code>$1</code>');
+    // link: [text](url)
+    t = t.replace(/\[([^\]]+?)\]\(([^)]+?)\)/g, '<a href="$2">$1</a>');
+    return t;
+  };
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Heading: # Heading (1-6)
+    const hMatch = line.match(/^(#{1,6})\s+(.+)$/);
+    if (hMatch) {
+      closeList();
+      const level = hMatch[1].length;
+      htmlLines.push(`<h${level}>${inlineFmt(hMatch[2])}</h${level}>`);
+      i++;
+      continue;
+    }
+
+    // Blockquote: > text (greedy: gabungkan baris berturutan)
+    if (line.match(/^>\s?/)) {
+      closeList();
+      const bqLines: string[] = [];
+      while (i < lines.length && lines[i].match(/^>\s?/)) {
+        bqLines.push(inlineFmt(lines[i].replace(/^>\s?/, '')));
+        i++;
+      }
+      htmlLines.push(`<blockquote><p>${bqLines.join('<br>')}</p></blockquote>`);
+      continue;
+    }
+
+    // Horizontal rule: --- atau *** atau ___
+    if (line.match(/^(---+|\*\*\*+|___+)\s*$/)) {
+      closeList();
+      htmlLines.push('<hr>');
+      i++;
+      continue;
+    }
+
+    // Unordered list: - item, * item, + item
+    const ulMatch = line.match(/^[\-\*\+]\s+(.+)$/);
+    if (ulMatch) {
+      if (inList !== 'ul') {
+        closeList();
+        htmlLines.push('<ul>');
+        inList = 'ul';
+      }
+      htmlLines.push(`<li>${inlineFmt(ulMatch[1])}</li>`);
+      i++;
+      continue;
+    }
+
+    // Ordered list: 1. item
+    const olMatch = line.match(/^\d+\.\s+(.+)$/);
+    if (olMatch) {
+      if (inList !== 'ol') {
+        closeList();
+        htmlLines.push('<ol>');
+        inList = 'ol';
+      }
+      htmlLines.push(`<li>${inlineFmt(olMatch[1])}</li>`);
+      i++;
+      continue;
+    }
+
+    // Empty line = end of list, or paragraph separator
+    if (line.trim() === '') {
+      closeList();
+      htmlLines.push(''); // separator
+      i++;
+      continue;
+    }
+
+    // Plain paragraph line — kumpulkan sampai baris kosong / blok lain
+    closeList();
+    const paraLines: string[] = [];
+    while (
+      i < lines.length &&
+      lines[i].trim() !== '' &&
+      !lines[i].match(/^#{1,6}\s/) &&
+      !lines[i].match(/^>\s?/) &&
+      !lines[i].match(/^[\-\*\+]\s/) &&
+      !lines[i].match(/^\d+\.\s/) &&
+      !lines[i].match(/^(---+|\*\*\*+|___+)\s*$/)
+    ) {
+      paraLines.push(inlineFmt(lines[i]));
+      i++;
+    }
+    if (paraLines.length > 0) {
+      htmlLines.push(`<p>${paraLines.join('<br>')}</p>`);
+    }
+  }
+
+  closeList();
+
+  // Gabungkan, hapus separator berulang, trim
+  return htmlLines
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+
+// Deteksi apakah teks terlihat seperti Markdown
+function looksLikeMarkdown(text: string): boolean {
+  return /^#{1,6}\s/m.test(text)
+    || /\*\*.+?\*\*/s.test(text)
+    || /(?<!\*)\*(?!\*).+?(?<!\*)\*(?!\*)/s.test(text)
+    || /~~.+?~~/s.test(text)
+    || /^[\-\*\+]\s+/m.test(text)
+    || /^\d+\.\s+/m.test(text)
+    || /^>\s?/m.test(text)
+    || /\[.+?\]\(.+?\)/s.test(text);
+}
+
+// Plain text (tanpa Markdown) → HTML paragraf
+function plainToHtml(text: string): string {
+  return text
+    .split(/\n\n+/)
+    .map(p => p.trim())
+    .filter(Boolean)
+    .map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`)
+    .join('\n');
+}
+
+// ── Rich-text → sanitized HTML (untuk paste dari browser/Google Docs) ─────────
+function sanitizeRichHtml(html: string): string {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  // Tag yang diizinkan di output
+  const ALLOWED = new Set([
+    'B','STRONG','I','EM','U','S','DEL','STRIKE',
+    'H1','H2','H3','H4','H5','H6',
+    'UL','OL','LI','P','BR','BLOCKQUOTE','HR',
+    'SPAN','DIV','A','CODE','PRE',
+  ]);
+
+  function clean(node: Element) {
+    for (const child of Array.from(node.children).reverse()) {
+      if (!ALLOWED.has(child.tagName)) {
+        // Ganti dengan isi, bukan buang sama sekali
+        child.replaceWith(...Array.from(child.childNodes));
+      } else {
+        // Hapus semua atribut kecuali href di <a> dan style bold/italic di span
+        for (const attr of Array.from(child.attributes)) {
+          const keep =
+            (child.tagName === 'A' && attr.name === 'href') ||
+            (child.tagName === 'SPAN' && attr.name === 'style');
+          if (!keep) child.removeAttribute(attr.name);
+        }
+        // Konversi span style="font-weight:bold" → strong, dsb.
+        if (child.tagName === 'SPAN') {
+          const style = (child as HTMLElement).style;
+          if (style.fontWeight === 'bold' || style.fontWeight === '700') {
+            const strong = document.createElement('strong');
+            strong.innerHTML = child.innerHTML;
+            child.replaceWith(strong);
+            clean(strong);
+            continue;
+          }
+          if (style.fontStyle === 'italic') {
+            const em = document.createElement('em');
+            em.innerHTML = child.innerHTML;
+            child.replaceWith(em);
+            clean(em);
+            continue;
+          }
+          if (style.textDecoration?.includes('line-through')) {
+            const s = document.createElement('s');
+            s.innerHTML = child.innerHTML;
+            child.replaceWith(s);
+            clean(s);
+            continue;
+          }
+          // Span tanpa style berguna → unwrap
+          child.replaceWith(...Array.from(child.childNodes));
+          continue;
+        }
+        clean(child);
+      }
+    }
+  }
+
+  clean(doc.body);
+  return doc.body.innerHTML;
+}
+
 // ── WYSIWYG Editor ─────────────────────────────────────────────────
 interface WysiwygEditorProps {
   value: string;
@@ -170,37 +401,40 @@ function WysiwygEditor({ value, onChange }: WysiwygEditorProps) {
     setTimeout(() => { isUserEditing.current = false; }, 100);
   }, [onChange]);
 
-  // Paste: pertahankan bold/italic/heading, buang tag berbahaya
+  // Paste: robust handler untuk Markdown (dari AI tools) dan rich text (dari browser/Docs)
+  // Alur:
+  //   1. Ada text/html di clipboard → sanitize rich HTML (Google Docs, browser copy, dll)
+  //   2. Tidak ada HTML / HTML hanya berisi plain text → deteksi Markdown → konversi ke HTML
+  //   3. Tidak ada formatting sama sekali → insert sebagai paragraf biasa
   const handlePaste = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const html = e.clipboardData.getData('text/html');
-    const text = e.clipboardData.getData('text/plain');
+    const clipHtml = e.clipboardData.getData('text/html');
+    const clipText = e.clipboardData.getData('text/plain');
 
-    if (html) {
-      // Parse HTML dari clipboard, buang tag berbahaya
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const ALLOWED = new Set(['B','STRONG','I','EM','U','H1','H2','H3','H4','UL','OL','LI','P','BR','BLOCKQUOTE','HR','SPAN','DIV','A']);
-      function clean(node: Element) {
-        Array.from(node.children).forEach(child => {
-          if (!ALLOWED.has(child.tagName)) {
-            // Ganti node tidak diizinkan dengan kontennya saja
-            child.replaceWith(...Array.from(child.childNodes));
-          } else {
-            // Hapus semua atribut kecuali href di <a>
-            Array.from(child.attributes).forEach(attr => {
-              if (!(child.tagName === 'A' && attr.name === 'href')) {
-                child.removeAttribute(attr.name);
-              }
-            });
-            clean(child);
-          }
-        });
+    let insertHtml = '';
+
+    if (clipHtml && clipHtml.trim()) {
+      // Cek apakah HTML dari clipboard mengandung formatting nyata
+      // (bukan hanya wrapper kosong dari beberapa aplikasi)
+      const stripped = clipHtml.replace(/<[^>]+>/g, '').trim();
+      const hasRealFormatting = /<(strong|b|em|i|h[1-6]|ul|ol|li|blockquote|s|del|strike)\b/i.test(clipHtml);
+
+      if (hasRealFormatting) {
+        // Rich text dari browser/Google Docs/Word → sanitize
+        insertHtml = sanitizeRichHtml(clipHtml);
+      } else {
+        // HTML wrapper tapi isinya flat text → perlakukan sebagai plain text
+        // supaya Markdown syntax dari AI tools tidak hilang
+        const text = stripped || clipText;
+        insertHtml = looksLikeMarkdown(text) ? markdownToHtml(text) : plainToHtml(text);
       }
-      clean(doc.body);
-      document.execCommand('insertHTML', false, doc.body.innerHTML);
-    } else {
-      document.execCommand('insertText', false, text);
+    } else if (clipText && clipText.trim()) {
+      // Pure plain text (terminal, AI tools, Notepad, dll)
+      insertHtml = looksLikeMarkdown(clipText) ? markdownToHtml(clipText) : plainToHtml(clipText);
+    }
+
+    if (insertHtml) {
+      document.execCommand('insertHTML', false, insertHtml);
     }
 
     setTimeout(() => {
@@ -218,11 +452,11 @@ function WysiwygEditor({ value, onChange }: WysiwygEditorProps) {
         suppressContentEditableWarning
         onInput={handleInput}
         onPaste={handlePaste}
-        data-placeholder="Ketik isi artikel di sini... Pilih teks lalu klik toolbar untuk format."
+        data-placeholder="Paste artikel dari ChatGPT/Claude/Gemini langsung di sini — Markdown (**bold**, *italic*, ## Heading, - list) otomatis dikonversi. Atau ketik dan format dengan toolbar di atas."
         spellCheck={false}
       />
       <p className={editorStyles.bodyHint}>
-        💡 Pilih teks → klik <strong>B</strong>, <strong>I</strong>, <strong>H2</strong>, dll di toolbar. Enter untuk paragraf baru.
+        💡 Paste dari ChatGPT/Claude/Gemini → format Markdown otomatis dipertahankan. Paste dari Google Docs/browser → rich text dikonversi. Atau ketik manual dan gunakan toolbar.
       </p>
     </div>
   );
