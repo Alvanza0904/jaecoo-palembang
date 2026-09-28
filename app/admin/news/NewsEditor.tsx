@@ -170,11 +170,39 @@ function WysiwygEditor({ value, onChange }: WysiwygEditorProps) {
     setTimeout(() => { isUserEditing.current = false; }, 100);
   }, [onChange]);
 
-  // Paste: strip formatting dari luar, hanya ambil plain text
+  // Paste: pertahankan bold/italic/heading, buang tag berbahaya
   const handlePaste = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
     e.preventDefault();
+    const html = e.clipboardData.getData('text/html');
     const text = e.clipboardData.getData('text/plain');
-    document.execCommand('insertText', false, text);
+
+    if (html) {
+      // Parse HTML dari clipboard, buang tag berbahaya
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const ALLOWED = new Set(['B','STRONG','I','EM','U','H1','H2','H3','H4','UL','OL','LI','P','BR','BLOCKQUOTE','HR','SPAN','DIV','A']);
+      function clean(node: Element) {
+        Array.from(node.children).forEach(child => {
+          if (!ALLOWED.has(child.tagName)) {
+            // Ganti node tidak diizinkan dengan kontennya saja
+            child.replaceWith(...Array.from(child.childNodes));
+          } else {
+            // Hapus semua atribut kecuali href di <a>
+            Array.from(child.attributes).forEach(attr => {
+              if (!(child.tagName === 'A' && attr.name === 'href')) {
+                child.removeAttribute(attr.name);
+              }
+            });
+            clean(child);
+          }
+        });
+      }
+      clean(doc.body);
+      document.execCommand('insertHTML', false, doc.body.innerHTML);
+    } else {
+      document.execCommand('insertText', false, text);
+    }
+
     setTimeout(() => {
       if (editorRef.current) onChange(editorRef.current.innerHTML);
     }, 0);
