@@ -31,10 +31,6 @@ export function MobileMenuToggle({ navLinks, inverted = false }: Props) {
       document.body.style.left = "0";
       document.body.style.right = "0";
       document.body.style.width = "100%";
-      // Prevent background bleed-through on light pages (e.g. artikel, promo detail)
-      document.documentElement.style.backgroundColor = "#141414";
-      document.body.style.backgroundColor = "#141414";
-      document.body.setAttribute("data-menu-open", "");
       locked.current = true;
       return;
     }
@@ -52,9 +48,6 @@ export function MobileMenuToggle({ navLinks, inverted = false }: Props) {
     document.body.style.left = "";
     document.body.style.right = "";
     document.body.style.width = "";
-    document.documentElement.style.backgroundColor = "";
-    document.body.style.backgroundColor = "";
-    document.body.removeAttribute("data-menu-open");
 
     const root = document.documentElement;
     const previous = root.style.scrollBehavior;
