@@ -149,7 +149,7 @@ function RichToolbar({ editorRef, onChange }: ToolbarProps) {
 // menjadi HTML yang setara, lalu disanitasi sebelum dimasukkan ke editor.
 function markdownToHtml(md: string): string {
   // Normalisasi line endings
-  let s = md.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const s = md.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
   // Escape HTML entities yang ada di input supaya tidak jadi raw HTML
   // (keamanan: user tidak bisa inject arbitrary tag via plain-text paste)
