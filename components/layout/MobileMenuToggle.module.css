@@ -42,7 +42,13 @@
 /* ── Overlay ── */
 .overlay {
   position: fixed;
-  inset: 0;
+  /* Extend above viewport to cover safe-area / notch on iOS */
+  top: -100px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Extra padding so content stays below notch */
+  padding-top: 100px;
   background-color: var(--color-charcoal);
   z-index: var(--z-modal);
   display: flex;
@@ -69,6 +75,8 @@
   flex-direction: column;
   height: 100%;
   padding: var(--space-6) var(--container-padding);
+  /* 80px visual spacing from top of visible area;
+     overlay itself is shifted -100px so no extra offset needed */
   padding-top: 80px;
 }
 
