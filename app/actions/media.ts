@@ -40,6 +40,7 @@ export async function uploadAndSaveMedia(
 
   const { error: uploadError } = await supabase.storage.from(BUCKET).upload(storagePath, file, {
     contentType: file.type,
+    cacheControl: "31536000",
     upsert: false,
   });
   if (uploadError) throw new Error(`Storage upload gagal: ${uploadError.message}`);

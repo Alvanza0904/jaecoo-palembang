@@ -14,7 +14,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // experimental.optimizeCss dihapus — bug dengan route groups Next.js 15
+  // Strict keeps each route from pulling CSS that only another page imports.
+  experimental: {
+    cssChunking: "strict",
+  },
 };
 
 export default nextConfig;

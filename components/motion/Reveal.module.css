@@ -19,11 +19,11 @@
 .reveal--blur,
 .reveal--scale,
 .reveal--slide-left,
-.reveal--slide-right {
+.reveal--slide-right,
+.reveal--mask {
   transition:
     opacity var(--duration-slow) var(--ease-out),
-    transform var(--duration-slow) var(--ease-out),
-    filter var(--duration-slow) var(--ease-out);
+    transform var(--duration-slow) var(--ease-out);
 }
 
 /* ─── Hidden states ─────────────────────────────────────── */
@@ -31,22 +31,15 @@
 .reveal--fade-up[data-visible="false"]     { opacity: 0; transform: translateY(28px); }
 .reveal--fade-down[data-visible="false"]   { opacity: 0; transform: translateY(-24px); }
 .reveal--fade[data-visible="false"]        { opacity: 0; }
-.reveal--blur[data-visible="false"]        { opacity: 0; filter: blur(8px); }
+.reveal--blur[data-visible="false"]        { opacity: 0; transform: translateY(12px); }
 .reveal--scale[data-visible="false"]       { opacity: 0; transform: scale(0.96); }
 .reveal--slide-left[data-visible="false"]  { opacity: 0; transform: translateX(-35px); }
 .reveal--slide-right[data-visible="false"] { opacity: 0; transform: translateX(35px); }
 
-/* Mask / clip-path wipe */
-.reveal--mask {
-  transition:
-    clip-path var(--duration-cinematic) var(--ease-cinema),
-    opacity calc(var(--duration-cinematic) * 0.5) var(--ease-out);
-  overflow: hidden;
-}
-
+/* Mask / wipe — transform only, so the animation stays on the compositor */
 .reveal--mask[data-visible="false"] {
-  clip-path: inset(0 100% 0 0);
   opacity: 0;
+  transform: translateY(18px);
 }
 
 /* ─── Visible states ────────────────────────────────────── */
@@ -54,8 +47,6 @@
 .reveal[data-visible="true"] {
   opacity: 1;
   transform: none;
-  filter: none;
-  clip-path: inset(0 0% 0 0);
 }
 
 /* ─── Reduced motion ────────────────────────────────────── */

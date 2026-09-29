@@ -130,7 +130,7 @@
 
 .copy {
   font-size: var(--text-xs);
-  color: rgba(255,255,255,0.28);
+  color: rgba(255, 255, 255, 0.78);
   letter-spacing: var(--tracking-wide);
 }
 
@@ -141,11 +141,11 @@
 
 .legalLink {
   font-size: var(--text-xs);
-  color: rgba(255,255,255,0.28);
+  color: rgba(255, 255, 255, 0.78);
   letter-spacing: var(--tracking-wide);
   transition: color var(--duration-fast) var(--ease-out);
 }
-.legalLink:hover { color: rgba(255,255,255,0.7); }
+.legalLink:hover { color: var(--color-white); }
 
 @media (min-width: 768px) {
   .bottom {

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SITE_SETTINGS } from "@/lib/data/site";
+import { currentYearJakarta } from "@/lib/utils/format";
 import styles from "./Footer.module.css";
 import type { SiteBrandAssets } from "@/lib/supabase/media";
 import Image from "next/image";
@@ -25,7 +26,7 @@ const LEGAL_LINKS = [
 
 export function Footer({ brand }: { brand: SiteBrandAssets }) {
   const logo = brand.logoDark ?? brand.logo;
-  const year = new Date().getFullYear();
+  const year = currentYearJakarta();
   const street = `${SITE_SETTINGS.dealerAddress.lines[0]}, ${SITE_SETTINGS.dealerAddress.lines[1]}`;
 
   return (

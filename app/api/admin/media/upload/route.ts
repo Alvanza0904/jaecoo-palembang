@@ -48,6 +48,7 @@ export async function POST(request: Request) {
       .from(BUCKET)
       .upload(storagePath, file, {
         contentType: file.type,
+        cacheControl: "31536000",
         upsert: false,
       });
 

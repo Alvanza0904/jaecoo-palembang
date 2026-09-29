@@ -28,7 +28,10 @@ interface PriceDisplayProps {
 }
 
 function formatIDR(amount: number): string {
-  return `Rp${amount.toLocaleString("id-ID")}`;
+  const rounded = Math.round(amount);
+  const digits = Math.abs(rounded).toString();
+  const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return `${rounded < 0 ? "-" : ""}Rp${grouped}`;
 }
 
 function resolveDisplay(

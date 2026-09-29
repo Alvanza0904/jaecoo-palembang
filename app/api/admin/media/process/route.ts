@@ -149,6 +149,7 @@ export async function POST(req: NextRequest) {
           .from(BUCKET)
           .upload(variantPath, variantBuffer, {
             contentType: 'image/webp',
+            cacheControl: '31536000',
             upsert: true, // overwrite if reprocessing
           })
 

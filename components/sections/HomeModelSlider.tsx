@@ -39,12 +39,16 @@ export function HomeModelSlider({ models }: Props) {
   const swiped = useRef(false);
   const sectionRef = useRef<HTMLElement>(null);
   const [epoch, setEpoch] = useState(0);
+  // Neighbor slides stay out of the network queue until after first paint,
+  // so they don't compete with the hero LCP image.
+  const [armNeighbors, setArmNeighbors] = useState(false);
 
   const prev = useCallback(() => setCurrent((c) => (c - 1 + list.length) % list.length), [list.length]);
   const next = useCallback(() => setCurrent((c) => (c + 1) % list.length), [list.length]);
   const manual = useCallback((action: () => void) => {
     action();
     setEpoch((value) => value + 1);
+    setArmNeighbors(true);
   }, []);
 
   // Keyboard nav
@@ -68,7 +72,18 @@ export function HomeModelSlider({ models }: Props) {
     return () => observer.disconnect();
   }, []);
 
-  // Auto-advance only while the slider is near the viewport.
+  useEffect(() => {
+    let timeoutId = 0;
+    const arm = () => {
+      timeoutId = window.setTimeout(() => setArmNeighbors(true), 1500);
+    };
+    if (document.readyState === "complete") arm();
+    else window.addEventListener("load", arm);
+    return () => {
+      window.removeEventListener("load", arm);
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
   useEffect(() => {
     if (!inView || list.length < 2) return;
     const timer = setInterval(() => setCurrent((c) => (c + 1) % list.length), 8000);
@@ -95,7 +110,11 @@ export function HomeModelSlider({ models }: Props) {
       <div className={styles.track}>
         {list.map((model, i) => {
           const heroMedia = model.hero_media;
-          const src = heroMedia?.image?.desktop ?? heroMedia?.image?.mobile;
+          const image = heroMedia?.image;
+          const desktopSrc = image?.desktop;
+          const tabletSrc = image?.tablet;
+          const mobileSrc = image?.mobile || image?.small_mobile || image?.tablet || image?.desktop;
+          const smallSrc = image?.small_mobile;
           const isActive = i === current;
 
           // Apply presentation_settings (same pattern as LayeredHero / getBackgroundLayerStyle)
@@ -116,6 +135,7 @@ export function HomeModelSlider({ models }: Props) {
           } as CSSProperties;
 
           const nearby = isActive || i === (current + 1) % list.length || i === (current - 1 + list.length) % list.length;
+          const showImage = isActive || (armNeighbors && nearby);
 
           return (
             <Link
@@ -132,17 +152,28 @@ export function HomeModelSlider({ models }: Props) {
                 }
               }}
             >
-              {nearby && validSrc(src) ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={src!}
-                  alt={model.name}
-                  className={styles.slideImg}
-                  loading={isActive ? "eager" : "lazy"}
-                  fetchPriority={isActive ? "high" : "low"}
-                  decoding="async"
-                  style={Object.keys(desktopImgStyle).length > 0 ? slideImgStyle : undefined}
-                />
+              {showImage && validSrc(mobileSrc) ? (
+                <picture>
+                  {desktopSrc && desktopSrc !== mobileSrc && (
+                    <source media="(min-width: 1024px)" srcSet={desktopSrc} />
+                  )}
+                  {tabletSrc && tabletSrc !== mobileSrc && tabletSrc !== desktopSrc && (
+                    <source media="(min-width: 768px)" srcSet={tabletSrc} />
+                  )}
+                  {smallSrc && smallSrc !== mobileSrc && (
+                    <source media="(max-width: 389px)" srcSet={smallSrc} />
+                  )}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={mobileSrc!}
+                    alt={model.name}
+                    className={styles.slideImg}
+                    loading="lazy"
+                    fetchPriority="low"
+                    decoding="async"
+                    style={Object.keys(desktopImgStyle).length > 0 ? slideImgStyle : undefined}
+                  />
+                </picture>
               ) : (
                 <div className={styles.slideFallback} aria-hidden="true" />
               )}

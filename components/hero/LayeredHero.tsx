@@ -142,6 +142,13 @@ export function LayeredHero({
   const hasCutout = !!image.cutout && !isVideoSource(image.mime_type, image.desktop);
   const playback = readVideoSettings(presentationSettings);
   const assetIsVideo = isVideoSource(image.mime_type, image.desktop || image.mobile);
+  const lcpSrc = image.mobile || image.tablet || image.desktop || "";
+  let lcpOrigin = "";
+  try {
+    lcpOrigin = lcpSrc ? new URL(lcpSrc).origin : "";
+  } catch {
+    lcpOrigin = "";
+  }
 
   function cutoutVars(): React.CSSProperties {
     const styleFor = (breakpoint: BreakpointKey) => {
@@ -174,6 +181,13 @@ export function LayeredHero({
       data-hero-media-asset-id={media.media_asset_id}
       data-hero-cutout-media-id={media.cutout_media_id}
     >
+      {lcpOrigin ? <link rel="preconnect" href={lcpOrigin} /> : null}
+      {image.mobile ? (
+        <link rel="preload" as="image" href={image.mobile} fetchPriority="high" media="(max-width: 1023px)" />
+      ) : null}
+      {image.desktop && image.desktop !== image.mobile ? (
+        <link rel="preload" as="image" href={image.desktop} fetchPriority="high" media="(min-width: 1024px)" />
+      ) : null}
       {/* ── Background layer ── */}
       <div className={styles.bg} aria-hidden="true">
         {assetIsVideo ? (

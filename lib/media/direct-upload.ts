@@ -26,6 +26,7 @@ export function uploadToStorage(
     xhr.setRequestHeader("Authorization", `Bearer ${token}`);
     xhr.setRequestHeader("apikey", process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "");
     xhr.setRequestHeader("content-type", file.type || "application/octet-stream");
+    xhr.setRequestHeader("cache-control", "31536000");
     xhr.setRequestHeader("x-upsert", "false");
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable && onProgress) onProgress(Math.round((event.loaded / event.total) * 100));
