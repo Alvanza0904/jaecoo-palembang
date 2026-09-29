@@ -123,3 +123,9 @@ input, textarea, select { font-family: inherit; color: var(--color-ink); backgro
 body[data-menu-open] [class*="reveal"] {
   will-change: auto !important;
 }
+
+/* Fix: Reveal elements use will-change:transform which creates stacking contexts
+   that trap the fixed overlay. Reset when menu is open. */
+body[data-menu-open] [class*="reveal"] {
+  will-change: auto !important;
+}
