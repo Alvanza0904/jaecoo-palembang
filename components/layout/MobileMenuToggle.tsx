@@ -7,6 +7,7 @@
 "use client";
 
 import { useState, useLayoutEffect, useEffect, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import styles from "./MobileMenuToggle.module.css";
 import { WHATSAPP_NUMBER } from "@/lib/utils/whatsapp";
@@ -18,6 +19,12 @@ export function MobileMenuToggle({ navLinks, inverted = false }: Props) {
   const [open, setOpen] = useState(false);
   const scrollY = useRef(0);
   const locked = useRef(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Overlay is portaled to <body>: the solid header uses backdrop-filter,
+  // which turns it into the containing block for position:fixed children
+  // and would clip the overlay to the header height.
+  useEffect(() => setMounted(true), []);
 
   const close = useCallback(() => setOpen(false), []);
 
@@ -31,7 +38,6 @@ export function MobileMenuToggle({ navLinks, inverted = false }: Props) {
       document.body.style.left = "0";
       document.body.style.right = "0";
       document.body.style.width = "100%";
-      document.body.setAttribute("data-menu-open", "");
       locked.current = true;
       return;
     }
@@ -49,7 +55,6 @@ export function MobileMenuToggle({ navLinks, inverted = false }: Props) {
     document.body.style.left = "";
     document.body.style.right = "";
     document.body.style.width = "";
-    document.body.removeAttribute("data-menu-open");
 
     const root = document.documentElement;
     const previous = root.style.scrollBehavior;
@@ -84,6 +89,7 @@ export function MobileMenuToggle({ navLinks, inverted = false }: Props) {
       </button>
 
       {/* Fullscreen overlay */}
+      {mounted && createPortal(
       <div
         id="mobile-menu"
         className={[styles.overlay, open ? styles.overlayOpen : ""].join(" ")}
@@ -130,7 +136,9 @@ export function MobileMenuToggle({ navLinks, inverted = false }: Props) {
             </a>
           </div>
         </div>
-      </div>
+      </div>,
+      document.body
+      )}
     </>
   );
 }
