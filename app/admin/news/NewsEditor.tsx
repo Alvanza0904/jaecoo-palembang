@@ -149,7 +149,7 @@ function RichToolbar({ editorRef, onChange }: ToolbarProps) {
 // menjadi HTML yang setara, lalu disanitasi sebelum dimasukkan ke editor.
 function markdownToHtml(md: string): string {
   // Normalisasi line endings
-  const s = md.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  let s = md.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
   // Escape HTML entities yang ada di input supaya tidak jadi raw HTML
   // (keamanan: user tidak bisa inject arbitrary tag via plain-text paste)
@@ -292,13 +292,13 @@ function markdownToHtml(md: string): string {
 // Deteksi apakah teks terlihat seperti Markdown
 function looksLikeMarkdown(text: string): boolean {
   return /^#{1,6}\s/m.test(text)
-    || /\*\*.+?\*\*/s.test(text)
-    || /(?<!\*)\*(?!\*).+?(?<!\*)\*(?!\*)/s.test(text)
-    || /~~.+?~~/s.test(text)
+    || /\*\*[\s\S]+?\*\*/.test(text)
+    || /(?<!\*)\*(?!\*)[\s\S]+?(?<!\*)\*(?!\*)/.test(text)
+    || /~~[\s\S]+?~~/.test(text)
     || /^[\-\*\+]\s+/m.test(text)
     || /^\d+\.\s+/m.test(text)
     || /^>\s?/m.test(text)
-    || /\[.+?\]\(.+?\)/s.test(text);
+    || /\[[\s\S]+?\]\([\s\S]+?\)/.test(text);
 }
 
 // Plain text (tanpa Markdown) → HTML paragraf
