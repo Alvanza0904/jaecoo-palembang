@@ -116,3 +116,10 @@ input, textarea, select { font-family: inherit; color: var(--color-ink); backgro
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+
+/* ─── MENU OPEN: reset will-change on Reveal elements ───────────────────── */
+/* will-change: opacity/transform creates new stacking contexts that trap     */
+/* position:fixed overlays. Reset when menu is open so overlay shows on top. */
+body[data-menu-open] [class*="reveal"] {
+  will-change: auto !important;
+}
