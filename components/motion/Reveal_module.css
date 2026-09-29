@@ -1,7 +1,7 @@
 /* ─── Base ──────────────────────────────────────────────── */
 
 .reveal {
-  will-change: opacity, transform;
+
   /* Prevent slide-left/slide-right from causing horizontal scroll */
   max-width: 100%;
 }
@@ -78,11 +78,4 @@
   .reveal[data-visible="true"] {
     opacity: 1;
   }
-}
-
-/* ─── Menu open: disable stacking context ───────────────── */
-/* will-change creates a stacking context that traps the fixed overlay.
-   Reset it when the mobile menu is open. */
-:global(body[data-menu-open]) .reveal {
-  will-change: auto;
 }
