@@ -8,12 +8,30 @@
  * Slugs: jaecoo-j5-ev | jaecoo-j7-shs | jaecoo-j7-sivp | jaecoo-j8-shs
  */
 
-import type { ModelData, ModelSpecCategory } from "@/lib/types/model";
+import type { ModelData } from "@/lib/types/model";
+import { MODEL_J5_EV } from "./models/j5-ev";
+import { MODEL_J7_SHS } from "./models/j7-shs";
+import { MODEL_J7_SIVP } from "./models/j7-sivp";
+import { MODEL_J8_SHS } from "./models/j8-shs";
 
-export const MODEL_PRICES = {
-  "jaecoo-j5-ev": 354_900_000,
-  "jaecoo-j7-shs": 534_900_000,
-  "jaecoo-j8-shs": 865_000_000,
-} as const;
+export { MODEL_PRICES } from "./models/shared";
 
-const emptyImage = (alt: string) => ({ desktop: undefined, alt });
+export const MODELS: ModelData[] = [
+  MODEL_J5_EV,
+  MODEL_J7_SHS,
+  MODEL_J7_SIVP,
+  MODEL_J8_SHS,
+];
+
+export function getModelBySlug(slug: string): ModelData | undefined {
+  return MODELS.find((m) => m.slug === slug && m.published);
+}
+
+export function getModelSlugs(): string[] {
+  return MODELS.filter((m) => m.published).map((m) => m.slug);
+}
+
+export function getModelPrice(slug: string): number | null {
+  const model = getModelBySlug(slug);
+  return model?.default_variant.price_idr ?? null;
+}
