@@ -8,40 +8,40 @@ export const FALLBACK_CONTENT: Omit<HomepageContent, 'id'> = {
   hero: {
     eyebrow: "DEALER RESMI JAECOO PALEMBANG",
     headline: "JAECOO J5",
-    description: "SUV listrik dengan karakter tangguh, ruang yang lapang, dan tenaga instan untuk mobilitas modern yang lebih berani.",
+    description: "SUV listrik untuk perjalanan harian. Tenaga instan, kabin lega, dan jarak tempuh yang cukup untuk aktivitas kota maupun luar kota.",
     ctaText: "Jelajahi J5",
     ctaUrl: "/model/jaecoo-j5-ev"
   },
   experience: {
     title: "Satu Lini. Tiga Karakter.",
-    description: "JAECOO menghadirkan pilihan SUV dengan karakter yang berbeda. J5 EV membawa kesederhanaan tenaga listrik, J7 SHS memadukan listrik dan hybrid, sementara J8 SHS-P ARDIS membawa performa flagship ke level berikutnya."
+    description: "J5 EV untuk mobilitas listrik sehari-hari, J7 SHS untuk hybrid yang fleksibel, J7 SIVP dengan valet parkir pintar, dan J8 SHS-P ARDIS sebagai flagship dengan AWD."
   },
   technology: {
     title: "Teknologi yang Terasa, Bukan Sekadar Terlihat",
-    description: "Dari sistem penggerak listrik dan Super Hybrid System hingga ARDIS, kamera 540° dan fitur bantuan pengemudi, setiap teknologi dirancang untuk membuat perjalanan terasa lebih mudah, tenang, dan terkendali."
+    description: "Dari powertrain listrik dan Super Hybrid System hingga ARDIS, kamera 540°, dan bantuan pengemudi — teknologi yang membantu perjalanan terasa lebih tenang dan terkendali."
   },
   about: {
     title: "JAECOO Palembang",
-    description: "Temukan lineup JAECOO di Palembang bersama Alvan. Mulai dari mengenal setiap model, konsultasi kebutuhan, hingga menjadwalkan test drive — semuanya dibuat sederhana dan personal."
+    description: "Kenali lineup JAECOO bersama Alvan di Palembang. Dari membandingkan model, konsultasi kebutuhan, sampai menjadwalkan test drive — semuanya dibuat sederhana dan personal."
   },
   promo: {
     title: "Penawaran Terkini",
-    description: "Dapatkan informasi harga, program, dan penawaran terbaru JAECOO Palembang. Hubungi Alvan untuk detail yang sesuai dengan kebutuhan Anda.",
+    description: "Cek harga, program, dan penawaran terbaru JAECOO Palembang. Hubungi Alvan untuk detail yang sesuai dengan kebutuhan Anda.",
     ctaText: "Lihat Semua Promo",
     ctaUrl: "/promo"
   },
   journal: {
     title: "Berita & Informasi JAECOO",
-    description: "Ikuti informasi terbaru seputar produk, teknologi, dan aktivitas JAECOO."
+    description: "Ikuti update produk, teknologi, dan aktivitas JAECOO yang relevan untuk Anda di Palembang."
   },
   dealer_location: {
     title: "Kenali JAECOO Lebih Dekat",
-    description: "Datang dan lihat langsung lineup JAECOO di dealer resmi Palembang. Alvan siap membantu Anda memahami setiap model dan menemukan pilihan yang sesuai.",
+    description: "Datang ke dealer resmi di Palembang. Lihat unit secara langsung, bandingkan model, dan tanyakan detail ke Alvan tanpa basa-basi bertele-tele.",
     address: "JAECOO Palembang\nKomp. Graha Maju, Jl. Mayor HM. Rasyad Nawawi No.506–509\n9 Ilir, Ilir Timur II, Palembang 30113\nSales: Alvan — 085183145926"
   },
   final_cta: {
     title: "Temukan JAECOO yang Tepat untuk Anda.",
-    description: "Ingin melihat langsung, membandingkan model, atau menjadwalkan test drive? Hubungi Alvan untuk mendapatkan informasi JAECOO Palembang secara langsung.",
+    description: "Ingin melihat unit, membandingkan model, atau menjadwalkan test drive? Chat Alvan untuk informasi langsung dari JAECOO Palembang.",
     ctaText: "Chat dengan Alvan",
     ctaUrl: "https://wa.me/6285183145926"
   },
