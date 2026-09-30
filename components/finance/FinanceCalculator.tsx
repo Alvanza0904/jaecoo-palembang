@@ -2,7 +2,7 @@
  * JAECOO Palembang — Finance Calculator
  *
  * Rules (LOCKED — do not change):
- *   DP range:     25% – 50% (step 5)
+ *   DP range:     25% – 50% (step 1)
  *   Tenor:        1 – 5 tahun
  *   Flat interest: 10% per tahun
  *   Pokok        = Harga − DP
@@ -40,7 +40,7 @@ export interface CalculatorResult {
 
 export const DP_MIN = 25;
 export const DP_MAX = 50;
-export const DP_STEP = 5;
+export const DP_STEP = 1;
 export const DP_OPTIONS = [25, 30, 35, 40, 45, 50] as const;
 export const TENOR_OPTIONS = [1, 2, 3, 4, 5] as const;
 export const INTEREST_RATE = 0.10;
