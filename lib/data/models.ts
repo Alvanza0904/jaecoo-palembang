@@ -23,6 +23,10 @@ export const MODELS: ModelData[] = [
   MODEL_J8_SHS,
 ];
 
+export function getModels(): ModelData[] {
+  return MODELS.filter((m) => m.published);
+}
+
 export function getModelBySlug(slug: string): ModelData | undefined {
   return MODELS.find((m) => m.slug === slug && m.published);
 }
