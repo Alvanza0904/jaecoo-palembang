@@ -163,7 +163,6 @@ export function HomeModelSlider({ models }: Props) {
                   {smallSrc && smallSrc !== mobileSrc && (
                     <source media="(max-width: 389px)" srcSet={smallSrc} />
                   )}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={mobileSrc!}
                     alt={model.name}

@@ -220,7 +220,7 @@ export function LayeredHero({
               aria-hidden="true"
               className={`${styles.bgImg} ${styles.bgPictureImg}`}
               fetchPriority="high"
-              decoding="async"
+              decoding="sync"
               style={{
                 "--hero-fit": getBackgroundStyle("mobile").objectFit,
                 "--hero-pos": getBackgroundStyle("mobile").objectPosition,

@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
             withoutEnlargement: true,
             fit: 'inside',
           })
-          .webp({ quality: targetWidth <= THUMB_WIDTH ? 75 : 82 })
+          .webp({ quality: targetWidth <= 768 ? 75 : 72 })
           .toBuffer()
 
         // Build storage path for variant

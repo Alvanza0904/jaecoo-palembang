@@ -77,7 +77,6 @@ export function ScrollHeader({ navLinks, whatsappUrl, logo, logoLight }: ScrollH
               width={logo.width ?? 180}
               height={logo.height ?? 48}
               className={styles.logoImage}
-              priority
               sizes="180px"
             />
           ) : (

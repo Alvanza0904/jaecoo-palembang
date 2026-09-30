@@ -68,13 +68,17 @@ function VisualImage({
 
   return (
     <picture>
-      {image.mobile && <source media="(max-width: 767px)" srcSet={image.mobile} />}
+      {image.small_mobile && image.small_mobile !== image.mobile && (
+        <source media="(max-width: 480px)" srcSet={image.small_mobile} />
+      )}
+      {image.mobile && <source media="(max-width: 1023px)" srcSet={image.mobile} />}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={image.desktop ?? image.mobile ?? ''}
         alt={alt}
         className={`${className} ${styles.visualMedia}`}
         loading="lazy"
+        fetchPriority="low"
         decoding="async"
         style={style}
       />
@@ -297,6 +301,8 @@ export function HomePromoSection({ promos }: { promos: Promo[] }) {
                     alt={promo.title}
                     className={styles.promoCardImg}
                     loading="lazy"
+                    decoding="async"
+                    fetchPriority="low"
                   />
                 )}
                 <p className={styles.promoCardEyebrow}>{promo.promo_type || "Promo"}</p>
@@ -374,13 +380,18 @@ export function HomeJournalSection({ news }: { news: NewsData[] }) {
               <Reveal key={item.id} variant={["fade-up", "slide-left", "fade", "slide-right"][i % 4] as "fade-up" | "slide-left" | "fade" | "slide-right"} delay={(i % 3) * 70}>
               <Link href={`/berita/${item.slug}`} className={styles.newsCard}>
                 {item.cover?.desktop && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={item.cover.desktop}
-                    alt={item.cover.alt ?? item.title}
-                    className={styles.newsCardImg}
-                    loading="lazy"
-                  />
+                  <picture>
+                    {item.cover.mobile && item.cover.mobile !== item.cover.desktop ? (
+                      <source media="(max-width: 1023px)" srcSet={item.cover.mobile} />
+                    ) : null}
+                    <img
+                      src={item.cover.mobile || item.cover.desktop}
+                      alt={item.cover.alt ?? item.title}
+                      className={styles.newsCardImg}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </picture>
                 )}
                 <div className={styles.newsCardBody}>
                   <div className={styles.newsCardMeta}>
