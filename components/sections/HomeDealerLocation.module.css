@@ -73,6 +73,22 @@
 }
 .phoneLink:hover { opacity: 0.7; }
 
+/* Desktop only. Other homepage bands already use --desktop-frame-height.
+   Dealer was content-sized, so the cover image was cropped to a short strip. */
+@media (min-width: 1280px) {
+  .section {
+    min-height: var(--desktop-frame-height);
+    display: flex;
+    align-items: flex-end;
+    padding-block: 0;
+  }
+
+  .inner {
+    width: 100%;
+    padding-block: var(--space-20);
+  }
+}
+
 /* ── Presentation settings mobile override ───────────────────────────────── */
 @media (max-width: 767px) {
   .bgImg {

@@ -123,7 +123,8 @@
 .help,
 .whatsapp,
 .order,
-.delivery {
+.delivery,
+.calculator {
   padding: var(--section-gap-md) var(--container-padding);
 }
 
@@ -143,6 +144,7 @@
 .about h2,
 .help h2,
 .whatsapp h2,
+.calculator h2,
 .delivery h2 {
   margin: 0 0 var(--space-5);
   font-size: clamp(2rem, 5vw, 3.6rem);
@@ -352,6 +354,18 @@
   max-width: 760px;
   margin-inline: auto;
   text-align: left;
+}
+
+.calculator {
+  max-width: 1180px;
+  margin-inline: auto;
+}
+
+.calculatorLead {
+  max-width: 46ch;
+  margin: 0 0 var(--space-8);
+  color: var(--color-ink-muted);
+  line-height: 1.7;
 }
 
 .whatsapp a { margin-top: var(--space-8); }

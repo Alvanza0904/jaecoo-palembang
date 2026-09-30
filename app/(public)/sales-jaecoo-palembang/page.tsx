@@ -9,6 +9,8 @@ import type { Metadata } from "next";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { SalesPageView } from "@/components/sales/SalesPage";
 import { getSalesDeliveries, getSalesMedia } from "@/lib/supabase/media";
+import { getModels } from "@/lib/supabase/queries";
+import { catalogFromModels } from "@/lib/finance/catalog";
 import { SITE_URL } from "@/lib/utils/seo";
 
 const title = "Sales JAECOO Palembang — Alvan";
@@ -35,11 +37,16 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SalesPage() {
-  const [images, deliveries] = await Promise.all([getSalesMedia(), getSalesDeliveries()]);
+  const [images, deliveries, models] = await Promise.all([
+    getSalesMedia(),
+    getSalesDeliveries(),
+    getModels(),
+  ]);
+  const catalog = catalogFromModels(models);
   return (
     <>
       <TransparentHeader />
-      <SalesPageView images={images} deliveries={deliveries} />
+      <SalesPageView images={images} deliveries={deliveries} catalog={catalog} />
     </>
   );
 }

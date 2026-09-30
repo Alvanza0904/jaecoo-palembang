@@ -37,6 +37,7 @@ import { HeroPlaceholder } from "@/components/hero/HeroPlaceholder";
 import { LayeredHero } from "@/components/hero/LayeredHero";
 import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { FinanceCalculator } from "@/components/finance/FinanceCalculator";
+import { toCalculatorModel } from "@/lib/finance/catalog";
 import { PriceDisplay } from "@/components/price/PriceDisplay";
 import { priceStatusAllowsCalculator, type ModelSectionCopy } from "@/lib/types/model";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
@@ -697,9 +698,8 @@ export default async function ModelPage({ params }: ModelPageProps) {
       {/* ══════════════════════════════════════════════════════════════════
           FINANCE CALCULATOR — minimal, tucked between specs and CTA
       ══════════════════════════════════════════════════════════════════ */}
-      {priceStatusAllowsCalculator(
-        model.default_variant.price_status,
-        model.default_variant.price_idr
+      {model.variants.some((variant) =>
+        priceStatusAllowsCalculator(variant.price_status, variant.price_idr)
       ) && (
         <section className={styles.calcSection}>
           <Container size="narrow">
@@ -715,8 +715,9 @@ export default async function ModelPage({ params }: ModelPageProps) {
             </Reveal>
             <Reveal variant="fade-up" delay={100} threshold={0}>
               <FinanceCalculator
-                price={model.default_variant.price_idr!}
-                modelName={model.name}
+                model={toCalculatorModel(model)}
+                initialVariantId={model.default_variant.id}
+                source="model_overview"
               />
             </Reveal>
           </Container>

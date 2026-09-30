@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/Button";
 import type { ResponsiveImage } from "@/lib/types/media";
 import type { SalesDelivery } from "@/lib/sales/deliveries";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
+import { FinanceCalculator } from "@/components/finance/FinanceCalculator";
+import type { CalculatorModel } from "@/lib/finance/catalog";
 import { Reveal } from "@/components/motion/Reveal";
 import { DeliverySection } from "./DeliverySection";
 import styles from "./SalesPage.module.css";
@@ -71,7 +73,15 @@ function Photo({
 
 const HELP_VARIANTS = ["slide-left", "fade-up", "slide-right"] as const;
 
-export function SalesPageView({ images, deliveries = [] }: { images: SalesImages; deliveries?: SalesDelivery[] }) {
+export function SalesPageView({
+  images,
+  deliveries = [],
+  catalog = [],
+}: {
+  images: SalesImages;
+  deliveries?: SalesDelivery[];
+  catalog?: CalculatorModel[];
+}) {
   const whatsapp = buildWhatsAppUrl({ source: "sales_page", source_cta: "sales_page_cta" });
 
   return (
@@ -169,6 +179,25 @@ export function SalesPageView({ images, deliveries = [] }: { images: SalesImages
       </section>
 
       <DeliverySection deliveries={deliveries} />
+
+      {catalog.length > 0 && (
+        <section className={styles.calculator} aria-labelledby="sales-calculator-title">
+          <Reveal variant="fade-up" delay={0}>
+            <p className={styles.kickerDark}>Simulasi Kredit</p>
+          </Reveal>
+          <Reveal variant="mask" delay={80}>
+            <h2 id="sales-calculator-title">Hitung estimasi cicilan JAECOO.</h2>
+          </Reveal>
+          <Reveal variant="fade-up" delay={140}>
+            <p className={styles.calculatorLead}>
+              Pilih model dan tipe, geser DP, lalu tanyakan hasilnya langsung ke Alvan.
+            </p>
+          </Reveal>
+          <Reveal variant="fade-up" delay={180}>
+            <FinanceCalculator catalog={catalog} source="sales_page" />
+          </Reveal>
+        </section>
+      )}
 
       <section className={styles.whatsapp}>
         <Reveal variant="fade-up" delay={0}>

@@ -26,6 +26,7 @@ import { TransparentHeader } from "@/components/layout/TransparentHeader";
 import { LayeredHero } from "@/components/hero/LayeredHero";
 import { resolveSubpageHero } from "@/lib/models/hero";
 import { FinanceCalculator } from "@/components/finance/FinanceCalculator";
+import { toCalculatorModel } from "@/lib/finance/catalog";
 import { PriceDisplay } from "@/components/price/PriceDisplay";
 import { priceStatusAllowsCalculator } from "@/lib/types/model";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
@@ -83,7 +84,9 @@ export default async function SpesifikasiPage({ params }: Props) {
   });
 
   const v = model.default_variant;
-  const showCalculator = priceStatusAllowsCalculator(v.price_status, v.price_idr);
+  const showCalculator = model.variants.some((variant) =>
+    priceStatusAllowsCalculator(variant.price_status, variant.price_idr)
+  );
   const specsCta = model.page_copy?.specs_cta;
   const specsHeading = specsCta?.heading || `Siap memesan ${model.short_name}?`;
   const specsBody = specsCta?.body || "Hubungi Alvan untuk informasi harga terkini, test drive, dan penawaran spesial dealer resmi JAECOO Palembang.";
@@ -265,8 +268,9 @@ export default async function SpesifikasiPage({ params }: Props) {
               <Reveal variant="scale" delay={100} threshold={0}>
                 <div className={styles.calcWrapper}>
                   <FinanceCalculator
-                    price={v.price_idr!}
-                    modelName={model.name}
+                    model={toCalculatorModel(model)}
+                    initialVariantId={v.id}
+                    source="model_specifications"
                   />
                 </div>
               </Reveal>

@@ -1,31 +1,32 @@
 /**
  * JAECOO Palembang — Finance Calculator
  *
- * STEP 4A: Full interactive UI implemented.
- *
  * Rules (LOCKED — do not change):
- *   DP options:   25 | 30 | 40 | 50%
+ *   DP range:     25% – 50% (step 5)
  *   Tenor:        1 – 5 tahun
  *   Flat interest: 10% per tahun
  *   Pokok        = Harga − DP
  *   Bunga        = Pokok × 10% × tenor
  *   Angsuran     = (Pokok + Bunga) / (tenor × 12)
  *
- * Price is ALWAYS passed from model data — never hardcoded here.
+ * Price always comes from model/variant data — never hardcoded here.
  */
 
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { formatIDR } from "@/lib/utils/format";
+import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
+import type { LeadSource } from "@/lib/types/lead";
+import {
+  isCalculableVariant,
+  type CalculatorModel,
+} from "@/lib/finance/catalog";
 import styles from "./FinanceCalculator.module.css";
 
 export interface CalculatorInput {
-  /** Vehicle price in IDR — from model data */
   price: number;
-  /** Down payment percentage: 25 | 30 | 40 | 50 */
   dp_percent: number;
-  /** Tenor in years: 1 | 2 | 3 | 4 | 5 */
   tenor_years: number;
 }
 
@@ -37,9 +38,12 @@ export interface CalculatorResult {
   monthly_installment: number;
 }
 
-export const DP_OPTIONS = [25, 30, 40, 50] as const;
+export const DP_MIN = 25;
+export const DP_MAX = 50;
+export const DP_STEP = 5;
+export const DP_OPTIONS = [25, 30, 35, 40, 45, 50] as const;
 export const TENOR_OPTIONS = [1, 2, 3, 4, 5] as const;
-export const INTEREST_RATE = 0.10; // 10% per tahun flat
+export const INTEREST_RATE = 0.10;
 
 export const CALCULATOR_DISCLAIMER =
   "Simulasi merupakan estimasi dan bukan penawaran pembiayaan resmi. Angsuran aktual dapat berbeda sesuai program pembiayaan dan hasil persetujuan lembaga keuangan.";
@@ -54,104 +58,210 @@ export function calculate(input: CalculatorInput): CalculatorResult {
   return { dp_amount, principal, total_interest, total_payment, monthly_installment };
 }
 
+export type { CalculatorModel, CalculatorVariant } from "@/lib/finance/catalog";
+export { toCalculatorModel, catalogFromModels } from "@/lib/finance/catalog";
+
 interface FinanceCalculatorProps {
-  /** Price passed from model data — never hardcoded */
-  price: number;
-  modelName: string;
+  /** Combined catalog (sales / multi-model). Shows a model selector. */
+  catalog?: CalculatorModel[];
+  /** Single model page. Locks the model; shows a variant selector when needed. */
+  model?: CalculatorModel;
+  initialVariantId?: string;
+  source?: LeadSource;
 }
 
-export function FinanceCalculator({ price, modelName }: FinanceCalculatorProps) {
-  // Hooks MUST be called before any early return (Rules of Hooks)
-  const [dpPercent, setDpPercent] = useState<typeof DP_OPTIONS[number]>(30);
-  const [tenor, setTenor] = useState<typeof TENOR_OPTIONS[number]>(3);
+export function FinanceCalculator({
+  catalog,
+  model,
+  initialVariantId,
+  source = "calculator",
+}: FinanceCalculatorProps) {
+  const models = useMemo(() => {
+    const raw = catalog?.length ? catalog : model ? [model] : [];
+    return raw
+      .map((entry) => ({
+        ...entry,
+        variants: entry.variants.filter(isCalculableVariant),
+      }))
+      .filter((entry) => entry.variants.length > 0);
+  }, [catalog, model]);
 
-  // Guard: jangan render jika price tidak valid
-  // Caller seharusnya sudah diproteksi oleh priceStatusAllowsCalculator,
-  // tapi ini lapisan kedua untuk mencegah Rp0 / NaN / null
-  if (!price || price <= 0 || isNaN(price)) {
+  const [modelSlug, setModelSlug] = useState(models[0]?.slug ?? "");
+  const [variantId, setVariantId] = useState(() => {
+    const first = models[0];
+    if (initialVariantId && first?.variants.some((variant) => variant.id === initialVariantId)) {
+      return initialVariantId;
+    }
+    return first?.variants[0]?.id ?? "";
+  });
+  const [dpPercent, setDpPercent] = useState(30);
+  const [tenor, setTenor] = useState<(typeof TENOR_OPTIONS)[number]>(3);
+
+  const selectedModel = models.find((entry) => entry.slug === modelSlug) ?? models[0];
+  const variants = selectedModel?.variants ?? [];
+  const selectedVariant = variants.find((variant) => variant.id === variantId) ?? variants[0];
+  const price = selectedVariant?.price_idr ?? 0;
+  const showModelSelect = Boolean(catalog && models.length > 1);
+  const showVariantSelect = variants.length > 1;
+
+  if (!selectedModel || !selectedVariant || !price || price <= 0 || Number.isNaN(price)) {
     return null;
   }
 
-  const result = calculate({ price, dp_percent: dpPercent, tenor_years: tenor });
+  const safeDp = Math.min(DP_MAX, Math.max(DP_MIN, dpPercent));
+  const result = calculate({ price, dp_percent: safeDp, tenor_years: tenor });
+  const fill = ((safeDp - DP_MIN) / (DP_MAX - DP_MIN)) * 100;
+  const typeLabel = selectedVariant.label?.trim() || selectedVariant.name;
+  const region = selectedVariant.price_region?.trim() || "OTR Palembang";
+
+  const whatsapp = buildWhatsAppUrl(
+    {
+      source,
+      model: selectedModel.short_name,
+      variant: selectedVariant.name,
+      source_cta: "calculator_ask",
+    },
+    [
+      `Halo Alvan, saya tertarik dengan ${selectedVariant.name}.`,
+      "Saya baru mencoba simulasi cicilan di website.",
+      `Model: ${selectedModel.name}`,
+      `Tipe: ${typeLabel}`,
+      `Harga OTR: ${formatIDR(price)}`,
+      `DP: ${safeDp}% (${formatIDR(result.dp_amount)})`,
+      `Tenor: ${tenor} Tahun`,
+      `Estimasi cicilan: ${formatIDR(result.monthly_installment)}/bulan`,
+      "Saya ingin menanyakan detail cicilan dan program yang tersedia.",
+    ].join("\n"),
+  );
+
+  const selectModel = (slug: string) => {
+    const next = models.find((entry) => entry.slug === slug);
+    setModelSlug(slug);
+    setVariantId(next?.variants[0]?.id ?? "");
+  };
 
   return (
-    <div className={styles.calculator} aria-label={`Simulasi kredit ${modelName}`}>
-      {/* Header */}
-      <div className={styles.header}>
+    <div className={styles.calculator} aria-label={`Simulasi kredit ${selectedVariant.name}`}>
+      <div className={styles.intro}>
         <p className={styles.label}>Simulasi Kredit</p>
-        <p className={styles.modelName}>{modelName}</p>
-        <p className={styles.otrPrice}>{formatIDR(price)} OTR Palembang</p>
+        <p className={styles.lead}>Pilih model, atur DP, lalu lihat estimasi cicilan.</p>
       </div>
 
-      {/* Controls */}
-      <div className={styles.controls}>
-        {/* DP Selector */}
-        <div className={styles.controlGroup}>
-          <p className={styles.controlLabel}>Uang Muka (DP)</p>
-          <div className={styles.optionRow}>
-            {DP_OPTIONS.map((dp) => (
-              <button
-                key={dp}
-                type="button"
-                className={`${styles.optionBtn} ${dpPercent === dp ? styles.optionBtnActive : ""}`}
-                onClick={() => setDpPercent(dp)}
-                aria-pressed={dpPercent === dp}
+      <div className={styles.layout}>
+        <div className={styles.controls}>
+          {showModelSelect ? (
+            <label className={styles.controlGroup}>
+              <span className={styles.controlLabel}>Pilih Model</span>
+              <select
+                className={styles.select}
+                value={selectedModel.slug}
+                onChange={(event) => selectModel(event.target.value)}
               >
-                {dp}%
-              </button>
-            ))}
-          </div>
-          <p className={styles.controlDetail}>
-            DP: <strong>{formatIDR(result.dp_amount)}</strong>
-          </p>
-        </div>
+                {models.map((entry) => (
+                  <option key={entry.slug} value={entry.slug}>
+                    {entry.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <div className={styles.controlGroup}>
+              <p className={styles.controlLabel}>Model</p>
+              <p className={styles.modelName}>{selectedModel.name}</p>
+            </div>
+          )}
 
-        {/* Tenor Selector */}
-        <div className={styles.controlGroup}>
-          <p className={styles.controlLabel}>Tenor</p>
-          <div className={styles.optionRow}>
-            {TENOR_OPTIONS.map((t) => (
-              <button
-                key={t}
-                type="button"
-                className={`${styles.optionBtn} ${tenor === t ? styles.optionBtnActive : ""}`}
-                onClick={() => setTenor(t)}
-                aria-pressed={tenor === t}
+          {showVariantSelect ? (
+            <label className={styles.controlGroup}>
+              <span className={styles.controlLabel}>Pilih Tipe</span>
+              <select
+                className={styles.select}
+                value={selectedVariant.id}
+                onChange={(event) => setVariantId(event.target.value)}
               >
-                {t} th
-              </button>
-            ))}
+                {variants.map((variant) => (
+                  <option key={variant.id} value={variant.id}>
+                    {variant.label ? `${variant.label} — ${variant.name}` : variant.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+
+          <div className={styles.controlGroup}>
+            <div className={styles.sliderHead}>
+              <span className={styles.controlLabel}>Uang Muka (DP)</span>
+              <span className={styles.sliderValue}>{safeDp}%</span>
+            </div>
+            <input
+              className={styles.slider}
+              type="range"
+              min={DP_MIN}
+              max={DP_MAX}
+              step={DP_STEP}
+              value={safeDp}
+              aria-valuemin={DP_MIN}
+              aria-valuemax={DP_MAX}
+              aria-valuenow={safeDp}
+              aria-label="Persentase uang muka"
+              onChange={(event) => setDpPercent(Number(event.target.value))}
+              style={{
+                background: `linear-gradient(to right, var(--color-gold) ${fill}%, var(--color-border-mid) ${fill}%)`,
+              }}
+            />
+            <div className={styles.sliderScale} aria-hidden="true">
+              <span>{DP_MIN}%</span>
+              <span>{DP_MAX}%</span>
+            </div>
           </div>
-          <p className={styles.controlDetail}>
-            Tenor: <strong>{tenor} tahun ({tenor * 12} bulan)</strong>
-          </p>
+
+          <div className={styles.controlGroup}>
+            <p className={styles.controlLabel}>Tenor</p>
+            <div className={styles.optionRow} role="group" aria-label="Tenor kredit">
+              {TENOR_OPTIONS.map((years) => (
+                <button
+                  key={years}
+                  type="button"
+                  className={`${styles.optionBtn} ${tenor === years ? styles.optionBtnActive : ""}`}
+                  onClick={() => setTenor(years)}
+                  aria-pressed={tenor === years}
+                >
+                  {years} th
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.result}>
+          <div className={styles.resultStack}>
+            <div className={styles.metric}>
+              <p className={styles.metricLabel}>Harga OTR</p>
+              <p className={styles.metricValue}>{formatIDR(price)}</p>
+              <p className={styles.metricHint}>{region}</p>
+            </div>
+            <div className={styles.metric}>
+              <p className={styles.metricLabel}>DP {safeDp}%</p>
+              <p className={styles.metricValue}>{formatIDR(result.dp_amount)}</p>
+            </div>
+            <div className={styles.metricMain}>
+              <p className={styles.metricLabel}>Estimasi Cicilan</p>
+              <p className={styles.resultValue}>{formatIDR(result.monthly_installment)}</p>
+              <p className={styles.metricHint}>per bulan · {tenor} tahun</p>
+            </div>
+          </div>
+
+          <a
+            className={styles.cta}
+            href={whatsapp}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Tanyakan Cicilan
+          </a>
         </div>
       </div>
 
-      {/* Result */}
-      <div className={styles.result}>
-        <div className={styles.resultMain}>
-          <p className={styles.resultLabel}>Estimasi Angsuran / Bulan</p>
-          <p className={styles.resultValue}>{formatIDR(result.monthly_installment)}</p>
-        </div>
-
-        <div className={styles.resultBreakdown}>
-          <div className={styles.breakdownRow}>
-            <span>Pokok Pinjaman</span>
-            <span>{formatIDR(result.principal)}</span>
-          </div>
-          <div className={styles.breakdownRow}>
-            <span>Total Bunga (10%/th × {tenor} th)</span>
-            <span>{formatIDR(result.total_interest)}</span>
-          </div>
-          <div className={`${styles.breakdownRow} ${styles.breakdownTotal}`}>
-            <span>Total Pembayaran</span>
-            <span>{formatIDR(result.total_payment)}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Disclaimer */}
       <p className={styles.disclaimer}>{CALCULATOR_DISCLAIMER}</p>
     </div>
   );
