@@ -71,6 +71,7 @@ export function buildSitemapEntries(input: {
       if (!subpath) continue;
       add(route(`/model/${slug}${subpath}`, modified, "monthly", 0.7));
     }
+    add(route(`/gallery/${slug}`, modified, "monthly", 0.55));
   }
 
   for (const article of input.news) {
