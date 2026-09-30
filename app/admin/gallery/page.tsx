@@ -11,9 +11,15 @@ export default function AdminPage() {
       </div>
       <div className={styles.goldLine} />
       <div className={styles.note}>
-        <h2 className={styles.noteTitle}>Coming Soon</h2>
+        <h2 className={styles.noteTitle}>Public gallery source</h2>
         <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-ink-muted)', margin: 0 }}>
-          Halaman ini akan dibuat pada step berikutnya.
+          Halaman publik <code>/gallery</code> dan <code>/gallery/[slug]</code> memakai media yang sudah
+          di-assign di <strong>Models</strong> (slot exterior, interior, detail, technology, warna) plus
+          foto delivery di <strong>Sales</strong> jika tersedia. Tidak ada hardcode path gambar.
+        </p>
+        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-ink-muted)', margin: '12px 0 0' }}>
+          Untuk menambah foto gallery: unggah di Media, lalu assign ke slot model yang relevan di editor model.
+          Section kosong otomatis disembunyikan jika belum ada asset.
         </p>
       </div>
     </div>
