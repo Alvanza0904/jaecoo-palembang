@@ -1,5 +1,5 @@
 import type { ModelData } from "@/lib/types/model";
-import { MODEL_PRICES, emptyImage, J7_SHS_SPECIFICATIONS } from "./shared";
+import { emptyImage, J7_SHS_SPECIFICATIONS } from "./shared";
 
 export const MODEL_J7_SIVP: ModelData = {
   slug: "jaecoo-j7-sivp",
