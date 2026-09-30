@@ -9,10 +9,10 @@
 }
 
 /* Size variants */
-/* Full heroes use the large viewport, same 390×844 / 1920×1080 frame
-   the visual editor composes against. 100svh is shorter while the browser
-   bar is open, which made a contain-fit cutout render larger than the cover
-   background and larger than the editor preview. */
+/* Phones and tablets stay on the large viewport. Desktop (1280+) uses the
+   same 1920×1080 frame the visual editor composes against. 100lvh is shorter
+   than that frame once browser chrome is open, which made a contain-fit
+   cutout render larger than the cover background and larger than the editor. */
 .hero--full {
   min-height: 100vh;
   min-height: 100lvh;
@@ -464,6 +464,16 @@
 @media (prefers-reduced-motion: reduce) {
   .bgImg {
     transition: none;
+  }
+}
+
+/* Desktop only. Tablet, mobile, and phone landscape keep the rules above. */
+@media (min-width: 1280px) {
+  .hero--full,
+  .hero--large {
+    height: var(--desktop-frame-height);
+    min-height: var(--desktop-frame-height);
+    max-height: none;
   }
 }
 

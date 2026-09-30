@@ -15,6 +15,12 @@
   }
 }
 
+@media (min-width: 1280px) {
+  .band {
+    min-height: 100lvh;
+  }
+}
+
 .media {
   position: absolute;
   inset: 0;

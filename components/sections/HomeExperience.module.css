@@ -591,3 +591,15 @@
     height: 100svh;
   }
 }
+
+@media (min-width: 1280px) {
+  .experience,
+  .technology {
+    height: var(--desktop-frame-height);
+    min-height: var(--desktop-frame-height);
+  }
+
+  .finalCta {
+    min-height: var(--desktop-frame-height);
+  }
+}

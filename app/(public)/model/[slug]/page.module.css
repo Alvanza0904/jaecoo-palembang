@@ -992,3 +992,15 @@
     transform-origin: var(--cms-mobile-origin, 50% 50%);
   }
 }
+
+/* Desktop frame = editor 1920×1080. Does not match tablet or mobile queries. */
+@media (min-width: 1280px) {
+  .cinematicSection,
+  .presenceSection,
+  .performanceSection,
+  .specsSection,
+  .ctaSection,
+  .techLayout {
+    min-height: var(--desktop-frame-height);
+  }
+}

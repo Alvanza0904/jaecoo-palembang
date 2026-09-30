@@ -221,3 +221,10 @@
     min-height: 0;
   }
 }
+
+@media (min-width: 1280px) {
+  .track {
+    height: var(--desktop-frame-height);
+    min-height: var(--desktop-frame-height);
+  }
+}

@@ -84,3 +84,10 @@
     font-size: clamp(3rem, 5vw, 4.75rem);
   }
 }
+
+@media (min-width: 1280px) {
+  .section,
+  .content {
+    min-height: var(--desktop-frame-height);
+  }
+}

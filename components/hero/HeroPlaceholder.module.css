@@ -13,6 +13,12 @@
 .hero--medium { min-height: 70svh; }
 .hero--small  { min-height: 50svh; }
 
+@media (min-width: 1280px) {
+  .hero:not(.hero--medium):not(.hero--small) {
+    min-height: var(--desktop-frame-height);
+  }
+}
+
 /* Background */
 .bg {
   position: absolute;

@@ -124,6 +124,11 @@
   /* ─── HEADER ─────────────────────────── */
   --header-height-mobile:  60px;
   --header-height-desktop: 76px;
+
+  /* Desktop live frame. Must stay equal to
+     lib/models/section-frame.ts DEVICE_VIEWPORT.desktop (1920×1080).
+     100vw × 1080/1920 = 56.25vw. Applied only inside min-width: 1280px. */
+  --desktop-frame-height: 56.25vw;
 }
 
 @media (min-width: 1024px) {

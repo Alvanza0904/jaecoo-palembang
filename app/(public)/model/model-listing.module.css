@@ -451,6 +451,14 @@
   }
 }
 
+@media (min-width: 1280px) {
+  .modelSection {
+    height: 100lvh;
+    min-height: 100lvh;
+    max-height: none;
+  }
+}
+
 .imagePicture {
   position: absolute;
   inset: 0;

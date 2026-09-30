@@ -698,3 +698,11 @@
 .featureLayoutImgLeft {
   /* default — image is already in column 1 */
 }
+
+@media (min-width: 1280px) {
+  .heroScene,
+  .cinematicScene,
+  .ctaScene {
+    min-height: var(--desktop-frame-height);
+  }
+}
