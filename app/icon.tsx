@@ -1,62 +1,30 @@
 import { ImageResponse } from "next/og";
 
-/** JAECOO wordmark — letter J only, white background */
-export const size = { width: 32, height: 32 };
+/**
+ * Favicon — circular white badge + bold JAECOO "J"
+ * Style matches common Google knowledge-panel site icons:
+ * solid white circle, black geometric J, generous padding.
+ */
+export const size = { width: 64, height: 64 };
 export const contentType = "image/png";
 
-/**
- * Pixel map of the official JAECOO "J" glyph (1 = ink, 0 = empty).
- * Derived from the brand logo; rendered on solid white.
- */
-const J_MAP = [
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00111111111111110111",
-  "00111111111111110111",
-  "00011111111111110111",
-  "00001111111111110111",
-];
-
 export default function Icon() {
-  const rows = J_MAP.length;
-  const cols = J_MAP[0].length;
-  const pad = 4;
-  const cellW = (size.width - pad * 2) / cols;
-  const cellH = (size.height - pad * 2) / rows;
+  const s = size.width;
+  // Inner drawing box (~62% of circle) so J stays bold and centered
+  const inset = s * 0.19;
+  const box = s - inset * 2;
 
-  const cells: React.ReactElement[] = [];
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      if (J_MAP[r][c] !== "1") continue;
-      cells.push(
-        <div
-          key={`${r}-${c}`}
-          style={{
-            position: "absolute",
-            left: pad + c * cellW,
-            top: pad + r * cellH,
-            width: cellW + 0.5,
-            height: cellH + 0.5,
-            backgroundColor: "#000000",
-          }}
-        />,
-      );
-    }
-  }
+  // Geometric J: vertical stem (right) + bottom hook (leftward)
+  // Proportions tuned to the official JAECOO wordmark J.
+  const stemW = box * 0.28;
+  const stemX = inset + box - stemW;
+  const stemY = inset;
+  const stemH = box * 0.92;
+
+  const barH = box * 0.28;
+  const barY = inset + box - barH;
+  const barX = inset + box * 0.08;
+  const barW = box * 0.92;
 
   return new ImageResponse(
     (
@@ -64,12 +32,49 @@ export default function Icon() {
         style={{
           width: "100%",
           height: "100%",
-          backgroundColor: "#ffffff",
-          position: "relative",
           display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#ffffff",
         }}
       >
-        {cells}
+        {/* Circular white badge (reads clean in browser tabs & Google) */}
+        <div
+          style={{
+            width: s,
+            height: s,
+            borderRadius: "50%",
+            backgroundColor: "#ffffff",
+            position: "relative",
+            display: "flex",
+            overflow: "hidden",
+          }}
+        >
+          {/* Bottom hook of J */}
+          <div
+            style={{
+              position: "absolute",
+              left: barX,
+              top: barY,
+              width: barW,
+              height: barH,
+              backgroundColor: "#000000",
+              borderRadius: barH * 0.12,
+            }}
+          />
+          {/* Vertical stem of J */}
+          <div
+            style={{
+              position: "absolute",
+              left: stemX,
+              top: stemY,
+              width: stemW,
+              height: stemH,
+              backgroundColor: "#000000",
+              borderRadius: stemW * 0.12,
+            }}
+          />
+        </div>
       </div>
     ),
     { ...size },
