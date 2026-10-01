@@ -11,7 +11,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getNewsBySlug, getAllNewsSlugs } from "@/lib/data/news";
-import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/motion/Reveal";
 import { AnimatedNewsBody } from "@/components/motion/AnimatedNewsBody";
 import { formatDate } from "@/lib/utils/format";
@@ -50,7 +49,7 @@ export default async function BeritaDetailPage({ params }: Props) {
 
   return (
     <section className={styles.section}>
-      <Container size="narrow">
+      <div className={styles.shell}>
         {/* Breadcrumb */}
         <Reveal variant="fade" threshold={0}>
           <nav className={styles.breadcrumb} aria-label="Breadcrumb">
@@ -106,13 +105,13 @@ export default async function BeritaDetailPage({ params }: Props) {
 
         {/* Back */}
         <Reveal variant="fade" delay={0}>
-          <div style={{ marginTop: "var(--space-16)", paddingTop: "var(--space-8)", borderTop: "1px solid var(--color-border)" }}>
+          <div className={styles.backRow}>
             <Link href="/berita" className={styles.breadcrumbLink}>
               ← Semua Artikel
             </Link>
           </div>
         </Reveal>
-      </Container>
+      </div>
     </section>
   );
 }
