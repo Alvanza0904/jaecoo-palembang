@@ -1,58 +1,23 @@
 import { ImageResponse } from "next/og";
 
-/** Apple touch icon — JAECOO J on solid white */
+/** Apple touch icon — circular white badge + bold JAECOO J */
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
-const J_MAP = [
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00000000000000000111",
-  "00111111111111110111",
-  "00111111111111110111",
-  "00011111111111110111",
-  "00001111111111110111",
-];
-
 export default function AppleIcon() {
-  const rows = J_MAP.length;
-  const cols = J_MAP[0].length;
-  const pad = 22;
-  const cellW = (size.width - pad * 2) / cols;
-  const cellH = (size.height - pad * 2) / rows;
+  const s = size.width;
+  const inset = s * 0.19;
+  const box = s - inset * 2;
 
-  const cells: React.ReactElement[] = [];
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      if (J_MAP[r][c] !== "1") continue;
-      cells.push(
-        <div
-          key={`${r}-${c}`}
-          style={{
-            position: "absolute",
-            left: pad + c * cellW,
-            top: pad + r * cellH,
-            width: cellW + 0.6,
-            height: cellH + 0.6,
-            backgroundColor: "#000000",
-          }}
-        />,
-      );
-    }
-  }
+  const stemW = box * 0.28;
+  const stemX = inset + box - stemW;
+  const stemY = inset;
+  const stemH = box * 0.92;
+
+  const barH = box * 0.28;
+  const barY = inset + box - barH;
+  const barX = inset + box * 0.08;
+  const barW = box * 0.92;
 
   return new ImageResponse(
     (
@@ -60,12 +25,46 @@ export default function AppleIcon() {
         style={{
           width: "100%",
           height: "100%",
-          backgroundColor: "#ffffff",
-          position: "relative",
           display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#ffffff",
         }}
       >
-        {cells}
+        <div
+          style={{
+            width: s,
+            height: s,
+            borderRadius: "50%",
+            backgroundColor: "#ffffff",
+            position: "relative",
+            display: "flex",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              left: barX,
+              top: barY,
+              width: barW,
+              height: barH,
+              backgroundColor: "#000000",
+              borderRadius: barH * 0.12,
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              left: stemX,
+              top: stemY,
+              width: stemW,
+              height: stemH,
+              backgroundColor: "#000000",
+              borderRadius: stemW * 0.12,
+            }}
+          />
+        </div>
       </div>
     ),
     { ...size },
